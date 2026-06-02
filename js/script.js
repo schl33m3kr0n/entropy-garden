@@ -2,17 +2,7 @@
 // ENTROPY GARDEN - v24.0 ENGINE
 // ==========================================
 
-// --- KONAMI CODE ---
-const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-let konamiIndex = 0;
-document.addEventListener('keydown', (e) => {
-    if(e.target.tagName === 'INPUT') return; 
-    if (e.key === konamiCode[konamiIndex]) {
-        konamiIndex++;
-        if (konamiIndex === konamiCode.length) { activateGodMode(); konamiIndex = 0; }
-    } else { konamiIndex = 0; }
-});
-
+// --- GOD MODE (Konami completion via js/konami.js on module or file-pong.bundle paths) ---
 function activateGodMode() {
     const body = document.body;
     const h1 = document.querySelector('h1');
@@ -22,6 +12,7 @@ function activateGodMode() {
         body.classList.remove('god-mode');
         h1.innerText = "ENTROPY GARDEN";
         setPanopticonGodMode(false);
+        globalThis.EntropyCipherHint?.onGodModeOff?.();
         pushTerminalLog("> SYSTEM OVERRIDE TERMINATED. RETURNING TO NORMALCY.");
         playSound(sfx.glitch); // A good "power down" sound
     } 
@@ -32,8 +23,12 @@ function activateGodMode() {
         setPanopticonGodMode(true);
         pushTerminalLog("!!! OVERRIDE ACCEPTED !!!");
         playSound(sfx.missionCleared);
+        globalThis.unlockTrophy?.('konami_god');
+        globalThis.EntropyCipherHint?.unlock?.();
     }
 }
+
+globalThis.activateGodMode = activateGodMode;
 
 // --- SHUFFLE & BAG LOGIC ---
 function shuffle(array) { 
@@ -71,7 +66,7 @@ function handleDragStart(e) {
     dragOffsetY = clientY - rect.top;
     
     draggedElement.style.position = 'absolute';
-    draggedElement.style.zIndex = 1000; // Bring to front while dragging
+    draggedElement.style.zIndex = draggedElement.id.includes('pizza') ? 10050 : 1000;
     
     document.addEventListener('mousemove', handleDragMove);
     document.addEventListener('touchmove', handleDragMove, { passive: false });
@@ -128,7 +123,7 @@ function handleDragEnd(e) {
         }
     } else {
         // If dropped anywhere else, just put it down normally
-        draggedElement.style.zIndex = 10; 
+        draggedElement.style.zIndex = draggedElement.id.includes('pizza') ? 10010 : 10;
     }
 
     draggedElement = null;
@@ -154,7 +149,7 @@ function createBag(arr) {
 // --- AUDIO SYSTEM ---
 const asset = (path) => `assets/${path}`;
 const sfxPath = (file) => asset(`audio/sfx/${file}`);
-const musicPath = (file) => asset(`audio/music/${file}`);
+const musicPath = (file) => asset(`audio/music/${encodeURIComponent(file)}`);
 const imgPath = (file) => asset(`img/${file}`);
 
 function setImgWithFallback(el) {
@@ -175,6 +170,13 @@ function createLazyAudio(src) {
     const audio = new Audio();
     audio.preload = 'none';
     audio.src = src;
+    return audio;
+}
+
+function createBgmAudio(file) {
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.src = musicPath(file);
     return audio;
 }
 
@@ -204,7 +206,8 @@ const sfx = {
     close: createLazyAudio(sfxPath('close.mp3')),
     click: createLazyAudio(sfxPath('click.mp3')),
     press: createLazyAudio(sfxPath('press.mp3')),
-    stop: createLazyAudio(sfxPath('stop it.mp3'))
+    stop: createLazyAudio(sfxPath('stop it.mp3')),
+    meow: createLazyAudio(sfxPath('meow.mp3')),
 };
 
 const BGM_TRACKS = [
@@ -342,15 +345,21 @@ function applyTrackTitleMarquee(container, text, options = {}) {
 
 const bgmCache = new Map();
 let currentTrackIndex = 0;
+let bgmPlayGeneration = 0;
 
 function wrapTrackIndex(index) {
     return ((index % BGM_TRACKS.length) + BGM_TRACKS.length) % BGM_TRACKS.length;
 }
 
+function nextBgmPlayGeneration() {
+    bgmPlayGeneration += 1;
+    return bgmPlayGeneration;
+}
+
 function getBgmTrack(index) {
     const i = wrapTrackIndex(index);
     if (!bgmCache.has(i)) {
-        const audio = createLazyAudio(musicPath(BGM_TRACKS[i]));
+        const audio = createBgmAudio(BGM_TRACKS[i]);
         audio.loop = false;
         audio.volume = 0.3;
         bgmCache.set(i, audio);
@@ -359,8 +368,10 @@ function getBgmTrack(index) {
 }
 
 function stopBgmTrack(index) {
-    const track = bgmCache.get(index);
+    const i = wrapTrackIndex(index);
+    const track = bgmCache.get(i);
     if (!track) return;
+    nextBgmPlayGeneration();
     track.pause();
     track.currentTime = 0;
     track.onended = null;
@@ -379,21 +390,114 @@ function pruneBgmCache() {
     ]);
     bgmCache.forEach((track, index) => {
         if (keep.has(index)) return;
-        stopBgmTrack(index);
-        track.removeAttribute('src');
-        track.load();
-        bgmCache.delete(index);
+        const i = wrapTrackIndex(index);
+        const cached = bgmCache.get(i);
+        if (!cached) return;
+        cached.pause();
+        cached.currentTime = 0;
+        cached.onended = null;
+        cached.removeAttribute('src');
+        cached.load();
+        bgmCache.delete(i);
     });
 }
 
+const BGM_LARGE_FILES = new Set([
+    'ambient3.mp3',
+    'ambient5.mp3',
+    'ambient8.mp3',
+    '13 angels.mp3',
+    'fractals.mp3',
+    'playboi carti - 7am (slowed reverb).mp3',
+]);
+
+function isLargeBgmTrack(track) {
+    const src = track.currentSrc || track.src || '';
+    return BGM_LARGE_FILES.has(decodeURIComponent(src.split('/').pop() || ''));
+}
+
+function playBgmWhenReady(track, generation, retriesLeft = 4, fileName = '') {
+    if (generation !== bgmPlayGeneration) return;
+
+    const large = isLargeBgmTrack(track) || (fileName && BGM_LARGE_FILES.has(fileName));
+    const minReady = large
+        ? HTMLMediaElement.HAVE_FUTURE_DATA
+        : HTMLMediaElement.HAVE_CURRENT_DATA;
+
+    const startPlayback = () => {
+        if (generation !== bgmPlayGeneration) return;
+        track.volume = 0.3;
+        track.play().catch(() => {
+            if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
+            setTimeout(() => playBgmWhenReady(track, generation, retriesLeft - 1), 250);
+        });
+    };
+
+    const onReady = () => {
+        cleanup();
+        startPlayback();
+    };
+    const onError = () => {
+        cleanup();
+        if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
+        const file = fileName || BGM_TRACKS[wrapTrackIndex(currentTrackIndex)];
+        if (!track.src && file) track.src = musicPath(file);
+        track.load();
+        playBgmWhenReady(track, generation, retriesLeft - 1, fileName);
+    };
+    const onStalled = () => {
+        if (generation !== bgmPlayGeneration) return;
+        if (track.readyState < minReady) track.load();
+    };
+    const cleanup = () => {
+        clearTimeout(waitTimeout);
+        track.removeEventListener('canplaythrough', onReady);
+        track.removeEventListener('canplay', onReady);
+        track.removeEventListener('error', onError);
+        track.removeEventListener('stalled', onStalled);
+    };
+
+    if (track.readyState >= minReady) {
+        startPlayback();
+        return;
+    }
+
+    const waitTimeout = setTimeout(() => {
+        if (generation !== bgmPlayGeneration) return;
+        if (track.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+            cleanup();
+            startPlayback();
+        }
+    }, large ? 90_000 : 20_000);
+
+    track.addEventListener('canplaythrough', onReady, { once: true });
+    track.addEventListener('canplay', onReady, { once: true });
+    track.addEventListener('error', onError, { once: true });
+    track.addEventListener('stalled', onStalled);
+    const file = fileName || BGM_TRACKS[wrapTrackIndex(currentTrackIndex)];
+    if (!track.src && file) track.src = musicPath(file);
+    if (track.readyState === 0 || track.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+        track.load();
+    }
+}
+
+function schedulePruneBgmCache(track) {
+    const prune = () => pruneBgmCache();
+    track.addEventListener('playing', prune, { once: true });
+    setTimeout(prune, 45_000);
+}
+
 function playCurrentBgmTrack() {
-    const track = getBgmTrack(currentTrackIndex);
-    track.volume = 0.3;
+    const i = wrapTrackIndex(currentTrackIndex);
+    const generation = nextBgmPlayGeneration();
+    const track = getBgmTrack(i);
     track.loop = false;
     track.onended = playNextTrack;
-    track.play().catch(e => console.log("Audio blocked"));
+    preloadBgmTrack(i);
     preloadBgmTrack(currentTrackIndex + 1);
-    pruneBgmCache();
+    preloadBgmTrack(currentTrackIndex - 1);
+    playBgmWhenReady(track, generation, 4, BGM_TRACKS[i]);
+    schedulePruneBgmCache(track);
     updatePlaylistUI();
 }
 
@@ -404,22 +508,8 @@ function playSound(sound) {
 }
 
 function playMeow() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator(); 
-        const gain = audioCtx.createGain();
-        osc.type = 'sine'; 
-        osc.frequency.setValueAtTime(392.00, audioCtx.currentTime); // G4
-        osc.frequency.exponentialRampToValueAtTime(440.00, audioCtx.currentTime + 0.2); 
-        osc.frequency.exponentialRampToValueAtTime(392.00, audioCtx.currentTime + 0.5); 
-        gain.gain.setValueAtTime(0, audioCtx.currentTime); 
-        gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.1); 
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-        osc.connect(gain); 
-        gain.connect(audioCtx.destination); 
-        osc.start(); 
-        osc.stop(audioCtx.currentTime + 0.6);
-    } catch(e) {}
+    triggerPanopticonCatEye(sfx.meow);
+    playSound(sfx.meow);
 }
 
 // --- GLOBAL VARIABLES ---
@@ -428,7 +518,7 @@ const ctx = canvas.getContext('2d');
 let fontSize = 16;
 let cellSize = 16;
 const font = '16px Arial, sans-serif'; 
-const chars = "ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ∑∫∆∞≈µ¥£€¢±×÷∂∇∏√∝∠∧∨∩∪∴∵∼≅≠≤≥⊂⊃⊆⊇⊕⊗⊥─□△▽◇○◎★☆♪♀♂☼ϫϞ֍אבגדהוזחטיכלמנסעपफबभमयरलवशषसहअआइईउऊऋएऐओऔॐॠѢѪѦѮѰѲѴѶѸѠѾѼӁӃӇӋӚӜӞӠӢӤӦӨӪӬӮӰӲӴӶӸӺӼӾԀԂԄԆԈԊԌԎԐԒЖЗЛФЦЧШЩЪЫЬЭЮЯ道无极阴阳气玄虚禅空觉悟幻仁义礼智信理天命心变აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰჱჲჳჴჵჶჷჸჹჺァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶᚠᚢᚦᚬᚱᚴᚼᚽᚾᚿᛁᛅᛆᛋᛌᛏᛐᛒᛘᛚᛦঅআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলবশষসহకఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహ가나다라마바사아자차카타파하ሀለሐመሠረሰቀበተኀነአከወዐዘየደገጠጰጸፀፈፐကခဂဃငစဆဇဈညဋဌဍ႑ဏတထဒဓနပဖဗဘမယရလဝသဟဠအഅആഇഈഉഊഋഎഏഐഒഓഔകഖഗഘങചഛജഝഞടഠഡഢണതഥദധനപഫബഭമയരലവശഷസഹᜀᜁᜂᜃᜄᜅᜆᜇᜈᜉᜊᜋᜌᜎᜏᜐᜑកខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអกขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหඅආඇඈඉඊඋඌඍඑඒඓඔඕඖකඛගඝඞඟචඡජඣඤඥඦටඨඩඪණඬතථදධනඳපඵබභමඹයරලවශෂසහළෆֆբգդեզէըթժլխծկհձղճմյնշոչպջռսվտրցւփքօႠႡႢႣႤႥႦႧႨႩႪႫႬႭႮႯႰႱႲႳႴႵႶႷႸႹႺႻႼႽႾႿჀⴀⴁⴂⴃⴄⴅⴆⴇⴈⴉⴊⴋⴌⴍⴎⴏⴐⴑⴒⴓⴔⴕⴖⴗⴘⴙⴚⴛⴜⴝⴞⴟⴠꔀꔃꔉꔊꔋꔌꔚꔛꔤꔥꔪ가고구그기나노누느니다도두드디라로루르리마모무므미바보부브비사소수스시아오우으이자조주즈지차초추츠치카코쿠크키타토투트티파포푸프피하호후흐히";
+const chars = "ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ∑∫∆∞≈µ¥£€¢±×÷∂∇∏√∝∠∧∨∩∪∴∵∼≅≠≤≥⊂⊃⊆⊇⊕⊗⊥─□△▽◇○◎★☆♪♀♂☼ϫϞ֍אבגדהוזחטיכךלמםנןסעפףצץקרשת׳״־पफबभमयरलवशषसहअआइईउऊऋएऐओऔॐॠѢѪѦѮѰѲѴѶѸѠѾѼӁӃӇӋӚӜӞӠӢӤӦӨӪӬӮӰӲӴӶӸӺӼӾԀԂԄԆԈԊԌԎԐԒЖЗЛФЦЧШЩЪЫЬЭЮЯ道无极阴阳气玄虚禅空觉悟幻仁义礼智信理天命心变აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰჱჲჳჴჵჶჷჸჹჺァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶᚠᚢᚦᚬᚱᚴᚼᚽᚾᚿᛁᛅᛆᛋᛌᛏᛐᛒᛘᛚᛦঅআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলবশষসহకఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహ가나다라마바사아자차카타파하ሀለሐመሠረሰቀበተኀነአከወዐዘየደገጠጰጸፀፈፐကခဂဃငစဆဇဈညဋဌဍ႑ဏတထဒဓနပဖဗဘမယရလဝသဟဠအഅആഇഈഉഊഋഎഏഐഒഓഔകഖഗഘങചഛജഝഞടഠഡഢണതഥദധനപഫബഭമയരലവശഷസഹᜀᜁᜂᜃᜄᜅᜆᜇᜈᜉᜊᜋᜌᜎᜏᜐᜑកខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអกขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหඅආඇඈඉඊඋඌඍඑඒඓඔඕඖකඛගඝඞඟචඡජඣඤඥඦටඨඩඪණඬතථදධනඳපඵබභමඹයරලවශෂසහළෆֆբգդեզէըթժլխծկհձղճմյնշոչպջռսվտրցւփքօႠႡႢႣႤႥႦႧႨႩႪႫႬႭႮႯႰႱႲႳႴႵႶႷႸႹႺႻႼႽႾႿჀⴀⴁⴂⴃⴄⴅⴆⴇⴈⴉⴊⴋⴌⴍⴎⴏⴐⴑⴒⴓⴔⴕⴖⴗⴘⴙⴚⴛⴜⴝⴞⴟⴠꔀꔃꔉꔊꔋꔌꔚꔛꔤꔥꔪ가고구그기나노누느니다도두드디라로루르리마모무므미바보부브비사소수스시아오우으이자조주즈지차초추츠치카코쿠크키타토투트티파포푸프피하호후흐히";
 let activeUtterances = []; // Prevents the browser from killing the speech events
 let cols, rows; 
 let mouse = { x: -1000, y: -1000 }; 
@@ -523,8 +613,9 @@ function rebuildTerminalLogPool() {
     drawTerminalLog = createBag(activeTerminalPool());
 }
 
-function pushTerminalLog(msg) {
+function pushTerminalLog(msg, options) {
     const term = document.getElementById('terminal-output');
+    if (!term) return;
     const finalMsg = msg || drawTerminalLog();
     
     // 1. Check if the user is currently looking at the bottom BEFORE adding the new message.
@@ -532,8 +623,12 @@ function pushTerminalLog(msg) {
     const isScrolledToBottom = term.scrollHeight - term.clientHeight <= term.scrollTop + 50;
 
     const p = document.createElement('div'); 
-    p.className = 'term-entry'; 
-    p.innerText = finalMsg;
+    p.className = 'term-entry';
+    if (options?.html) {
+        p.innerHTML = finalMsg;
+    } else {
+        p.innerText = finalMsg;
+    }
     term.appendChild(p); 
     
     if(term.children.length > 50) term.removeChild(term.firstChild); 
@@ -543,26 +638,39 @@ function pushTerminalLog(msg) {
         term.scrollTop = term.scrollHeight; 
     }
 }
+globalThis.pushTerminalLog = pushTerminalLog;
+
 setInterval(() => { if(!document.hidden) pushTerminalLog(); }, 3000 + Math.random() * 4000);
 
 const termInput = document.getElementById('term-input');
 
-termInput.addEventListener('input', () => {
-    const soundClone = sfx.keystroke.cloneNode(); // Creates a "fresh" copy for every tap
-    soundClone.volume = 0.5; // Lower volume so it isn't deafening
-    soundClone.play().catch(e => {});
-});
+function isTerminalSubmitKey(e) {
+    return e.key === 'Enter' || e.keyCode === 13 || e.which === 13;
+}
 
-termInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') {
-        let val = termInput.value.toLowerCase().trim();
-        if(val) { 
-            pushTerminalLog(`> ${val}`); 
-            termInput.value = ''; 
-            processCommand(val); 
-        }
-    }
-});
+function submitTerminalCommand() {
+    if (!termInput) return;
+    const val = termInput.value.trim();
+    if (!val) return;
+    const normalized = val.toLowerCase();
+    pushTerminalLog(`> ${normalized}`);
+    termInput.value = '';
+    processCommand(normalized);
+}
+
+if (termInput) {
+    termInput.addEventListener('input', () => {
+        const soundClone = sfx.keystroke.cloneNode();
+        soundClone.volume = 0.5;
+        soundClone.play().catch(e => {});
+    });
+
+    termInput.addEventListener('keydown', (e) => {
+        if (!isTerminalSubmitKey(e)) return;
+        e.preventDefault();
+        submitTerminalCommand();
+    });
+}
 
 // --- COMMAND PROCESSING & SCATTER LOGIC ---
 const fakeFiles = [
@@ -574,13 +682,33 @@ const fakeFiles = [
 let extraPizzas = 0;
 let cipherStage = 0; // 0: inactive, 1: awaiting Vigenère key, 2: awaiting Korzamuron translation
 let isCipherSolved = false; // Tracks if the terminal hack is complete
+globalThis.getCipherStage = () => cipherStage;
+
+const CIPHER_TRANSLATION_ANSWERS = new Set(['chaos', 'disorder']);
+const CIPHER_FALLBACK_CT = 'jiq rrtsvo';
+
+function cipherCiphertext() {
+    return globalThis.EntropyCipher?.ciphertext || CIPHER_FALLBACK_CT;
+}
+
+function korzamuronCipherPlain() {
+    return globalThis.EntropyCipher?.plaintext || 'hun nuresk';
+}
+
+function tryAcceptCipherKey(cleanCmd) {
+    const cipher = globalThis.EntropyCipher;
+    if (!cipher?.decrypt) return cleanCmd === 'codex';
+    const keyNorm = cleanCmd.replace(/[^a-z]/g, '');
+    if (!keyNorm) return false;
+    const plain = cipher.decrypt(cipherCiphertext(), keyNorm);
+    return plain === korzamuronCipherPlain();
+}
 
 // --- CIPHER HELPERS & REWARDS ---
 function printLexicon() {
     pushTerminalLog("> KORZAMURON DATABANK FRAGMENT:");
-    pushTerminalLog("> ves = as | yon = above");
-    pushTerminalLog("> kol = so | vel = below");
-    pushTerminalLog("> bran = earth | sjum = fire");
+    pushTerminalLog("> hun = storm | nuresk = vital");
+    pushTerminalLog('> hun nuresk <em>from Korzamuron</em>', { html: true });
 }
 
 // --- NEW: THE SHORTCUTS MENU ---
@@ -597,12 +725,15 @@ function printShortcuts() {
 function triggerCipherReward() {
     const term = document.getElementById('terminal-container');
     const termInputLine = document.getElementById('terminal-input-line');
-    
+    if (!term) return;
+
+    isCipherSolved = true;
+
     // Turn terminal Cyan for the hack effect
     term.style.borderColor = 'var(--cyan)';
     term.style.color = 'var(--cyan)';
     term.style.textShadow = '0 0 10px var(--cyan)';
-    termInputLine.style.display = 'none'; 
+    if (termInputLine) termInputLine.style.display = 'none';
 
     setTimeout(() => pushTerminalLog("> TRANSLATION LOGIC VERIFIED."), 500);
     setTimeout(() => pushTerminalLog("> KORZAMURON ARCHIVE UNLOCKED."), 1500);
@@ -612,19 +743,19 @@ function triggerCipherReward() {
     setTimeout(() => pushTerminalLog("> DECRYPTING DOCKING BAY OVERRIDE..."), 4500);
     setTimeout(() => pushTerminalLog("> SEQUENCE: [ 1. FUEL | 2. SOURCE | 3. HOARD ]"), 6000);
     
-    // THE CRITICAL MOMENT: Flip the switch
     setTimeout(() => {
-        isCipherSolved = true; 
         pushTerminalLog("> DOCKING BAY UNLOCKED. AWAITING MANUAL OVERRIDE.");
         playSound(sfx.collectible);
+        globalThis.unlockTrophy?.('cipher_vault');
+        checkCycleWin();
     }, 8000);
-    
+
     // Reset Terminal Appearance
     setTimeout(() => {
         term.style.borderColor = 'var(--neon-green)';
         term.style.color = 'var(--neon-green)';
         term.style.textShadow = '0 0 3px var(--neon-green)';
-        termInputLine.style.display = 'flex';
+        if (termInputLine) termInputLine.style.display = 'flex';
     }, 9500);
 }
 
@@ -640,13 +771,16 @@ function processCommand(cmd) {
             pushTerminalLog("> CIPHER SEQUENCE ABORTED.");
             playSound(sfx.glitch);
             cipherStage = 0;
-        } else if (cleanCmd === 'codex') {
+            globalThis.EntropyCipherHint?.resetCipherHints?.();
+        } else if (tryAcceptCipherKey(cleanCmd)) {
             pushTerminalLog("> KEYWORD ACCEPTED. DECRYPTING...");
             playSound(sfx.taskComplete);
+            const plain = korzamuronCipherPlain();
             setTimeout(() => {
-                pushTerminalLog("> DECRYPTED FRAGMENT: 'ves yon, kol vel'");
+                pushTerminalLog(`> DECRYPTED FRAGMENT: '${plain}'`);
                 pushTerminalLog("> AWAITING ENGLISH TRANSLATION...");
-                cipherStage = 2; // Move to the translation phase
+                cipherStage = 2;
+                globalThis.EntropyCipherHint?.syncCipherHints?.();
             }, 1500);
         } else {
             pushTerminalLog("> ERROR: INVALID KEY. HINT: 'Dresden ..., ... Leicester, ... Gigas'");
@@ -663,12 +797,14 @@ function processCommand(cmd) {
             pushTerminalLog("> CIPHER SEQUENCE ABORTED.");
             playSound(sfx.glitch);
             cipherStage = 0;
+            globalThis.EntropyCipherHint?.resetCipherHints?.();
         } else if (cleanCmd === 'lexicon') {
             printLexicon(); // Print the dictionary without failing the puzzle
-        } else if (cleanCmd === 'as above so below') {
+        } else if (CIPHER_TRANSLATION_ANSWERS.has(cleanCmd)) {
             pushTerminalLog("> TRANSLATION ACCEPTED. DATA UNLOCKED.");
             playSound(sfx.missionCleared);
             cipherStage = 0; // Reset the puzzle state
+            globalThis.EntropyCipherHint?.resetCipherHints?.();
             triggerCipherReward();
         } else {
             pushTerminalLog("> ERROR: INVALID TRANSLATION. TYPE 'lexicon' FOR HINTS OR 'abort'.");
@@ -691,10 +827,19 @@ function processCommand(cmd) {
         document.getElementById('terminal-output').innerHTML = '';
         document.querySelectorAll('.scatter-file').forEach(f => f.remove());
     }
+    else if(cmd === 'reset trophies' || cmd === 'trophies reset') {
+        if (globalThis.resetTrophies?.()) {
+            pushTerminalLog('> TROPHIES PURGED. ALL SLOTS RELOCKED.');
+            playSound(sfx.glitch);
+        } else {
+            pushTerminalLog('> ERROR: TROPHY MODULE OFFLINE.');
+            playSound(sfx.oopsy);
+        }
+    }
     else if(cmd === 'meow') {
         pushTerminalLog("Synthesizing feline frequency in G Major...");
         playMeow();
-        triggerPanopticonCatEye();
+        globalThis.unlockTrophy?.('feline_freq');
     }
     else if(cmd === 'render') { 
         pushTerminalLog("CRITICAL ERROR: GEOMETRY FAILED."); 
@@ -725,25 +870,29 @@ function processCommand(cmd) {
     }
     // THE NEW MULTI-STAGE CIPHER COMMAND
     else if(cmd === 'cipher') {
+        if (cipherStage > 0) {
+            pushTerminalLog("> CIPHER PROTOCOL ALREADY ACTIVE.");
+            playSound(sfx.oopsy);
+            return;
+        }
+        cipherStage = 1;
         pushTerminalLog("> INITIATING VIGENÈRE DECRYPTION PROTOCOL...");
         playSound(sfx.loading);
+        const ct = cipherCiphertext();
         setTimeout(() => {
-            pushTerminalLog("> CIPHERTEXT: 'xef bwq, oql iht'");
+            pushTerminalLog(`> CIPHERTEXT: '${ct}'`);
             pushTerminalLog("> AWAITING DECRYPTION KEY...");
             pushTerminalLog("> (HINT: 'Dresden ..., Aleppo ..., ... Gigas')");
-            cipherStage = 1;
         }, 2000);
     }
 
 // --- THE SECRET BACKDOOR ---
     else if(cmd === 'express') {
         pushTerminalLog("> EXPRESS OVERRIDE ACCEPTED. BYPASSING SECURITY PROTOCOLS...");
-        
-        // If the terminal is currently open, we should probably close it so they can see the event!
-        document.getElementById('terminal-container').classList.remove('active');
-        document.getElementById('term-input').blur();
-        
-        // Fire the singularity event directly
+        cipherStage = 0;
+        globalThis.EntropyCipherHint?.resetCipherHints?.();
+        document.getElementById('terminal-container')?.classList.remove('active');
+        termInput?.blur();
         triggerSingularity();
     }
     else {
@@ -753,6 +902,7 @@ function processCommand(cmd) {
 }
 
 function triggerScatter() {
+    globalThis.unlockTrophy?.('scatter_breach');
     playSound(sfx.glitch);
     for(let i=0; i<40; i++) {
         let f = document.createElement('div');
@@ -771,9 +921,10 @@ function triggerScatter() {
 }
 
 function spawnPizza() {
+    globalThis.unlockTrophy?.('pizza_protocol');
     extraPizzas++; 
     const newPizza = document.createElement('div'); 
-    newPizza.className = 'artifact'; 
+    newPizza.className = 'artifact artifact-pizza'; 
     newPizza.id = 'art-pizza-clone-' + extraPizzas;
     newPizza.style.top = '-100px'; 
     newPizza.style.left = (Math.random() * 80 + 10) + '%'; 
@@ -824,9 +975,8 @@ terminalContainer.addEventListener('click', () => {
     terminalContainer.classList.add('active');
     
     // Wait for the animation to finish before focusing!
-   setTimeout(() => { 
-        termInput.focus({ preventScroll: true });
-        window.scrollTo(0, 0); // Slams the camera back to the top instantly
+   setTimeout(() => {
+        termInput?.focus({ preventScroll: true });
     }, 420);
 });
 
@@ -844,8 +994,17 @@ window.addEventListener('click', (e) => {
 let tabSpamCount = 0;
 let tabSpamTimer;
 
-// --- MASTER KEYBOARD CONTROLLER ---
+// --- MASTER KEYBOARD CONTROLLER (capture: block native Tab focus before it shifts the HUD) ---
 window.addEventListener('keydown', (e) => {
+    const gardenBlocksTerminalKeys = () => {
+        if (!document.body.classList.contains('garden-ready')) return true;
+        if (document.getElementById('lightbox')?.classList.contains('active')) return true;
+        for (const modal of document.querySelectorAll('.modal')) {
+            if (getComputedStyle(modal).display === 'flex') return true;
+        }
+        return false;
+    };
+
     // 1. Pressing ENTER opens the terminal (if it's closed)
     if (e.key === 'Enter') {
         if (!terminalContainer.classList.contains('active')) {
@@ -857,16 +1016,18 @@ window.addEventListener('keydown', (e) => {
             // Inside the 'Enter' key block:
             terminalContainer.classList.add('active');
             lastTerminalOpenTime = Date.now(); 
-setTimeout(() => { 
-        termInput.focus({ preventScroll: true });
-        window.scrollTo(0, 0); // Slams the camera back to the top instantly
-    }, 420);        }
+setTimeout(() => {
+        termInput?.focus({ preventScroll: true });
+    }, 420);
+        }
     }
-    
+
    // 2. Pressing TAB toggles the terminal open/closed
-    if (e.key === 'Tab') {
+    if (e.key === 'Tab' && !gardenBlocksTerminalKeys()) {
         e.preventDefault();
-        
+        terminalContainer.removeAttribute('hidden');
+        terminalContainer.classList.add('reveal-in', 'is-sliver');
+
         // --- ADD THE SPAM TRACKER HERE ---
         tabSpamCount++;
         clearTimeout(tabSpamTimer);
@@ -890,6 +1051,7 @@ setTimeout(() => {
             
             if (typeof cipherStage !== 'undefined' && cipherStage > 0) {
                 cipherStage = 0;
+                globalThis.EntropyCipherHint?.resetCipherHints?.();
                 pushTerminalLog("> CIPHER SEQUENCE ABORTED.");
             }
         } 
@@ -901,10 +1063,9 @@ setTimeout(() => {
             terminalContainer.classList.add('active');
             lastTerminalOpenTime = Date.now(); 
             
-            setTimeout(() => { 
-                termInput.focus({ preventScroll: true });
-                window.scrollTo(0, 0); // Slams the camera back to the top instantly
-            }, 420);        
+            setTimeout(() => {
+                termInput?.focus({ preventScroll: true });
+            }, 420);
         }
     }
 
@@ -961,8 +1122,8 @@ setTimeout(() => {
             toggleMode(); // Fires your existing corruption toggle function
         }
     }
-    
-});
+
+}, true);
 
 // --- PLAYLIST CONTROL LOGIC ---
 
@@ -990,21 +1151,26 @@ function playNextTrack() {
 // --- BOSS KEY ---
 function toggleBossKey() {
     const overlay = document.getElementById('boss-key-overlay');
-    if (overlay.classList.contains('active')) { 
-        overlay.classList.remove('active'); 
-        
-        // --- ADD THE CLOSE SOUND HERE ---
-        const closeClone = sfx.close.cloneNode();
-        closeClone.play().catch(e => {});
-        
-        pushTerminalLog("> CRISIS AVERTED. RESUMING NORMAL CYCLES.");
-    } else { 
-        overlay.classList.add('active'); 
-        if (sfx.error) playSound(sfx.error); 
+    if (!overlay) return;
+
+    if (overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+        playSound(sfx.close);
+        pushTerminalLog('> CRISIS AVERTED. RESUMING NORMAL CYCLES.');
+        if (gardenHasStarted) startGardenLoop();
+    } else {
+        overlay.classList.add('active');
+        stopGardenLoop();
+        playSound(sfx.error);
+        globalThis.unlockTrophy?.('maya_crash');
     }
 }
-document.getElementById('close-maya-btn').addEventListener('click', toggleBossKey);
-document.querySelectorAll('.boss-btn').forEach(btn => btn.addEventListener('click', toggleBossKey));
+
+globalThis.toggleBossKey = toggleBossKey;
+
+const closeMayaBtn = document.getElementById('close-maya-btn');
+if (closeMayaBtn) closeMayaBtn.addEventListener('click', toggleBossKey);
+document.querySelectorAll('.boss-btn').forEach((btn) => btn.addEventListener('click', toggleBossKey));
 
 // --- TIME SENSITIVE LORE ---
 function checkLateNight() {
@@ -1048,6 +1214,7 @@ const PANOPTICON_CAT_MORPH_MS = 420;
 const PANOPTICON_CAT_HOLD_MS = 1100;
 let catEyePhase = null;
 let catEyeStart = 0;
+let catEyeAudioEl = null;
 let panopticonGodActive = false;
 let godEyeSequence = null;
 let godEyeSeqStart = 0;
@@ -1087,9 +1254,14 @@ function rerollWobbleEnvelope(elapsedSec, durationSec, speedNorm) {
     return inertiaBlend * rampOut;
 }
 
+function panopticonGodGazeLocked() {
+    if (!godEyeSequence && !panopticonGodActive) return false;
+    return godEyeSequence !== 'open';
+}
+
 function setPanopticonCursor(clientX, clientY) {
     if (!panopticonEl || !panopticonEl.classList.contains('visible')) return;
-    if (godEyeSequence || panopticonGodActive) return;
+    if (panopticonGodGazeLocked()) return;
     if (eyeMode !== 'idle' && eyeMode !== 'eyeroll' && eyeMode !== 'stare') return;
     const rect = panopticonInnerEl.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
@@ -1105,9 +1277,12 @@ function setPanopticonCursor(clientX, clientY) {
 
 if (panopticonEl) {
     window.addEventListener('mousemove', (e) => setPanopticonCursor(e.clientX, e.clientY));
-    window.addEventListener('touchmove', (e) => {
-        if (e.touches[0]) setPanopticonCursor(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
+    const onTouchGaze = (e) => {
+        const t = e.touches?.[0];
+        if (t) setPanopticonCursor(t.clientX, t.clientY);
+    };
+    window.addEventListener('touchstart', onTouchGaze, { passive: true });
+    window.addEventListener('touchmove', onTouchGaze, { passive: true });
 }
 
 function enterPanopticonReroll() {
@@ -1158,10 +1333,26 @@ function triggerPanopticonCenterStare() {
     eyeMode = 'stare';
 }
 
-function triggerPanopticonCatEye() {
+function onCatEyeAudioEnded() {
+    if (catEyePhase !== 'hold') return;
+    catEyePhase = 'out';
+    catEyeStart = performance.now();
+    catEyeAudioEl = null;
+}
+
+function triggerPanopticonCatEye(audioEl = null) {
     if (!panopticonEl?.classList.contains('visible')) return;
     if (godEyeSequence || panopticonGodActive) return;
     if (eyeMode === 'reroll') return;
+
+    if (catEyeAudioEl && catEyeAudioEl !== audioEl) {
+        catEyeAudioEl.removeEventListener('ended', onCatEyeAudioEnded);
+    }
+    catEyeAudioEl = audioEl || null;
+    if (catEyeAudioEl) {
+        catEyeAudioEl.addEventListener('ended', onCatEyeAudioEnded, { once: true });
+    }
+
     catEyePhase = 'in';
     catEyeStart = performance.now();
 }
@@ -1246,6 +1437,10 @@ function applyPanopticonCatMorph(morph) {
 }
 
 function cancelPanopticonCatEye() {
+    if (catEyeAudioEl) {
+        catEyeAudioEl.removeEventListener('ended', onCatEyeAudioEnded);
+        catEyeAudioEl = null;
+    }
     catEyePhase = null;
     resetPanopticonCatMorph();
 }
@@ -1265,6 +1460,17 @@ function animatePanopticonCatEye(now) {
     }
     if (catEyePhase === 'hold') {
         applyPanopticonCatMorph(1);
+        if (catEyeAudioEl) {
+            const d = catEyeAudioEl.duration;
+            if (
+                catEyeAudioEl.ended
+                || (Number.isFinite(d) && d > 0 && catEyeAudioEl.currentTime >= d - 0.05)
+                || elapsed > 15000
+            ) {
+                onCatEyeAudioEnded();
+            }
+            return;
+        }
         if (elapsed >= holdMs) {
             catEyePhase = 'out';
             catEyeStart = now;
@@ -1396,7 +1602,10 @@ function animatePanopticonGodEye(now) {
             if (panopticonGodPupilEl) panopticonGodPupilEl.textContent = ICO_SYMBOLS[godSymbolIndex];
             godSymbolTick = now;
         }
-        panopticonGazeEl?.setAttribute('transform', 'translate(0, 0)');
+        const ease = perf.prefersReducedMotion ? 0.08 : 0.14;
+        panopticonGazeX += (panopticonTargetX - panopticonGazeX) * ease;
+        panopticonGazeY += (panopticonTargetY - panopticonGazeY) * ease;
+        panopticonGazeEl?.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
         return true;
     }
 
@@ -1599,22 +1808,38 @@ const weirdLoadingPhrases = [
 ];
 
 function revealGardenUI() {
+    document.body.classList.remove('garden-loading');
+    document.body.classList.add('garden-ready');
+
+    const term = document.getElementById('terminal-container');
+    window.dispatchEvent(new Event('entropy:garden-ready'));
+
     const hud = document.getElementById('hud');
     const playlistMenu = document.getElementById('playlist-menu');
 
     playSound(sfx.ui);
+
+    const revealTerminalChrome = () => {
+        if (!term) return;
+        term.removeAttribute('hidden');
+        term.classList.add('is-sliver');
+        void term.offsetWidth;
+        requestAnimationFrame(() => term.classList.add('reveal-in'));
+    };
 
     setTimeout(() => hud.classList.add('active', 'anim-drop'), 150);
     setTimeout(() => {
         document.getElementById('mode-btn').classList.add('active');
         document.querySelector('.control-panel').classList.add('active');
     }, 450);
+    setTimeout(revealTerminalChrome, 600);
     setTimeout(() => {
         if (playlistMenu) {
             playlistMenu.classList.add('active');
             playlistMenu.style.display = 'block';
             updatePlaylistUI();
         }
+        globalThis.EntropyFilePong?.onGardenReady?.();
     }, 750);
 }
 
@@ -2034,8 +2259,10 @@ function reconcileSingularityPoem() {
     const pool = activeSingularityPoems();
     if (currentPoemIndex >= pool.length) currentPoemIndex = 0;
     if (!isSingularityActive) return;
-    if (document.getElementById('singularity-overlay').style.display === 'none') return;
-    if (document.getElementById('next-poem-btn').style.display === 'none') return;
+    const overlay = document.getElementById('singularity-overlay');
+    const nextBtn = document.getElementById('next-poem-btn');
+    if (!overlay || overlay.style.display === 'none') return;
+    if (!nextBtn || nextBtn.style.display === 'none') return;
 
     speakSingularity(pool[currentPoemIndex]);
 }
@@ -2083,6 +2310,7 @@ function handleReroll() {
     playSound(sfx.refresh);
     triggerPanopticonReroll();
     randomizeData();
+    globalThis.unlockTrophy?.('entropic_reroll');
 }
 function randomizeData() {
     document.getElementById('val-base').innerText = pickOne(lore.baseLocationsSafe, lore.baseLocationsGritty);
@@ -2166,6 +2394,8 @@ function initializeCycleSlots() {
 }
 
 function checkCycleWin() {
+    if (isSingularityActive) return;
+
     const currentIds = [
         cycleArtifacts[slotIndexes[0]].id,
         cycleArtifacts[slotIndexes[1]].id,
@@ -2177,22 +2407,23 @@ function checkCycleWin() {
         currentIds[1] === "art-source" &&
         currentIds[2] === "art-hoard";
 
-    if (isComboCorrect) {
-        if (isCipherSolved) {
-            triggerSingularity();
-        } else {
-            pushTerminalLog("> ERROR: VAULT ENCRYPTED. TERMINAL OVERRIDE REQUIRED.");
-            playSound(sfx.oopsy);
-            triggerPanopticonEyeRoll();
+    if (!isComboCorrect) return;
 
-            document.querySelectorAll('.slot').forEach((s) => {
-                s.style.animation = 'errorShake 0.4s ease';
-                setTimeout(() => {
-                    s.style.animation = '';
-                }, 400);
-            });
-        }
+    if (isCipherSolved) {
+        triggerSingularity();
+        return;
     }
+
+    pushTerminalLog("> ERROR: VAULT ENCRYPTED. TERMINAL OVERRIDE REQUIRED.");
+    playSound(sfx.oopsy);
+    triggerPanopticonEyeRoll();
+
+    document.querySelectorAll('.slot').forEach((s) => {
+        s.style.animation = 'errorShake 0.4s ease';
+        setTimeout(() => {
+            s.style.animation = '';
+        }, 400);
+    });
 }
 
 let angleX = 0, angleY = 0;
@@ -2385,25 +2616,42 @@ let isSingularityActive = false;
 let singularityAnimId;
 
 function triggerSingularity() {
+    if (isSingularityActive) return;
+    globalThis.unlockTrophy?.('singularity_ritual');
     isSingularityActive = true;
-    document.getElementById('hamburger-icon').style.display = 'none';
-    document.getElementById('mode-btn').classList.remove('active');
+    document.body.classList.add('singularity-active');
+    const hamburger = document.getElementById('hamburger-icon');
+    if (hamburger) hamburger.style.display = 'none';
+    document.getElementById('mode-btn')?.classList.remove('active');
+    document.getElementById('terminal-container')?.classList.remove('active');
+    termInput?.blur();
 
     setTimeout(() => {
+        if (!isSingularityActive) return;
         playSound(sfx.missionCleared);
         pushTerminalLog('!!! RITUAL COMPLETE !!!');
 
-        document.getElementById('singularity-overlay').style.display = 'flex';
-        document.getElementById('singularity-canvas').style.display = 'block';
-        document.getElementById('poem-container').style.display = 'block';
-        document.getElementById('next-poem-btn').style.display = 'inline-block';
+        const overlay = document.getElementById('singularity-overlay');
+        const canvas = document.getElementById('singularity-canvas');
+        const poem = document.getElementById('poem-container');
+        const nextBtn = document.getElementById('next-poem-btn');
+        const controls = document.getElementById('singularity-controls');
+        if (!overlay || !canvas || !poem) return;
 
+        overlay.style.display = 'flex';
+        canvas.style.display = 'block';
+        poem.style.display = 'block';
+        if (nextBtn) nextBtn.style.display = 'inline-block';
+
+        stopGardenLoop();
         currentPoemIndex = 0;
-        speakSingularity(activeSingularityPoems()[currentPoemIndex]);
+        const pool = activeSingularityPoems();
+        speakSingularity(pool[currentPoemIndex] ?? pool[0]);
         init3D();
 
-        const controls = document.getElementById('singularity-controls');
-        controls.style.animation = 'btnFadeIn 1.5s ease-in forwards 2.5s';
+        if (controls) {
+            controls.style.animation = 'btnFadeIn 1.5s ease-in forwards 2.5s';
+        }
     }, 500);
 }
 
@@ -2531,7 +2779,8 @@ function speakSingularity(poemText) {
 
 function cyclePoem() {
     const nextBtn = document.getElementById('next-poem-btn');
-    
+    if (!nextBtn) return;
+
     // Prevent spam-clicking while the sound is playing
     if (nextBtn.disabled) return;
     
@@ -2572,6 +2821,7 @@ function cyclePoem() {
 function resetTimeline() {
     window.speechSynthesis.cancel();
     playSound(sfx.exit);
+    document.body.classList.remove('singularity-active');
     document.getElementById('singularity-overlay').style.display = 'none';
     isSingularityActive = false;
 
@@ -2603,6 +2853,8 @@ function resetTimeline() {
     });
 
     pushTerminalLog("> NEW TIMELINE INITIALIZED.");
+    restartGardenLoop();
+    globalThis.refreshCipherEntropyRingHint?.();
 }
 
 
@@ -2616,6 +2868,7 @@ function toggleMode() {
         btn.innerText = "CORRUPTED MODE";
         playSound(sfx.glitch);
         pushTerminalLog("> CORRUPTED MODE ENGAGED");
+        globalThis.unlockTrophy?.('corrupted_bloom');
     } else {
         document.body.classList.remove('corrupted');
         btn.innerText = "SAFE MODE";
@@ -2690,9 +2943,14 @@ function buildCipherWheels() {
         charRadius += charBand + channel;
         ringIndex++;
     }
+
+    if (globalThis.EntropyCipherHint?.shouldShowRingHint?.()) {
+        globalThis.EntropyCipherHint.applyToWheels(wheels, perf, randomMatrixChar);
+    }
 }
 
 function cycleMatrixGlyphs(wheel) {
+    if (wheel.isHintWheel) return;
     const swaps = perf.prefersReducedMotion
         ? 1
         : (perf.isMobile ? 1 : 2 + Math.floor(Math.random() * 2));
@@ -2703,6 +2961,7 @@ function cycleMatrixGlyphs(wheel) {
 }
 
 function maybeDecoderBurst(wheel) {
+    if (wheel.isHintWheel) return;
     if (perf.prefersReducedMotion || Math.random() > 0.004) return;
     wheel.burstSpeed = wheel.direction * 0.012;
     wheel.burstUntil = matrixFrameCount + 10 + Math.floor(Math.random() * 14);
@@ -2731,8 +2990,24 @@ function updateCipherWheels() {
     }
 }
 
+function wheelConicGradient(cx, cy, alpha) {
+    const g = ctx.createConicGradient(-Math.PI * 0.5, cx, cy);
+    if (isCorrupted) {
+        g.addColorStop(0, `rgba(255, 0, 85, ${alpha})`);
+        g.addColorStop(1, `rgba(255, 0, 85, ${alpha})`);
+        return g;
+    }
+    const hues = [0, 60, 120, 180, 240, 300, 360];
+    for (let i = 0; i < hues.length; i++) {
+        g.addColorStop(i / (hues.length - 1), `hsla(${hues[i]}, 100%, 55%, ${alpha})`);
+    }
+    return g;
+}
+
 function drawChannelRings(cx, cy) {
     ctx.lineCap = 'round';
+    ctx.strokeStyle = wheelConicGradient(cx, cy, 0.16);
+    ctx.lineWidth = perf.isMobile ? 1 : 1.25;
 
     for (let r = 0; r < visibleRingCount - 1; r++) {
         const inner = wheels[r];
@@ -2740,12 +3015,6 @@ function drawChannelRings(cx, cy) {
         if (!inner || !outer) continue;
 
         const midRadius = (inner.charRadius + outer.charRadius) * 0.5;
-        const hue = (inner.ringIndex * 22 + 11) % 360;
-
-        ctx.strokeStyle = isCorrupted
-            ? 'rgba(255, 0, 85, 0.18)'
-            : `hsla(${hue}, 100%, 50%, 0.16)`;
-        ctx.lineWidth = perf.isMobile ? 1 : 1.25;
         ctx.beginPath();
         ctx.arc(cx, cy, midRadius, 0, Math.PI * 2);
         ctx.stroke();
@@ -2759,6 +3028,8 @@ function drawCipherWheels(cx, cy) {
     ctx.textBaseline = 'middle';
 
     drawChannelRings(cx, cy);
+
+    ctx.fillStyle = wheelConicGradient(cx, cy, 0.24);
 
     for (let r = 0; r < visibleRingCount; r++) {
         const wheel = wheels[r];
@@ -2774,14 +3045,9 @@ function drawCipherWheels(cx, cy) {
                 continue;
             }
 
-            const hue = (wheel.ringIndex * 22 + i * 4) % 360;
-            ctx.fillStyle = isCorrupted
-                ? 'rgba(255, 0, 85, 0.28)'
-                : `hsla(${hue}, 100%, 55%, 0.24)`;
-
             ctx.save();
             ctx.translate(x, y);
-            ctx.rotate(theta + Math.PI / 2);
+            ctx.rotate(theta);
             ctx.fillText(wheel.glyphs[i], 0, 0);
             ctx.restore();
         }
@@ -2790,9 +3056,39 @@ function drawCipherWheels(cx, cy) {
     needsFullRedraw = false;
 }
 
+function refreshCipherEntropyRingHint() {
+    const hint = globalThis.EntropyCipherHint;
+    if (!hint) return;
+
+    if (!wheels.length) {
+        needsFullRedraw = true;
+        return;
+    }
+
+    if (hint.shouldShowRingHint()) {
+        hint.applyToWheels(wheels, perf, randomMatrixChar);
+    } else {
+        hint.clearFromWheels(wheels, randomMatrixChar, perf);
+    }
+    needsFullRedraw = true;
+}
+
+globalThis.refreshCipherEntropyRingHint = refreshCipherEntropyRingHint;
+
+function getCipherWheelCenter() {
+    const eyeRect = panopticonEl?.getBoundingClientRect();
+    const canvasRect = canvas?.getBoundingClientRect();
+    if (eyeRect?.width > 0 && eyeRect.height > 0 && canvasRect) {
+        return {
+            cx: eyeRect.left + eyeRect.width * 0.5 - canvasRect.left,
+            cy: eyeRect.top + eyeRect.height * 0.5 - canvasRect.top,
+        };
+    }
+    return { cx: matrixViewW * 0.5, cy: matrixViewH * 0.5 };
+}
+
 function animateMatrix() {
-    const cx = matrixViewW / 2;
-    const cy = matrixViewH / 2;
+    const { cx, cy } = getCipherWheelCenter();
 
     if (!matrixFilled) {
         const revealEvery = perf.isMobile ? 4 : 2;
@@ -2835,6 +3131,8 @@ function resizeCanvas() {
     needsFullRedraw = false;
 }
 
+globalThis.__entropyResizeCanvas = resizeCanvas;
+
 function startGardenLoop() {
     if (gardenLoopActive || !gardenHasStarted) return;
     gardenLoopActive = true;
@@ -2848,6 +3146,16 @@ function stopGardenLoop() {
         cancelAnimationFrame(gardenAnimId);
         gardenAnimId = null;
     }
+}
+
+function restartGardenLoop() {
+    stopGardenLoop();
+    startGardenLoop();
+    requestAnimationFrame(() => {
+        if (!gardenHasStarted || document.hidden) return;
+        stopGardenLoop();
+        startGardenLoop();
+    });
 }
 
 function animate() {
@@ -2883,6 +3191,11 @@ function activateVaultMedia() {
             el.play().catch(() => {});
         }
     });
+    document.querySelectorAll('#modal-vault video.vault-media').forEach((video) => {
+        if (video.dataset.trophySunBound) return;
+        video.dataset.trophySunBound = '1';
+        video.addEventListener('play', () => globalThis.unlockTrophy?.('vault_sun'), { once: true });
+    });
     if (typeof updateCarousel === 'function') {
         requestAnimationFrame(updateCarousel);
     }
@@ -2909,8 +3222,15 @@ function ensureMediaSrc(el) {
 // --- MODAL SYSTEM ---
 let topZIndex = 20000;
 
+const MODALS_WITHOUT_REROLL_HINT = new Set(['vault', 'arcade', 'trophies']);
+
+function modalSkipsRerollHint(modalEl) {
+    if (!modalEl?.id) return false;
+    return MODALS_WITHOUT_REROLL_HINT.has(modalEl.id.replace(/^modal-/, ''));
+}
+
 function attachRefreshHint(modalEl) {
-    if (modalEl?.id === 'modal-arcade') {
+    if (modalSkipsRerollHint(modalEl)) {
         detachRefreshHint();
         return;
     }
@@ -2951,12 +3271,15 @@ function openModal(id) {
 
         // Load the arcade logic only if the arcade modal is opened
         if (resolvedId === 'arcade') {
-            detachRefreshHint();
             loadArcadeLevel();
+        } else if (resolvedId === 'trophies') {
+            globalThis.EntropyTrophies?.renderTrophyCase();
         } else if (resolvedId === 'vault') {
             activateVaultMedia();
-            attachRefreshHint(m);
-            triggerGhostHint();
+        }
+
+        if (modalSkipsRerollHint(m)) {
+            detachRefreshHint();
         } else {
             attachRefreshHint(m);
             triggerGhostHint();
@@ -3051,6 +3374,12 @@ function beginGardenExperience() {
     currentTrackIndex = 0;
     playCurrentBgmTrack();
 
+    document.body.classList.add('garden-loading');
+    document.body.classList.remove('garden-ready');
+    const term = document.getElementById('terminal-container');
+    term?.classList.remove('active', 'reveal-in', 'is-sliver');
+    term?.setAttribute('hidden', '');
+
     document.getElementById('init-screen').style.display = 'none';
     canvas.classList.remove('matrix-visible');
     gardenHasStarted = true;
@@ -3080,7 +3409,7 @@ function bindDomEvents() {
         playPauseBtn.addEventListener('click', function() {
             const track = getBgmTrack(currentTrackIndex);
             if (track.paused) {
-                track.play().catch(() => {});
+                playCurrentBgmTrack();
                 this.innerHTML = "&#10074;&#10074;"; // ❚❚ Pause Symbol
                 pushTerminalLog("> AUDIO RESUMED.");
             } else {
@@ -3142,12 +3471,20 @@ document.querySelectorAll('.vault-item').forEach(item => {
         lightboxOverlay.innerHTML = ''; 
         lightboxOverlay.appendChild(lightboxCloseBtn);
         
-        // Clone the media we found
-        const clone = media.cloneNode(true);
-        clone.className = 'lightbox-content'; 
-        if (clone.tagName === 'VIDEO') clone.controls = true; 
-        
-        lightboxOverlay.appendChild(clone);
+        if (media.tagName === 'IFRAME') {
+            const iframe = document.createElement('iframe');
+            iframe.className = 'lightbox-content genesis-lightbox';
+            iframe.src = media.dataset.src || media.getAttribute('src') || 'pages/genesis.html';
+            iframe.setAttribute('frameborder', '0');
+            iframe.setAttribute('scrolling', 'no');
+            lightboxOverlay.appendChild(iframe);
+            globalThis.unlockTrophy?.('genesis_gate');
+        } else {
+            const clone = media.cloneNode(true);
+            clone.className = 'lightbox-content';
+            if (clone.tagName === 'VIDEO') clone.controls = true;
+            lightboxOverlay.appendChild(clone);
+        }
         lightboxOverlay.classList.add('active');
     });
 });
@@ -3258,7 +3595,10 @@ function openComposer() {
         // If it already exists, just show it
         document.getElementById('composer-overlay').style.display = 'flex';
     }
+    globalThis.unlockTrophy?.('ghost_composer');
 }
+
+globalThis.openComposer = openComposer;
 
 // ==========================================
 // --- ARCADE MINIGAME: SEQUENCE PROTOCOL ---
@@ -3389,6 +3729,7 @@ function checkArcadeAnswer(guess, correct) {
         
         // Did they beat the whole game?
         if (currentSequenceIndex >= arcadeSequences.length) {
+            globalThis.unlockTrophy?.('arcade_clear');
             msg.innerText = "> PROTOCOL COMPLETE. DISPENSING REWARD...";
             playSound(sfx.missionCleared);
             pushTerminalLog("> ARCADE PROTOCOL BEATEN. REWARD DISPENSED.");
@@ -3579,6 +3920,8 @@ lightbox?.addEventListener('click', (e) => {
 
 // -- 3. Unified Keyboard Logic --
 document.addEventListener('keydown', (e) => {
+  if (globalThis.EntropyFilePong?.konamiClaimsKey?.(e)) return;
+  if (globalThis.EntropyFilePong?.pongBlocksArrowNav?.(e)) return;
   if (e.key === 'ArrowRight') {
     currentIndex = (currentIndex + 1) % slides.length;
     isLightboxOpen ? updateLightbox() : updateCarousel();

@@ -16,6 +16,26 @@ export let isSingularityActive = false;
 export let singularityAnimId = null;
 export let cipherStage = 0;
 export let isCipherSolved = false;
+/** iOS sidebar poems unlocked via cipher ritual or `express`. */
+export let iosTransmissionsOverride = false;
+
+export function setIosTransmissionsOverride(value = true) {
+    iosTransmissionsOverride = value;
+}
+
+export function getCipherStage() {
+    return cipherStage;
+}
+
+export function setCipherStage(stage) {
+    cipherStage = stage;
+}
+
+globalThis.getCipherStage = getCipherStage;
+
+export function setIsCipherSolved(value = true) {
+    isCipherSolved = value;
+}
 export let extraPizzas = 0;
 
 export function incrementExtraPizzas() {

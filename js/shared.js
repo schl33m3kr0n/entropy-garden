@@ -10,7 +10,7 @@ export { gardenHasStarted, gardenLoopActive, singularityAnimId, isCorrupted };
 
 export const asset = (path) => `assets/${path}`;
 export const sfxPath = (file) => asset(`audio/sfx/${file}`);
-export const musicPath = (file) => asset(`audio/music/${file}`);
+export const musicPath = (file) => asset(`audio/music/${encodeURIComponent(file)}`);
 export const imgPath = (file) => asset(`img/${file}`);
 
 export function setImgWithFallback(el) {
@@ -31,6 +31,13 @@ function createLazyAudio(src) {
     const audio = new Audio();
     audio.preload = 'none';
     audio.src = src;
+    return audio;
+}
+
+function createBgmAudio(file) {
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.src = musicPath(file);
     return audio;
 }
 
@@ -58,6 +65,7 @@ export const sfx = {
     gameStart: createLazyAudio(sfxPath('game-start.mp3')),
     gamePoint: createLazyAudio(sfxPath('game-point.mp3')),
     hit: createLazyAudio(sfxPath('hit.mp3')),
+    pop: createLazyAudio(sfxPath('pop.mp3')),
     eat: createLazyAudio(sfxPath('eat.mp3')),
     exit: createLazyAudio(sfxPath('exit.mp3')),
     burp: document.getElementById('burp-sound'),
@@ -72,6 +80,7 @@ export const sfx = {
     press: createLazyAudio(sfxPath('press.mp3')),
     stop: createLazyAudio(sfxPath('stop it.mp3')),
     boop: createEagerAudio(sfxPath('boop.mp3')),
+    meow: createLazyAudio(sfxPath('meow.mp3')),
 };
 
 export const BGM_TRACKS = [
@@ -210,15 +219,21 @@ export function applyTrackTitleMarquee(container, text, options = {}) {
 
 const bgmCache = new Map();
 export let currentTrackIndex = 0;
+let bgmPlayGeneration = 0;
 
 function wrapTrackIndex(index) {
     return ((index % BGM_TRACKS.length) + BGM_TRACKS.length) % BGM_TRACKS.length;
 }
 
+function nextBgmPlayGeneration() {
+    bgmPlayGeneration += 1;
+    return bgmPlayGeneration;
+}
+
 export function getBgmTrack(index) {
     const i = wrapTrackIndex(index);
     if (!bgmCache.has(i)) {
-        const audio = createLazyAudio(musicPath(BGM_TRACKS[i]));
+        const audio = createBgmAudio(BGM_TRACKS[i]);
         audio.loop = false;
         audio.volume = 0.3;
         bgmCache.set(i, audio);
@@ -227,8 +242,10 @@ export function getBgmTrack(index) {
 }
 
 function stopBgmTrack(index) {
-    const track = bgmCache.get(index);
+    const i = wrapTrackIndex(index);
+    const track = bgmCache.get(i);
     if (!track) return;
+    nextBgmPlayGeneration();
     track.pause();
     track.currentTime = 0;
     track.onended = null;
@@ -247,21 +264,115 @@ function pruneBgmCache() {
     ]);
     bgmCache.forEach((track, index) => {
         if (keep.has(index)) return;
-        stopBgmTrack(index);
-        track.removeAttribute('src');
-        track.load();
-        bgmCache.delete(index);
+        const i = wrapTrackIndex(index);
+        const cached = bgmCache.get(i);
+        if (!cached) return;
+        cached.pause();
+        cached.currentTime = 0;
+        cached.onended = null;
+        cached.removeAttribute('src');
+        cached.load();
+        bgmCache.delete(i);
     });
 }
 
+const BGM_LARGE_FILES = new Set([
+    'ambient3.mp3',
+    'ambient5.mp3',
+    'ambient8.mp3',
+    '13 angels.mp3',
+    'fractals.mp3',
+    'playboi carti - 7am (slowed reverb).mp3',
+]);
+
+function isLargeBgmTrack(track) {
+    const src = track.currentSrc || track.src || '';
+    return BGM_LARGE_FILES.has(decodeURIComponent(src.split('/').pop() || ''));
+}
+
+/** Wait for buffer (large tracks) before play(); retry on autoplay/block. */
+function playBgmWhenReady(track, generation, retriesLeft = 4, fileName = '') {
+    if (generation !== bgmPlayGeneration) return;
+
+    const large = isLargeBgmTrack(track) || (fileName && BGM_LARGE_FILES.has(fileName));
+    const minReady = large
+        ? HTMLMediaElement.HAVE_FUTURE_DATA
+        : HTMLMediaElement.HAVE_CURRENT_DATA;
+
+    const startPlayback = () => {
+        if (generation !== bgmPlayGeneration) return;
+        track.volume = 0.3;
+        track.play().catch(() => {
+            if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
+            setTimeout(() => playBgmWhenReady(track, generation, retriesLeft - 1), 250);
+        });
+    };
+
+    const onReady = () => {
+        cleanup();
+        startPlayback();
+    };
+    const onError = () => {
+        cleanup();
+        if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
+        const file = fileName || BGM_TRACKS[wrapTrackIndex(currentTrackIndex)];
+        if (!track.src && file) track.src = musicPath(file);
+        track.load();
+        playBgmWhenReady(track, generation, retriesLeft - 1, fileName);
+    };
+    const onStalled = () => {
+        if (generation !== bgmPlayGeneration) return;
+        if (track.readyState < minReady) track.load();
+    };
+    const cleanup = () => {
+        clearTimeout(waitTimeout);
+        track.removeEventListener('canplaythrough', onReady);
+        track.removeEventListener('canplay', onReady);
+        track.removeEventListener('error', onError);
+        track.removeEventListener('stalled', onStalled);
+    };
+
+    if (track.readyState >= minReady) {
+        startPlayback();
+        return;
+    }
+
+    const waitTimeout = setTimeout(() => {
+        if (generation !== bgmPlayGeneration) return;
+        if (track.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+            cleanup();
+            startPlayback();
+        }
+    }, large ? 90_000 : 20_000);
+
+    track.addEventListener('canplaythrough', onReady, { once: true });
+    track.addEventListener('canplay', onReady, { once: true });
+    track.addEventListener('error', onError, { once: true });
+    track.addEventListener('stalled', onStalled);
+    const file = fileName || BGM_TRACKS[wrapTrackIndex(currentTrackIndex)];
+    if (!track.src && file) track.src = musicPath(file);
+    if (track.readyState === 0 || track.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+        track.load();
+    }
+}
+
+function schedulePruneBgmCache(track) {
+    const prune = () => pruneBgmCache();
+    track.addEventListener('playing', prune, { once: true });
+    setTimeout(prune, 45_000);
+}
+
 export function playCurrentBgmTrack() {
-    const track = getBgmTrack(currentTrackIndex);
-    track.volume = 0.3;
+    const i = wrapTrackIndex(currentTrackIndex);
+    const generation = nextBgmPlayGeneration();
+    const track = getBgmTrack(i);
     track.loop = false;
     track.onended = playNextTrack;
-    track.play().catch(() => {});
+    preloadBgmTrack(i);
     preloadBgmTrack(currentTrackIndex + 1);
-    pruneBgmCache();
+    preloadBgmTrack(currentTrackIndex - 1);
+    playBgmWhenReady(track, generation, 4, BGM_TRACKS[i]);
+    schedulePruneBgmCache(track);
     if (typeof globalThis.updatePlaylistUI === 'function') {
         globalThis.updatePlaylistUI();
     }
@@ -287,22 +398,8 @@ export function playSoundOverlap(sound) {
 }
 
 export function playMeow() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(392.0, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(440.0, audioCtx.currentTime + 0.2);
-        osc.frequency.exponentialRampToValueAtTime(392.0, audioCtx.currentTime + 0.5);
-        gain.gain.setValueAtTime(0, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.1);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.6);
-    } catch (e) {}
+    triggerPanopticonCatEye(sfx.meow);
+    playSound(sfx.meow);
 }
 
 export function shuffle(array) {
@@ -356,7 +453,13 @@ export function pickMany(safe, gritty, count) {
 export const canvas = document.getElementById('grid-canvas');
 export const ctx = canvas.getContext('2d');
 
-const FULL_MATRIX_CHARS = "ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ∑∫∆∞≈µ¥£€¢±×÷∂∇∏√∝∠∧∨∩∪∴∵∼≅≠≤≥⊂⊃⊆⊇⊕⊗⊥─□△▽◇○◎★☆♪♀♂☼ϫϞ֍אבגדהוזחטיכלמנסעपफबभमयरलवशषसहअआइईउऊऋएऐओऔॐॠѢѪѦѮѰѲѴѶѸѠѾѼӁӃӇӋӚӜӞӠӢӤӦӨӪӬӮӰӲӴӶӸӺӼӾԀԂԄԆԈԊԌԎԐԒЖЗЛФЦЧШЩЪЫЬЭЮЯ道无极阴阳气玄虚禅空觉悟幻仁义礼智信理天命心变აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰჱჲჳჴჵჶჷჸჹჺァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶᚠᚢᚦᚬᚱᚴᚼᚽᚾᚿᛁᛅᛆᛋᛌᛏᛐᛒᛘᛚᛦঅআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলবশষসহకఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహ가나다라마바사아자차카타파하ሀለሐመሠረሰቀበተኀነአከወዐዘየደገጠጰጸፀፈፐကခဂဃငစဆဇဈညဋဌဍ႑ဏတထဒဓနပဖဗဘမယရလဝသဟဠအഅആഇഈഉഊഋഎഏഐഒഓഔകഖഗഘങചഛജഝഞടഠഡഢണതഥദധനപഫബഭമയരലവശഷസഹᜀᜁᜂᜃᜄᜅᜆᜇᜈᜉᜊᜋᜌᜎᜏᜐᜑកខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអกขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหඅආඇඈඉඊඋඌඍඑඒඓඔඕඖකඛගඝඞඟචඡජඣඤඥඦටඨඩඪණඬතථදධනඳපඵබභමඹයරලවශෂසහළෆֆբգդեզէըթժլխծկհձղճմյնշոչպջռսվտրցւփքօႠႡႢႣႤႥႦႧႨႩႪႫႬႭႮႯႰႱႲႳႴႵႶႷႸႹႺႻႼႽႾႿჀⴀⴁⴂⴃⴄⴅⴆⴇⴈⴉⴊⴋⴌⴍⴎⴏⴐⴑⴒⴓⴔⴕⴖⴗⴘⴙⴚⴛⴜⴝⴞⴟⴠꔀꔃꔉꔊꔋꔌꔚꔛꔤꔥꔪ가고구그기나노누느니다도두드디라로루르리마모무므미바보부브비사소수스시아오우으이자조주즈지차초추츠치카코쿠크키타토투트티파포푸프피하호후흐히";
+// Hebrew aleph-bet + finals + geresh/gershayim/maqaf (cipher wheels).
+const HEBREW_CIPHER_CHARS = 'אבגדהוזחטיכךלמםנןסעפףצץקרשת׳״־';
+
+const FULL_MATRIX_CHARS =
+    'ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ∑∫∆∞≈µ¥£€¢±×÷∂∇∏√∝∠∧∨∩∪∴∵∼≅≠≤≥⊂⊃⊆⊇⊕⊗⊥─□△▽◇○◎★☆♪♀♂☼ϫϞ֍' +
+    HEBREW_CIPHER_CHARS +
+    'पफबभमयरलवशषसहअआइईउऊऋएऐओऔॐॠѢѪѦѮѰѲѴѶѸѠѾѼӁӃӇӋӚӜӞӠӢӤӦӨӪӬӮӰӲӴӶӸӺӼӾԀԂԄԆԈԊԌԎԐԒЖЗЛФЦЧШЩЪЫЬЭЮЯ道无极阴阳气玄虚禅空觉悟幻仁义礼智信理天命心变აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰჱჲჳჴჵჶჷჸჹჺァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶᚠᚢᚦᚬᚱᚴᚼᚽᚾᚿᛁᛅᛆᛋᛌᛏᛐᛒᛘᛚᛦঅআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলবশষসহకఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహ가나다라마바사아자차카타파하ሀለሐመሠረሰቀበተኀነአከወዐዘየደገጠጰጸፀፈፐကခဂဃငစဆဇဈညဋဌဍ႑ဏတထဒဓနပဖဗဘမယရလဝသဟဠအഅആഇഈഉഊഋഎഏഐഒഓഔകഖഗഘങചഛജഝഞടഠഡഢണതഥദധനപഫബഭമയരലവശഷസഹᜀᜁᜂᜃᜄᜅᜆᜇᜈᜉᜊᜋᜌᜎᜏᜐᜑកខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអกขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหඅආඇඈඉඊඋඌඍඑඒඓඔඕඖකඛගඝඞඟචඡජඣඤඥඦටඨඩඪණඬතථදධනඳපඵබභමඹයරලවශෂසහළෆֆբգդեզէըթժլխծկհձղճմյնշոչպջռսվտրցւփքօႠႡႢႣႤႥႦႧႨႩႪႫႬႭႮႯႰႱႲႳႴႵႶႷႸႹႺႻႼႽႾႿჀⴀⴁⴂⴃⴄⴅⴆⴇⴈⴉⴊⴋⴌⴍⴎⴏⴐⴑⴒⴓⴔⴕⴖⴗⴘⴙⴚⴛⴜⴝⴞⴟⴠꔀꔃꔉꔊꔋꔌꔚꔛꔤꔥꔪ가고구그기나노누느니다도두드디라로루르리마모무므미바보부브비사소수스시아오우으이자조주즈지차초추츠치카코쿠크키타토투트티파포푸프피하호후흐히';
 
 export const chars = FULL_MATRIX_CHARS;
 
@@ -369,6 +472,7 @@ const IOS_CIPHER_CHARS =
     'アイウエオカキクケコサシスセソタチツテトナニヌネノ' +
     'ハヒフヘホマミムメモヤユヨラリルレロワン' +
     '道禅空幻心理气天阴阳' +
+    HEBREW_CIPHER_CHARS +
     '!?@#$%&*_+=<>[]{}|/~';
 
 export function usesIosCipherGlyphs() {
@@ -392,10 +496,14 @@ export const perf = {
     isIOS,
     isMobile,
     prefersReducedMotion: reducedMotionQuery.matches,
-    dprCap: isMobile ? 1.5 : 2,
-    spawnPerFrame: reducedMotionQuery.matches ? 12 : (isMobile ? 4 : 8),
-    steadySwapsPerFrame: reducedMotionQuery.matches ? 8 : (isMobile ? 12 : 30),
-    matrixFrameSkip: isMobile && !reducedMotionQuery.matches ? 1 : 0,
+    dprCap: isIOS ? 1 : (isMobile ? 1.5 : 2),
+    spawnPerFrame: reducedMotionQuery.matches ? 12 : (isIOS ? 2 : (isMobile ? 4 : 8)),
+    steadySwapsPerFrame: reducedMotionQuery.matches ? 8 : (isIOS ? 4 : (isMobile ? 12 : 30)),
+    matrixFrameSkip: isIOS && !reducedMotionQuery.matches
+        ? 2
+        : (isMobile && !reducedMotionQuery.matches ? 1 : 0),
+    panopticonFrameSkip: isIOS && !reducedMotionQuery.matches ? 1 : 0,
+    maxCipherRings: isIOS ? 7 : null,
     cellSpacing: isMobile ? 1.45 : 1.65,
 };
 
@@ -406,9 +514,12 @@ export function applyPerfClass() {
 applyPerfClass();
 reducedMotionQuery.addEventListener('change', (e) => {
     perf.prefersReducedMotion = e.matches;
-    perf.spawnPerFrame = e.matches ? 12 : (perf.isMobile ? 4 : 8);
-    perf.steadySwapsPerFrame = e.matches ? 8 : (perf.isMobile ? 12 : 30);
-    perf.matrixFrameSkip = perf.isMobile && !e.matches ? 1 : 0;
+    perf.spawnPerFrame = e.matches ? 12 : (perf.isIOS ? 2 : (perf.isMobile ? 4 : 8));
+    perf.steadySwapsPerFrame = e.matches ? 8 : (perf.isIOS ? 4 : (perf.isMobile ? 12 : 30));
+    perf.matrixFrameSkip = perf.isIOS && !e.matches
+        ? 2
+        : (perf.isMobile && !e.matches ? 1 : 0);
+    perf.panopticonFrameSkip = perf.isIOS && !e.matches ? 1 : 0;
     applyPerfClass();
     import('./state.js').then((s) => s.setNeedsFullRedraw(true));
 });
@@ -443,6 +554,7 @@ const PANOPTICON_CAT_HOLD_MS = 1100;
 
 let catEyePhase = null;
 let catEyeStart = 0;
+let catEyeAudioEl = null;
 
 let panopticonGodActive = false;
 let godEyeSequence = null;
@@ -577,10 +689,25 @@ export function triggerPanopticonCenterStare() {
     eyeMode = 'stare';
 }
 
-export function triggerPanopticonCatEye() {
+function onCatEyeAudioEnded() {
+    if (catEyePhase !== 'hold') return;
+    catEyePhase = 'out';
+    catEyeStart = performance.now();
+    catEyeAudioEl = null;
+}
+
+export function triggerPanopticonCatEye(audioEl = null) {
     if (!panopticonEl?.classList.contains('visible')) return;
     if (godEyeSequence || panopticonGodActive) return;
     if (eyeMode === 'reroll') return;
+
+    if (catEyeAudioEl && catEyeAudioEl !== audioEl) {
+        catEyeAudioEl.removeEventListener('ended', onCatEyeAudioEnded);
+    }
+    catEyeAudioEl = audioEl || null;
+    if (catEyeAudioEl) {
+        catEyeAudioEl.addEventListener('ended', onCatEyeAudioEnded, { once: true });
+    }
 
     catEyePhase = 'in';
     catEyeStart = performance.now();
@@ -592,7 +719,6 @@ export function updatePanopticonVisibility() {
     const singularity = document.getElementById('singularity-overlay');
     const boss = document.getElementById('boss-key-overlay');
     const hidden = singularity?.style.display === 'flex' || boss?.classList.contains('active');
-
     panopticonEl.classList.toggle('visible', gardenHasStarted && !hidden);
 }
 
@@ -678,6 +804,10 @@ function applyPanopticonCatMorph(morph) {
 }
 
 function cancelPanopticonCatEye() {
+    if (catEyeAudioEl) {
+        catEyeAudioEl.removeEventListener('ended', onCatEyeAudioEnded);
+        catEyeAudioEl = null;
+    }
     catEyePhase = null;
     resetPanopticonCatMorph();
 }
@@ -700,6 +830,17 @@ function animatePanopticonCatEye(now) {
 
     if (catEyePhase === 'hold') {
         applyPanopticonCatMorph(1);
+        if (catEyeAudioEl) {
+            const d = catEyeAudioEl.duration;
+            if (
+                catEyeAudioEl.ended
+                || (Number.isFinite(d) && d > 0 && catEyeAudioEl.currentTime >= d - 0.05)
+                || elapsed > 15000
+            ) {
+                onCatEyeAudioEnded();
+            }
+            return;
+        }
         if (elapsed >= holdMs) {
             catEyePhase = 'out';
             catEyeStart = now;

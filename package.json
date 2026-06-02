@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "bash scripts/deploy-cloudflare.sh",
+    "preview": "bash scripts/serve-local.sh",
     "deploy": "npm run build && wrangler pages deploy dist --project-name=entropy-garden-8r2 --commit-dirty=true --skip-caching"
   },
   "devDependencies": {

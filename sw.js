@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v23';
+const CACHE_VERSION = 'entropy-garden-v75';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -12,12 +12,17 @@ const PRECACHE_URLS = [
     'js/shared.js',
     'js/lazy.js',
     'js/lore-pools.data.js',
+    'js/cipher-vigenere.js',
+    'js/cipher-entropy-hint.js',
+    'js/trophies.js',
     'js/sw-register.js',
     'js/modules/terminal.js',
     'js/modules/matrix.js',
     'js/modules/singularity.js',
     'js/modules/arcade.js',
     'js/ios-ui.js',
+    'js/ios-poems.js',
+    'js/singularity-poems.data.js',
     'js/pong.js',
     'js/konami.js',
     'pages/genesis.html',
@@ -26,6 +31,7 @@ const PRECACHE_URLS = [
     'assets/icons/identity.svg',
     'assets/icons/joystick.svg',
     'assets/icons/ouroboros.svg',
+    'assets/icons/trophy.svg',
     'assets/icons/signal.svg',
     'assets/icons/stats.svg',
     'assets/icons/storage.svg',
@@ -95,20 +101,59 @@ self.addEventListener('fetch', (event) => {
     }
 });
 
+function audioCacheKey(request) {
+    return new URL(request.url).href.split('#')[0];
+}
+
+async function serveRangeFromCached(cachedResponse, request) {
+    const rangeHeader = request.headers.get('Range');
+    const match = /bytes=(\d*)-(\d*)/.exec(rangeHeader || '');
+    if (!match) return cachedResponse;
+
+    const blob = await cachedResponse.blob();
+    const size = blob.size;
+    let start = match[1] !== '' ? parseInt(match[1], 10) : 0;
+    let end = match[2] !== '' ? parseInt(match[2], 10) : size - 1;
+    if (Number.isNaN(start)) start = 0;
+    if (Number.isNaN(end) || end >= size) end = size - 1;
+    if (start > end || start >= size) {
+        return new Response(null, { status: 416, statusText: 'Range Not Satisfiable' });
+    }
+
+    const slice = blob.slice(start, end + 1);
+    const headers = new Headers(cachedResponse.headers);
+    headers.set('Content-Type', cachedResponse.headers.get('Content-Type') || 'audio/mpeg');
+    headers.set('Content-Range', `bytes ${start}-${end}/${size}`);
+    headers.set('Content-Length', String(slice.size));
+    headers.set('Accept-Ranges', 'bytes');
+    return new Response(slice, { status: 206, headers });
+}
+
 async function cacheAudioAfterFetch(request) {
-    const cached = await caches.match(request);
-    if (cached) return cached;
+    const cacheKey = audioCacheKey(request);
+    const cache = await caches.open(AUDIO_CACHE);
+    const cached = await cache.match(cacheKey);
+
+    if (cached) {
+        if (request.headers.get('Range')) {
+            return serveRangeFromCached(cached, request);
+        }
+        return cached;
+    }
 
     try {
         const response = await fetch(request);
-        if (response.ok) {
-            const cache = await caches.open(AUDIO_CACHE);
-            cache.put(request, response.clone());
+        if (response.ok && !request.headers.get('Range')) {
+            cache.put(cacheKey, response.clone());
         }
         return response;
     } catch (error) {
-        const fallback = await caches.match(request);
-        if (fallback) return fallback;
+        if (cached) {
+            if (request.headers.get('Range')) {
+                return serveRangeFromCached(cached, request);
+            }
+            return cached;
+        }
         throw error;
     }
 }

@@ -46,9 +46,12 @@ import {
     pushTerminalLog,
     triggerSingularity,
     cyclePoem,
+    pauseSingularityPresentation,
+    resumeSingularityPresentation,
     ensureMatrix,
     stopGardenLoop,
     resumeGardenLoop,
+    restartGardenLoop,
     resizeCanvas,
     setMatrixNeedsRedraw,
     loadArcadeLevel,
@@ -72,6 +75,13 @@ function beginGardenExperience() {
 
     document.body.classList.add('garden-loading');
     document.body.classList.remove('garden-ready');
+
+    const term = document.getElementById('terminal-container');
+    term?.classList.remove('active', 'reveal-in', 'is-sliver');
+    term?.setAttribute('hidden', '');
+    document.getElementById('ios-terminal-toggle')?.setAttribute('hidden', '');
+
+    if (perf.isIOS) loadTerminal();
 
     document.getElementById('init-screen').style.display = 'none';
     canvas.classList.remove('matrix-visible');
@@ -116,6 +126,7 @@ function activateGodMode() {
         body.classList.remove('god-mode');
         h1.innerText = "ENTROPY GARDEN";
         setPanopticonGodMode(false);
+        globalThis.EntropyCipherHint?.onGodModeOff?.();
         pushTerminalLog("> SYSTEM OVERRIDE TERMINATED. RETURNING TO NORMALCY.");
         playSound(sfx.glitch); // A good "power down" sound
     } 
@@ -126,6 +137,8 @@ function activateGodMode() {
         setPanopticonGodMode(true);
         pushTerminalLog("!!! OVERRIDE ACCEPTED !!!");
         playSound(sfx.missionCleared);
+        globalThis.unlockTrophy?.('konami_god');
+        globalThis.EntropyCipherHint?.unlock?.();
     }
 }
 
@@ -155,7 +168,7 @@ function handleDragStart(e) {
     dragOffsetY = clientY - rect.top;
     
     draggedElement.style.position = 'absolute';
-    draggedElement.style.zIndex = 1000; // Bring to front while dragging
+    draggedElement.style.zIndex = draggedElement.id.includes('pizza') ? 10050 : 1000;
     
     document.addEventListener('mousemove', handleDragMove);
     document.addEventListener('touchmove', handleDragMove, { passive: false });
@@ -212,7 +225,7 @@ function handleDragEnd(e) {
         }
     } else {
         // If dropped anywhere else, just put it down normally
-        draggedElement.style.zIndex = 10; 
+        draggedElement.style.zIndex = draggedElement.id.includes('pizza') ? 10010 : 10;
     }
 
     draggedElement = null;
@@ -250,15 +263,34 @@ const needyTitles = ["RENDER FAILED...", "WHERE DID YOU GO?", "MEMORY LEAK DETEC
     "AM I NOT ENOUGH FOR YOU?", "*SILENTLY JUDGES YOU*"];
 function resumeGardenAfterReturn() {
     if (!gardenHasStarted || document.hidden) return;
+    if (isSingularityActive) {
+        resumeSingularityPresentation();
+        return;
+    }
     resumeGardenLoop();
     requestAnimationFrame(() => resumeGardenLoop());
+}
+
+function handlePageReturn(event) {
+    if (event?.persisted) {
+        pauseSingularityPresentation();
+        stopSingularity3D();
+        if (isSingularityActive || document.body.classList.contains('singularity-active')) {
+            setIsSingularityActive(false);
+            document.body.classList.remove('singularity-active');
+            const overlay = document.getElementById('singularity-overlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+    }
+    resumeGardenAfterReturn();
 }
 
 document.addEventListener("visibilitychange", () => {
     document.title = document.hidden ? needyTitles[Math.floor(Math.random() * needyTitles.length)] : originalTitle;
     if (document.hidden) {
         stopGardenLoop();
-        if (singularityAnimId) {
+        if (isSingularityActive) pauseSingularityPresentation();
+        else if (singularityAnimId) {
             cancelAnimationFrame(singularityAnimId);
             setSingularityAnimId(null);
         }
@@ -267,8 +299,17 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-window.addEventListener("pageshow", () => {
-    resumeGardenAfterReturn();
+window.addEventListener("pageshow", handlePageReturn);
+window.addEventListener("pagehide", () => {
+    if (!isSingularityActive) return;
+    pauseSingularityPresentation();
+    stopSingularity3D();
+    if (perf.isIOS) {
+        setIsSingularityActive(false);
+        document.body.classList.remove('singularity-active');
+        const overlay = document.getElementById('singularity-overlay');
+        if (overlay) overlay.style.display = 'none';
+    }
 });
 
 window.addEventListener("focus", () => {
@@ -291,21 +332,26 @@ function updatePlaylistUI() {
 // --- BOSS KEY ---
 function toggleBossKey() {
     const overlay = document.getElementById('boss-key-overlay');
-    if (overlay.classList.contains('active')) { 
-        overlay.classList.remove('active'); 
-        
-        // --- ADD THE CLOSE SOUND HERE ---
-        const closeClone = sfx.close.cloneNode();
-        closeClone.play().catch(e => {});
-        
-        pushTerminalLog("> CRISIS AVERTED. RESUMING NORMAL CYCLES.");
-    } else { 
-        overlay.classList.add('active'); 
-        if (sfx.error) playSound(sfx.error); 
+    if (!overlay) return;
+
+    if (overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+        playSound(sfx.close);
+        pushTerminalLog('> CRISIS AVERTED. RESUMING NORMAL CYCLES.');
+        if (gardenHasStarted) resumeGardenLoop();
+    } else {
+        overlay.classList.add('active');
+        stopGardenLoop();
+        playSound(sfx.error);
+        globalThis.unlockTrophy?.('maya_crash');
     }
 }
-document.getElementById('close-maya-btn').addEventListener('click', toggleBossKey);
-document.querySelectorAll('.boss-btn').forEach(btn => btn.addEventListener('click', toggleBossKey));
+
+globalThis.toggleBossKey = toggleBossKey;
+
+const closeMayaBtn = document.getElementById('close-maya-btn');
+if (closeMayaBtn) closeMayaBtn.addEventListener('click', toggleBossKey);
+document.querySelectorAll('.boss-btn').forEach((btn) => btn.addEventListener('click', toggleBossKey));
 
 // --- TIME SENSITIVE LORE ---
 
@@ -367,11 +413,26 @@ function revealGardenUI() {
     document.body.classList.remove('garden-loading');
     document.body.classList.add('garden-ready');
 
+    const term = document.getElementById('terminal-container');
+    window.dispatchEvent(new Event('entropy:garden-ready'));
+
     const hud = document.getElementById('hud');
     const playlistMenu = document.getElementById('playlist-menu');
     const isIosLayout = document.body.classList.contains('ios-ui');
 
     playSound(sfx.ui);
+
+    const iosTerminalToggle = document.getElementById('ios-terminal-toggle');
+
+    const revealTerminalChrome = () => {
+        iosTerminalToggle?.removeAttribute('hidden');
+        if (isIosLayout) return;
+        if (!term) return;
+        term.removeAttribute('hidden');
+        term.classList.add('is-sliver');
+        void term.offsetWidth;
+        requestAnimationFrame(() => term.classList.add('reveal-in'));
+    };
 
     if (isIosLayout) {
         hud?.classList.add('active');
@@ -381,6 +442,7 @@ function revealGardenUI() {
             playlistMenu.classList.add('active');
             updatePlaylistUI();
         }
+        setTimeout(revealTerminalChrome, 450);
         scrollIosHudHome('smooth');
         requestAnimationFrame(() => {
             requestAnimationFrame(() => showIosScrollHints());
@@ -393,6 +455,7 @@ function revealGardenUI() {
         document.getElementById('mode-btn').classList.add('active');
         document.querySelector('.control-panel').classList.add('active');
     }, 450);
+    setTimeout(revealTerminalChrome, 600);
     setTimeout(() => {
         if (playlistMenu) {
             playlistMenu.classList.add('active');
@@ -470,6 +533,7 @@ function handleReroll() {
     playSound(sfx.refresh);
     triggerPanopticonReroll();
     randomizeData();
+    globalThis.unlockTrophy?.('entropic_reroll');
 }
 function randomizeData() {
     document.getElementById('val-base').innerText = pickOne(lore.baseLocationsSafe, lore.baseLocationsGritty);
@@ -552,6 +616,8 @@ function initializeCycleSlots() {
 }
 
 function checkCycleWin() {
+    if (isSingularityActive) return;
+
     const currentIds = [
         cycleArtifacts[slotIndexes[0]].id,
         cycleArtifacts[slotIndexes[1]].id,
@@ -563,30 +629,42 @@ function checkCycleWin() {
         currentIds[1] === "art-source" &&
         currentIds[2] === "art-hoard";
 
-    if (isComboCorrect) {
-        if (isCipherSolved) {
-            triggerSingularity();
-        } else {
-            pushTerminalLog("> ERROR: VAULT ENCRYPTED. TERMINAL OVERRIDE REQUIRED.");
-            playSound(sfx.oopsy);
-            triggerPanopticonEyeRoll();
+    if (!isComboCorrect) return;
 
-            document.querySelectorAll('.slot').forEach((s) => {
-                s.style.animation = 'errorShake 0.4s ease';
-                setTimeout(() => {
-                    s.style.animation = '';
-                }, 400);
-            });
-        }
+    if (isCipherSolved) {
+        triggerSingularity();
+        return;
     }
+
+    pushTerminalLog("> ERROR: VAULT ENCRYPTED. TERMINAL OVERRIDE REQUIRED.");
+    playSound(sfx.oopsy);
+    triggerPanopticonEyeRoll();
+
+    document.querySelectorAll('.slot').forEach((s) => {
+        s.style.animation = 'errorShake 0.4s ease';
+        setTimeout(() => {
+            s.style.animation = '';
+        }, 400);
+    });
 }
+
+globalThis.checkCycleWinAfterCipher = checkCycleWin;
 
 function resetTimeline() {
     window.speechSynthesis?.cancel();
     stopSingularity3D();
+    document.body.classList.remove('singularity-active');
+    const overlay = document.getElementById('singularity-overlay');
+    overlay?.classList.remove('singularity-ios-simple', 'singularity-ios-layout');
+    document.getElementById('singularity-bg')?.style.removeProperty('display');
     playSound(sfx.exit);
-    document.getElementById('singularity-overlay').style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
+    const nextBtn = document.getElementById('next-poem-btn');
+    const resetBtn = document.getElementById('reset-timeline-btn');
+    if (nextBtn) nextBtn.textContent = '[NEXT TRANSMISSION]';
+    if (resetBtn) resetBtn.textContent = '[RETURN TO GARDEN]';
     setIsSingularityActive(false);
+    setNeedsFullRedraw(true);
 
     document.getElementById('hamburger-icon').style.display = 'flex';
     document.getElementById('mode-btn').classList.add('active');
@@ -613,7 +691,8 @@ function resetTimeline() {
     });
 
     pushTerminalLog("> NEW TIMELINE INITIALIZED.");
-    resumeGardenLoop();
+    restartGardenLoop();
+    globalThis.refreshCipherEntropyRingHint?.();
 }
 
 
@@ -627,6 +706,7 @@ function toggleMode() {
         btn.innerText = "CORRUPTED MODE";
         playSound(sfx.glitch);
         pushTerminalLog("> CORRUPTED MODE ENGAGED");
+        globalThis.unlockTrophy?.('corrupted_bloom');
     } else {
         document.body.classList.remove('corrupted');
         btn.innerText = "SAFE MODE";
@@ -705,6 +785,12 @@ function primeManifoldCarousel() {
     setTimeout(refresh, 80);
     setTimeout(refresh, 350);
     setTimeout(refresh, 900);
+
+    document.querySelectorAll('#modal-vault video.vault-media').forEach((video) => {
+        if (video.dataset.trophySunBound) return;
+        video.dataset.trophySunBound = '1';
+        video.addEventListener('play', () => globalThis.unlockTrophy?.('vault_sun'), { once: true });
+    });
 }
 
 function ensureMediaSrc(el) {
@@ -728,8 +814,15 @@ function ensureMediaSrc(el) {
 // --- MODAL SYSTEM ---
 let topZIndex = 20000;
 
+const MODALS_WITHOUT_REROLL_HINT = new Set(['vault', 'arcade', 'trophies', 'poems']);
+
+function modalSkipsRerollHint(modalEl) {
+    if (!modalEl?.id) return false;
+    return MODALS_WITHOUT_REROLL_HINT.has(modalEl.id.replace(/^modal-/, ''));
+}
+
 function attachRefreshHint(modalEl) {
-    if (modalEl?.id === 'modal-arcade') {
+    if (modalSkipsRerollHint(modalEl)) {
         detachRefreshHint();
         return;
     }
@@ -791,7 +884,23 @@ function openModal(id) {
             });
         }
 
-        if (resolvedId === 'arcade') {
+        if (resolvedId === 'trophies') {
+            globalThis.EntropyTrophies?.renderTrophyCase();
+        }
+
+        if (resolvedId === 'poems' && document.body.classList.contains('ios-ui')) {
+            import('./ios-poems.js').then((poems) => {
+                if (!poems.iosPoemsAllowed?.()) {
+                    m.style.display = 'none';
+                    pushTerminalLog('> POEMS LOCKED. COMPLETE CIPHER OR USE express.');
+                    return;
+                }
+                poems.initIosPoemArchive();
+                poems.refreshIosPoemArchive();
+            }).catch((err) => console.error('[Entropy Garden] ios poems failed', err));
+        }
+
+        if (modalSkipsRerollHint(m)) {
             detachRefreshHint();
         } else {
             attachRefreshHint(m);
@@ -909,7 +1018,7 @@ function bindDomEvents() {
         playPauseBtn.addEventListener('click', function() {
             const track = getBgmTrack(currentTrackIndex);
             if (track.paused) {
-                track.play().catch(() => {});
+                playCurrentBgmTrack();
                 setPlayPauseLabel(this, true);
                 pushTerminalLog("> AUDIO RESUMED.");
             } else {
@@ -935,8 +1044,7 @@ function bindDomEvents() {
 
     // Bind existing UI buttons
     if (document.getElementById('mode-btn')) document.getElementById('mode-btn').addEventListener('click', toggleMode);
-    if (document.getElementById('next-poem-btn')) document.getElementById('next-poem-btn').addEventListener('click', cyclePoem);
-    if (document.getElementById('reset-timeline-btn')) document.getElementById('reset-timeline-btn').addEventListener('click', resetTimeline);
+    /* next-poem / reset-timeline: bound in singularity.js (iOS touchend-safe) */
 
     initializeCycleSlots();
     bindModalDrag();
@@ -979,6 +1087,7 @@ document.querySelectorAll('.vault-item').forEach(item => {
             iframe.setAttribute('frameborder', '0');
             iframe.setAttribute('scrolling', 'no');
             lightboxOverlay.appendChild(iframe);
+            globalThis.unlockTrophy?.('genesis_gate');
         } else {
             const clone = media.cloneNode(true);
             clone.className = 'lightbox-content';
@@ -1089,7 +1198,10 @@ function openComposer() {
         // If it already exists, just show it
         document.getElementById('composer-overlay').style.display = 'flex';
     }
+    globalThis.unlockTrophy?.('ghost_composer');
 }
+
+globalThis.openComposer = openComposer;
 
 // ==========================================
 
@@ -1326,9 +1438,11 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('resize', updateCarousel);
 
 globalThis.gardenHooks = {
+    ...globalThis.gardenHooks,
     toggleBossKey,
     handleReroll,
     toggleMode,
+    resetTimeline,
     resetIdleTimer,
     konamiBlocksPongArming: isKonamiInProgress,
     konamiClaimsKey: (e) => konamiClaimsKey(e, isPongSessionActive),

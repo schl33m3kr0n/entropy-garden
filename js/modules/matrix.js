@@ -51,7 +51,9 @@ function buildWheels() {
     let charRadius = cellSize * (perf.isMobile ? 2 : 2.2);
 
     let ringIndex = 0;
+    const maxRings = perf.maxCipherRings;
     while (charRadius < maxRadius) {
+        if (maxRings != null && ringIndex >= maxRings) break;
         const circumference = 2 * Math.PI * charRadius;
         const charCount = Math.max(
             perf.isMobile ? 10 : 12,
@@ -77,9 +79,14 @@ function buildWheels() {
         charRadius += charBand + channel;
         ringIndex++;
     }
+
+    if (globalThis.EntropyCipherHint?.shouldShowRingHint?.()) {
+        globalThis.EntropyCipherHint.applyToWheels(wheels, perf, randomChar);
+    }
 }
 
 function cycleGlyphs(wheel) {
+    if (wheel.isHintWheel) return;
     const swaps = perf.prefersReducedMotion
         ? 1
         : (perf.isMobile ? 1 : 2 + Math.floor(Math.random() * 2));
@@ -90,6 +97,7 @@ function cycleGlyphs(wheel) {
 }
 
 function maybeDecoderBurst(wheel) {
+    if (wheel.isHintWheel) return;
     if (perf.prefersReducedMotion || Math.random() > 0.004) return;
     wheel.burstSpeed = wheel.direction * 0.012;
     wheel.burstUntil = matrixFrameCount + 10 + Math.floor(Math.random() * 14);
@@ -118,23 +126,39 @@ function updateWheels() {
     }
 }
 
+let wheelGradientCache = { key: '', stroke: null, fill: null };
+
 function wheelConicGradient(cx, cy, alpha) {
+    const key = `${Math.round(cx)}|${Math.round(cy)}|${alpha}|${isCorrupted ? 1 : 0}`;
+    const slot = alpha < 0.2 ? 'stroke' : 'fill';
+    if (wheelGradientCache.key === key && wheelGradientCache[slot]) {
+        return wheelGradientCache[slot];
+    }
+
     const g = ctx.createConicGradient(-Math.PI * 0.5, cx, cy);
     if (isCorrupted) {
         g.addColorStop(0, `rgba(255, 0, 85, ${alpha})`);
         g.addColorStop(1, `rgba(255, 0, 85, ${alpha})`);
-        return g;
+    } else {
+        const hues = [0, 60, 120, 180, 240, 300, 360];
+        for (let i = 0; i < hues.length; i++) {
+            g.addColorStop(i / (hues.length - 1), `hsla(${hues[i]}, 100%, 55%, ${alpha})`);
+        }
     }
-    const hues = [0, 60, 120, 180, 240, 300, 360];
-    for (let i = 0; i < hues.length; i++) {
-        g.addColorStop(i / (hues.length - 1), `hsla(${hues[i]}, 100%, 55%, ${alpha})`);
-    }
+    wheelGradientCache.key = key;
+    wheelGradientCache[slot] = g;
     return g;
+}
+
+function usesIosCipherFlatColor() {
+    return perf.isIOS || document.body.classList.contains('ios-ui');
 }
 
 function drawChannelRings(cx, cy) {
     ctx.lineCap = 'round';
-    ctx.strokeStyle = wheelConicGradient(cx, cy, 0.16);
+    ctx.strokeStyle = usesIosCipherFlatColor()
+        ? (isCorrupted ? 'rgba(255, 0, 85, 0.16)' : 'rgba(0, 255, 0, 0.16)')
+        : wheelConicGradient(cx, cy, 0.16);
     ctx.lineWidth = perf.isMobile ? 1 : 1.25;
 
     for (let r = 0; r < visibleRingCount - 1; r++) {
@@ -157,7 +181,9 @@ function drawCipherWheels(cx, cy) {
 
     drawChannelRings(cx, cy);
 
-    ctx.fillStyle = wheelConicGradient(cx, cy, 0.24);
+    ctx.fillStyle = usesIosCipherFlatColor()
+        ? (isCorrupted ? 'rgba(255, 0, 85, 0.24)' : 'rgba(0, 255, 0, 0.24)')
+        : wheelConicGradient(cx, cy, 0.24);
 
     for (let r = 0; r < visibleRingCount; r++) {
         const wheel = wheels[r];
@@ -202,7 +228,7 @@ function animateMatrix() {
     const { cx, cy } = getCipherWheelCenter();
 
     if (!matrixFilled) {
-        const revealEvery = perf.isMobile ? 4 : 2;
+        const revealEvery = perf.isIOS ? 6 : (perf.isMobile ? 4 : 2);
         if (matrixFrameCount % revealEvery === 0 && visibleRingCount < wheels.length) {
             visibleRingCount++;
         }
@@ -283,9 +309,11 @@ function resizeCanvas() {
     if (!canvas || !ctx) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, perf.dprCap);
-    const fs = perf.isMobile
-        ? Math.max(26, Math.min(36, window.innerWidth / 32))
-        : Math.max(24, Math.min(40, window.innerWidth / 42));
+    const fs = perf.isIOS
+        ? Math.max(28, Math.min(38, window.innerWidth / 28))
+        : (perf.isMobile
+            ? Math.max(26, Math.min(36, window.innerWidth / 32))
+            : Math.max(24, Math.min(40, window.innerWidth / 42)));
     const cs = Math.round(fs * perf.cellSpacing);
 
     const vp = getViewportMetrics();
@@ -307,6 +335,8 @@ function resizeCanvas() {
     ctx.scale(dpr, dpr);
 
     setCanvasMetrics(dpr, fs, cs, Math.ceil(viewW / cs), Math.ceil(viewH / cs));
+
+    wheelGradientCache.key = '';
 
     // DPR changes on browser zoom — resize backing store only; keep ring state/center.
     if (!sizeChanged && wheels.length > 0) {
@@ -391,6 +421,16 @@ function resumeGardenLoop() {
     scheduleGardenFrame();
 }
 
+/** After singularity (or other full-screen takeover), force a fresh rAF chain. */
+function restartGardenLoop() {
+    stopGardenLoop();
+    resumeGardenLoop();
+    requestAnimationFrame(() => {
+        if (!gardenHasStarted || document.hidden) return;
+        resumeGardenLoop();
+    });
+}
+
 function animate() {
     if (!gardenLoopActive) return;
 
@@ -401,13 +441,19 @@ function animate() {
         animateMatrix();
     }
 
-    animatePanopticon();
+    const shouldAnimatePanopticon = !perf.panopticonFrameSkip
+        || (matrixFrameCount % (perf.panopticonFrameSkip + 1) === 0);
+    if (shouldAnimatePanopticon) {
+        animatePanopticon();
+    }
 
     const timeStep = isCorrupted ? 2 : (perf.isMobile ? 0.25 : 0.5);
     addTime(timeStep);
-    document.documentElement.style.setProperty('--rainbow-offset', `${(time * 0.5) % 200}%`);
-    if (!perf.prefersReducedMotion && !isCorrupted) {
-        document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);
+    if (!perf.isIOS) {
+        document.documentElement.style.setProperty('--rainbow-offset', `${(time * 0.5) % 200}%`);
+        if (!perf.prefersReducedMotion && !isCorrupted) {
+            document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);
+        }
     }
 
     if (gardenLoopActive) {
@@ -437,19 +483,28 @@ document.addEventListener('focusout', (e) => {
 });
 
 document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        stopGardenLoop();
-    } else {
+    import('./state.js').then((s) => {
+        if (document.hidden) {
+            stopGardenLoop();
+            return;
+        }
+        if (s.isSingularityActive) return;
         resumeGardenLoop();
-    }
+    });
 });
 
 window.addEventListener('pageshow', () => {
-    resumeGardenLoop();
+    import('./state.js').then((s) => {
+        if (s.isSingularityActive) return;
+        resumeGardenLoop();
+    });
 });
 
 window.addEventListener('focus', () => {
-    resumeGardenLoop();
+    import('./state.js').then((s) => {
+        if (s.isSingularityActive) return;
+        resumeGardenLoop();
+    });
 });
 
 window.addEventListener('orientationchange', () => {
@@ -461,4 +516,30 @@ window.addEventListener('orientationchange', () => {
     }, 260);
 });
 
-export { resizeCanvas, startGardenLoop, stopGardenLoop, resumeGardenLoop, resetIosViewportLock };
+function refreshCipherEntropyRingHint() {
+    const hint = globalThis.EntropyCipherHint;
+    if (!hint) return;
+
+    if (!wheels.length) {
+        setNeedsFullRedraw(true);
+        return;
+    }
+
+    if (hint.shouldShowRingHint()) {
+        hint.applyToWheels(wheels, perf, randomChar);
+    } else {
+        hint.clearFromWheels(wheels, randomChar, perf);
+    }
+    setNeedsFullRedraw(true);
+}
+
+globalThis.refreshCipherEntropyRingHint = refreshCipherEntropyRingHint;
+
+export {
+    resizeCanvas,
+    startGardenLoop,
+    stopGardenLoop,
+    resumeGardenLoop,
+    restartGardenLoop,
+    resetIosViewportLock,
+};

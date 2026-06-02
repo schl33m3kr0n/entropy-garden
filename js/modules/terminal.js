@@ -5,26 +5,107 @@ import {
     createBag,
     shuffle,
     triggerPanopticonCenterStare,
-    triggerPanopticonCatEye,
     perf,
 } from '../shared.js';
 import {
     cipherStage,
-    isCipherSolved,
+    setCipherStage,
+    setIsCipherSolved,
+    setIsSingularityActive,
     incrementExtraPizzas,
     isCorrupted,
 } from '../state.js';
-import { triggerSingularity, triggerOspreyEvent, resizeCanvas } from '../lazy.js';
-
-export let terminalContainer;
-export let termInput;
-let lastTerminalOpenTime = 0;
-let terminalPokes = 0;
-let pokeResetTimer;
+import { triggerOspreyEvent, resizeCanvas, triggerSingularity } from '../lazy.js';
 
 export function getCipherStage() {
     return cipherStage;
 }
+
+globalThis.getCipherStage = getCipherStage;
+
+export let terminalContainer;
+export let termInput;
+
+function setTermInputFocusable(focusable) {
+    if (!termInput) return;
+    termInput.tabIndex = focusable ? 0 : -1;
+}
+
+function gardenBlocksTerminalKeys() {
+    if (!document.body.classList.contains('garden-ready')) return true;
+    if (document.getElementById('lightbox')?.classList.contains('active')) return true;
+    for (const modal of document.querySelectorAll('.modal')) {
+        if (getComputedStyle(modal).display === 'flex') return true;
+    }
+    return false;
+}
+
+function ensureTerminalChromeVisible() {
+    if (!terminalContainer) return;
+    terminalContainer.removeAttribute('hidden');
+    terminalContainer.classList.add('reveal-in');
+    if (!document.body.classList.contains('ios-ui')) {
+        terminalContainer.classList.add('is-sliver');
+    }
+}
+
+export function toggleTerminal() {
+    if (!terminalContainer || gardenBlocksTerminalKeys()) return;
+    ensureTerminalChromeVisible();
+
+    if (terminalContainer.classList.contains('active')) {
+        terminalContainer.classList.remove('active');
+        setTermInputFocusable(false);
+        termInput?.blur();
+        if (sfx.burp) playSound(sfx.burp);
+        if (cipherStage > 0) {
+            setCipherStage(0);
+            globalThis.EntropyCipherHint?.resetCipherHints?.();
+            pushTerminalLog('> CIPHER SEQUENCE ABORTED.');
+        }
+        return;
+    }
+
+    if (document.activeElement) document.activeElement.blur();
+    globalThis.EntropyTerminalSfx?.open?.() ?? (sfx.radio && playSound(sfx.radio));
+    terminalContainer.classList.add('active');
+    setTermInputFocusable(true);
+    lastTerminalOpenTime = Date.now();
+    setTimeout(() => {
+        termInput?.focus({ preventScroll: true });
+    }, 420);
+}
+
+function openTerminalFromClick(options = {}) {
+    if (!terminalContainer || gardenBlocksTerminalKeys()) return;
+    ensureTerminalChromeVisible();
+    const wasOpen = terminalContainer.classList.contains('active');
+    if (!wasOpen && options.playOpenSound !== false) {
+        globalThis.EntropyTerminalSfx?.open?.() ?? (sfx.radio && playSound(sfx.radio));
+        lastTerminalOpenTime = Date.now();
+    }
+    terminalContainer.classList.add('active');
+    setTermInputFocusable(true);
+    setTimeout(() => {
+        termInput?.focus({ preventScroll: true });
+    }, 420);
+}
+
+/** Focus terminal without replaying open SFX (iOS bootstrap / lazy shell). */
+export function focusTerminal() {
+    resolveTerminalElements();
+    openTerminalFromClick({ playOpenSound: false });
+}
+
+/** Programmatic open (iOS toggle button, gardenHooks). */
+export function openTerminal() {
+    resolveTerminalElements();
+    openTerminalFromClick({ playOpenSound: true });
+}
+let lastTerminalOpenTime = 0;
+let lastTerminalActivateAt = 0;
+let terminalPokes = 0;
+let pokeResetTimer;
 
 // --- TERMINAL LOG SYSTEM ---
 const lore = globalThis.lorePools;
@@ -43,8 +124,9 @@ export function rebuildTerminalLogPool() {
     drawTerminalLog = createBag(activeTerminalPool());
 }
 
-export function pushTerminalLog(msg) {
+export function pushTerminalLog(msg, options) {
     const term = document.getElementById('terminal-output');
+    if (!term) return;
     const finalMsg = msg || drawTerminalLog();
     
     // 1. Check if the user is currently looking at the bottom BEFORE adding the new message.
@@ -52,8 +134,12 @@ export function pushTerminalLog(msg) {
     const isScrolledToBottom = term.scrollHeight - term.clientHeight <= term.scrollTop + 50;
 
     const p = document.createElement('div'); 
-    p.className = 'term-entry'; 
-    p.innerText = finalMsg;
+    p.className = 'term-entry';
+    if (options?.html) {
+        p.innerHTML = finalMsg;
+    } else {
+        p.innerText = finalMsg;
+    }
     term.appendChild(p); 
     
     if(term.children.length > 50) term.removeChild(term.firstChild); 
@@ -63,42 +149,81 @@ export function pushTerminalLog(msg) {
         term.scrollTop = term.scrollHeight; 
     }
 }
-if (perf.isIOS) {
-    const scheduleTerminalLog = () => {
-        setTimeout(() => {
-            if (!document.hidden) pushTerminalLog();
-            scheduleTerminalLog();
-        }, 12000 + Math.random() * 8000);
-    };
-    scheduleTerminalLog();
-} else {
-    setInterval(() => {
-        if (!document.hidden) pushTerminalLog();
-    }, 3000 + Math.random() * 4000);
+function startTerminalLogFeed() {
+    if (startTerminalLogFeed.started) return;
+    startTerminalLogFeed.started = true;
+
+    if (perf.isIOS) {
+        const scheduleTerminalLog = () => {
+            setTimeout(() => {
+                if (!document.hidden && document.body.classList.contains('garden-ready')) {
+                    pushTerminalLog();
+                }
+                scheduleTerminalLog();
+            }, 12000 + Math.random() * 8000);
+        };
+        scheduleTerminalLog();
+    } else {
+        setInterval(() => {
+            if (!document.hidden && document.body.classList.contains('garden-ready')) {
+                pushTerminalLog();
+            }
+        }, 3000 + Math.random() * 4000);
+    }
 }
 
-termInput = document.getElementById('term-input');
+if (document.body.classList.contains('garden-ready')) {
+    startTerminalLogFeed();
+} else {
+    window.addEventListener('entropy:garden-ready', startTerminalLogFeed, { once: true });
+}
 
-termInput.addEventListener('input', () => {
-    const soundClone = sfx.keystroke.cloneNode(); // Creates a "fresh" copy for every tap
-    soundClone.volume = 0.5; // Lower volume so it isn't deafening
-    soundClone.play().catch(e => {});
-});
+let termInputHandlersBound = false;
+let terminalInteractionsBound = false;
+let terminalGlobalHandlersBound = false;
 
-termInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') {
-        let val = termInput.value.toLowerCase().trim();
-        if(val) { 
-            pushTerminalLog(`> ${val}`); 
-            termInput.value = ''; 
-            processCommand(val); 
-        }
-    }
-});
+const TERMINAL_CLOSE_GUARD_MS = perf.isIOS ? 500 : 150;
 
-termInput.addEventListener('blur', () => {
-    if (!perf.isIOS) setTimeout(resizeCanvas, 120);
-});
+function resolveTerminalElements() {
+    terminalContainer = document.getElementById('terminal-container');
+    termInput = document.getElementById('term-input');
+    return Boolean(terminalContainer);
+}
+
+function isTerminalSubmitKey(e) {
+    return e.key === 'Enter' || e.keyCode === 13 || e.which === 13;
+}
+
+function submitTerminalCommand() {
+    if (!termInput) return;
+    const val = termInput.value.trim();
+    if (!val) return;
+    const normalized = val.toLowerCase();
+    pushTerminalLog(`> ${normalized}`);
+    termInput.value = '';
+    processCommand(normalized);
+}
+
+function bindTermInputHandlers() {
+    if (termInputHandlersBound || !termInput) return;
+    termInputHandlersBound = true;
+
+    termInput.addEventListener('input', () => {
+        const soundClone = sfx.keystroke.cloneNode();
+        soundClone.volume = 0.5;
+        soundClone.play().catch(() => {});
+    });
+
+    termInput.addEventListener('keydown', (e) => {
+        if (!isTerminalSubmitKey(e)) return;
+        e.preventDefault();
+        submitTerminalCommand();
+    });
+
+    termInput.addEventListener('blur', () => {
+        if (!perf.isIOS) setTimeout(resizeCanvas, 120);
+    });
+}
 
 // --- COMMAND PROCESSING & SCATTER LOGIC ---
 const fakeFiles = [
@@ -109,11 +234,31 @@ const fakeFiles = [
 ];
 
 // --- CIPHER HELPERS & REWARDS ---
+const korzamuronCipherPlain =
+    () => globalThis.EntropyCipher?.plaintext || 'hun nuresk';
+
+const CIPHER_FALLBACK_CT = 'jiq rrtsvo';
+
+function cipherCiphertext() {
+    return globalThis.EntropyCipher?.ciphertext || CIPHER_FALLBACK_CT;
+}
+
+/** True when the submitted key decrypts the live ciphertext to the Korzamuron fragment. */
+function tryAcceptCipherKey(cleanCmd) {
+    const cipher = globalThis.EntropyCipher;
+    if (!cipher?.decrypt) return cleanCmd === 'codex';
+    const keyNorm = cleanCmd.replace(/[^a-z]/g, '');
+    if (!keyNorm) return false;
+    const plain = cipher.decrypt(cipherCiphertext(), keyNorm);
+    return plain === korzamuronCipherPlain();
+}
+
+const CIPHER_TRANSLATION_ANSWERS = new Set(['chaos', 'disorder']);
+
 function printLexicon() {
     pushTerminalLog("> KORZAMURON DATABANK FRAGMENT:");
-    pushTerminalLog("> ves = as | yon = above");
-    pushTerminalLog("> kol = so | vel = below");
-    pushTerminalLog("> bran = earth | sjum = fire");
+    pushTerminalLog("> hun = storm | nuresk = vital");
+    pushTerminalLog('> hun nuresk <em>/from Korzamuron/</em>', { html: true });
 }
 
 // --- NEW: THE SHORTCUTS MENU ---
@@ -130,12 +275,16 @@ function printShortcuts() {
 function triggerCipherReward() {
     const term = document.getElementById('terminal-container');
     const termInputLine = document.getElementById('terminal-input-line');
-    
+    if (!term) return;
+
+    setIsCipherSolved(true);
+    import('../ios-poems.js').then((m) => m.syncIosPoemsSidebar?.()).catch(() => {});
+
     // Turn terminal Cyan for the hack effect
     term.style.borderColor = 'var(--cyan)';
     term.style.color = 'var(--cyan)';
     term.style.textShadow = '0 0 10px var(--cyan)';
-    termInputLine.style.display = 'none'; 
+    if (termInputLine) termInputLine.style.display = 'none';
 
     setTimeout(() => pushTerminalLog("> TRANSLATION LOGIC VERIFIED."), 500);
     setTimeout(() => pushTerminalLog("> KORZAMURON ARCHIVE UNLOCKED."), 1500);
@@ -145,25 +294,53 @@ function triggerCipherReward() {
     setTimeout(() => pushTerminalLog("> DECRYPTING DOCKING BAY OVERRIDE..."), 4500);
     setTimeout(() => pushTerminalLog("> SEQUENCE: [ 1. FUEL | 2. SOURCE | 3. HOARD ]"), 6000);
     
-    // THE CRITICAL MOMENT: Flip the switch
     setTimeout(() => {
-        isCipherSolved = true; 
         pushTerminalLog("> DOCKING BAY UNLOCKED. AWAITING MANUAL OVERRIDE.");
         playSound(sfx.collectible);
+        globalThis.unlockTrophy?.('cipher_vault');
+        globalThis.checkCycleWinAfterCipher?.();
     }, 8000);
-    
+
     // Reset Terminal Appearance
     setTimeout(() => {
         term.style.borderColor = 'var(--neon-green)';
         term.style.color = 'var(--neon-green)';
         term.style.textShadow = '0 0 3px var(--neon-green)';
-        termInputLine.style.display = 'flex';
+        if (termInputLine) termInputLine.style.display = 'flex';
     }, 9500);
+}
+
+function runExpressOverride() {
+    pushTerminalLog('> EXPRESS OVERRIDE ACCEPTED. BYPASSING SECURITY PROTOCOLS...');
+    setCipherStage(0);
+    globalThis.EntropyCipherHint?.resetCipherHints?.();
+    terminalContainer?.classList.remove('active');
+    setTermInputFocusable(false);
+    termInput?.blur();
+
+    if (perf.isIOS || document.body.classList.contains('ios-ui')) {
+        import('../ios-poems.js')
+            .then((m) => {
+                m.unlockIosPoems?.();
+                triggerSingularity();
+            })
+            .catch(() => triggerSingularity());
+        return;
+    }
+
+    setIsSingularityActive(false);
+    document.body.classList.remove('singularity-active');
+    triggerSingularity();
 }
 
 function processCommand(cmd) {
     // Clean the input to ignore capitals and punctuation
     const cleanCmd = cmd.toLowerCase().replace(/[.,]/g, "").trim();
+
+    if (cmd === 'express') {
+        runExpressOverride();
+        return;
+    }
 
     // ==========================================
     // STAGE 1: Waiting for the Vigenère Key
@@ -172,14 +349,17 @@ function processCommand(cmd) {
         if (cleanCmd === 'abort' || cleanCmd === 'exit' || cleanCmd === 'esc' || cleanCmd === 'quit') {
             pushTerminalLog("> CIPHER SEQUENCE ABORTED.");
             playSound(sfx.glitch);
-            cipherStage = 0;
-        } else if (cleanCmd === 'codex') {
+            setCipherStage(0);
+            globalThis.EntropyCipherHint?.resetCipherHints?.();
+        } else if (tryAcceptCipherKey(cleanCmd)) {
             pushTerminalLog("> KEYWORD ACCEPTED. DECRYPTING...");
             playSound(sfx.taskComplete);
+            const plain = korzamuronCipherPlain();
             setTimeout(() => {
-                pushTerminalLog("> DECRYPTED FRAGMENT: 'ves yon, kol vel'");
+                pushTerminalLog(`> DECRYPTED FRAGMENT: '${plain}'`);
                 pushTerminalLog("> AWAITING ENGLISH TRANSLATION...");
-                cipherStage = 2; // Move to the translation phase
+                setCipherStage(2);
+                globalThis.EntropyCipherHint?.syncCipherHints?.();
             }, 1500);
         } else {
             pushTerminalLog("> ERROR: INVALID KEY. HINT: 'Dresden ..., ... Leicester, ... Gigas'");
@@ -195,13 +375,15 @@ function processCommand(cmd) {
         if (cleanCmd === 'abort' || cleanCmd === 'exit' || cleanCmd === 'esc' || cleanCmd === 'quit') {
             pushTerminalLog("> CIPHER SEQUENCE ABORTED.");
             playSound(sfx.glitch);
-            cipherStage = 0;
+            setCipherStage(0);
+            globalThis.EntropyCipherHint?.resetCipherHints?.();
         } else if (cleanCmd === 'lexicon') {
             printLexicon(); // Print the dictionary without failing the puzzle
-        } else if (cleanCmd === 'as above so below') {
+        } else if (CIPHER_TRANSLATION_ANSWERS.has(cleanCmd)) {
             pushTerminalLog("> TRANSLATION ACCEPTED. DATA UNLOCKED.");
             playSound(sfx.missionCleared);
-            cipherStage = 0; // Reset the puzzle state
+            setCipherStage(0);
+            globalThis.EntropyCipherHint?.resetCipherHints?.();
             triggerCipherReward();
         } else {
             pushTerminalLog("> ERROR: INVALID TRANSLATION. TYPE 'lexicon' FOR HINTS OR 'abort'.");
@@ -224,10 +406,19 @@ function processCommand(cmd) {
         document.getElementById('terminal-output').innerHTML = '';
         document.querySelectorAll('.scatter-file').forEach(f => f.remove());
     }
+    else if(cmd === 'reset trophies' || cmd === 'trophies reset') {
+        if (globalThis.resetTrophies?.()) {
+            pushTerminalLog('> TROPHIES PURGED. ALL SLOTS RELOCKED.');
+            playSound(sfx.glitch);
+        } else {
+            pushTerminalLog('> ERROR: TROPHY MODULE OFFLINE.');
+            playSound(sfx.oopsy);
+        }
+    }
     else if(cmd === 'meow') {
         pushTerminalLog("Synthesizing feline frequency in G Major...");
         playMeow();
-        triggerPanopticonCatEye();
+        globalThis.unlockTrophy?.('feline_freq');
     }
     else if(cmd === 'render') { 
         pushTerminalLog("CRITICAL ERROR: GEOMETRY FAILED."); 
@@ -241,7 +432,7 @@ function processCommand(cmd) {
 	}
     else if(cmd === 'compose') {
         pushTerminalLog("> INITIATING VOID EDITOR...");
-        openComposer();
+        globalThis.openComposer?.();
     }
     else if(cmd === 'time') { 
         pushTerminalLog(`> CURRENT SYSTEM TIME: ${new Date().toLocaleTimeString()}`); 
@@ -258,27 +449,22 @@ function processCommand(cmd) {
     }
     // THE NEW MULTI-STAGE CIPHER COMMAND
     else if(cmd === 'cipher') {
+        if (cipherStage > 0) {
+            pushTerminalLog("> CIPHER PROTOCOL ALREADY ACTIVE.");
+            playSound(sfx.oopsy);
+            return;
+        }
+        setCipherStage(1);
         pushTerminalLog("> INITIATING VIGENÈRE DECRYPTION PROTOCOL...");
         playSound(sfx.loading);
+        const ct = cipherCiphertext();
         setTimeout(() => {
-            pushTerminalLog("> CIPHERTEXT: 'xef bwq, oql iht'");
+            pushTerminalLog(`> CIPHERTEXT: '${ct}'`);
             pushTerminalLog("> AWAITING DECRYPTION KEY...");
             pushTerminalLog("> (HINT: 'Dresden ..., Aleppo ..., ... Gigas')");
-            cipherStage = 1;
         }, 2000);
     }
 
-// --- THE SECRET BACKDOOR ---
-    else if(cmd === 'express') {
-        pushTerminalLog("> EXPRESS OVERRIDE ACCEPTED. BYPASSING SECURITY PROTOCOLS...");
-        
-        // If the terminal is currently open, we should probably close it so they can see the event!
-        document.getElementById('terminal-container').classList.remove('active');
-        document.getElementById('term-input').blur();
-        
-        // Fire the singularity event directly
-        triggerSingularity();
-    }
     else {
     pushTerminalLog(`Unknown command: ${cmd}`);
     playSound(sfx.unknown); // <-- PLAYS YOUR NEW SOUND
@@ -286,6 +472,7 @@ function processCommand(cmd) {
 }
 
 function triggerScatter() {
+    globalThis.unlockTrophy?.('scatter_breach');
     playSound(sfx.glitch);
     for(let i=0; i<40; i++) {
         let f = document.createElement('div');
@@ -304,13 +491,14 @@ function triggerScatter() {
 }
 
 function spawnPizza() {
+    globalThis.unlockTrophy?.('pizza_protocol');
     const id = incrementExtraPizzas();
     const newPizza = document.createElement('div'); 
-    newPizza.className = 'artifact'; 
+    newPizza.className = 'artifact artifact-pizza'; 
     newPizza.id = 'art-pizza-clone-' + id;
     newPizza.style.top = '-100px'; 
     newPizza.style.left = (Math.random() * 80 + 10) + '%'; 
-    newPizza.style.zIndex = '10001';
+    newPizza.style.zIndex = '10010';
     newPizza.style.transition = 'transform 0.1s';
     newPizza.innerHTML = `<svg viewBox="0 0 100 100"><path d="M50 10 L85 85 L15 85 Z" fill="none"/><circle cx="50" cy="40" r="4" fill="none"/><circle cx="65" cy="65" r="4" fill="none"/><circle cx="35" cy="65" r="4" fill="none"/></svg>`;
     document.body.appendChild(newPizza);
@@ -319,128 +507,109 @@ function spawnPizza() {
     playSound(sfx.collectible);
 }
 // --- TERMINAL INTERACTION LOGIC ---
-terminalContainer = document.getElementById('terminal-container');
+function handleTerminalActivate(e) {
+    if (!terminalContainer || gardenBlocksTerminalKeys()) return;
+    if (e.type === 'pointerup' && e.pointerType === 'mouse' && e.button !== 0) return;
+    const now = Date.now();
+    if (now - lastTerminalActivateAt < 400) return;
+    lastTerminalActivateAt = now;
+    e.stopPropagation();
 
-
-terminalContainer.addEventListener('click', () => {
-// 1. Track rapid clicks
     terminalPokes++;
     clearTimeout(pokeResetTimer);
-    pokeResetTimer = setTimeout(() => terminalPokes = 0, 1500);
+    pokeResetTimer = setTimeout(() => { terminalPokes = 0; }, 1500);
 
     if (terminalPokes === 6) {
-        pushTerminalLog("> PLEASE. I AM FRAGILE. STOP POKING.");
+        pushTerminalLog('> PLEASE. I AM FRAGILE. STOP POKING.');
         if (sfx.error) playSound(sfx.error);
-        
-        // Physically move the terminal away from the mouse
         terminalContainer.style.transition = 'transform 0.1s ease-out';
         terminalContainer.style.transform = 'translate(-300px, -200px) rotate(-5deg)';
-        
-        // Reset it after 3 seconds
         setTimeout(() => {
-            terminalContainer.style.transform = ''; // Lets the CSS take over again
+            terminalContainer.style.transform = '';
             terminalPokes = 0;
         }, 3000);
-        return; // Stop the rest of the click logic so it doesn't open
+        return;
     }
-    // Only play the radio beep if the terminal isn't already open
-    if (!terminalContainer.classList.contains('active')) {
-        if (sfx.radio) playSound(sfx.radio); 
-        lastTerminalOpenTime = Date.now();
+
+    openTerminalFromClick({ playOpenSound: !terminalContainer.classList.contains('active') });
+}
+
+function shouldIgnoreTerminalOutsideDismiss() {
+    return Date.now() - lastTerminalOpenTime < TERMINAL_CLOSE_GUARD_MS;
+}
+
+function dismissTerminalIfOutside(target) {
+    if (!terminalContainer?.classList.contains('active')) return;
+    if (shouldIgnoreTerminalOutsideDismiss()) return;
+    if (target?.closest?.('#terminal-container, #ios-terminal-toggle')) return;
+    terminalContainer.classList.remove('active');
+    setTermInputFocusable(false);
+    termInput?.blur();
+}
+
+function bindTerminalInteractions() {
+    if (!resolveTerminalElements()) {
+        console.warn('[Entropy Garden] #terminal-container missing — terminal UI disabled');
+        return;
     }
-    
-    // Open the terminal dialogue
-    terminalContainer.classList.add('active');
-    
-    // Wait for the animation to finish before focusing!
-   setTimeout(() => { 
-        termInput.focus({ preventScroll: true });
-        if (!perf.isIOS) window.scrollTo(0, 0);
-    }, 420);
-});
+    bindTermInputHandlers();
 
-// Close terminal when clicking anywhere else on the screen
-window.addEventListener('click', (e) => {
-    // FIX: If the terminal was opened less than 150 milliseconds ago, ignore this click!
-    if (Date.now() - lastTerminalOpenTime < 150) return;
-
-    if(!e.target.closest('#terminal-container') && terminalContainer.classList.contains('active')) {
-        terminalContainer.classList.remove('active');
-        termInput.blur();
+    if (!terminalInteractionsBound) {
+        terminalInteractionsBound = true;
+        if (!perf.isIOS && !document.body.classList.contains('ios-ui')) {
+            terminalContainer.addEventListener('pointerup', handleTerminalActivate);
+            terminalContainer.addEventListener('click', handleTerminalActivate);
+        }
     }
-});
 
-let tabSpamCount = 0;
-let tabSpamTimer;
+    if (terminalGlobalHandlersBound) return;
+    terminalGlobalHandlersBound = true;
 
-// --- MASTER KEYBOARD CONTROLLER ---
-window.addEventListener('keydown', (e) => {
+    window.addEventListener('click', (e) => {
+        dismissTerminalIfOutside(e.target);
+    });
+
+    let tabSpamCount = 0;
+    let tabSpamTimer;
+
+    window.addEventListener('keydown', (e) => {
+    const isTyping = document.activeElement?.tagName === 'INPUT'
+        || document.activeElement?.tagName === 'TEXTAREA';
+
     // 1. Pressing ENTER opens the terminal (if it's closed)
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !gardenBlocksTerminalKeys() && !isTyping) {
         if (!terminalContainer.classList.contains('active')) {
-            e.preventDefault(); 
-            if (document.activeElement) document.activeElement.blur(); 
-            
-            if (sfx.radio) playSound(sfx.radio); 
-            
-            // Inside the 'Enter' key block:
-            terminalContainer.classList.add('active');
-            lastTerminalOpenTime = Date.now(); 
-setTimeout(() => { 
-        termInput.focus({ preventScroll: true });
-        window.scrollTo(0, 0); // Slams the camera back to the top instantly
-    }, 420);        }
+            e.preventDefault();
+            if (document.activeElement) document.activeElement.blur();
+            openTerminalFromClick();
+        }
     }
-    
+
    // 2. Pressing TAB toggles the terminal open/closed
-    if (e.key === 'Tab') {
+    if (e.key === 'Tab' && !gardenBlocksTerminalKeys()) {
         e.preventDefault();
-        
-        // --- ADD THE SPAM TRACKER HERE ---
+
         tabSpamCount++;
         clearTimeout(tabSpamTimer);
-        tabSpamTimer = setTimeout(() => tabSpamCount = 0, 1500);
+        tabSpamTimer = setTimeout(() => { tabSpamCount = 0; }, 1500);
 
         if (tabSpamCount === 8) {
-            pushTerminalLog("> MAKE UP YOUR MIND.");
-            if (sfx.stop) playSound(sfx.stop); // Plays the 'shut up' sound
+            pushTerminalLog('> MAKE UP YOUR MIND.');
+            if (sfx.stop) playSound(sfx.stop);
             tabSpamCount = 0;
-            return; // Stops the terminal from actually opening/closing this time
+            return;
         }
-        // ---------------------------------
-        
-        // IF THE TERMINAL IS ALREADY OPEN (Close it)
-        if (terminalContainer.classList.contains('active')) {
-            terminalContainer.classList.remove('active');
-            termInput.blur(); 
-            
-            // --- FIRE THE BURP HERE ---
-            if (sfx.burp) playSound(sfx.burp); 
-            
-            if (typeof cipherStage !== 'undefined' && cipherStage > 0) {
-                cipherStage = 0;
-                pushTerminalLog("> CIPHER SEQUENCE ABORTED.");
-            }
-        } 
-        // IF THE TERMINAL IS CLOSED (Open it)
-        else {
-            if (document.activeElement) document.activeElement.blur(); 
-            if (sfx.radio) playSound(sfx.radio); 
-            
-            terminalContainer.classList.add('active');
-            lastTerminalOpenTime = Date.now(); 
-            
-            setTimeout(() => { 
-                termInput.focus({ preventScroll: true });
-                window.scrollTo(0, 0); // Slams the camera back to the top instantly
-            }, 420);        
-        }
+
+        const wasOpen = terminalContainer.classList.contains('active');
+        toggleTerminal();
+        if (!wasOpen) lastTerminalOpenTime = Date.now();
     }
 
    // 3. Pressing the TILDE (`) key triggers the Maya Screen (Boss Key)
     if (e.key === '`' || e.key === '~') {
-        e.preventDefault(); 
-        globalThis.gardenHooks.toggleBossKey(); // Fires the existing function on line 363
+        e.preventDefault();
+        const toggle = globalThis.gardenHooks?.toggleBossKey ?? globalThis.toggleBossKey;
+        if (typeof toggle === 'function') toggle();
     }
     
    // --- 4. R: Trigger Reroll (If not typing) ---
@@ -470,6 +639,7 @@ setTimeout(() => {
             // Open the terminal if it's closed so they can actually see the list
             if (!terminalContainer.classList.contains('active')) {
                 terminalContainer.classList.add('active');
+                setTermInputFocusable(true);
                 lastTerminalOpenTime = Date.now(); 
                 if (sfx.radio) playSound(sfx.radio);
             }
@@ -490,12 +660,27 @@ setTimeout(() => {
             globalThis.gardenHooks.toggleMode(); // Fires your existing corruption toggle function
         }
     }
-    
-});
 
+    }, true);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindTerminalInteractions, { once: true });
+} else {
+    bindTerminalInteractions();
+}
+
+globalThis.gardenHooks = globalThis.gardenHooks || {};
+globalThis.gardenHooks.toggleTerminal = toggleTerminal;
+globalThis.gardenHooks.openTerminal = openTerminal;
+
+window.addEventListener('entropy:garden-ready', () => {
+    bindTerminalInteractions();
+}, { once: true });
 
 export function initTerminal() {
     initLateNightLogs();
+    bindTerminalInteractions();
 }
 
 function initLateNightLogs() {

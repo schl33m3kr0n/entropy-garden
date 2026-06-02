@@ -26,6 +26,10 @@
     font-display: swap;
 }
 
+html {
+    scrollbar-gutter: stable;
+}
+
 body, html { 
     margin: 0; 
     padding: 0; 
@@ -157,6 +161,32 @@ body::before {
     font-family: var(--main-font);
 }
 
+body.ios-ui #init-screen {
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+    box-sizing: border-box;
+}
+
+body.ios-ui #epilepsy-warning {
+    max-width: min(78vw, 300px);
+    width: 100%;
+    padding: 18px 14px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+body.ios-ui #epilepsy-warning .warning-title {
+    font-size: clamp(0.52rem, 2.65vw, 0.68rem);
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    white-space: nowrap;
+}
+
+body.ios-ui #epilepsy-warning p {
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
 /* Subtle pulse for the warning title */
 @keyframes pulseWarning {
     0% { opacity: 0.8; text-shadow: 0 0 5px var(--alert-red); }
@@ -174,7 +204,7 @@ body::before {
     top: 0; left: 0; 
     width: 100%; height: 100%; 
     background: var(--void-black); 
-    z-index: 9999; 
+    z-index: 10100; 
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
@@ -345,6 +375,17 @@ body.god-mode #panopticon-eye {
     background: var(--neon-green); 
     color: #000; 
 }
+
+.ui-btn:focus,
+#hamburger-icon:focus {
+    outline: none;
+}
+
+.ui-btn:focus-visible,
+#hamburger-icon:focus-visible {
+    outline: 2px solid var(--neon-green);
+    outline-offset: 3px;
+}
 body.corrupted .ui-btn { 
     border-color: var(--alert-red); 
     color: var(--alert-red); 
@@ -360,6 +401,12 @@ body.corrupted .ui-btn:hover {
     z-index: 50; cursor: grab; 
     filter: drop-shadow(0 0 5px var(--neon-green)); 
     transition: transform 0.1s; 
+}
+
+/* Pizza slices sit above the terminal sliver/panel (terminal is 10004) */
+.artifact.artifact-pizza,
+.artifact[id^="art-pizza-clone-"] {
+    z-index: 10010;
 }
 .artifact:active { cursor: grabbing; transform: scale(1.1); }
 .artifact svg { 
@@ -636,18 +683,47 @@ body.corrupted #grid-canvas.matrix-visible {
 /* --- INTERACTIVE TERMINAL LOG --- */
 #terminal-container { 
     position: absolute; bottom: 40px; right: 0; 
-    transform: translateX(calc(100% - 15px)); /* Makes the resting sliver slightly thicker (15px) */
     width: 350px; 
     height: 35px; 
     font-family: var(--main-font); 
     font-size: 0.75rem; color: var(--neon-green); 
     background: rgba(0,0,0,0.6); border-left: 2px solid var(--neon-green); 
-    padding: 5px 10px; z-index: 100; display: flex; flex-direction: column; 
+    padding: 5px 10px; z-index: 10004; display: flex; flex-direction: column;
     justify-content: flex-end; text-shadow: 0 0 3px var(--neon-green); 
     box-sizing: border-box; overflow: hidden; 
     border-radius: var(--radius-md) 0 0 var(--radius-md);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), height 0.4s ease, background 0.3s; 
+    opacity: 0;
+    transform: translateX(100%);
+    pointer-events: none;
+    transition:
+        transform 1.5s cubic-bezier(0.25, 1, 0.5, 1),
+        height 0.4s ease,
+        background 0.3s;
     cursor: pointer;
+}
+
+/* Hidden until loader finishes (revealGardenUI adds .garden-ready) */
+body.garden-loading #terminal-container,
+body:not(.garden-ready) #terminal-container,
+#terminal-container[hidden] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* In layout, waiting for slide-in (no opacity transition — avoids Tab fade bug) */
+body.garden-ready #terminal-container:not([hidden]) {
+    display: flex;
+}
+
+body.garden-ready #terminal-container.reveal-in {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Docked sliver after chrome reveal */
+body.garden-ready #terminal-container.reveal-in.is-sliver:not(.active) {
+    transform: translateX(calc(100% - 15px));
 }
 
 /* The SUPER generous invisible hitbox */
@@ -659,9 +735,13 @@ body.corrupted #grid-canvas.matrix-visible {
     right: 0; 
     cursor: pointer;
 }
-#terminal-container:hover { 
-    transform: translateX(0); /* FIXES THE FLICKER: Keeps it flush against the right wall */
+body.garden-ready #terminal-container.reveal-in:hover:not(.active) {
+    transform: translateX(0);
     background: rgba(0, 20, 0, 0.8);
+    transition:
+        transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        height 0.4s ease,
+        background 0.3s;
 }
 
 /* --- TERMINAL EATING ANIMATION --- */
@@ -679,11 +759,16 @@ body.corrupted #grid-canvas.matrix-visible {
     animation: terminalBurp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-#terminal-container.active {
-    transform: translateX(0); 
-    height: 200px; 
+#terminal-container.reveal-in.active {
+    transform: translateX(0);
+    height: 200px;
+    opacity: 1;
     cursor: default;
     background: rgba(0,0,0,0.9);
+    transition:
+        transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        height 0.4s ease,
+        background 0.3s;
 }
 
 #terminal-container.active::before {
@@ -731,8 +816,16 @@ body.corrupted #terminal-output::-webkit-scrollbar-thumb {
     margin: 2px 0; animation: fadeInTerm 0.3s forwards; 
     opacity: 0; word-wrap: break-word; 
 }
+#terminal-output .term-entry em {
+    font-style: italic;
+    color: var(--cyan);
+}
 @keyframes fadeInTerm { to { opacity: 1; } }
 #terminal-input-line { display: flex; gap: 5px; margin-top: 5px; align-items: center; }
+
+#terminal-container:not(.active) #terminal-input-line {
+    pointer-events: none;
+}
 #term-input { 
     background: transparent; border: none; color: #fff; 
     font-family: var(--main-font); font-size: 0.75rem; 
@@ -772,35 +865,6 @@ body.corrupted #terminal-container {
 body.corrupted #refresh-hint {
     color: var(--alert-red);
     text-shadow: 0 0 5px var(--alert-red);
-}
-
-#file-protocol-notice {
-    display: none;
-    position: fixed;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000002;
-    max-width: min(92vw, 520px);
-    padding: 12px 16px;
-    font-family: var(--main-font);
-    font-size: 0.72rem;
-    line-height: 1.45;
-    letter-spacing: 0.06em;
-    text-align: center;
-    color: #ffb347;
-    background: rgba(20, 10, 0, 0.92);
-    border: 1px solid rgba(255, 179, 71, 0.45);
-    box-shadow: 0 0 16px rgba(255, 179, 71, 0.18);
-    pointer-events: none;
-}
-
-#file-protocol-notice:not([hidden]) {
-    display: block;
-}
-
-#file-protocol-notice code {
-    color: var(--neon-green);
 }
 
 @keyframes hintFadeInOut {
@@ -942,6 +1006,119 @@ h1::after {
 .scrollable-content::-webkit-scrollbar { width: 6px; }
 .scrollable-content::-webkit-scrollbar-thumb { background: var(--neon-green); border-radius: var(--radius-sm); }
 body.corrupted .scrollable-content::-webkit-scrollbar-thumb { background: var(--alert-red); }
+
+.trophy-case-scroll { max-height: 55vh; }
+.trophy-case-intro {
+    font-size: 0.85rem;
+    color: #888;
+    margin: 0 0 12px;
+    line-height: 1.5;
+}
+.trophy-count {
+    font-family: var(--main-font);
+    color: var(--cyan);
+    margin: 0 0 16px;
+    letter-spacing: 0.05em;
+}
+.trophy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+.trophy-card {
+    border: 1px solid rgba(0, 255, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: 10px 10px 12px;
+    text-align: center;
+    background: rgba(0, 12, 0, 0.35);
+    min-height: 132px;
+    display: grid;
+    grid-template-rows: 40px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+}
+.trophy-card.locked {
+    border-color: rgba(255, 255, 255, 0.08);
+    opacity: 0.55;
+}
+.trophy-card.unlocked {
+    border-color: rgba(0, 255, 0, 0.45);
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.12);
+}
+.trophy-visual {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.trophy-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    min-height: 72px;
+}
+.trophy-card.locked .trophy-meta {
+    visibility: hidden;
+}
+.trophy-icon {
+    width: 32px;
+    height: 32px;
+    display: block;
+    flex-shrink: 0;
+    object-fit: contain;
+    object-position: center center;
+}
+.trophy-mystery {
+    font-family: var(--main-font);
+    font-size: 1.75rem;
+    line-height: 32px;
+    height: 32px;
+    color: #555;
+    letter-spacing: 0;
+}
+.trophy-unlock-flash {
+    position: fixed;
+    top: 16%;
+    left: 50%;
+    z-index: 1000001;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: trophyUnlockFlash 1.35s ease forwards;
+}
+.trophy-unlock-flash-icon {
+    width: 56px;
+    height: 56px;
+    display: block;
+    object-fit: contain;
+}
+@keyframes trophyUnlockFlash {
+    0% { opacity: 0; transform: translateX(-50%) scale(0.65); }
+    10% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    20% { opacity: 0.12; transform: translateX(-50%) scale(1); }
+    30% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    40% { opacity: 0.12; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    60% { opacity: 0; transform: translateX(-50%) scale(0.95); }
+    100% { opacity: 0; transform: translateX(-50%) scale(0.95); visibility: hidden; }
+}
+.trophy-title {
+    font-family: var(--main-font);
+    font-size: 0.72rem;
+    color: var(--neon-green);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.trophy-card.locked .trophy-title { color: #666; }
+.trophy-desc {
+    font-size: 0.7rem;
+    color: #999;
+    line-height: 1.35;
+    margin: 0;
+}
+
 .modal ul { list-style: none; padding: 0; margin: 0; }
 .modal li { margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
 .stat-row { display: flex; justify-content: space-between; }
@@ -1183,7 +1360,39 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 .win95-btn:active { border-top: 2px solid #000; border-left: 2px solid #000; border-right: 2px solid #fff; border-bottom: 2px solid #fff; }
 
 /* --- SINGULARITY EVENT --- */
-#singularity-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 200; justify-content: center; align-items: center; flex-direction: column; text-align: center; color: var(--cyan); }
+#singularity-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    background-color: #000;
+    z-index: 100030;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    color: var(--cyan);
+}
+
+/* Ritual takes over the full viewport (iOS HUD/terminal sit at ~10004+) */
+body.singularity-active #terminal-container,
+body.singularity-active #ios-terminal-toggle,
+body.singularity-active #playlist-menu,
+body.singularity-active #ios-scroll-shell,
+body.singularity-active #docking-bay,
+body.singularity-active #hud,
+body.singularity-active #panopticon-eye,
+body.singularity-active #reroll-eye,
+body.singularity-active .control-panel,
+body.singularity-active #sidebar-menu,
+body.singularity-active #refresh-hint,
+body.singularity-active #hamburger-icon {
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
 
 #singularity-bg { 
     position: absolute; top: 0; left: 0; 
@@ -1208,6 +1417,11 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 #singularity-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; touch-action: none; cursor: grab; }
 #singularity-canvas:active { cursor: grabbing; }
 
+body.ios-ui #singularity-canvas {
+    pointer-events: none !important;
+    touch-action: none;
+}
+
 #poem-container { 
     position: absolute; 
     z-index: 10; 
@@ -1216,6 +1430,16 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     color: #fff; text-shadow: 0 0 10px cyan; 
     max-width: 800px; padding: 20px; 
     pointer-events: none; 
+}
+
+body.singularity-active #poem-container {
+    pointer-events: auto;
+    touch-action: pan-y;
+}
+
+body.singularity-active #singularity-controls {
+    z-index: 100050;
+    pointer-events: auto;
 }
 
 /* THE NEW SCROLL UP ANIMATION */
@@ -1259,10 +1483,12 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     pointer-events: auto; 
 }
 
-.singularity-btn:hover { 
-    background: var(--neon-green); 
-    color: black; 
-    box-shadow: 0 0 15px var(--neon-green); 
+@media (hover: hover) and (pointer: fine) {
+    .singularity-btn:hover {
+        background: var(--neon-green);
+        color: black;
+        box-shadow: 0 0 15px var(--neon-green);
+    }
 }
 
 @keyframes btnFadeIn { 
@@ -1579,6 +1805,11 @@ body.perf-lite #ouroboros-svg {
     margin: 2px 4px;
 }
 
+#sequence-display .matrix-grid {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
 /* The Color Blocks */
 .color-square {
     width: 35px;
@@ -1661,12 +1892,19 @@ body.ios-ui #sequence-display {
     min-width: 0;
     max-width: 100%;
     padding: 14px 18px;
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #sequence-display .matrix-grid {
+    border-radius: var(--ios-radius-sm);
+    overflow: hidden;
 }
 
 body.ios-ui #arcade-screen {
     height: auto;
     min-height: 120px;
     padding: 14px 18px;
+    border-radius: var(--ios-radius-md);
 }
 
 .matrix-grid {
@@ -2043,6 +2281,15 @@ body.ios-ui {
     width: 100%;
     height: 100svh;
     min-height: 100svh;
+    --ios-radius-sm: 12px;
+    --ios-radius-md: 18px;
+    --ios-radius-lg: 24px;
+    --ios-radius-xl: 32px;
+}
+
+/* Rotating 150vmax backdrop is costly on mobile GPUs */
+body.ios-ui::before {
+    animation: none;
 }
 
 body.ios-ui.ios-keyboard-open #ios-scroll-shell {
@@ -2075,6 +2322,11 @@ body.ios-ui #panopticon-eye {
 body.ios-ui #grid-canvas {
     position: fixed;
     transform: translate(var(--ios-vv-offset-x, 0px), var(--ios-vv-offset-y, 0px));
+    contain: strict;
+}
+
+body.ios-ui.singularity-active #grid-canvas {
+    visibility: hidden;
 }
 
 body.ios-ui #panopticon-eye:not(.pong-active) {
@@ -2230,17 +2482,6 @@ body.ios-ui.garden-ready .control-panel.active {
     pointer-events: auto;
 }
 
-body.ios-ui:not(.garden-ready) #terminal-container {
-    visibility: hidden;
-    opacity: 0;
-    pointer-events: none;
-}
-
-body.ios-ui.garden-ready #terminal-container {
-    visibility: visible;
-    opacity: 1;
-}
-
 body.ios-ui #mode-btn {
     position: static;
     top: auto;
@@ -2321,19 +2562,63 @@ body.ios-ui .ios-sidebar-tools {
     background: rgba(5, 5, 5, 0.98);
 }
 
-body.ios-ui #terminal-container {
+/* iOS: FAB only — no docked sliver; terminal opens full panel when active */
+body.ios-ui.garden-ready #terminal-container:not(.active),
+body.ios-ui.garden-ready #terminal-container.reveal-in.is-sliver:not(.active) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+body.ios-ui.garden-ready #terminal-container.active:not([hidden]) {
+    display: flex !important;
     position: fixed;
-    width: min(280px, 72vw);
-    bottom: calc(env(safe-area-inset-bottom) + 64px);
-    right: 0;
-    transform: translateX(calc(100% - 12px));
-    z-index: 10004;
-    pointer-events: auto;
+    width: min(320px, 92vw);
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) !important;
+    bottom: calc(env(safe-area-inset-bottom) + 72px);
+    z-index: 10055;
+    min-width: 0;
+}
+
+body.ios-ui.garden-ready .ios-terminal-toggle:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: calc(env(safe-area-inset-right) + 10px);
+    bottom: calc(env(safe-area-inset-bottom) + 10px);
+    width: 52px;
+    height: 52px;
+    z-index: 10060;
+    margin: 0;
+    padding: 0;
+    border: 2px solid var(--neon-green);
+    border-radius: var(--ios-radius-md);
+    background: rgba(0, 12, 0, 0.92);
+    color: var(--neon-green);
+    font-family: var(--main-font);
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 6px var(--neon-green);
+    box-shadow: 0 0 14px rgba(0, 255, 0, 0.25);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+body.ios-ui.garden-ready .ios-terminal-toggle:not([hidden]) .ios-terminal-toggle-glyph {
+    pointer-events: none;
+}
+
+body.ios-ui #terminal-container.active ~ .ios-terminal-toggle:not([hidden]) {
+    opacity: 0.35;
 }
 
 body.ios-ui #terminal-container.active {
-    transform: translateX(0);
-    height: min(200px, 42dvh);
+    height: min(220px, 44dvh);
+    overflow: hidden;
 }
 
 body.ios-ui #panopticon-eye {
@@ -2449,6 +2734,227 @@ body.ios-ui.corrupted .ios-modal-reroll {
 
 body.ios-ui .modal-content {
     min-height: 0;
+    border-radius: var(--ios-radius-lg);
+}
+
+/* --- iOS: rounded corners on all chrome --- */
+body.ios-ui #init-btn,
+body.ios-ui #progress-container,
+body.ios-ui .ui-btn,
+body.ios-ui #mode-btn,
+body.ios-ui .playlist-btn,
+body.ios-ui .singularity-btn,
+body.ios-ui .arcade-btn,
+body.ios-ui .carousel-btn,
+body.ios-ui .close-btn,
+body.ios-ui .lightbox-btn {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #terminal-container,
+body.ios-ui.garden-ready #terminal-container:not([hidden]),
+body.ios-ui #terminal-container.reveal-in,
+body.ios-ui #terminal-container.active {
+    border-radius: var(--ios-radius-lg);
+}
+
+body.ios-ui #terminal-container.active {
+    overflow: hidden;
+}
+
+body.ios-ui #terminal-input-line {
+    border-radius: var(--ios-radius-sm);
+    background: rgba(0, 20, 0, 0.35);
+    padding: 4px 8px;
+    margin-top: 6px;
+}
+
+/* iOS: singularity overlay retired — poems live in sidebar modal */
+body.ios-ui #singularity-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+body:not(.ios-ui) .ios-only-sidebar-item {
+    display: none !important;
+}
+
+body.ios-ui #ios-poems-item[hidden] {
+    display: none !important;
+}
+
+body.ios-ui #modal-poems .ios-poems-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    flex: 1 1 auto;
+    max-height: min(62vh, 520px);
+}
+
+body.ios-ui #modal-poems .ios-poem-list {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 4px 0 8px;
+    overflow: visible;
+    border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+body.ios-ui .ios-poem-list-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    margin: 0 0 4px;
+    border: 1px solid rgba(0, 255, 0, 0.25);
+    border-radius: var(--ios-radius-sm, 6px);
+    background: rgba(0, 20, 0, 0.35);
+    color: var(--neon-green);
+    font-family: var(--main-font);
+    font-size: 0.95rem;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+body.ios-ui .ios-poem-list-item.active {
+    background: rgba(0, 255, 0, 0.15);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+body.ios-ui #modal-poems .ios-poem-reader {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    text-align: center;
+}
+
+body.ios-ui #ios-poem-body {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: var(--main-font);
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--neon-green);
+}
+
+body.ios-ui .ios-poem-nav {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 8px;
+}
+
+body.ios-ui #modal-poems .modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: min(88dvh, 720px);
+}
+
+body.ios-ui #hud h1 {
+    border-radius: var(--ios-radius-lg);
+}
+
+body.ios-ui .control-panel {
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-sizing: border-box;
+}
+
+body.ios-ui #playlist-menu {
+    border-radius: var(--ios-radius-md);
+    border: 1px solid rgba(0, 255, 0, 0.25);
+}
+
+body.ios-ui #track-title {
+    border-radius: var(--ios-radius-sm);
+}
+
+body.ios-ui #sidebar-menu {
+    border-radius: 0 var(--ios-radius-xl) var(--ios-radius-xl) 0;
+}
+
+body.ios-ui #sidebar-menu li {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui .ios-sidebar-tools {
+    border-radius: var(--ios-radius-md) var(--ios-radius-md) 0 0;
+}
+
+body.ios-ui .modal,
+body.ios-ui .modal.wide {
+    border-radius: var(--ios-radius-lg);
+    overflow: hidden;
+}
+
+body.ios-ui .modal h2 {
+    border-radius: var(--ios-radius-sm) var(--ios-radius-sm) 0 0;
+}
+
+body.ios-ui .scrollable-content {
+    border-radius: var(--ios-radius-sm);
+}
+
+body.ios-ui .vault-item,
+body.ios-ui .carousel-stage,
+body.ios-ui .carousel-slide,
+body.ios-ui .vault-media,
+body.ios-ui .vault-item iframe.genesis-iframe {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui .trophy-card,
+body.ios-ui #arcade-game-container {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #arcade-screen,
+body.ios-ui #sequence-display,
+body.ios-ui .interactive-square,
+body.ios-ui .matrix-grid {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui .pfp-wrapper {
+    border-radius: var(--ios-radius-lg);
+}
+
+body.ios-ui #lightbox .lightbox-image-wrapper,
+body.ios-ui #lightbox #lightbox-img {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #ios-pong-scoreboard,
+body.ios-ui #ios-pong-comment,
+body.ios-ui #pong-quit-hint {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #ios-pong-scoreboard.visible {
+    padding: 10px 22px;
+}
+
+body.ios-ui #ios-pong-comment.visible,
+body.ios-ui #pong-quit-hint {
+    padding: 6px 12px;
+    background: rgba(0, 8, 0, 0.55);
+}
+
+body.ios-ui .artifact-pizza {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui .ios-modal-reroll {
+    border-radius: var(--radius-pill);
 }
 
 #modal-arcade .modal-content {
@@ -2465,8 +2971,12 @@ body.ios-ui .modal-content {
     padding: 14px 18px;
 }
 
+#modal-vault #refresh-hint,
+#modal-vault .ios-modal-reroll,
 #modal-arcade #refresh-hint,
-#modal-arcade .ios-modal-reroll {
+#modal-arcade .ios-modal-reroll,
+#modal-trophies #refresh-hint,
+#modal-trophies .ios-modal-reroll {
     display: none !important;
 }
 
@@ -2682,6 +3192,17 @@ body.ios-ui #panopticon-pong {
     pointer-events: auto;
 }
 
+@media (orientation: landscape) {
+    body.ios-pong-playing #ios-pong-quit:not([hidden]),
+    body.pong-playing:not(.pong-keyboard-mode) #ios-pong-quit:not([hidden]) {
+        top: calc(env(safe-area-inset-top) + 10px);
+        right: calc(env(safe-area-inset-right) + 10px);
+        left: auto;
+        bottom: auto;
+        transform: none;
+    }
+}
+
 body.pong-keyboard-mode #ios-pong-quit {
     display: none !important;
     pointer-events: none !important;
@@ -2785,14 +3306,15 @@ body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-socket-in
     opacity: 0.72 !important;
 }
 
+#panopticon-eye.eye-move-anim,
 body.ios-pong-playing #panopticon-eye,
 body.pong-playing:not(.ios-ui) #panopticon-eye {
     z-index: 14;
     transition:
-        top 0.56s cubic-bezier(0.25, 0.75, 0.35, 1),
-        left 0.56s cubic-bezier(0.25, 0.75, 0.35, 1),
-        width 0.56s cubic-bezier(0.25, 0.75, 0.35, 1),
-        height 0.56s cubic-bezier(0.25, 0.75, 0.35, 1),
+        top 0.64s cubic-bezier(0.25, 0.75, 0.35, 1),
+        left 0.64s cubic-bezier(0.25, 0.75, 0.35, 1),
+        width 0.64s cubic-bezier(0.25, 0.75, 0.35, 1),
+        height 0.64s cubic-bezier(0.25, 0.75, 0.35, 1),
         opacity 0.35s ease;
 }
 

@@ -9,6 +9,9 @@ dist/
 /scripts/
 /docs/
 /js/script.js
+/js/file-pong.bundle.js
+/js/file-pong-boot.js
+/js/file-lazy-shim.js
 /assets/video/genesis-web.mov
 /assets/img/vault/sun-poster.png
 deploy.exclude

@@ -49,7 +49,7 @@
     </div>
 
     <div class="control-panel right-controls">
-        <div id="hamburger-icon">
+        <div id="hamburger-icon" tabindex="-1">
         <span></span><span></span><span></span>
     </div>
 </div>
@@ -63,15 +63,15 @@
         </div>
     </div>
     <div id="playlist-controls">
-        <button onclick="playPrevTrack()" class="ui-btn playlist-btn" data-label="PREV">&#9198;</button>
+        <button type="button" tabindex="-1" onclick="playPrevTrack()" class="ui-btn playlist-btn" data-label="PREV">&#9198;</button>
         
-        <button id="play-pause-btn" class="ui-btn playlist-btn" data-label="PAUSE" data-play-label="PLAY">&#10074;&#10074;</button>
+        <button type="button" tabindex="-1" id="play-pause-btn" class="ui-btn playlist-btn" data-label="PAUSE" data-play-label="PLAY">&#10074;&#10074;</button>
         
-        <button onclick="playNextTrack()" class="ui-btn playlist-btn" data-label="NEXT">&#9197;</button>
+        <button type="button" tabindex="-1" onclick="playNextTrack()" class="ui-btn playlist-btn" data-label="NEXT">&#9197;</button>
     </div>
 </div>
 
-<button id="mode-btn" class="ui-btn">SAFE MODE</button>
+<button type="button" tabindex="-1" id="mode-btn" class="ui-btn">SAFE MODE</button>
 
     <div id="sidebar-menu">
         <ul>
@@ -102,6 +102,14 @@
             <li onclick="openModal('arcade')">
                 <div class="ui-icon" style="background-image: url('assets/icons/joystick.svg');"></div>
                 <span class="sidebar-text">// ARCADE</span>
+            </li>
+            <li id="ios-poems-item" class="ios-only-sidebar-item" hidden onclick="openModal('poems')">
+                <div class="ui-icon" style="background-image: url('assets/icons/feather.svg');"></div>
+                <span class="sidebar-text">// POEMS</span>
+            </li>
+            <li onclick="openModal('trophies')">
+                <div class="ui-icon" style="background-image: url('assets/icons/ouroboros.svg');"></div>
+                <span class="sidebar-text">// TROPHIES</span>
             </li>
         </ul>
     </div>
@@ -165,18 +173,17 @@
     </div>
 
     <div id="refresh-hint">[ PRESS R TO REROLL ]</div>
-    <div id="file-protocol-notice" hidden>
-        Desktop pong and other modules need a local server.
-        Run <code>python3 -m http.server</code> in this folder, then open
-        <code>http://localhost:8000</code>
-    </div>
 
-    <div id="terminal-container">
+    <div id="terminal-container" hidden>
         <div id="terminal-output"></div>
         <div id="terminal-input-line">
-            <span>></span><input type="text" id="term-input" autocomplete="off" spellcheck="false" />
+            <span>></span><input type="text" id="term-input" tabindex="-1" autocomplete="off" spellcheck="false" />
         </div>
     </div>
+
+    <button type="button" id="ios-terminal-toggle" class="ios-terminal-toggle" hidden aria-label="Open terminal">
+        <span class="ios-terminal-toggle-glyph" aria-hidden="true">&gt;_</span>
+    </button>
 
     <div id="hud">
         <h1>ENTROPY GARDEN</h1>
@@ -304,6 +311,35 @@
         </div>
     </div>
 
+    <div id="modal-poems" class="modal wide ios-poems-modal">
+        <div class="modal-content">
+            <span class="close-btn modal-close">X</span>
+            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/feather.svg');"></div>// POEMS</h2>
+            <div class="ios-poems-layout">
+                <nav id="ios-poem-list" class="ios-poem-list scrollable-content" aria-label="Poem list"></nav>
+                <article id="ios-poem-reader" class="ios-poem-reader scrollable-content" aria-label="Poem text">
+                    <pre id="ios-poem-body"></pre>
+                </article>
+            </div>
+            <div class="ios-poem-nav">
+                <button type="button" id="ios-poem-prev" class="singularity-btn">Prev</button>
+                <button type="button" id="ios-poem-next" class="singularity-btn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-trophies" class="modal wide">
+        <div class="modal-content">
+            <span class="close-btn modal-close">X</span>
+            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/ouroboros.svg');"></div>// TROPHIES</h2>
+            <div class="scrollable-content trophy-case-scroll">
+                <p class="trophy-case-intro">> Recovered anomalies from the garden substrate. Locked entries remain classified until you trigger them in the wild.</p>
+                <p id="trophy-count" class="trophy-count">0 / 14</p>
+                <div id="trophy-grid" class="trophy-grid" role="list"></div>
+            </div>
+        </div>
+    </div>
+
 <audio id="burp-sound" src="assets/audio/sfx/burp.mp3" preload="none"></audio>
 <audio id="error-sound" src="assets/audio/sfx/error.mp3" preload="none"></audio>
 
@@ -318,21 +354,55 @@
   <button class="lightbox-btn lb-next">&#10095;</button>
 </div>
 
+<script src="js/terminal-sfx.js" defer></script>
+<script src="js/ios-terminal-boot.js" defer></script>
 <script src="js/lore-pools.data.js"></script>
+<script src="js/cipher-vigenere.js"></script>
+<script src="js/cipher-entropy-hint.js"></script>
+<script src="js/trophies.js"></script>
 <script>
 (function () {
+    function loadPongAddon(onReady) {
+        var pong = document.createElement('script');
+        pong.src = 'js/file-pong.bundle.js';
+        pong.defer = true;
+        pong.onload = function () {
+            if (globalThis.EntropyFilePong?.bootAddons) globalThis.EntropyFilePong.bootAddons();
+            else if (globalThis.EntropyFilePong?.bootPong) globalThis.EntropyFilePong.bootPong();
+            if (onReady) onReady();
+        };
+        pong.onerror = function () {
+            console.warn('[Entropy Garden] file-pong.bundle.js missing — run: bash scripts/build-file-pong.sh');
+            if (onReady) onReady();
+        };
+        document.body.appendChild(pong);
+    }
+
     function loadLegacyBundle() {
         console.warn(
-            '[Entropy Garden] Could not load js/main.js — falling back to js/script.js (desktop pong unavailable). '
-            + 'Use a local server instead: python3 -m http.server'
+            '[Entropy Garden] Could not load js/main.js — falling back to js/script.js. '
+            + 'For full modules use Serve Entropy Garden.command or npm run preview'
         );
-        var notice = document.getElementById('file-protocol-notice');
-        if (notice) notice.hidden = false;
         var fb = document.createElement('script');
         fb.src = 'js/script.js';
         fb.defer = true;
+        fb.onload = function () { loadPongAddon(); };
         document.body.appendChild(fb);
     }
+
+    function loadFileBundle() {
+        var fb = document.createElement('script');
+        fb.src = 'js/script.js';
+        fb.defer = true;
+        fb.onload = function () { loadPongAddon(); };
+        document.body.appendChild(fb);
+    }
+
+    if (location.protocol === 'file:') {
+        loadFileBundle();
+        return;
+    }
+
     var s = document.createElement('script');
     s.type = 'module';
     s.src = 'js/main.js';

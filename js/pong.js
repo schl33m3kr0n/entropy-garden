@@ -10,7 +10,7 @@ import {
     warmSound,
     sfx,
 } from './shared.js';
-import { resizeCanvas } from './lazy.js';
+import { resizeCanvas } from './canvas-resize.js';
 
 const PADDLE_HALF = 8;
 const BALL_R = 3.5;
@@ -31,7 +31,7 @@ const ARROW_COURT_GAP = 10;
 const COURT_W_RATIO = 0.82;
 const EDGE_INSET = 10;
 const FADE_MS = 480;
-const EYE_TRANSITION_MS = 560;
+const EYE_TRANSITION_MS = 640;
 const STRIP_MIN_H = 240;
 const STRIP_H_RATIO = 1.65;
 const EYE_COURT_GAP = 12;
@@ -44,10 +44,11 @@ const EYE_TAP_ZONE_OUTSET = 1.05;
 const MAX_PONG_GAZE = 13;
 const DESKTOP_COURT_RADIUS = 14;
 const DESKTOP_COURT_RADIUS_PX = 16;
+const IOS_COURT_RADIUS = 14;
+const IOS_COURT_RADIUS_PX = 18;
 const DESKTOP_HUD_GAP = 18;
 const SERVE_COUNTDOWN_MS = 900;
 const RESERVE_AFTER_MISS_MS = 2000;
-const PONG_ARM_HINT_DELAY_MS = 5000;
 const PONG_ARM_HINT_IDLE_MS = 3000;
 const PONG_QUIT_COMMENT = '[ press 0 to quit ]';
 
@@ -234,6 +235,14 @@ function clearReserviceDelay() {
     if (!serveCountdownTimer) ballHeld = false;
 }
 
+function enableEyeMoveAnim() {
+    panopticonEl?.classList.add('eye-move-anim');
+}
+
+function disableEyeMoveAnim() {
+    panopticonEl?.classList.remove('eye-move-anim');
+}
+
 function pinEyeToCurrentFrame() {
     if (!panopticonEl) return;
     const rect = panopticonEl.getBoundingClientRect();
@@ -255,10 +264,34 @@ function getGardenEyeMetrics() {
     };
 }
 
-function transitionEyeToCenter() {
-    if (!panopticonEl) return;
-    eyeReturning = true;
-    applyEyePosition(getGardenEyeMetrics());
+function transitionEyeToReturnHome() {
+    return new Promise((resolve) => {
+        if (!panopticonEl) {
+            resolve();
+            return;
+        }
+
+        enableEyeMoveAnim();
+        eyeReturning = true;
+        applyEyePosition(getGardenEyeMetrics());
+
+        let finished = false;
+        const finish = () => {
+            if (finished) return;
+            finished = true;
+            panopticonEl.removeEventListener('transitionend', onTransitionEnd);
+            clearTimeout(fallback);
+            resolve();
+        };
+
+        const onTransitionEnd = (event) => {
+            if (event.target !== panopticonEl) return;
+            if (event.propertyName === 'top' || event.propertyName === 'left') finish();
+        };
+
+        panopticonEl.addEventListener('transitionend', onTransitionEnd);
+        const fallback = setTimeout(finish, EYE_TRANSITION_MS + 80);
+    });
 }
 
 function parkBallForCountdown() {
@@ -463,7 +496,8 @@ function positionScoreboard(layout) {
 }
 
 function syncCourtCornerRadius() {
-    if (!useKeyboardControls) {
+    const roundCourt = useKeyboardControls || perf.isIOS;
+    if (!roundCourt) {
         [courtFillEl, courtBoundaryEl, courtClipRectEl].forEach((el) => {
             el?.removeAttribute('rx');
             el?.removeAttribute('ry');
@@ -472,10 +506,12 @@ function syncCourtCornerRadius() {
         return;
     }
 
+    const radiusPx = perf.isIOS ? IOS_COURT_RADIUS_PX : DESKTOP_COURT_RADIUS_PX;
+    const radiusUnits = perf.isIOS ? IOS_COURT_RADIUS : DESKTOP_COURT_RADIUS;
     const rect = courtOverlayEl?.getBoundingClientRect();
     const r = rect?.height
-        ? (DESKTOP_COURT_RADIUS_PX / rect.height) * 100
-        : DESKTOP_COURT_RADIUS;
+        ? (radiusPx / rect.height) * 100
+        : radiusUnits;
 
     [courtFillEl, courtBoundaryEl, courtClipRectEl].forEach((el) => {
         if (!el) return;
@@ -483,7 +519,8 @@ function syncCourtCornerRadius() {
         el.setAttribute('ry', String(r));
     });
     if (courtOverlayEl) {
-        courtOverlayEl.style.borderRadius = `${DESKTOP_COURT_RADIUS_PX}px`;
+        courtOverlayEl.style.borderRadius = `${radiusPx}px`;
+        courtOverlayEl.style.overflow = 'hidden';
     }
 }
 
@@ -495,6 +532,7 @@ function applyCourtPixelRect(court) {
     courtOverlayEl.style.height = `${court.height}px`;
     syncCourtCornerRadius();
     syncCourtViewBox(court.width, court.height);
+    syncBallEl();
 }
 
 function updatePongGaze() {
@@ -671,10 +709,32 @@ function setPaddleLine(el, cy, half) {
     el.setAttribute('y2', String(cy + half));
 }
 
+/** Counteract court SVG stretch so the ball stays a screen-space circle. */
+function ballUserSpaceStretchY() {
+    if (!courtOverlayEl || !courtViewW) return 1;
+    const rect = courtOverlayEl.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return 1;
+    const scaleX = rect.width / courtViewW;
+    const scaleY = rect.height / 100;
+    return scaleX / scaleY;
+}
+
 function syncBallEl() {
     if (!ballEl) return;
-    ballEl.setAttribute('cx', String(ball.x));
-    ballEl.setAttribute('cy', String(ball.y));
+    const cx = ball.x;
+    const cy = ball.y;
+    ballEl.setAttribute('cx', String(cx));
+    ballEl.setAttribute('cy', String(cy));
+
+    const stretchY = ballUserSpaceStretchY();
+    if (Math.abs(stretchY - 1) < 0.015) {
+        ballEl.removeAttribute('transform');
+        return;
+    }
+    ballEl.setAttribute(
+        'transform',
+        `translate(${cx} ${cy}) scale(1 ${stretchY}) translate(${-cx} ${-cy})`,
+    );
 }
 
 function updateScoreboard() {
@@ -736,7 +796,7 @@ function scorePoint(side) {
     updateScoreboard();
     dropScoreboard();
     showPongComment(scoreComment(side, diffBefore));
-    playSound(sfx.gamePoint);
+    playSound(sfx.gameStart);
     scheduleReservice(side === 'left');
 }
 
@@ -759,16 +819,20 @@ function scheduleReservice(towardLeft) {
 function collideWall() {
     const yMin = courtPlayTop() + BALL_R;
     const yMax = courtPlayBottom() - BALL_R;
+    let bounced = false;
 
     if (ball.y < yMin) {
         ball.y = yMin + (yMin - ball.y);
         ball.vy = Math.abs(ball.vy) * 1.01;
+        bounced = true;
     } else if (ball.y > yMax) {
         ball.y = yMax - (ball.y - yMax);
         ball.vy = -Math.abs(ball.vy) * 1.01;
+        bounced = true;
     }
 
     ball.y = clamp(ball.y, yMin, yMax);
+    if (bounced) playSoundOverlap(sfx.pop);
 }
 
 function collidePaddle(paddleX, paddleY, isLeft) {
@@ -1077,15 +1141,6 @@ function fadeArmingHint() {
     armingHintVisible = false;
 }
 
-function showPongArmingHint() {
-    if (!useKeyboardControls || active || fading) return;
-    if (!document.body.classList.contains('garden-ready')) return;
-    if (!panopticonEl?.classList.contains('visible')) return;
-    if (!startHintEl) return;
-
-    revealActivationHint('pong', buildPongHintHtml(0), PONG_ARM_HINT_IDLE_MS);
-}
-
 export function cancelPongArmingSequence() {
     cancelPongArming();
 }
@@ -1094,10 +1149,8 @@ export function fadePongArmingHint() {
     fadeArmingHint();
 }
 
-export function notifyGardenReady() {
-    if (!useKeyboardControls) return;
-    setTimeout(showPongArmingHint, PONG_ARM_HINT_DELAY_MS);
-}
+/** Pong is discovered via arrow keys; progressive hint appears only after the first press. */
+export function notifyGardenReady() {}
 
 function setUiPlaying(playing) {
     if (quitBtnEl) quitBtnEl.hidden = !playing || useKeyboardControls;
@@ -1159,6 +1212,7 @@ function activatePong() {
     paused = false;
     pauseState = null;
     eyeReturning = false;
+    enableEyeMoveAnim();
     pinEyeToCurrentFrame();
     active = true;
     fading = false;
@@ -1173,14 +1227,18 @@ function activatePong() {
     updateScoreboard();
     dropScoreboard();
     void panopticonEl.offsetWidth;
-    positionControls();
-    resizeCanvas();
+    requestAnimationFrame(() => {
+        positionControls();
+        resizeCanvas();
+    });
     warmSound(sfx.hit);
-    warmSound(sfx.gameStart);
+    warmSound(sfx.pop);
     warmSound(sfx.gamePoint);
-    playSound(sfx.gameStart);
+    warmSound(sfx.gameStart);
+    playSound(sfx.gamePoint);
     startPongLoop();
     startServeCountdown();
+    globalThis.unlockTrophy?.('panopticon_pong');
 }
 
 function deactivatePong() {
@@ -1198,6 +1256,7 @@ function deactivatePong() {
     }
     panopticonEl?.classList.remove('pong-active');
     document.body.classList.remove('pong-fading', 'ios-pong-fading');
+    disableEyeMoveAnim();
     resetEyePosition();
     resetPongGaze();
     clearServeCountdown();
@@ -1227,10 +1286,9 @@ function fadeOutAndQuit() {
     if (perf.isIOS) document.body.classList.add('ios-pong-fading');
     updateControlsVisibility();
     playSound(sfx.transition);
-    transitionEyeToCenter();
-    setTimeout(() => {
+    transitionEyeToReturnHome().then(() => {
         deactivatePong();
-    }, Math.max(FADE_MS, EYE_TRANSITION_MS));
+    });
 }
 
 function onArrowHoldStart(side, direction, btn) {
@@ -1529,6 +1587,27 @@ function schedulePositionControls() {
     });
 }
 
+function isPongLandscape() {
+    return window.innerWidth > window.innerHeight;
+}
+
+function positionQuitButton(centerX) {
+    if (!quitBtnEl) return;
+    if (isPongLandscape()) {
+        quitBtnEl.style.left = '';
+        quitBtnEl.style.bottom = '';
+        quitBtnEl.style.top = '';
+        quitBtnEl.style.right = '';
+        quitBtnEl.style.transform = '';
+        return;
+    }
+    quitBtnEl.style.top = '';
+    quitBtnEl.style.right = '';
+    quitBtnEl.style.left = `${centerX}px`;
+    quitBtnEl.style.bottom = '';
+    quitBtnEl.style.transform = '';
+}
+
 function positionControls() {
     if (!panopticonEl) return;
 
@@ -1557,9 +1636,7 @@ function positionControls() {
             panelRightEl.style.left = `${layout.panels.right}px`;
         }
 
-        if (quitBtnEl) {
-            quitBtnEl.style.left = `${layout.court.left + layout.court.width * 0.5}px`;
-        }
+        positionQuitButton(layout.court.left + layout.court.width * 0.5);
 
         positionScoreboard(layout);
         return;
@@ -1584,9 +1661,7 @@ function positionControls() {
         applyCourtPixelRect(getCourtMetrics());
     }
 
-    if (quitBtnEl) {
-        quitBtnEl.style.left = `${rect.left + rect.width * 0.5}px`;
-    }
+    positionQuitButton(rect.left + rect.width * 0.5);
 
     if (activationHintOwner) positionStartHint();
 }

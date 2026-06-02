@@ -113,8 +113,8 @@ if ! grep -q 'wheelConicGradient' "$DEST/js/modules/matrix.js"; then
   exit 1
 fi
 
-if ! grep -q 'PONG_ARM_HINT_DELAY_MS = 5000' "$DEST/js/pong.js"; then
-  echo "Deploy check failed: dist/js/pong.js missing pong arming hint timing" >&2
+if grep -q 'setTimeout(showPongArmingHint' "$DEST/js/pong.js"; then
+  echo "Deploy check failed: dist/js/pong.js still auto-shows pong arming hint" >&2
   exit 1
 fi
 

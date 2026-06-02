@@ -2,7 +2,8 @@
 
 import { perf } from './shared.js';
 
-import { resizeCanvas } from './lazy.js';
+import { resizeCanvas, stopGardenLoop, resumeGardenLoop } from './lazy.js';
+import { isSingularityActive } from './state.js';
 import { initIosPingPong } from './pong.js';
 
 
@@ -161,10 +162,13 @@ function relocateControlsToSidebar() {
 
 
 
+const IOS_MODALS_WITHOUT_REROLL = new Set(['modal-arcade', 'modal-vault', 'modal-trophies', 'modal-poems']);
+
 function addIosModalRerollButtons() {
 
     document.querySelectorAll('.modal .modal-content').forEach((content) => {
-        if (content.closest('#modal-arcade')) return;
+        const modal = content.closest('.modal');
+        if (!modal || IOS_MODALS_WITHOUT_REROLL.has(modal.id)) return;
         if (content.querySelector('.ios-modal-reroll')) return;
 
 
@@ -194,6 +198,25 @@ function addIosModalRerollButtons() {
 }
 
 
+
+function pauseGardenDuringHudScroll() {
+    const shell = scrollShell();
+    if (!shell || shell.dataset.scrollPerfBound) return;
+    shell.dataset.scrollPerfBound = '1';
+    let resumeTimer;
+    const pause = () => {
+        stopGardenLoop();
+        clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(() => {
+            if (!document.body.classList.contains('singularity-active') && !isSingularityActive) {
+                resumeGardenLoop();
+            }
+        }, 280);
+    };
+    shell.addEventListener('scroll', pause, { passive: true });
+    shell.addEventListener('touchstart', pause, { passive: true });
+    shell.addEventListener('touchmove', pause, { passive: true });
+}
 
 function preventPullToRefresh() {
 
@@ -271,6 +294,35 @@ function onIosViewportChange() {
     resizeCanvas();
 }
 
+function bindIosTerminalToggle() {
+    const btn = document.getElementById('ios-terminal-toggle');
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+
+    let lastFabTapAt = 0;
+
+    const onOpenTerminal = (e) => {
+        if (!document.body.classList.contains('garden-ready')) return;
+        const now = Date.now();
+        if (now - lastFabTapAt < 400) return;
+        lastFabTapAt = now;
+        e.preventDefault();
+        e.stopPropagation();
+        if (globalThis.EntropyIosTerminalBoot?.revealTerminalShell) {
+            globalThis.EntropyIosTerminalBoot.revealTerminalShell();
+        }
+        const run = globalThis.gardenHooks?.openTerminal;
+        if (typeof run === 'function') {
+            run().catch(() => {});
+            return;
+        }
+        import('./lazy.js').then(({ openTerminal }) => openTerminal()).catch(() => {});
+    };
+
+    btn.addEventListener('touchend', onOpenTerminal, { passive: false });
+    btn.addEventListener('click', onOpenTerminal);
+}
+
 export function initIosUi() {
 
     if (!perf.isIOS) return;
@@ -288,9 +340,14 @@ export function initIosUi() {
 
     addIosModalRerollButtons();
 
+    bindIosTerminalToggle();
+
     initIosPingPong();
 
+    import('./ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
+
     preventPullToRefresh();
+    pauseGardenDuringHudScroll();
 
     window.addEventListener('orientationchange', () => {
         setTimeout(onIosViewportChange, 260);

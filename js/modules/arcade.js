@@ -69,6 +69,7 @@ const arcadeSequences = [
 ];
 
 function dispenseArcadeReward() {
+    globalThis.unlockTrophy?.('arcade_clear');
     const modal = document.getElementById('modal-arcade');
     if (modal) modal.style.display = 'none';
     loadTerminal()
