@@ -1,0 +1,18 @@
+# Paths omitted from production bundles (see scripts/deploy-netlify.sh)
+.git/
+.gitignore
+.DS_Store
+.netlify/
+node_modules/
+dist/
+/archive/
+/scripts/
+/docs/
+/js/script.js
+/assets/video/genesis-web.mov
+/assets/img/vault/sun-poster.png
+deploy.exclude
+deploy.manifest
+.netlifyignore
+netlify.toml
+Serve Entropy Garden.command

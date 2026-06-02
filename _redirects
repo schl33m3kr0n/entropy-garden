@@ -1,0 +1,4 @@
+# Config metafile — not served at /_redirects. Do NOT add /* /index.html 200 (breaks ES modules).
+# Disable SPA mode in Cloudflare Dashboard → Workers & Pages → your project → Settings.
+
+/pages/genesis.html /pages/genesis.html 200

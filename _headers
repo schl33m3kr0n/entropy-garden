@@ -1,0 +1,14 @@
+# Parsed by Cloudflare at deploy — NOT served as a URL (/_headers will 404 or SPA-fallback).
+# These rules won't show in the dashboard file list; that is expected.
+
+/js/*
+  Content-Type: application/javascript; charset=utf-8
+
+/pages/*.js
+  Content-Type: application/javascript; charset=utf-8
+
+/sw.js
+  Content-Type: application/javascript; charset=utf-8
+
+/pages/genesis.html
+  Content-Type: text/html; charset=utf-8

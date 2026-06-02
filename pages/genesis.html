@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Entropy Garden - Kinetic Canvas</title>
+  <style>
+    :root {
+      --cream: #e8dcc0;
+      --brown: #4a3b28;
+      --yellow: #f0c800;
+      --red: #e53a33;
+      --blue: #0f669b;
+      --green: #17a37f;
+      --sky: #7398bc;
+      --peach: #eea26f;
+      --bg: #efefef;
+    }
+    body {
+      margin: 0;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg);
+      overflow: hidden;
+    }
+    
+    .wrap { 
+      width: 100vw; 
+      height: 100vh; 
+      position: relative; 
+    }
+    
+    svg { 
+      width: 100%; 
+      height: 100%; 
+      display: block; 
+    }
+
+    /* -- SVG Anti-Aliasing Fix -- */
+    rect, 
+    polygon {
+      shape-rendering: crispEdges;
+    }
+
+    circle, 
+    path, 
+    ellipse {
+      shape-rendering: geometricPrecision;
+    }
+
+    /* -- The Dance Floor (Animations with 2s Holds) -- */
+    @keyframes rotateCW {
+      0%, 15% { transform: rotate(0deg); } 
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes rotateCCW {
+      0%, 15% { transform: rotate(0deg); } 
+      100% { transform: rotate(-360deg); }
+    }
+ 
+    /* Animation Classes */
+    .dance-spin-cw { 
+      animation: rotateCW 10s linear infinite; 
+      transform-origin: 100px 100px; 
+    }
+    .dance-spin-ccw { 
+      animation: rotateCCW 10s linear infinite; 
+      transform-origin: 100px 100px; 
+    }
+
+   /* -- Chevron Waterfall (7s Loop - Perfect 20% Intervals) -- */
+    @keyframes dropBlue {
+      0%, 20% { opacity: 1; transform: translateY(0); } /* Hold */
+      21%, 37% { opacity: 0; transform: translateY(-10px); } /* Vanish */
+      40%, 100% { opacity: 1; transform: translateY(0); } /* Drop at 40% */
+    }
+    @keyframes dropYellow {
+      0%, 20% { opacity: 1; transform: translateY(0); }
+      21%, 57% { opacity: 0; transform: translateY(-10px); }
+      60%, 100% { opacity: 1; transform: translateY(0); } /* Drop at 60% */
+    }
+    @keyframes dropRed {
+      0%, 20% { opacity: 1; transform: translateY(0); }
+      21%, 77% { opacity: 0; transform: translateY(-10px); }
+      80%, 100% { opacity: 1; transform: translateY(0); } /* Drop at 80% */
+    }
+
+    [data-name="CHEVRON-BLU"] { animation: dropBlue 7s infinite; }
+    [data-name="CHEVRON-YEL"] { animation: dropYellow 7s infinite; }
+    [data-name="CHEVRON-RED"] { animation: dropRed 7s infinite; }
+
+    /* iOS Safari: explicit pupil color when CSS vars fail inside iframes */
+    #draw-center-peach ellipse {
+      fill: #4a3b28;
+      stroke: #4a3b28;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+   <svg viewBox="0 0 1000 800" id="grid-svg">
+      <defs>
+        <g id="bg-diag">
+          <rect width="200" height="200" fill="var(--brown)"/> 
+          <polygon points="0,0 200,0 100,100" fill="var(--cream)"/> 
+          <polygon points="0,200 200,200 100,100" fill="var(--cream)"/>
+        </g>
+        <g id="bg-v-split">
+          <rect width="200" height="200" fill="var(--brown)"/>
+          <polygon points="0,0 100,100 0,200" fill="var(--cream)"/>
+          <polygon points="200,0 100,100 200,200" fill="var(--cream)"/>
+        </g>
+        <g id="bg-hourglass-h">
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="0,0 200,0 100,100" fill="var(--brown)"/>
+          <polygon points="0,200 200,200 100,100" fill="var(--brown)"/>
+  		  </g>
+        
+        <g id="draw-diamond-brown">
+          <polygon points="100,0 200,100 100,200 0,100" fill="var(--brown)"/>
+        </g>
+
+        <g id="bg-diamond-brown">
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="100,0 200,100 100,200 0,100" fill="var(--brown)"/>
+        </g>
+
+        <g id="bg-chevron-down">
+          <rect width="200" height="200" fill="var(--brown)"/>
+          <polygon points="0,0 100,100 200,0 200,50 100,150 0,50" fill="var(--blue)" data-name="CHEVRON-BLU"/>
+          <polygon points="0,50 100,150 200,50 200,100 100,200 0,100" fill="var(--yellow)" data-name="CHEVRON-YEL"/>
+          <polygon points="0,100 100,200 200,100 200,150 150,200 50,200 0,150" fill="var(--red)" data-name="CHEVRON-RED"/>
+        </g>
+        
+        <g id="bg-cluster-tl"> 
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="200,0 200,200 100,100" fill="var(--red)"/>
+          <polygon points="0,200 200,200 100,100" fill="var(--yellow)"/>
+          <polygon points="0,0 0,200 100,100" fill="var(--brown)"/>
+        </g>
+        <g id="bg-cluster-tr"> 
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="0,0 0,200 100,100" fill="var(--red)"/>
+          <polygon points="0,200 200,200 100,100" fill="var(--yellow)"/>
+          <polygon points="200,0 200,200 100,100" fill="var(--brown)"/>
+        </g>
+        <g id="bg-cluster-bl"> 
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="0,0 200,0 100,100" fill="var(--red)"/>
+          <polygon points="200,0 200,200 100,100" fill="var(--yellow)"/>
+          <polygon points="0,0 0,200 100,100" fill="var(--brown)"/>
+        </g>
+        <g id="bg-cluster-br"> 
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="0,0 200,0 100,100" fill="var(--red)"/>
+          <polygon points="0,0 0,200 100,100" fill="var(--yellow)"/>
+          <polygon points="200,0 200,200 100,100" fill="var(--brown)"/>
+        </g>
+
+        <g id="bg-cluster-gb-tl"> 
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="200,0 200,200 100,100" fill="var(--green)"/>
+          <polygon points="0,200 200,200 100,100" fill="var(--blue)"/>
+          <polygon points="0,0 0,200 100,100" fill="var(--brown)"/>
+        </g>
+        <g id="bg-cluster-gb-tr"> 
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="0,0 0,200 100,100" fill="var(--green)"/>
+          <polygon points="0,200 200,200 100,100" fill="var(--blue)"/>
+          <polygon points="200,0 200,200 100,100" fill="var(--brown)"/>
+        </g>
+        <g id="bg-cluster-gb-bl"> 
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="0,0 200,0 100,100" fill="var(--green)"/>
+          <polygon points="200,0 200,200 100,100" fill="var(--blue)"/>
+          <polygon points="0,0 0,200 100,100" fill="var(--brown)"/>
+        </g>
+        <g id="bg-cluster-gb-br"> 
+          <rect width="200" height="200" fill="var(--cream)"/>
+          <polygon points="0,0 200,0 100,100" fill="var(--green)"/>
+          <polygon points="0,0 0,200 100,100" fill="var(--blue)"/>
+          <polygon points="200,0 200,200 100,100" fill="var(--brown)"/>
+        </g>
+
+        <g id="draw-bw-slice">
+          <circle cx="100" cy="100" r="62" fill="var(--cream)"/> 
+          <path d="M100 100 L143.8 56.2 A62 62 0 0 0 56.2 56.2 Z" fill="var(--brown)"/>
+   		    <path d="M100 100 L56.2 143.8 A62 62 0 0 0 143.8 143.8 Z" fill="var(--brown)"/>
+        </g>
+        <g id="draw-quartered">
+          <circle cx="100" cy="100" r="62" fill="var(--cream)"/>
+          <path d="M100 100 L100 38 A62 62 0 0 1 143.8 56.2 Z" fill="var(--yellow)"/>
+          <path d="M100 100 L143.8 56.2 A62 62 0 0 1 143.8 143.8 Z" fill="var(--green)"/>
+          <path d="M100 100 L143.8 143.8 A62 62 0 0 1 56.2 143.8 Z" fill="var(--blue)"/>
+          <path d="M100 100 L56.2 143.8 A62 62 0 0 1 56.2 56.2 Z" fill="var(--red)"/>
+          <path d="M100 100 L56.2 56.2 A62 62 0 0 1 100 38 Z" fill="var(--yellow)"/>
+        </g>
+        <g id="draw-quartered-3-3">
+          <path d="M100 100 L143.8 56.2 A62 62 0 0 0 56.2 56.2 Z" fill="var(--blue)"/>
+          <path d="M100 100 L143.8 143.8 A62 62 0 0 0 143.8 56.2 Z" fill="var(--red)"/>
+          <path d="M100 100 L56.2 143.8 A62 62 0 0 0 143.8 143.8 Z" fill="var(--yellow)"/>
+          <path d="M100 100 L56.2 56.2 A62 62 0 0 0 56.2 143.8 Z" fill="var(--green)"/>
+        </g>
+  	    <g id="draw-center-peach">
+          <circle cx="100" cy="100" r="62" fill="#eea26f"/>
+          <path d="M100 100 L143.8 143.8 A62 62 0 0 1 56.2 143.8 Z" fill="#e8dcc0"/>
+          <ellipse cx="100" cy="152" rx="18" ry="5" fill="#4a3b28" stroke="#4a3b28" stroke-width="4"/>
+  	    </g>
+        <g id="draw-cluster-circle">
+          <circle cx="100" cy="100" r="62" fill="var(--cream)"/>
+          <path d="M100 100 L143.8 56.2 A62 62 0 0 0 56.2 56.2 Z" fill="var(--yellow)"/>
+          <path d="M100 100 L143.8 143.8 A62 62 0 0 0 143.8 56.2 Z" fill="var(--brown)"/>
+          <path d="M100 100 L56.2 143.8 A62 62 0 0 0 143.8 143.8 Z" fill="var(--cream)"/>
+          <path d="M100 100 L56.2 56.2 A62 62 0 0 0 56.2 143.8 Z" fill="var(--red)"/>
+        </g>
+        <g id="draw-cluster-circle-gb">
+          <circle cx="100" cy="100" r="62" fill="var(--cream)"/>
+          <path d="M100 100 L143.8 56.2 A62 62 0 0 0 56.2 56.2 Z" fill="var(--blue)"/>
+          <path d="M100 100 L143.8 143.8 A62 62 0 0 0 143.8 56.2 Z" fill="var(--brown)"/>
+          <path d="M100 100 L56.2 143.8 A62 62 0 0 0 143.8 143.8 Z" fill="var(--cream)"/>
+          <path d="M100 100 L56.2 56.2 A62 62 0 0 0 56.2 143.8 Z" fill="var(--green)"/>
+        </g>
+        <g id="draw-octant-rb">
+          <circle cx="100" cy="100" r="62" fill="var(--cream)"/>
+          <path d="M100 100 L100 38 A62 62 0 0 1 143.8 56.2 Z" fill="var(--red)"/>
+          <path d="M100 100 L143.8 56.2 A62 62 0 0 1 162 100 Z" fill="var(--blue)"/>
+          <path d="M100 100 L162 100 A62 62 0 0 1 143.8 143.8 Z" fill="var(--red)"/>
+          <path d="M100 100 L143.8 143.8 A62 62 0 0 1 100 162 Z" fill="var(--blue)"/>
+          <path d="M100 100 L100 162 A62 62 0 0 1 56.2 143.8 Z" fill="var(--red)"/>
+          <path d="M100 100 L56.2 143.8 A62 62 0 0 1 38 100 Z" fill="var(--blue)"/>
+          <path d="M100 100 L38 100 A62 62 0 0 1 56.2 56.2 Z" fill="var(--red)"/>
+          <path d="M100 100 L56.2 56.2 A62 62 0 0 1 100 38 Z" fill="var(--blue)"/>
+        </g>
+        <g id="draw-center-quartered">
+          <circle cx="100" cy="100" r="62" fill="var(--cream)"/>
+          <path d="M100 100 L143.8 56.2 A62 62 0 0 0 56.2 56.2 Z" fill="var(--yellow)"/>
+          <path d="M100 100 L143.8 143.8 A62 62 0 0 0 143.8 56.2 Z" fill="var(--sky)"/>
+          <path d="M100 100 L56.2 143.8 A62 62 0 0 0 143.8 143.8 Z" fill="var(--green)"/>
+          <path d="M100 100 L56.2 56.2 A62 62 0 0 0 56.2 143.8 Z" fill="var(--sky)"/>
+        </g>
+      </defs>
+
+      <g id="cell-1-1" transform="translate(0,0)">
+        <rect width="200" height="200" fill="var(--brown)"/>
+        <g class="dance-pulse"><circle cx="100" cy="100" r="62" fill="var(--cream)"/></g>
+      </g>
+      <g id="cell-2-1" transform="translate(200,0)">
+        <use href="#bg-diag"/>
+        <g class="dance-spin-cw"><use href="#draw-quartered"/></g>
+      </g>
+      <g id="cell-3-1" transform="translate(400,0)">
+        <use href="#bg-hourglass-h"/>
+        <g class="dance-bounce"><use href="#draw-center-peach"/></g>
+      </g>      
+      <g id="cell-4-1" transform="translate(600,0)">
+        <use href="#bg-diag"/>
+        <g class="dance-spin-ccw"><use href="#draw-bw-slice"/></g>
+      </g>
+      <g id="cell-5-1" transform="translate(800,0)">
+        <rect width="200" height="200" fill="var(--sky)"/>
+        <g class="dance-pulse"><circle cx="100" cy="100" r="62" fill="var(--yellow)"/></g>
+      </g>
+      
+      <g id="cell-1-2" transform="translate(0,200)">
+        <use href="#bg-cluster-tl"/>
+        <g class="dance-spin-cw"><use href="#draw-cluster-circle"/></g>
+      </g>
+      <g id="cell-2-2" transform="translate(200,200)">
+        <use href="#bg-cluster-tr"/>
+        <g class="dance-spin-ccw"><use href="#draw-cluster-circle" transform="translate(200,0) scale(-1, 1)"/></g>
+      </g>
+      <g id="cell-3-2" transform="translate(400,200)">
+        <rect width="200" height="200" fill="var(--cream)"/>
+        <g class="dance-spin-ccw"><use href="#draw-diamond-brown"/></g>
+        <g class="dance-spin-cw"><use href="#draw-octant-rb"/></g>
+      </g>
+      <g id="cell-4-2" transform="translate(600,200)">
+        <use href="#bg-cluster-gb-tl"/>
+        <g class="dance-spin-cw"><use href="#draw-cluster-circle-gb"/></g>
+      </g>
+      <g id="cell-5-2" transform="translate(800,200)">
+        <use href="#bg-cluster-gb-tr"/>
+        <g class="dance-spin-ccw"><use href="#draw-cluster-circle-gb" transform="translate(200,0) scale(-1, 1)"/></g>
+      </g>
+
+      <g id="cell-1-3" transform="translate(0,400)">
+        <use href="#bg-cluster-bl"/>
+        <g class="dance-spin-ccw"><use href="#draw-cluster-circle" transform="translate(0,200) scale(1, -1)"/></g>
+      </g>
+      <g id="cell-2-3" transform="translate(200,400)">
+        <use href="#bg-cluster-br"/>
+        <g class="dance-spin-cw"><use href="#draw-cluster-circle" transform="translate(200,200) scale(-1, -1)"/></g>
+      </g>
+      <g id="cell-3-3" transform="translate(400,400)">
+        <use href="#bg-hourglass-h"/>
+        <g class="dance-pulse"><use href="#draw-center-quartered"/></g>
+      </g>
+      <g id="cell-4-3" transform="translate(600,400)">
+        <use href="#bg-cluster-gb-bl"/>
+        <g class="dance-spin-ccw"><use href="#draw-cluster-circle-gb" transform="translate(0,200) scale(1, -1)"/></g>
+      </g>
+      <g id="cell-5-3" transform="translate(800,400)">
+        <use href="#bg-cluster-gb-br"/>
+        <g class="dance-spin-cw"><use href="#draw-cluster-circle-gb" transform="translate(200,200) scale(-1, -1)"/></g>
+      </g>
+
+      <g id="cell-1-4" transform="translate(0,600)">
+        <rect width="200" height="200" fill="var(--sky)"/>
+        <g class="dance-pulse"><circle cx="100" cy="100" r="62" fill="var(--yellow)"/></g>
+      </g>
+      <g id="cell-2-4" transform="translate(200,600)">
+        <use href="#bg-diag"/>
+        <g class="dance-spin-ccw"><use href="#draw-bw-slice"/></g>
+      </g>
+      <g id="cell-3-4" transform="translate(400,600)">
+        <g class="dance-bounce"><use href="#bg-chevron-down"/></g>
+      </g>
+      <g id="cell-4-4" transform="translate(600,600)">
+        <use href="#bg-diag"/>
+        <g class="dance-spin-cw"><use href="#draw-quartered-3-3"/></g>
+      </g>
+      <g id="cell-5-4" transform="translate(800,600)">
+        <rect width="200" height="200" fill="var(--brown)"/>
+        <g class="dance-pulse"><circle cx="100" cy="100" r="62" fill="var(--cream)"/></g>
+      </g>
+    </svg>
+  </div>
+  <script src="genesis.js"></script>
+</body>
+</html>

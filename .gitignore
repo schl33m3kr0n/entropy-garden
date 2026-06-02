@@ -1,0 +1,16 @@
+# Local originals & compression backups
+archive/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Deploy output
+dist/
+
+# Dev-only scratch
+assets/img/vault/sun.mp4.png

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Entropy Garden</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g transform='rotate(90 50 50)'><path d='M 10 50 C 30 20, 70 20, 90 50 C 70 80, 30 80, 10 50 Z' stroke='%230f0' stroke-width='4' fill='none' stroke-linejoin='round'/><circle cx='50' cy='50' r='24' stroke='%230f0' stroke-width='1.5' fill='none'/><circle cx='50' cy='50' r='14' stroke='%230f0' stroke-width='2' fill='none'/><circle cx='50' cy='50' r='5' fill='%230f0'/></g></svg>">
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+    <div id="init-screen">
+        <div id="epilepsy-warning">
+            <span class="warning-title">/// WARNING: PHOTOSENSITIVITY ///</span>
+            <p>This experience contains rapid flashing lights, high-contrast strobing, and glitch effects that may trigger seizures for people with photosensitive epilepsy. Viewer discretion is strongly advised.</p>
+        </div>
+        <button id="init-btn">[ INITIALIZE ]</button>
+    </div>
+
+    <div id="loader">
+        <div id="ouroboros-container">
+            <svg id="ouroboros-svg" viewBox="0 0 465 465" xmlns="http://www.w3.org/2000/svg">
+                <g id="SVGRepo_iconCarrier">
+                    <path d="M276.877,24.439C266.062,8.435,250.783,0,232.5,0c-18.941,0-36.839,9.533-47.491,25.087 c-48.354,10.527-92.31,37.325-124.052,75.706C28.097,140.526,10,190.852,10,242.5c0,59.432,23.144,115.307,65.169,157.331 C117.193,441.855,173.068,465,232.5,465s115.307-23.145,157.331-65.169C431.856,357.807,455,301.932,455,242.5 C455,136.573,380.283,45.388,276.877,24.439z M232.5,450C118.084,450,25,356.916,25,242.5c0-98.346,69.848-183.866,166.078-203.361 c0.098-0.02,0.196-0.041,0.292-0.064h0c0.003,0,0.007-0.001,0.011-0.002c0.005-0.003,0.009-0.003,0.013-0.003 c0.005-0.002,0.009-0.001,0.015-0.004c0.004-0.001,0.01,0.003,0.014-0.004c0.005-0.001,0.008-0.003,0.014-0.003 c0.005-0.001,0.012,0,0.014-0.004c0.019-0.005,0.038-0.009,0.057-0.015h0c0.019-0.005,0.037-0.01,0.056-0.015 c0.005,0.001,0.008-0.002,0.013-0.003c0.004-0.002,0.008-0.003,0.011-0.003c0.004-0.001,0.01,0.001,0.011-0.004 c1.785-0.487,3.392-1.633,4.428-3.336c0-0.001,0.001-0.002,0.001-0.003c0.001-0.003,0.003-0.005,0.004-0.007 c0.001-0.003,0.002-0.005,0.004-0.007c0.001-0.002,0.002-0.003,0.003-0.005c0.002-0.004,0.005-0.008,0.007-0.013 C203.817,22.718,217.444,15,232.5,15c10.648,0,19.684,3.906,26.981,11.617c-14.357,5.266-24.641,19.079-24.641,35.219 c0,13.834,7.489,26.034,18.816,32.532C247.299,98.039,240.073,100,232.5,100c-11.801,0-22.773-4.736-30.895-13.335 c-1.846-1.954-4.598-2.771-7.211-2.142c-34.83,8.402-66.41,28.556-88.924,56.747C82.597,169.912,70,205.863,70,242.5 C70,332.103,142.897,405,232.5,405S395,332.103,395,242.5c0-36.638-12.596-72.59-35.467-101.234 c-22.128-27.713-53.017-47.65-87.139-56.302c-0.781-0.396-1.641-0.669-2.563-0.771c-11.397-1.261-19.992-10.873-19.992-22.357 c0-12.365,10.059-22.457,22.423-22.497c0.56-0.002,1.104-0.07,1.629-0.188C370.324,58.683,440,143.711,440,242.5 C440,356.916,346.916,450,232.5,450z M380,242.5c0,81.332-66.168,147.5-147.5,147.5S85,323.832,85,242.5 c0-67.014,44.582-124.979,108.921-142.374C204.505,109.75,218.041,115,232.5,115c14.461,0,28-5.254,38.585-14.884 C335.422,117.511,380,175.479,380,242.5z"/>
+                    <path d="M215.979,49.218c4.411,0,8-3.589,8-8s-3.589-8-8-8s-8,3.589-8,8S211.568,49.218,215.979,49.218z"/>
+                </g>
+            </svg>
+        </div>
+        <p id="loader-text">INITIALIZING...</p>
+    </div>
+
+    <div id="boss-key-overlay">
+        <div class="win-bg"></div>
+        <div class="win95-window">
+            <div class="win95-titlebar"><span>Autodesk Maya 2024</span><span style="cursor:pointer" id="close-maya-btn">X</span></div>
+            <div class="win95-content">
+                <div class="win95-icon">X</div>
+                <div>A fatal error has occurred in module 'topology_anxiety.dll'. <br><br>Application Not Responding. All unsaved progress has been sacrificed to the void.</div>
+            </div>
+            <div class="win95-buttons">
+                <button class="win95-btn boss-btn">Wait</button>
+                <button class="win95-btn boss-btn">Force Quit</button>
+                <button class="win95-btn boss-btn">Cry</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-panel right-controls">
+        <div id="hamburger-icon">
+        <span></span><span></span><span></span>
+    </div>
+</div>
+
+<div id="playlist-menu">
+    <div id="playlist-header">
+        <div id="track-title" class="track-title-marquee is-static" title="Hightech Data — Alex_Jauk">
+            <div class="track-title-scroll">
+                <span class="track-title-content">// Hightech Data — Alex_Jauk</span>
+            </div>
+        </div>
+    </div>
+    <div id="playlist-controls">
+        <button onclick="playPrevTrack()" class="ui-btn playlist-btn" data-label="PREV">&#9198;</button>
+        
+        <button id="play-pause-btn" class="ui-btn playlist-btn" data-label="PAUSE" data-play-label="PLAY">&#10074;&#10074;</button>
+        
+        <button onclick="playNextTrack()" class="ui-btn playlist-btn" data-label="NEXT">&#9197;</button>
+    </div>
+</div>
+
+<button id="mode-btn" class="ui-btn">SAFE MODE</button>
+
+    <div id="sidebar-menu">
+        <ul>
+            <li onclick="openModal('identity')">
+                <div class="ui-icon" style="background-image: url('assets/icons/identity.svg');"></div>
+                <span class="sidebar-text">// IDENTITY</span>
+            </li>
+            <li onclick="openModal('stats')">
+                <div class="ui-icon" style="background-image: url('assets/icons/stats.svg');"></div>
+                <span class="sidebar-text">// STATS</span>
+            </li>
+            <li onclick="openModal('about')">
+                <div class="ui-icon" style="background-image: url('assets/icons/about.svg');"></div>
+                <span class="sidebar-text">// BIO DUMP</span>
+            </li>
+            <li onclick="openModal('projects')">
+                <div class="ui-icon" style="background-image: url('assets/icons/storage.svg');"></div>
+                <span class="sidebar-text">// REPOSITORY</span>
+            </li>
+            <li onclick="openModal('signal')">
+                <div class="ui-icon" style="background-image: url('assets/icons/signal.svg');"></div>
+                <span class="sidebar-text">// LIVE FEED</span>
+            </li>
+            <li onclick="openModal('vault')">
+                <div class="ui-icon" style="background-image: url('assets/icons/vault.svg');"></div>
+                <span class="sidebar-text">// THE VAULT</span>
+            </li>
+            <li onclick="openModal('arcade')">
+                <div class="ui-icon" style="background-image: url('assets/icons/joystick.svg');"></div>
+                <span class="sidebar-text">// ARCADE</span>
+            </li>
+        </ul>
+    </div>
+
+    <div id="docking-bay">
+        <div class="slot" id="slot-1" data-id="1"></div>
+        <div class="slot" id="slot-2" data-id="2"></div>
+        <div class="slot" id="slot-3" data-id="3"></div>
+    </div>
+
+    <canvas id="grid-canvas"></canvas>
+
+    <div id="panopticon-eye" aria-hidden="true">
+        <div class="panopticon-inner">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <clipPath id="panopticon-socket-clip">
+                        <path id="panopticon-clip-path" d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+                    </clipPath>
+                    <linearGradient id="panopticon-rainbow" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse" spreadMethod="repeat">
+                        <stop offset="0%" stop-color="hsl(0, 100%, 50%)" />
+                        <stop offset="17%" stop-color="hsl(60, 100%, 50%)" />
+                        <stop offset="33%" stop-color="hsl(120, 100%, 50%)" />
+                        <stop offset="50%" stop-color="hsl(180, 100%, 50%)" />
+                        <stop offset="67%" stop-color="hsl(240, 100%, 50%)" />
+                        <stop offset="83%" stop-color="hsl(300, 100%, 50%)" />
+                        <stop offset="100%" stop-color="hsl(0, 100%, 50%)" />
+                    </linearGradient>
+                    <radialGradient id="panopticon-inlay-shadow" cx="50" cy="50" r="46" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#000000" stop-opacity="0" />
+                        <stop offset="55%" stop-color="#001400" stop-opacity="0.06" />
+                        <stop offset="82%" stop-color="#000000" stop-opacity="0.38" />
+                        <stop offset="100%" stop-color="#000000" stop-opacity="0.58" />
+                    </radialGradient>
+                    <linearGradient id="panopticon-inlay-rim" x1="50" y1="10" x2="50" y2="90" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#000000" stop-opacity="0.38" />
+                        <stop offset="16%" stop-color="#000000" stop-opacity="0" />
+                        <stop offset="84%" stop-color="#000000" stop-opacity="0" />
+                        <stop offset="100%" stop-color="#000000" stop-opacity="0.38" />
+                    </linearGradient>
+                </defs>
+                <g clip-path="url(#panopticon-socket-clip)">
+                    <path class="panopticon-socket-fill" d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+                    <path class="panopticon-socket-inlay" d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+                    <path class="panopticon-socket-inlay-rim" d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+                    <g id="panopticon-gaze">
+                        <circle class="panopticon-iris-outer" cx="50" cy="50" r="26" />
+                        <circle class="panopticon-iris-mid" cx="50" cy="50" r="16" />
+                        <circle class="panopticon-pupil" cx="50" cy="50" r="7" />
+                        <text id="panopticon-god-pupil" class="panopticon-god-pupil" x="50" y="50">⛦</text>
+                    </g>
+                </g>
+                <path id="panopticon-lid" class="panopticon-lid" d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+                <g id="panopticon-pong" aria-hidden="true">
+                    <line id="pong-paddle-l" class="pong-paddle" x1="8" y1="50" x2="8" y2="50" />
+                    <line id="pong-paddle-r" class="pong-paddle" x1="92" y1="50" x2="92" y2="50" />
+                    <circle id="pong-ball" class="pong-ball" cx="50" cy="50" r="5" />
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <div id="refresh-hint">[ PRESS R TO REROLL ]</div>
+    <div id="file-protocol-notice" hidden>
+        Desktop pong and other modules need a local server.
+        Run <code>python3 -m http.server</code> in this folder, then open
+        <code>http://localhost:8000</code>
+    </div>
+
+    <div id="terminal-container">
+        <div id="terminal-output"></div>
+        <div id="terminal-input-line">
+            <span>></span><input type="text" id="term-input" autocomplete="off" spellcheck="false" />
+        </div>
+    </div>
+
+    <div id="hud">
+        <h1>ENTROPY GARDEN</h1>
+    </div>
+    
+    <div id="singularity-overlay">
+        <div id="singularity-bg"></div>
+        <canvas id="singularity-canvas"></canvas>
+        <div id="poem-container"></div>
+        <div id="singularity-controls">
+            <button class="singularity-btn" id="next-poem-btn">[NEXT TRANSMISSION]</button>
+            <button class="singularity-btn" id="reset-timeline-btn">[RETURN TO GARDEN]</button>
+        </div>
+    </div>
+
+    <div id="modal-identity" class="modal">
+        <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/identity.svg');"></div>// IDENTITY</h2>
+            <div class="scrollable-content">
+               <div class="bio-header" style="border-bottom: none; padding-bottom: 0;">
+                    <div class="pfp-wrapper">
+                        <picture>
+                            <source srcset="assets/img/profile/schl33m3kr0n-pfp.webp" type="image/webp">
+                            <img src="assets/img/profile/schl33m3kr0n-pfp.jpeg" alt="schl33m3kr0n" class="pfp-image">
+                        </picture>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <p style="margin-top: 0;"><strong>USER:</strong> schl33m3kr0n</p>
+                        <p><strong>CLASS:</strong> <span id="val-class">Keyframe Sorcerer (Lvl 1)</span></p>
+                        <p><strong>BASE:</strong> <span id="val-base">Nashville (for the humidity)</span></p>
+                        <p style="margin-bottom: 0;"><strong>COMMS:</strong> dycurlee@gmail.com | <a href="https://instagram.com/schl33m3kr0n" target="_blank" class="social-link">@schl33m3kr0n</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modal-stats" class="modal">
+        <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/stats.svg');"></div>// STATS</h2>
+            <div class="scrollable-content"><ul id="stats-list"></ul></div>
+        </div>
+    </div>
+
+    <div id="modal-about" class="modal">
+        <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/about.svg');"></div>// BIO DUMP</h2>
+            <div id="bio-container" class="scrollable-content"></div>
+        </div>
+    </div>
+
+    <div id="modal-projects" class="modal">
+         <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/storage.svg');"></div>// REPOSITORY</h2>
+            <div class="scrollable-content"><ul id="project-list"></ul></div>
+        </div>
+    </div>
+
+    <div id="modal-vault" class="modal wide">
+         <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/vault.svg');"></div>// THE VAULT</h2>
+           <div class="scrollable-content vault-grid">
+                <div class="vault-item">
+                    <img data-src="assets/img/vault/geometry-art.webp" data-fallback="assets/img/vault/geometry-art.jpg" alt="serpentine" class="vault-media">
+                </div>
+                
+                <div class="vault-item">
+  				   <iframe data-src="pages/genesis.html" class="vault-media genesis-iframe" frameborder="0" scrolling="no"></iframe>
+				</div>
+                
+                <div class="vault-item">
+                    <img data-src="assets/img/vault/ripples.webp" data-fallback="assets/img/vault/ripples.jpg" alt="ripples" class="vault-media">
+                </div>
+                
+                <div class="vault-item">
+                    <img data-src="assets/img/vault/descent.jpg" alt="descent" class="vault-media">
+                </div>
+                
+                <div class="vault-item">
+    				<video data-src="assets/video/sun.mp4" data-poster="assets/img/vault/sun-poster.webp" class="vault-media" muted loop playsinline preload="none"></video>
+				</div>
+                
+                <div class="vault-item carousel-container">
+                    <div class="carousel-stage">
+                        <div class="carousel-wrapper">
+                            <div class="carousel-track" id="manifold-track">
+                                <img data-src="assets/img/vault/mm1.webp" data-fallback="assets/img/vault/mm1.jpg" alt="Manifold Movers Ad 1" class="carousel-slide">
+                                <img data-src="assets/img/vault/mm2.webp" data-fallback="assets/img/vault/mm2.jpg" alt="Manifold Movers Ad 2" class="carousel-slide">
+                                <img data-src="assets/img/vault/mm3.webp" data-fallback="assets/img/vault/mm3.jpg" alt="Manifold Movers Ad 3" class="carousel-slide">
+                                <img data-src="assets/img/vault/mm4.webp" data-fallback="assets/img/vault/mm4.jpg" alt="Manifold Movers Ad 4" class="carousel-slide">
+                                <img data-src="assets/img/vault/mm5.webp" data-fallback="assets/img/vault/mm5.jpg" alt="Manifold Movers Ad 5" class="carousel-slide">
+                                <img data-src="assets/img/vault/mm6.webp" data-fallback="assets/img/vault/mm6.jpg" alt="Manifold Movers Ad 6" class="carousel-slide">
+                                <img data-src="assets/img/vault/mm7.webp" data-fallback="assets/img/vault/mm7.jpg" alt="Manifold Movers Ad 7" class="carousel-slide">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-controls">
+                        <button type="button" class="carousel-btn prev-btn" aria-label="Previous slide">&#10094;</button>
+                        <button type="button" class="carousel-btn next-btn" aria-label="Next slide">&#10095;</button>
+                    </div>
+                </div>
+      </div>
+    </div>
+</div> <div id="modal-signal" class="modal">
+     <div class="modal-content">
+        <span class="close-btn modal-close">X</span>
+            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/signal.svg');"></div>// LIVE FEED</h2>
+            <div class="scrollable-content">
+                <p>Audio: <span id="val-audio" class="data-value">...</span></p>
+                <p>Action: <span id="val-activity" class="data-value">...</span></p>
+                <p>Mood: <span id="val-mood" class="data-value">...</span></p>
+            </div>
+        </div>
+    </div>
+
+<div id="modal-arcade" class="modal wide">
+        <div class="modal-content">
+            <span class="close-btn modal-close">X</span>
+            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/joystick.svg');"></div>// ARCADE CABINET</h2>
+            <div class="scrollable-content" style="text-align: center; margin-top: 10px;">
+                <div id="arcade-game-container">
+                    <div id="arcade-screen">
+                        <div id="sequence-display"></div>
+                        <div id="arcade-message">> AWAITING INPUT...</div>
+                    </div>
+                    <div id="arcade-controls" class="arcade-answers-row"></div>
+                    <div id="arcade-score">SCORE: 000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<audio id="burp-sound" src="assets/audio/sfx/burp.mp3" preload="none"></audio>
+<audio id="error-sound" src="assets/audio/sfx/error.mp3" preload="none"></audio>
+
+<div id="lightbox" class="lightbox-overlay">
+  <button class="lightbox-btn lb-prev">&#10094;</button>
+  
+  <div class="lightbox-image-wrapper">
+    <button class="lightbox-close">&times;</button>
+    <img id="lightbox-img" src="" alt="Expanded View">
+  </div>
+  
+  <button class="lightbox-btn lb-next">&#10095;</button>
+</div>
+
+<script src="js/lore-pools.data.js"></script>
+<script>
+(function () {
+    function loadLegacyBundle() {
+        console.warn(
+            '[Entropy Garden] Could not load js/main.js — falling back to js/script.js (desktop pong unavailable). '
+            + 'Use a local server instead: python3 -m http.server'
+        );
+        var notice = document.getElementById('file-protocol-notice');
+        if (notice) notice.hidden = false;
+        var fb = document.createElement('script');
+        fb.src = 'js/script.js';
+        fb.defer = true;
+        document.body.appendChild(fb);
+    }
+    var s = document.createElement('script');
+    s.type = 'module';
+    s.src = 'js/main.js';
+    s.onerror = loadLegacyBundle;
+    document.body.appendChild(s);
+})();
+</script>
+
+</body>
+</html>

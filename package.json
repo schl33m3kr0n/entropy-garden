@@ -1,0 +1,11 @@
+{
+  "name": "entropy-garden",
+  "private": true,
+  "scripts": {
+    "build": "bash scripts/deploy-cloudflare.sh",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=entropy-garden-8r2 --commit-dirty=true --skip-caching"
+  },
+  "devDependencies": {
+    "wrangler": "^4.14.0"
+  }
+}
