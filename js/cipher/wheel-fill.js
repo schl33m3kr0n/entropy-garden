@@ -119,16 +119,22 @@ const MAX_FILL_ATTEMPTS = 12;
  * @returns {number} slots rewritten
  */
 export function populateEmptyWheelGlyphs(wheels, pickChar, ctx, font, options = {}) {
-    const { skipHintWheels = true } = options;
+    const { skipHintWheels = true, lightFill = false } = options;
     if (!wheels?.length || !ctx || !font) return 0;
 
-    ensureCipherRenderCache(ctx, font);
+    if (!lightFill) ensureCipherRenderCache(ctx, font);
     let filled = 0;
 
     for (const wheel of wheels) {
         if (skipHintWheels && wheel.isHintWheel) continue;
         for (let i = 0; i < wheel.glyphs.length; i++) {
             let glyph = wheel.glyphs[i];
+            if (lightFill) {
+                if (!isEmptyWheelGlyph(glyph)) continue;
+                wheel.glyphs[i] = pickChar();
+                filled++;
+                continue;
+            }
             if (!isEmptyWheelGlyph(glyph) && isRenderableCipherGlyph(ctx, glyph, font)) continue;
 
             for (let attempt = 0; attempt < MAX_FILL_ATTEMPTS; attempt++) {

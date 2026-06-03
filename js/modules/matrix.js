@@ -39,11 +39,26 @@ let viewW = 0;
 let viewH = 0;
 
 let cipherRenderCacheReady = false;
+let cipherRenderCacheScheduled = false;
 
 function initCipherRenderCacheIfNeeded() {
     if (cipherRenderCacheReady || !ctx) return;
     ensureCipherRenderCache(ctx, cipherWheelFont(), usesIosCipherGlyphs());
     cipherRenderCacheReady = true;
+}
+
+function scheduleCipherRenderCache() {
+    if (cipherRenderCacheScheduled || cipherRenderCacheReady || !ctx) return;
+    cipherRenderCacheScheduled = true;
+    const run = () => {
+        initCipherRenderCacheIfNeeded();
+        if (cipherRenderCacheReady) fillEmptyWheelGlyphs();
+    };
+    if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(run, { timeout: 2500 });
+    } else {
+        setTimeout(run, 0);
+    }
 }
 
 function randomChar() {
@@ -55,7 +70,11 @@ function randomChar() {
 
 function fillEmptyWheelGlyphs() {
     if (!ctx || !wheels.length) return;
-    initCipherRenderCacheIfNeeded();
+    if (!cipherRenderCacheReady) {
+        populateEmptyWheelGlyphs(wheels, pickCipherChar, ctx, cipherWheelFont(), { lightFill: true });
+        scheduleCipherRenderCache();
+        return;
+    }
     populateEmptyWheelGlyphs(wheels, randomChar, ctx, cipherWheelFont());
 }
 
@@ -201,7 +220,7 @@ function drawChannelRings(cx, cy) {
 }
 
 function drawCipherWheels(cx, cy) {
-    initCipherRenderCacheIfNeeded();
+    scheduleCipherRenderCache();
     ctx.clearRect(0, 0, viewW, viewH);
     ctx.font = cipherWheelFont();
     ctx.textAlign = 'center';
@@ -337,6 +356,7 @@ function resizeCanvas() {
     if (!canvas || !ctx) return;
 
     cipherRenderCacheReady = false;
+    cipherRenderCacheScheduled = false;
     resetCipherRenderCache();
 
     const dpr = Math.min(window.devicePixelRatio || 1, perf.dprCap);

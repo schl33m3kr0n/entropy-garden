@@ -1,5 +1,0 @@
-Removed 87 glyphs from FULL_MATRIX_CHARS (blank or tofu vs U+FFFD / U+1F700 on 16px monospace).
-
-∫∏∴⊥♪׳ءإابجحخدذرزسشصضعغفقكلمنهوىيԀノᛁᛅᛆᛌᎠᎫᏒᏗᐧᑊᑕᑖᒋᒌᒕᒥᒦᒧᒨᒯᒱᒳᒵᓗᓘᓙᓣᓥᕳᖢᖣᗮլյ🜀🜚🜴🜺🜽🝄🝆🝇🝐🝑🝙🝚🝛🝜🝞🝟🝠🝯
-
-Re-run audit: scripts/dev/glyph-audit.html

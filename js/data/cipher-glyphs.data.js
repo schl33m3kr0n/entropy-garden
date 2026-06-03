@@ -1,5 +1,5 @@
 /** Cipher wheel glyph pools by script / category (desktop matrix rain).
- *  Pruned via scripts/dev/glyph-audit.html (16px monospace): drops blank + missing-glyph (tofu) code points. */
+ *  Pruned for 16px monospace: drops blank + missing-glyph (tofu) code points. */
 
 // ─── European & Middle Eastern ─────────────────────────────────────────────
 
