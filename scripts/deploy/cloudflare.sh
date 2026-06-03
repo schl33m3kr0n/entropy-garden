@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 # Production bundle for Cloudflare Pages (publish dist/ as site output).
-set -eu
+set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+
+log() { echo "==> $*"; }
 DEST="$ROOT/dist"
 EXCLUDE_FILE="$ROOT/deploy.exclude"
 MAX_MIB=120
 
+log "Entropy Garden — Cloudflare Pages bundle"
+log "Removing previous dist/"
 rm -rf "$DEST"
 mkdir -p "$DEST"
 
@@ -55,13 +59,18 @@ for pattern in "${TAR_EXCLUDES[@]}"; do
   TAR_ARGS+=(--exclude="$pattern")
 done
 
-(
+log "Packing repository into dist/ (tar; may take ~30s on CI)..."
+if ! (
   cd "$ROOT"
   tar "${TAR_ARGS[@]}" -cf - .
 ) | (
   cd "$DEST"
   tar -xf -
-)
+); then
+  echo "Deploy failed: could not create dist/ bundle" >&2
+  exit 1
+fi
+log "Pack complete."
 
 # Cloudflare Pages reads _headers / _redirects / _routes.json from the publish root
 for meta in _headers _redirects _routes.json; do
@@ -77,6 +86,7 @@ check_file() {
   fi
 }
 
+log "Verifying dist/ contents..."
 check_file "$DEST/index.html"
 check_file "$DEST/404.html"
 check_file "$DEST/js/main.js"
@@ -156,17 +166,18 @@ if ! grep -qF "$SW_VER" "$DEST/sw.js"; then
   exit 1
 fi
 
-SIZE_BYTES="$(find "$DEST" -type f -print0 | xargs -0 stat -f%z 2>/dev/null | awk '{s+=$1} END {print s+0}')"
-if [ -z "$SIZE_BYTES" ] || [ "$SIZE_BYTES" -eq 0 ]; then
-  SIZE_BYTES="$(find "$DEST" -type f -exec stat -c%s {} + 2>/dev/null | awk '{s+=$1} END {print s+0}')"
-fi
-SIZE_MIB=$((SIZE_BYTES / 1024 / 1024))
+# Portable on macOS + Cloudflare Linux (avoid stat -f vs -c differences).
+SIZE_KIB=$(du -sk "$DEST" | awk '{print $1}')
+SIZE_BYTES=$((SIZE_KIB * 1024))
+SIZE_MIB=$((SIZE_KIB / 1024))
+log "Bundle size: ${SIZE_MIB} MiB ($(find "$DEST" -type f | wc -l | tr -d ' ') files)"
 
 if [ "$SIZE_MIB" -gt "$MAX_MIB" ]; then
   echo "Deploy bundle too large: ${SIZE_MIB} MiB (max ${MAX_MIB} MiB)." >&2
   exit 1
 fi
 
+log "Build finished successfully."
 echo "Cloudflare Pages bundle: $DEST (${SIZE_MIB} MiB)"
 echo ""
 echo "Deploy (recommended — uploads _headers/_redirects as config metadata):"
