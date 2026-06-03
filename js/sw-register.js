@@ -1,7 +1,9 @@
 let registered = false;
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel'
+        && navigator.maxTouchPoints > 1
+        && window.matchMedia('(hover: none)').matches);
 
 export function registerServiceWorkerAfterInit() {
     if (registered || !('serviceWorker' in navigator)) return;

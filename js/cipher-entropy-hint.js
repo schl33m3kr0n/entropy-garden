@@ -14,8 +14,10 @@
     let terminalProvidenceShown = false;
 
     function isIosChannel() {
-        const ua = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const ipadOs = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+        const ua = /iPad|iPhone|iPod/i.test(navigator.userAgent);
+        const ipadOs = navigator.platform === 'MacIntel'
+            && navigator.maxTouchPoints > 1
+            && window.matchMedia('(hover: none)').matches;
         return ua || ipadOs || document.body?.classList.contains('ios-ui');
     }
 

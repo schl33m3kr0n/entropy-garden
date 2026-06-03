@@ -484,8 +484,15 @@ export function pickCipherChar() {
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+/** iPhone / iPad / iPod — excludes macOS laptops (same MacIntel touch heuristic, but hover: hover). */
+export function isRealIOSDevice() {
+    if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) return true;
+    return navigator.platform === 'MacIntel'
+        && navigator.maxTouchPoints > 1
+        && window.matchMedia('(hover: none)').matches;
+}
+
+export const isIOS = isRealIOSDevice();
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;

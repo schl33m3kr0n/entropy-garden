@@ -3,8 +3,10 @@
  * Runs even if main.js or terminal.js fail to load.
  */
 (function () {
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel'
+            && navigator.maxTouchPoints > 1
+            && window.matchMedia('(hover: none)').matches);
     if (!isIOS) return;
 
     var lastTap = 0;

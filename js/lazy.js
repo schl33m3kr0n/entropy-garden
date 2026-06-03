@@ -372,7 +372,9 @@ globalThis.gardenHooks.openTerminal = () => openTerminal();
 function preloadGardenModules() {
     loadMatrix().catch(() => {});
     loadTerminal()
-        .then(() => loadSingularity())
+        .then(() => {
+            if (!isIosPoemMode()) loadSingularity().catch(() => {});
+        })
         .catch(() => {});
 }
 

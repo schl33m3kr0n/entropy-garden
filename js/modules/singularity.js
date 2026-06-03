@@ -441,27 +441,19 @@ function openSingularityRitual(showNextBtn = true, poemText) {
 }
 
 function triggerSingularity() {
+    if (isIosSingularity()) return;
+
     setIsSingularityActive(true);
     hideSingularityChrome();
     globalThis.unlockTrophy?.('singularity_ritual');
-
-    if (perf.isIOS) {
-        openSingularityRitual(true);
-        return;
-    }
-
     setTimeout(() => openSingularityRitual(true), 500);
 }
 
 function triggerOspreyEvent() {
+    if (isIosSingularity()) return;
+
     setIsSingularityActive(true);
     hideSingularityChrome();
-
-    if (isIosSingularity()) {
-        revealSingularityOverlay(false);
-        speakSingularity(ospreyPoem);
-        return;
-    }
 
     setTimeout(() => {
         playSound(sfx.missionCleared);
@@ -710,22 +702,31 @@ export function pauseSingularityPresentation() {
 }
 
 export function resumeSingularityPresentation() {
+    if (isIosSingularity()) return;
     if (!isSingularityActive || document.hidden) return;
     const overlay = document.getElementById('singularity-overlay');
     if (!overlay || overlay.style.display === 'none') return;
     pauseSingularityPresentation();
-    if (!isIosSingularity()) {
-        const canvas = singularityCanvas();
-        if (canvas) {
-            try {
-                init3D();
-            } catch (err) {
-                console.error('[Entropy Garden] singularity resume failed', err);
-            }
+    const canvas = singularityCanvas();
+    if (canvas) {
+        try {
+            init3D();
+        } catch (err) {
+            console.error('[Entropy Garden] singularity resume failed', err);
         }
     }
     const pool = activeSingularityPoems();
     if (pool.length) speakSingularity(pool[currentPoemIndex] ?? pool[0]);
+}
+
+export function reconcileSingularityPoem() {
+    if (isIosSingularity()) return;
+    if (!isSingularityActive && !document.body.classList.contains('singularity-active')) return;
+    const pool = activeSingularityPoems();
+    if (!pool.length) return;
+    const idx = Math.min(currentPoemIndex, pool.length - 1);
+    setCurrentPoemIndex(idx);
+    speakSingularity(pool[idx] ?? pool[0]);
 }
 
 let singularityControlsTapAt = 0;
@@ -814,5 +815,6 @@ export {
     stopSingularity3D,
     pauseSingularityPresentation,
     resumeSingularityPresentation,
+    reconcileSingularityPoem,
     bindSingularityControls,
 };
