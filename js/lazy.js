@@ -330,6 +330,7 @@ export function revealTerminalShell() {
     if (!term) return false;
 
     const iosLayout = document.body.classList.contains('ios-ui');
+    const wasOpen = term.classList.contains('active');
     term.removeAttribute('hidden');
     term.classList.add('reveal-in', 'active');
     if (!iosLayout) term.classList.add('is-sliver');
@@ -345,7 +346,9 @@ export function revealTerminalShell() {
             }
         }, 80);
     }
-    globalThis.EntropyTerminalSfx?.open?.();
+    if (!wasOpen && globalThis.EntropyTerminalSfx?.open) {
+        globalThis.EntropyTerminalSfx.open();
+    }
     return true;
 }
 

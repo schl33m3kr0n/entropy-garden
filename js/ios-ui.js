@@ -296,7 +296,7 @@ function onIosViewportChange() {
 
 function bindIosTerminalToggle() {
     const btn = document.getElementById('ios-terminal-toggle');
-    if (!btn || btn.dataset.bound) return;
+    if (!btn || btn.dataset.bound || btn.dataset.iosBootBound) return;
     btn.dataset.bound = '1';
 
     let lastFabTapAt = 0;

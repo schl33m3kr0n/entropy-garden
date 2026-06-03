@@ -87,7 +87,6 @@
         if (!btn || btn.dataset.iosBootBound) return;
         btn.dataset.iosBootBound = '1';
         btn.addEventListener('touchend', onTap, { passive: false });
-        btn.addEventListener('click', onTap);
     }
 
     function onGardenReady() {

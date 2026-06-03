@@ -40,6 +40,15 @@ function gardenBlocksTerminalKeys() {
     return false;
 }
 
+/** One open beep — EntropyTerminalSfx.open() returns undefined, so never use ?? with playSound. */
+function playTerminalOpenSound() {
+    if (globalThis.EntropyTerminalSfx?.open) {
+        globalThis.EntropyTerminalSfx.open();
+    } else if (sfx.radio) {
+        playSound(sfx.radio);
+    }
+}
+
 function ensureTerminalChromeVisible() {
     if (!terminalContainer) return;
     terminalContainer.removeAttribute('hidden');
@@ -67,7 +76,7 @@ export function toggleTerminal() {
     }
 
     if (document.activeElement) document.activeElement.blur();
-    globalThis.EntropyTerminalSfx?.open?.() ?? (sfx.radio && playSound(sfx.radio));
+    playTerminalOpenSound();
     terminalContainer.classList.add('active');
     setTermInputFocusable(true);
     lastTerminalOpenTime = Date.now();
@@ -81,7 +90,7 @@ function openTerminalFromClick(options = {}) {
     ensureTerminalChromeVisible();
     const wasOpen = terminalContainer.classList.contains('active');
     if (!wasOpen && options.playOpenSound !== false) {
-        globalThis.EntropyTerminalSfx?.open?.() ?? (sfx.radio && playSound(sfx.radio));
+        playTerminalOpenSound();
         lastTerminalOpenTime = Date.now();
     }
     terminalContainer.classList.add('active');
@@ -558,7 +567,6 @@ function bindTerminalInteractions() {
         terminalInteractionsBound = true;
         if (!perf.isIOS && !document.body.classList.contains('ios-ui')) {
             terminalContainer.addEventListener('pointerup', handleTerminalActivate);
-            terminalContainer.addEventListener('click', handleTerminalActivate);
         }
     }
 
@@ -640,8 +648,8 @@ function bindTerminalInteractions() {
             if (!terminalContainer.classList.contains('active')) {
                 terminalContainer.classList.add('active');
                 setTermInputFocusable(true);
-                lastTerminalOpenTime = Date.now(); 
-                if (sfx.radio) playSound(sfx.radio);
+                lastTerminalOpenTime = Date.now();
+                playTerminalOpenSound();
             }
             
             // Print the list!
