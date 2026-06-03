@@ -1,7 +1,0 @@
-# Cloudflare Pages — https://developers.cloudflare.com/pages/configuration/build-configuration/
-name = "entropy-garden"
-compatibility_date = "2024-09-23"
-pages_build_output_dir = "dist"
-
-# _headers and _redirects live in dist/ after `npm run build`.
-# Wrangler sends them as deploy metadata (not static files). They will not appear in the asset file list.
