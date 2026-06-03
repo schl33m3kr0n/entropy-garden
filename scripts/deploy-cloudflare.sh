@@ -10,41 +10,58 @@ MAX_MIB=120
 rm -rf "$DEST"
 mkdir -p "$DEST"
 
-RSYNC=(rsync -a
-  --exclude '.git'
-  --exclude '.gitignore'
-  --exclude '.DS_Store'
-  --exclude '.netlify'
-  --exclude 'node_modules'
-  --exclude 'dist'
-  --exclude 'archive'
-  --exclude 'scripts'
-  --exclude 'docs'
-  --exclude 'js/script.js'
-  --exclude 'assets/video/genesis-web.mov'
-  --exclude 'assets/img/vault/sun-poster.png'
-  --exclude 'deploy.exclude'
-  --exclude 'deploy.manifest'
-  --exclude '.netlifyignore'
-  --exclude 'netlify.toml'
-  --exclude 'Serve Entropy Garden.command'
-  --exclude 'public'
+# Cloudflare Pages build images do not ship rsync; tar is always available.
+TAR_EXCLUDES=(
+  '.git'
+  '.gitignore'
+  '.DS_Store'
+  '.netlify'
+  'node_modules'
+  'dist'
+  'archive'
+  'scripts'
+  'docs'
+  'js/script.js'
+  'assets/video/genesis-web.mov'
+  'assets/img/vault/sun-poster.png'
+  'deploy.exclude'
+  'deploy.manifest'
+  '.netlifyignore'
+  'netlify.toml'
+  'Serve Entropy Garden.command'
+  'public'
 )
+
+append_tar_exclude() {
+  local pattern="$1"
+  pattern="${pattern%%$'\r'}"
+  pattern="${pattern#"${pattern%%[![:space:]]*}"}"
+  pattern="${pattern%"${pattern##*[![:space:]]}"}"
+  [ -z "$pattern" ] && return 0
+  [[ "$pattern" == \#* ]] && return 0
+  pattern="${pattern#/}"
+  pattern="${pattern%/}"
+  TAR_EXCLUDES+=("$pattern")
+}
 
 if [ -f "$EXCLUDE_FILE" ]; then
   while IFS= read -r pattern || [ -n "$pattern" ]; do
-    pattern="${pattern%%$'\r'}"
-    pattern="${pattern#"${pattern%%[![:space:]]*}"}"
-    pattern="${pattern%"${pattern##*[![:space:]]}"}"
-    [ -z "$pattern" ] && continue
-    [[ "$pattern" == \#* ]] && continue
-    pattern="${pattern#/}"
-    pattern="${pattern%/}"
-    RSYNC+=(--exclude "$pattern")
+    append_tar_exclude "$pattern"
   done < "$EXCLUDE_FILE"
 fi
 
-"${RSYNC[@]}" "$ROOT/" "$DEST/"
+TAR_ARGS=()
+for pattern in "${TAR_EXCLUDES[@]}"; do
+  TAR_ARGS+=(--exclude="$pattern")
+done
+
+(
+  cd "$ROOT"
+  tar "${TAR_ARGS[@]}" -cf - .
+) | (
+  cd "$DEST"
+  tar -xf -
+)
 
 # Cloudflare Pages reads _headers / _redirects / _routes.json from the publish root
 for meta in _headers _redirects _routes.json; do
@@ -120,7 +137,7 @@ fi
 
 SW_VER="$(grep -E "const CACHE_VERSION = " "$ROOT/sw.js" | head -1)"
 if ! grep -qF "$SW_VER" "$DEST/sw.js"; then
-  echo "Deploy check failed: dist/sw.js out of sync with source (run npm run build)" >&2
+  echo "Deploy check failed: dist/sw.js out of sync with source (re-run deploy-cloudflare.sh)" >&2
   exit 1
 fi
 
@@ -141,7 +158,7 @@ echo "Deploy (recommended — uploads _headers/_redirects as config metadata):"
 echo "  npm install && npm run deploy"
 echo ""
 echo "Git-connected Pages settings:"
-echo "  Build command:  npm run build"
+echo "  Build command:  bash scripts/deploy-cloudflare.sh"
 echo "  Build output:   dist"
 echo "  Root directory: (leave blank)"
 echo ""
