@@ -815,6 +815,5 @@ export {
     stopSingularity3D,
     pauseSingularityPresentation,
     resumeSingularityPresentation,
-    reconcileSingularityPoem,
     bindSingularityControls,
 };
