@@ -9,14 +9,14 @@ import {
     pongBlocksArrowNav,
     isPongSessionActive,
     cancelPongArmingSequence,
-} from './pong.js';
+} from './game/pong.js';
 import {
     initKonami,
     isKonamiInProgress,
     konamiClaimsKey,
     cancelKonamiArmingSequence,
     resetKonamiSequence,
-} from './konami.js';
+} from './game/konami.js';
 
 export function bootAddons() {
     initPanopticonPingPong();

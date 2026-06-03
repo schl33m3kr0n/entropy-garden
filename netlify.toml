@@ -1,7 +1,7 @@
 # Netlify: build creates dist/, then publishes dist/.
 # In Netlify UI → Build settings → leave "Publish directory" BLANK (netlify.toml wins).
 [build]
-  command = "bash scripts/deploy-netlify.sh"
+  command = "bash scripts/deploy/netlify.sh"
   publish = "dist"
 
 # Skip post-processing (form scan, asset optimization) — avoids hangs on media-heavy static sites.

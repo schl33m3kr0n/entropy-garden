@@ -354,12 +354,12 @@
   <button class="lightbox-btn lb-next">&#10095;</button>
 </div>
 
-<script src="js/terminal-sfx.js" defer></script>
-<script src="js/ios-terminal-boot.js" defer></script>
-<script src="js/lore-pools.data.js"></script>
-<script src="js/cipher-vigenere.js"></script>
-<script src="js/cipher-entropy-hint.js"></script>
-<script src="js/trophies.js"></script>
+<script src="js/boot/terminal-sfx.js" defer></script>
+<script src="js/ios/terminal-boot.js" defer></script>
+<script src="js/data/lore-pools.data.js"></script>
+<script src="js/cipher/vigenere.js"></script>
+<script src="js/cipher/entropy-hint.js"></script>
+<script src="js/boot/trophies.js"></script>
 <script>
 (function () {
     function loadPongAddon(onReady) {
@@ -372,7 +372,7 @@
             if (onReady) onReady();
         };
         pong.onerror = function () {
-            console.warn('[Entropy Garden] file-pong.bundle.js missing — run: bash scripts/build-file-pong.sh');
+            console.warn('[Entropy Garden] file-pong.bundle.js missing — run: bash scripts/dev/build-file-pong.sh');
             if (onReady) onReady();
         };
         document.body.appendChild(pong);

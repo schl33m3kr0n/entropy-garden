@@ -1,10 +1,10 @@
 // iOS layout: vertical HUD rail, sidebar tools, playlist text labels.
 
-import { perf } from './shared.js';
+import { perf } from '../core/shared.js';
 
-import { resizeCanvas, stopGardenLoop, resumeGardenLoop } from './lazy.js';
-import { isSingularityActive } from './state.js';
-import { initIosPingPong } from './pong.js';
+import { resizeCanvas, stopGardenLoop, resumeGardenLoop } from '../lazy.js';
+import { isSingularityActive } from '../core/state.js';
+import { initIosPingPong } from '../game/pong.js';
 
 
 
@@ -316,7 +316,7 @@ function bindIosTerminalToggle() {
             run().catch(() => {});
             return;
         }
-        import('./lazy.js').then(({ openTerminal }) => openTerminal()).catch(() => {});
+        import('../lazy.js').then(({ openTerminal }) => openTerminal()).catch(() => {});
     };
 
     btn.addEventListener('touchend', onOpenTerminal, { passive: false });
@@ -344,7 +344,7 @@ export function initIosUi() {
 
     initIosPingPong();
 
-    import('./ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
+    import('./ios/ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
 
     preventPullToRefresh();
     pauseGardenDuringHudScroll();

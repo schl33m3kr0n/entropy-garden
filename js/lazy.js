@@ -1,7 +1,7 @@
 // Lazy module loader with call-through stubs
 
-import { setResizeCanvasHook } from './canvas-resize.js';
-import { perf, sfx, playSound } from './shared.js';
+import { setResizeCanvasHook } from './core/canvas-resize.js';
+import { perf, sfx, playSound } from './core/shared.js';
 
 let terminalMod;
 let singularityMod;
@@ -106,7 +106,7 @@ function isIosPoemMode() {
 
 export function triggerSingularity() {
     if (isIosPoemMode()) {
-        return import('./ios-poems.js').then((m) => m.openIosPoemArchive(0));
+        return import('./ios/ios-poems.js').then((m) => m.openIosPoemArchive(0));
     }
 
     const run = (mod) => {
@@ -141,10 +141,10 @@ the prime thread woven beneath our understanding`;
 /** Last-resort overlay if the singularity module fails to import. */
 function revealSingularityShell() {
     if (isIosPoemMode()) {
-        import('./ios-poems.js').then((m) => m.openIosPoemArchive(0)).catch(() => {});
+        import('./ios/ios-poems.js').then((m) => m.openIosPoemArchive(0)).catch(() => {});
         return;
     }
-    import('./state.js').then(({ setIsSingularityActive }) => {
+    import('./core/state.js').then(({ setIsSingularityActive }) => {
         setIsSingularityActive(true);
         document.body.classList.add('singularity-active');
         const overlay = document.getElementById('singularity-overlay');
@@ -202,14 +202,14 @@ function revealSingularityShell() {
         }
         stopGardenLoop();
         if (!ios) {
-            import('./shared.js').then(({ sfx, playSound }) => playSound(sfx.missionCleared)).catch(() => {});
+            import('./core/shared.js').then(({ sfx, playSound }) => playSound(sfx.missionCleared)).catch(() => {});
         }
     });
 }
 
 export function triggerOspreyEvent() {
     if (isIosPoemMode()) {
-        return import('./ios-poems.js').then((m) => m.openIosOspreyPoem());
+        return import('./ios/ios-poems.js').then((m) => m.openIosOspreyPoem());
     }
     loadSingularity().then((mod) => mod.triggerOspreyEvent());
 }
@@ -236,7 +236,7 @@ export function resumeSingularityPresentation() {
 
 export function cyclePoem() {
     if (isIosPoemMode()) {
-        return import('./ios-poems.js').then((m) => m.stepIosPoem(1));
+        return import('./ios/ios-poems.js').then((m) => m.stepIosPoem(1));
     }
     if (singularityMod?.cyclePoem) {
         singularityMod.cyclePoem();
@@ -247,7 +247,7 @@ export function cyclePoem() {
 
 export function reconcileSingularityPoem() {
     if (isIosPoemMode()) {
-        return import('./ios-poems.js').then((m) => m.refreshIosPoemArchive());
+        return import('./ios/ios-poems.js').then((m) => m.refreshIosPoemArchive());
     }
     loadSingularity().then((mod) => mod.reconcileSingularityPoem());
 }
@@ -291,7 +291,7 @@ export function stopGardenLoop() {
         matrixMod.stopGardenLoop();
         return;
     }
-    import('./state.js').then((s) => {
+    import('./core/state.js').then((s) => {
         s.setGardenLoopActive(false);
         if (s.gardenAnimId !== null) {
             cancelAnimationFrame(s.gardenAnimId);
@@ -306,7 +306,7 @@ export function resizeCanvas() {
 }
 
 export function setMatrixNeedsRedraw() {
-    import('./state.js').then((s) => s.setNeedsFullRedraw(true));
+    import('./core/state.js').then((s) => s.setNeedsFullRedraw(true));
 }
 
 export async function loadArcadeLevel() {
@@ -386,7 +386,7 @@ function preloadGardenModules() {
 if (perf.isIOS) {
     const preloadIosModules = () => {
         loadTerminal().catch(() => {});
-        import('./ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
+        import('./ios/ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
     };
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', preloadIosModules, { once: true });

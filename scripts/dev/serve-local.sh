@@ -2,14 +2,14 @@
 # Build dist/ (same bundle Cloudflare Pages publishes) and serve it locally.
 set -eu
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PORT="${PORT:-8765}"
 
 while lsof -iTCP:"$PORT" -sTCP:LISTEN -Pn >/dev/null 2>&1; do
   PORT=$((PORT + 1))
 done
 
-bash "$ROOT/scripts/deploy-cloudflare.sh"
+bash "$ROOT/scripts/deploy/cloudflare.sh"
 
 echo ""
 echo "Serving Cloudflare bundle: $ROOT/dist"

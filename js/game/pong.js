@@ -9,8 +9,8 @@ import {
     playSoundOverlap,
     warmSound,
     sfx,
-} from './shared.js';
-import { resizeCanvas } from './canvas-resize.js';
+} from '../core/shared.js';
+import { resizeCanvas } from '../core/canvas-resize.js';
 
 const PADDLE_HALF = 8;
 const BALL_R = 3.5;

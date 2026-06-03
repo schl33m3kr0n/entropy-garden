@@ -1,3 +1,3 @@
 #!/bin/bash
 cd "$(dirname "$0")" || exit 1
-exec bash scripts/serve-local.sh
+exec bash scripts/dev/serve-local.sh

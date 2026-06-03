@@ -2,7 +2,7 @@
 # Production bundle for Cloudflare Pages (publish dist/ as site output).
 set -eu
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 DEST="$ROOT/dist"
 EXCLUDE_FILE="$ROOT/deploy.exclude"
 MAX_MIB=120
@@ -81,12 +81,12 @@ check_file "$DEST/index.html"
 check_file "$DEST/404.html"
 check_file "$DEST/js/main.js"
 check_file "$DEST/js/lazy.js"
-check_file "$DEST/js/shared.js"
+check_file "$DEST/js/core/shared.js"
 check_file "$DEST/js/modules/matrix.js"
 check_file "$DEST/js/modules/singularity.js"
 check_file "$DEST/js/modules/arcade.js"
-check_file "$DEST/js/pong.js"
-check_file "$DEST/js/konami.js"
+check_file "$DEST/js/game/pong.js"
+check_file "$DEST/js/game/konami.js"
 check_file "$DEST/_headers"
 check_file "$DEST/_redirects"
 check_file "$DEST/_routes.json"
@@ -125,13 +125,13 @@ if [ -f "$DEST/js/ios-pingpong.js" ]; then
   exit 1
 fi
 
-if ! grep -q "from './pong.js'" "$DEST/js/main.js" || ! grep -q "from './pong.js'" "$DEST/js/ios-ui.js"; then
-  echo "Deploy check failed: dist bundle must import js/pong.js from main.js and ios-ui.js" >&2
+if ! grep -q "from './game/pong.js'" "$DEST/js/main.js" || ! grep -q "from '../game/pong.js'" "$DEST/js/ios/ios-ui.js"; then
+  echo "Deploy check failed: dist bundle must import game/pong.js from main.js and ios-ui.js" >&2
   exit 1
 fi
 
-if ! grep -q 'let panopticonPongInitialized = false' "$DEST/js/pong.js"; then
-  echo "Deploy check failed: js/pong.js missing panopticonPongInitialized guard" >&2
+if ! grep -q 'let panopticonPongInitialized = false' "$DEST/js/game/pong.js"; then
+  echo "Deploy check failed: js/game/pong.js missing panopticonPongInitialized guard" >&2
   exit 1
 fi
 
@@ -145,14 +145,14 @@ if ! grep -q 'wheelConicGradient' "$DEST/js/modules/matrix.js"; then
   exit 1
 fi
 
-if grep -q 'setTimeout(showPongArmingHint' "$DEST/js/pong.js"; then
-  echo "Deploy check failed: dist/js/pong.js still auto-shows pong arming hint" >&2
+if grep -q 'setTimeout(showPongArmingHint' "$DEST/js/game/pong.js"; then
+  echo "Deploy check failed: dist/js/game/pong.js still auto-shows pong arming hint" >&2
   exit 1
 fi
 
 SW_VER="$(grep -E "const CACHE_VERSION = " "$ROOT/sw.js" | head -1)"
 if ! grep -qF "$SW_VER" "$DEST/sw.js"; then
-  echo "Deploy check failed: dist/sw.js out of sync with source (re-run deploy-cloudflare.sh)" >&2
+  echo "Deploy check failed: dist/sw.js out of sync with source (re-run scripts/deploy/cloudflare.sh)" >&2
   exit 1
 fi
 
@@ -173,7 +173,7 @@ echo "Deploy (recommended — uploads _headers/_redirects as config metadata):"
 echo "  npm install && npm run deploy"
 echo ""
 echo "Git-connected Pages settings:"
-echo "  Build command:  bash scripts/deploy-cloudflare.sh"
+echo "  Build command:  bash scripts/deploy/cloudflare.sh"
 echo "  Build output:   dist"
 echo "  Root directory: (leave blank)"
 echo ""

@@ -12,7 +12,7 @@ except ImportError:
     print("Run: pip3 install imageio-ffmpeg", file=sys.stderr)
     sys.exit(1)
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 IMG_ROOT = ROOT / "assets" / "img"
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 QUALITY = 82

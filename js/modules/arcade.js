@@ -1,4 +1,4 @@
-import { sfx, playSound } from '../shared.js';
+import { sfx, playSound } from '../core/shared.js';
 import { pushTerminalLog, loadTerminal } from '../lazy.js';
 
 let arcadeScore = 0;

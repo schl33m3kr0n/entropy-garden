@@ -1,4 +1,4 @@
-import { panopticonEl } from './shared.js';
+import { panopticonEl } from '../core/shared.js';
 import {
     dismissActivationHint,
     getActivationHintOwner,

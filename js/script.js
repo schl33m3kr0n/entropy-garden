@@ -1127,12 +1127,16 @@ setTimeout(() => {
 
 // --- PLAYLIST CONTROL LOGIC ---
 
+let lastTerminalLoggedTrackIndex = -1;
+
 function updatePlaylistUI() {
     const trackLabel = document.getElementById('track-title');
     const title = getBgmTrackTitle(currentTrackIndex);
     if (trackLabel) {
         applyTrackTitleMarquee(trackLabel, title);
     }
+    if (currentTrackIndex === lastTerminalLoggedTrackIndex) return;
+    lastTerminalLoggedTrackIndex = currentTrackIndex;
     pushTerminalLog(`> AUDIO_LINK: ${title.toUpperCase()} ACTIVE.`);
 }
 
@@ -3371,6 +3375,7 @@ function onModalDragEnd() {
 // --- INITIALIZATION & EVENT BINDING ---
 function beginGardenExperience() {
     playSound(sfx.collectible);
+    lastTerminalLoggedTrackIndex = -1;
     currentTrackIndex = 0;
     playCurrentBgmTrack();
 

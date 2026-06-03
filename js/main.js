@@ -23,7 +23,7 @@ import {
     getBgmTrack,
     getBgmTrackTitle,
     applyTrackTitleMarquee,
-} from './shared.js';
+} from './core/shared.js';
 import {
     time,
     isCorrupted,
@@ -41,7 +41,7 @@ import {
     resetArtifactSlots,
     toggleIsCorrupted,
     setNeedsFullRedraw,
-} from './state.js';
+} from './core/state.js';
 import {
     pushTerminalLog,
     triggerSingularity,
@@ -62,15 +62,16 @@ import {
     reconcileSingularityPoem,
     stopSingularity3D,
 } from './lazy.js';
-import { registerServiceWorkerAfterInit } from './sw-register.js';
-import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios-ui.js';
-import { initKonami, isKonamiInProgress, konamiClaimsKey, cancelKonamiArmingSequence, resetKonamiSequence } from './konami.js';
-import { initPanopticonPingPong, notifyGardenReady, pongBlocksArrowNav, isPongSessionActive, cancelPongArmingSequence } from './pong.js';
+import { registerServiceWorkerAfterInit } from './core/sw-register.js';
+import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios/ios-ui.js';
+import { initKonami, isKonamiInProgress, konamiClaimsKey, cancelKonamiArmingSequence, resetKonamiSequence } from './game/konami.js';
+import { initPanopticonPingPong, notifyGardenReady, pongBlocksArrowNav, isPongSessionActive, cancelPongArmingSequence } from './game/pong.js';
 
 // Bind init immediately so a later module error cannot block the gatekeeper.
 function beginGardenExperience() {
     playSound(sfx.collectible);
     warmSound(sfx.boop);
+    lastTerminalLoggedTrackIndex = -1;
     resetBgmToStart();
 
     document.body.classList.add('garden-loading');
@@ -319,12 +320,16 @@ window.addEventListener("focus", () => {
 
 // --- PLAYLIST CONTROL LOGIC ---
 
+let lastTerminalLoggedTrackIndex = -1;
+
 function updatePlaylistUI() {
     const trackLabel = document.getElementById('track-title');
     const title = getBgmTrackTitle(currentTrackIndex);
     if (trackLabel) {
         applyTrackTitleMarquee(trackLabel, title);
     }
+    if (currentTrackIndex === lastTerminalLoggedTrackIndex) return;
+    lastTerminalLoggedTrackIndex = currentTrackIndex;
     pushTerminalLog(`> AUDIO_LINK: ${title.toUpperCase()} ACTIVE.`);
 }
 
@@ -891,7 +896,7 @@ function openModal(id) {
         }
 
         if (resolvedId === 'poems' && document.body.classList.contains('ios-ui')) {
-            import('./ios-poems.js').then((poems) => {
+            import('./ios/ios-poems.js').then((poems) => {
                 if (!poems.iosPoemsAllowed?.()) {
                     m.style.display = 'none';
                     pushTerminalLog('> POEMS LOCKED. COMPLETE CIPHER OR USE express.');

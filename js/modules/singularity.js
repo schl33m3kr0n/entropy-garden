@@ -1,4 +1,4 @@
-import { sfx, playSound, perf } from '../shared.js';
+import { sfx, playSound, perf } from '../core/shared.js';
 import {
     isSingularityActive,
     currentPoemIndex,
@@ -11,8 +11,8 @@ import {
     setCurrentPoemIndex,
     setGardenLoopActive,
     setGardenAnimId,
-} from '../state.js';
-import { buildSingularityPoemPool, ospreyPoem } from '../singularity-poems.data.js';
+} from '../core/state.js';
+import { buildSingularityPoemPool, ospreyPoem } from '../data/singularity-poems.data.js';
 
 function pushTerminalLog(msg) {
     if (typeof globalThis.pushTerminalLog === 'function') globalThis.pushTerminalLog(msg);

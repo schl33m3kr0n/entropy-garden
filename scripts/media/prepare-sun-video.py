@@ -12,7 +12,7 @@ except ImportError:
     print("Run: pip3 install imageio-ffmpeg", file=sys.stderr)
     sys.exit(1)
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 VIDEO = ROOT / "assets" / "video" / "sun.mp4"
 ARCHIVE = ROOT / "archive" / "sun-original.mp4"
 POSTER_JPG = ROOT / "assets" / "img" / "vault" / "sun-poster.jpg"

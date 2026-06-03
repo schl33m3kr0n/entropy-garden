@@ -18,4 +18,4 @@ deploy.exclude
 deploy.manifest
 .netlifyignore
 netlify.toml
-Serve Entropy Garden.command
+scripts/dev/Serve Entropy Garden.command

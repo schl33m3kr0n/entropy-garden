@@ -1,8 +1,8 @@
 # Entropy Garden — production deploy manifest
 #
 # Build a clean static bundle:
-#   python3 scripts/deploy.py          → writes ./dist/
-#   python3 scripts/deploy.py ../site  → custom output directory
+#   python3 scripts/deploy/deploy.py          → writes ./dist/
+#   python3 scripts/deploy/deploy.py ../site  → custom output directory
 #
 # Includes: index.html, sw.js, css/, js/ (modules, not script.js monolith), pages/, assets/
 # Excludes:  see deploy.exclude (archive/, scripts/, unused media, dev monolith)

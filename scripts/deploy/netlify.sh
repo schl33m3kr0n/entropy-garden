@@ -2,7 +2,7 @@
 # Production bundle for Netlify (bash + rsync only — no Python required).
 set -eu
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 DEST="$ROOT/dist"
 EXCLUDE_FILE="$ROOT/deploy.exclude"
 MAX_MIB=120
@@ -61,17 +61,17 @@ check_file() {
 check_file "$DEST/index.html"
 check_file "$DEST/js/main.js"
 check_file "$DEST/js/lazy.js"
-check_file "$DEST/js/shared.js"
+check_file "$DEST/js/core/shared.js"
 check_file "$DEST/js/modules/matrix.js"
-check_file "$DEST/js/pong.js"
+check_file "$DEST/js/game/pong.js"
 
 if [ -f "$DEST/js/ios-pingpong.js" ]; then
-  echo "Deploy check failed: stale js/ios-pingpong.js in dist/ (use js/pong.js)" >&2
+  echo "Deploy check failed: stale js/ios-pingpong.js in dist/ (use js/game/pong.js)" >&2
   exit 1
 fi
 
-if ! grep -q "from './pong.js'" "$DEST/js/main.js" || ! grep -q "from './pong.js'" "$DEST/js/ios-ui.js"; then
-  echo "Deploy check failed: dist bundle must import js/pong.js from main.js and ios-ui.js" >&2
+if ! grep -q "from './game/pong.js'" "$DEST/js/main.js" || ! grep -q "from '../game/pong.js'" "$DEST/js/ios/ios-ui.js"; then
+  echo "Deploy check failed: dist bundle must import game/pong.js from main.js and ios-ui.js" >&2
   exit 1
 fi
 

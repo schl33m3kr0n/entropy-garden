@@ -6,7 +6,7 @@ import {
     pickCipherChar,
     usesIosCipherGlyphs,
     panopticonEl,
-} from '../shared.js';
+} from '../core/shared.js';
 import {
     time,
     isCorrupted,
@@ -23,7 +23,7 @@ import {
     setNeedsFullRedraw,
     addTime,
     setCanvasMetrics,
-} from '../state.js';
+} from '../core/state.js';
 
 // --- CONCENTRIC CIPHER WHEEL MATRIX ---
 let wheels = [];
@@ -483,7 +483,7 @@ document.addEventListener('focusout', (e) => {
 });
 
 document.addEventListener('visibilitychange', () => {
-    import('./state.js').then((s) => {
+    import('./core/state.js').then((s) => {
         if (document.hidden) {
             stopGardenLoop();
             return;
@@ -494,14 +494,14 @@ document.addEventListener('visibilitychange', () => {
 });
 
 window.addEventListener('pageshow', () => {
-    import('./state.js').then((s) => {
+    import('./core/state.js').then((s) => {
         if (s.isSingularityActive) return;
         resumeGardenLoop();
     });
 });
 
 window.addEventListener('focus', () => {
-    import('./state.js').then((s) => {
+    import('./core/state.js').then((s) => {
         if (s.isSingularityActive) return;
         resumeGardenLoop();
     });

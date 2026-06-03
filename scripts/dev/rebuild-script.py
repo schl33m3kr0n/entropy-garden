@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 script_path = ROOT / "js/script.js"
 lines = script_path.read_text(encoding="utf-8").splitlines(keepends=True)
 

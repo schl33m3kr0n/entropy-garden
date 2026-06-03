@@ -2,7 +2,7 @@
 # Build js/file-pong.bundle.js for file:// opens (pong + konami, not loaded over http).
 set -eu
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 OUT="$ROOT/js/file-pong.bundle.js"
 VER=0.25.5
 

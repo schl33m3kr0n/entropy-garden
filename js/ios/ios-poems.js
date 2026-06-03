@@ -1,12 +1,12 @@
 // iOS poem archive — sidebar list + reader (replaces singularity overlay).
 
-import { perf, sfx, playSound } from './shared.js';
-import { isCorrupted, isCipherSolved, setIosTransmissionsOverride } from './state.js';
+import { perf, sfx, playSound } from '../core/shared.js';
+import { isCorrupted, isCipherSolved, setIosTransmissionsOverride } from '../core/state.js';
 import {
     buildSingularityPoemPool,
     poemTitleFromText,
     findPoemIndexByTitle,
-} from './singularity-poems.data.js';
+} from '../data/singularity-poems.data.js';
 
 const IOS_POEM_TITLE_SLOTS = 3;
 

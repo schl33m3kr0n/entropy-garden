@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v78';
+const CACHE_VERSION = 'entropy-garden-v79';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -8,23 +8,23 @@ const PRECACHE_URLS = [
     'index.html',
     'css/style.css',
     'js/main.js',
-    'js/state.js',
-    'js/shared.js',
     'js/lazy.js',
-    'js/lore-pools.data.js',
-    'js/cipher-vigenere.js',
-    'js/cipher-entropy-hint.js',
-    'js/trophies.js',
-    'js/sw-register.js',
+    'js/core/state.js',
+    'js/core/shared.js',
+    'js/core/sw-register.js',
+    'js/data/lore-pools.data.js',
+    'js/data/singularity-poems.data.js',
+    'js/cipher/vigenere.js',
+    'js/cipher/entropy-hint.js',
+    'js/boot/trophies.js',
     'js/modules/terminal.js',
     'js/modules/matrix.js',
     'js/modules/singularity.js',
     'js/modules/arcade.js',
-    'js/ios-ui.js',
-    'js/ios-poems.js',
-    'js/singularity-poems.data.js',
-    'js/pong.js',
-    'js/konami.js',
+    'js/ios/ios-ui.js',
+    'js/ios/ios-poems.js',
+    'js/game/pong.js',
+    'js/game/konami.js',
     'pages/genesis.html',
     'pages/genesis.js',
     'assets/icons/about.svg',

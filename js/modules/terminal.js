@@ -6,7 +6,7 @@ import {
     shuffle,
     triggerPanopticonCenterStare,
     perf,
-} from '../shared.js';
+} from '../core/shared.js';
 import {
     cipherStage,
     setCipherStage,
@@ -14,7 +14,7 @@ import {
     setIsSingularityActive,
     incrementExtraPizzas,
     isCorrupted,
-} from '../state.js';
+} from '../core/state.js';
 import { triggerOspreyEvent, resizeCanvas, triggerSingularity } from '../lazy.js';
 
 export function getCipherStage() {
