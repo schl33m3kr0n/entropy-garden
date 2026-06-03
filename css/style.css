@@ -214,6 +214,11 @@ body.ios-ui #epilepsy-warning p {
     pointer-events: auto;
 }
 
+/* Above init gatekeeper (100000) once Initialize is clicked */
+body.garden-loading #loader {
+    z-index: 100001;
+}
+
 #loader.loader-exiting {
     pointer-events: none;
 }

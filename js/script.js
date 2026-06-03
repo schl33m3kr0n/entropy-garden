@@ -3466,12 +3466,12 @@ function onModalDragEnd() {
 }
 
 // --- INITIALIZATION & EVENT BINDING ---
-function beginGardenExperience() {
-    playSound(sfx.collectible);
-    lastTerminalLoggedTrackIndex = -1;
-    currentTrackIndex = 0;
-    playCurrentBgmTrack();
+function prefetchGardenBoot() {
+    if (sfx.collectible?.load) sfx.collectible.load();
+    if (sfx.loading?.load) sfx.loading.load();
+}
 
+function beginGardenExperience() {
     document.body.classList.add('garden-loading');
     document.body.classList.remove('garden-ready');
     const term = document.getElementById('terminal-container');
@@ -3481,8 +3481,15 @@ function beginGardenExperience() {
     document.getElementById('init-screen').style.display = 'none';
     canvas.classList.remove('matrix-visible');
     gardenHasStarted = true;
-    startGardenLoop();
     startLoader();
+    startGardenLoop();
+
+    requestAnimationFrame(() => {
+        playSound(sfx.collectible);
+        lastTerminalLoggedTrackIndex = -1;
+        currentTrackIndex = 0;
+        playCurrentBgmTrack();
+    });
 }
 
 (function bindInitButton() {
@@ -3490,6 +3497,8 @@ function beginGardenExperience() {
     if (!initBtn || initBtn.dataset.bound) return;
     initBtn.dataset.bound = '1';
     initBtn.addEventListener('click', beginGardenExperience);
+    initBtn.addEventListener('pointerenter', prefetchGardenBoot, { once: true });
+    initBtn.addEventListener('touchstart', prefetchGardenBoot, { once: true, passive: true });
 })();
 
 function bindDomEvents() {

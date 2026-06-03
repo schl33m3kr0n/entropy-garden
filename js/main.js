@@ -68,12 +68,15 @@ import { initKonami, isKonamiInProgress, konamiClaimsKey, cancelKonamiArmingSequ
 import { initPanopticonPingPong, notifyGardenReady, pongBlocksArrowNav, isPongSessionActive, cancelPongArmingSequence } from './game/pong.js';
 
 // Bind init immediately so a later module error cannot block the gatekeeper.
-function beginGardenExperience() {
-    playSound(sfx.collectible);
+function prefetchGardenBoot() {
+    warmSound(sfx.collectible);
+    warmSound(sfx.loading);
     warmSound(sfx.boop);
-    lastTerminalLoggedTrackIndex = -1;
-    resetBgmToStart();
+    ensureMatrix().catch(() => {});
+}
 
+function beginGardenExperience() {
+    // Show loader before audio decode / BGM load (those can block the main thread).
     document.body.classList.add('garden-loading');
     document.body.classList.remove('garden-ready');
 
@@ -82,12 +85,14 @@ function beginGardenExperience() {
     term?.setAttribute('hidden', '');
     document.getElementById('ios-terminal-toggle')?.setAttribute('hidden', '');
 
-    if (perf.isIOS) loadTerminal();
-
     document.getElementById('init-screen').style.display = 'none';
     canvas.classList.remove('matrix-visible');
     setGardenHasStarted(true);
     updatePanopticonVisibility();
+    startLoader();
+
+    if (perf.isIOS) loadTerminal();
+
     ensureMatrix().then((mod) => {
         mod.resizeCanvas();
         mod.startGardenLoop();
@@ -96,8 +101,15 @@ function beginGardenExperience() {
             setTimeout(() => mod.resizeCanvas(), 300);
         }
     }).catch((err) => console.error('[Entropy Garden] matrix failed to load', err));
-    startLoader();
+
     registerServiceWorkerAfterInit();
+
+    requestAnimationFrame(() => {
+        playSound(sfx.collectible);
+        warmSound(sfx.boop);
+        lastTerminalLoggedTrackIndex = -1;
+        resetBgmToStart();
+    });
 }
 
 function bindInitButton() {
@@ -105,6 +117,8 @@ function bindInitButton() {
     if (!initBtn || initBtn.dataset.bound) return;
     initBtn.dataset.bound = '1';
     initBtn.addEventListener('click', beginGardenExperience);
+    initBtn.addEventListener('pointerenter', prefetchGardenBoot, { once: true });
+    initBtn.addEventListener('touchstart', prefetchGardenBoot, { once: true, passive: true });
 }
 
 bindInitButton();
