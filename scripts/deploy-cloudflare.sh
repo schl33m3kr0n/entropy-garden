@@ -83,6 +83,7 @@ check_file "$DEST/js/main.js"
 check_file "$DEST/js/lazy.js"
 check_file "$DEST/js/shared.js"
 check_file "$DEST/js/modules/matrix.js"
+check_file "$DEST/js/modules/singularity.js"
 check_file "$DEST/js/modules/arcade.js"
 check_file "$DEST/js/pong.js"
 check_file "$DEST/js/konami.js"
@@ -94,6 +95,20 @@ check_file "$ROOT/functions/_middleware.js"
 # Marker so deploy logs confirm the bundle is complete
 echo "build=$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$DEST/.pages-build"
 check_file "$DEST/.pages-build"
+
+check_js_asset() {
+  local rel="$1"
+  local path="$DEST/$rel"
+  if ! head -c 256 "$path" | grep -qE '^[[:space:]]*(//|/\*|import |export |const |let |function )'; then
+    echo "Deploy check failed: $rel is not JavaScript (SPA may be serving HTML for missing files)" >&2
+    head -3 "$path" >&2
+    exit 1
+  fi
+}
+
+check_js_asset "js/main.js"
+check_js_asset "js/lazy.js"
+check_js_asset "js/modules/singularity.js"
 
 if [ -d "$DEST/.netlify" ] || [ -d "$DEST/node_modules" ]; then
   echo "Deploy check failed: build tooling leaked into dist/" >&2
@@ -163,6 +178,8 @@ echo "  Build output:   dist"
 echo "  Root directory: (leave blank)"
 echo ""
 echo "IMPORTANT — Cloudflare Pages:"
-echo "  • 404.html in dist disables automatic SPA fallback (/* → index.html)"
-echo "  • _headers / _redirects are config metadata — they won't appear in the file list"
+echo "  • Build output directory MUST be: dist"
+echo "  • Not found behavior: use 404 page (404.html) — NOT Single Page Application"
+echo "    (SPA serves index.html for /js/modules/*.js → singularity import fails)"
+echo "  • _headers / _redirects / _routes.json are config — not in the file list"
 echo "  • functions/_middleware.js sets JS MIME types if _headers is skipped"

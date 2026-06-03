@@ -125,6 +125,8 @@ export function triggerSingularity() {
         .then(run)
         .catch((err) => {
             console.error('[Entropy Garden] singularity failed to load:', err);
+            pushTerminalLog('> SINGULARITY MODULE FAILED TO LOAD (stale cache or deploy path).');
+            pushTerminalLog('> Hard-refresh, clear site data, or check Cloudflare dist + Not found = 404 page.');
             revealSingularityShell();
         });
 }
