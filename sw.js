@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v79';
+const CACHE_VERSION = 'entropy-garden-v85';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -13,9 +13,11 @@ const PRECACHE_URLS = [
     'js/core/shared.js',
     'js/core/sw-register.js',
     'js/data/lore-pools.data.js',
+    'js/data/cipher-glyphs.data.js',
     'js/data/singularity-poems.data.js',
     'js/cipher/vigenere.js',
     'js/cipher/entropy-hint.js',
+    'js/cipher/wheel-fill.js',
     'js/boot/trophies.js',
     'js/modules/terminal.js',
     'js/modules/matrix.js',

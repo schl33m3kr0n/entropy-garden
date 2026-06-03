@@ -21,8 +21,8 @@
 | `lazy.js` | Lazy loader for terminal, matrix, singularity, arcade |
 | `script.js` | Monolith fallback (`file://` only; excluded from deploy) |
 | `core/` | `shared.js`, `state.js`, `canvas-resize.js`, `sw-register.js` |
-| `data/` | Lore and poem corpora (`.data.js`) |
-| `cipher/` | Vigenère cipher + entropy ring hints (classic scripts) |
+| `data/` | Lore, poems, cipher wheel glyph pools (`cipher-glyphs.data.js`) |
+| `cipher/` | Vigenère, entropy ring hints, `wheel-fill.js` (blank/tofu slot refill) |
 | `ios/` | iOS UI, poems archive, terminal boot |
 | `boot/` | Classic scripts: `terminal-sfx.js`, `trophies.js` |
 | `game/` | Pong + Konami |

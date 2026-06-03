@@ -5,6 +5,7 @@ import {
     singularityAnimId,
     isCorrupted,
 } from './state.js';
+import { FULL_MATRIX_CHARS, HEBREW_CIPHER_CHARS } from '../data/cipher-glyphs.data.js';
 
 export { gardenHasStarted, gardenLoopActive, singularityAnimId, isCorrupted };
 
@@ -453,14 +454,7 @@ export function pickMany(safe, gritty, count) {
 export const canvas = document.getElementById('grid-canvas');
 export const ctx = canvas.getContext('2d');
 
-// Hebrew aleph-bet + finals + geresh/gershayim/maqaf (cipher wheels).
-const HEBREW_CIPHER_CHARS = 'אבגדהוזחטיכךלמםנןסעפףצץקרשת׳״־';
-
-const FULL_MATRIX_CHARS =
-    'ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ∑∫∆∞≈µ¥£€¢±×÷∂∇∏√∝∠∧∨∩∪∴∵∼≅≠≤≥⊂⊃⊆⊇⊕⊗⊥─□△▽◇○◎★☆♪♀♂☼ϫϞ֍' +
-    HEBREW_CIPHER_CHARS +
-    'पफबभमयरलवशषसहअआइईउऊऋएऐओऔॐॠѢѪѦѮѰѲѴѶѸѠѾѼӁӃӇӋӚӜӞӠӢӤӦӨӪӬӮӰӲӴӶӸӺӼӾԀԂԄԆԈԊԌԎԐԒЖЗЛФЦЧШЩЪЫЬЭЮЯ道无极阴阳气玄虚禅空觉悟幻仁义礼智信理天命心变აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰჱჲჳჴჵჶჷჸჹჺァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶᚠᚢᚦᚬᚱᚴᚼᚽᚾᚿᛁᛅᛆᛋᛌᛏᛐᛒᛘᛚᛦঅআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলবশষসহకఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహ가나다라마바사아자차카타파하ሀለሐመሠረሰቀበተኀነአከወዐዘየደገጠጰጸፀፈፐကခဂဃငစဆဇဈညဋဌဍ႑ဏတထဒဓနပဖဗဘမယရလဝသဟဠအഅആഇഈഉഊഋഎഏഐഒഓഔകഖഗഘങചഛജഝഞടഠഡഢണതഥദധനപഫബഭമയരലവശഷസഹᜀᜁᜂᜃᜄᜅᜆᜇᜈᜉᜊᜋᜌᜎᜏᜐᜑកខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអกขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหඅආඇඈඉඊඋඌඍඑඒඓඔඕඖකඛගඝඞඟචඡජඣඤඥඦටඨඩඪණඬතථදධනඳපඵබභමඹයරලවශෂසහළෆֆբգդեզէըթժլխծկհձղճմյնշոչպջռսվտրցւփքօႠႡႢႣႤႥႦႧႨႩႪႫႬႭႮႯႰႱႲႳႴႵႶႷႸႹႺႻႼႽႾႿჀⴀⴁⴂⴃⴄⴅⴆⴇⴈⴉⴊⴋⴌⴍⴎⴏⴐⴑⴒⴓⴔⴕⴖⴗⴘⴙⴚⴛⴜⴝⴞⴟⴠꔀꔃꔉꔊꔋꔌꔚꔛꔤꔥꔪ가고구그기나노누느니다도두드디라로루르리마모무므미바보부브비사소수스시아오우으이자조주즈지차초추츠치카코쿠크키타토투트티파포푸프피하호후흐히';
-
+export { FULL_MATRIX_CHARS };
 export const chars = FULL_MATRIX_CHARS;
 
 // BMP symbols that render reliably in iOS system fonts (cipher wheels only).

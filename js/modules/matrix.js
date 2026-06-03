@@ -8,6 +8,12 @@ import {
     panopticonEl,
 } from '../core/shared.js';
 import {
+    ensureCipherRenderCache,
+    pickRenderableCipherChar,
+    populateEmptyWheelGlyphs,
+    resetCipherRenderCache,
+} from '../cipher/wheel-fill.js';
+import {
     time,
     isCorrupted,
     fontSize,
@@ -32,8 +38,25 @@ let matrixFilled = false;
 let viewW = 0;
 let viewH = 0;
 
+let cipherRenderCacheReady = false;
+
+function initCipherRenderCacheIfNeeded() {
+    if (cipherRenderCacheReady || !ctx) return;
+    ensureCipherRenderCache(ctx, cipherWheelFont(), usesIosCipherGlyphs());
+    cipherRenderCacheReady = true;
+}
+
 function randomChar() {
+    if (ctx && cipherRenderCacheReady) {
+        return pickRenderableCipherChar(ctx, cipherWheelFont(), usesIosCipherGlyphs());
+    }
     return pickCipherChar();
+}
+
+function fillEmptyWheelGlyphs() {
+    if (!ctx || !wheels.length) return;
+    initCipherRenderCacheIfNeeded();
+    populateEmptyWheelGlyphs(wheels, randomChar, ctx, cipherWheelFont());
 }
 
 function cipherWheelFont() {
@@ -83,6 +106,8 @@ function buildWheels() {
     if (globalThis.EntropyCipherHint?.shouldShowRingHint?.()) {
         globalThis.EntropyCipherHint.applyToWheels(wheels, perf, randomChar);
     }
+
+    fillEmptyWheelGlyphs();
 }
 
 function cycleGlyphs(wheel) {
@@ -124,6 +149,8 @@ function updateWheels() {
             cycleGlyphs(wheel);
         }
     }
+
+    fillEmptyWheelGlyphs();
 }
 
 let wheelGradientCache = { key: '', stroke: null, fill: null };
@@ -174,6 +201,7 @@ function drawChannelRings(cx, cy) {
 }
 
 function drawCipherWheels(cx, cy) {
+    initCipherRenderCacheIfNeeded();
     ctx.clearRect(0, 0, viewW, viewH);
     ctx.font = cipherWheelFont();
     ctx.textAlign = 'center';
@@ -307,6 +335,9 @@ function getViewportMetrics() {
 
 function resizeCanvas() {
     if (!canvas || !ctx) return;
+
+    cipherRenderCacheReady = false;
+    resetCipherRenderCache();
 
     const dpr = Math.min(window.devicePixelRatio || 1, perf.dprCap);
     const fs = perf.isIOS
@@ -530,6 +561,7 @@ function refreshCipherEntropyRingHint() {
     } else {
         hint.clearFromWheels(wheels, randomChar, perf);
     }
+    fillEmptyWheelGlyphs();
     setNeedsFullRedraw(true);
 }
 
