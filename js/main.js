@@ -425,8 +425,10 @@ function revealGardenUI() {
     const iosTerminalToggle = document.getElementById('ios-terminal-toggle');
 
     const revealTerminalChrome = () => {
-        iosTerminalToggle?.removeAttribute('hidden');
-        if (isIosLayout) return;
+        if (isIosLayout) {
+            iosTerminalToggle?.removeAttribute('hidden');
+            return;
+        }
         if (!term) return;
         term.removeAttribute('hidden');
         term.classList.add('is-sliver');
