@@ -812,8 +812,5 @@ export {
     triggerOspreyEvent,
     cyclePoem,
     init3D,
-    stopSingularity3D,
-    pauseSingularityPresentation,
-    resumeSingularityPresentation,
     bindSingularityControls,
 };
