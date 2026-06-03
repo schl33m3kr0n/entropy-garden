@@ -9,6 +9,8 @@ import {
 } from '../core/shared.js';
 import {
     ensureCipherRenderCache,
+    isEmptyWheelGlyph,
+    isRenderableCipherGlyph,
     pickRenderableCipherChar,
     populateEmptyWheelGlyphs,
     resetCipherRenderCache,
@@ -41,22 +43,27 @@ let viewH = 0;
 let cipherRenderCacheReady = false;
 
 function initCipherRenderCacheIfNeeded() {
-    if (cipherRenderCacheReady || !ctx) return;
-    ensureCipherRenderCache(ctx, cipherWheelFont(), usesIosCipherGlyphs());
+    if (cipherRenderCacheReady) return;
+    ensureCipherRenderCache(cipherWheelFont(), usesIosCipherGlyphs());
     cipherRenderCacheReady = true;
 }
 
 function randomChar() {
-    if (ctx && cipherRenderCacheReady) {
-        return pickRenderableCipherChar(ctx, cipherWheelFont(), usesIosCipherGlyphs());
-    }
-    return pickCipherChar();
+    if (!cipherRenderCacheReady) return pickCipherChar();
+    return pickRenderableCipherChar(cipherWheelFont(), usesIosCipherGlyphs());
+}
+
+function repairWheelGlyph(wheel, index) {
+    const font = cipherWheelFont();
+    const glyph = wheel.glyphs[index];
+    if (!isEmptyWheelGlyph(glyph) && isRenderableCipherGlyph(glyph, font)) return;
+    wheel.glyphs[index] = pickRenderableCipherChar(font, usesIosCipherGlyphs());
 }
 
 function fillEmptyWheelGlyphs() {
-    if (!ctx || !wheels.length) return;
+    if (!wheels.length) return;
     initCipherRenderCacheIfNeeded();
-    populateEmptyWheelGlyphs(wheels, randomChar, ctx, cipherWheelFont());
+    populateEmptyWheelGlyphs(wheels, randomChar, cipherWheelFont());
 }
 
 function cipherWheelFont() {
@@ -67,6 +74,7 @@ function cipherWheelFont() {
 }
 
 function buildWheels() {
+    initCipherRenderCacheIfNeeded();
     wheels = [];
     const maxRadius = Math.hypot(viewW, viewH) / 2 + cellSize;
     const charBand = cellSize * (perf.isMobile ? 1.15 : 1.25);
@@ -118,6 +126,7 @@ function cycleGlyphs(wheel) {
     for (let s = 0; s < swaps; s++) {
         const idx = Math.floor(Math.random() * wheel.charCount);
         wheel.glyphs[idx] = randomChar();
+        repairWheelGlyph(wheel, idx);
     }
 }
 
@@ -149,8 +158,6 @@ function updateWheels() {
             cycleGlyphs(wheel);
         }
     }
-
-    fillEmptyWheelGlyphs();
 }
 
 let wheelGradientCache = { key: '', stroke: null, fill: null };

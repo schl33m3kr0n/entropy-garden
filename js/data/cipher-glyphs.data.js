@@ -7,9 +7,17 @@
 export const CIPHER_LATIN_EXTENDED =
     "ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ×÷";
 
-/** Greek (classic & archaic). */
+/** Greek (classic, archaic). */
 export const CIPHER_GREEK =
-    "ϫϞ";
+    "αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩϫϞ";
+
+/** BMP symbols for desktop monospace (probe-tested via wheel-fill). Avoid emoji-default code points (e.g. zodiac U+2648). */
+export const CIPHER_BMP_SAFE_EXTRA =
+    "♠♣♥♦" +
+    "←→↑↓↔⇐⇒" +
+    "◆●▪■▲▼" +
+    "✦✧✩✪✫✭✯" +
+    "∀∃∅∈∉";
 
 /** Elder Futhark runes. */
 export const CIPHER_RUNIC =
@@ -18,10 +26,6 @@ export const CIPHER_RUNIC =
 /** Hebrew aleph-bet + finals + geresh/gershayim/maqaf. */
 export const HEBREW_CIPHER_CHARS =
     "אבגדהוזחטיכךלמםנןסעפףצץקרשת״־";
-
-/** Arabic (monospace-safe subset). */
-export const CIPHER_ARABIC =
-    "آأئةتثطظ";
 
 /** Cyrillic and related letters. */
 export const CIPHER_CYRILLIC =
@@ -96,40 +100,6 @@ export const CIPHER_CHEROKEE =
     "ᎡᎢᎣᎤᎥᎦᎧᎨᎩᎪᎬᎭᎮᎯᎰᎱᎲᎳᎴᎵᎶᎷᎸᎹᎺᎻᎼᎽᎾᎿᏀᏁᏂᏃᏄᏅᏆᏇᏈᏉᏊᏋᏌᏍᏎᏏᏐᏑᏓᏔᏕᏖᏘᏙᏚᏛᏜᏝᏞᏟᏠᏡᏢᏣᏤᏥᏦᏧᏨᏩᏪᏫᏬᏭᏮᏯ" +
     "ᏰᏱᏲᏳᏴᏵᏸᏹᏺᏻᏼᏽ";
 
-/** Canadian Aboriginal Syllabics (Unicode U+1400–U+167F). */
-export const CIPHER_SYLLABICS_1 =
-    "᐀ᐁᐂᐃᐄᐅᐆᐇᐈᐉᐊᐋᐌᐍᐎᐏᐐᐑᐒᐓᐔᐕᐖᐗᐘᐙᐚᐛᐜᐝᐞᐟᐠᐡᐢᐣᐤᐥᐦᐨᐩᐪᐫᐬᐭᐮᐯᐰᐱᐲᐳᐴᐵᐶᐷᐸᐹᐺᐻᐼᐽᐾᐿᑀᑁᑂᑃᑄᑅᑆᑇᑈᑉᑋᑌᑍ" +
-    "ᑎᑏ";
-export const CIPHER_SYLLABICS_2 =
-    "ᑐᑑᑒᑓᑔᑗᑘᑙᑚᑛᑜᑝᑞᑟᑠᑡᑢᑣᑤᑥᑦᑧᑨᑩᑪᑫᑬᑭᑮᑯᑰᑱᑲᑳᑴᑵᑶᑷᑸᑹᑺᑻᑼᑽᑾᑿᒀᒁᒂᒃᒄᒅᒆᒇᒈᒉᒊᒍᒎᒏᒐᒑᒒᒓᒔᒖᒗᒘᒙᒚᒛᒜᒝᒞᒟ";
-export const CIPHER_SYLLABICS_3 =
-    "ᒠᒡᒢᒣᒤᒩᒪᒫᒬᒭᒮᒰᒲᒴᒶᒷᒸᒹᒺᒻᒼᒽᒾᒿᓀᓁᓂᓃᓄᓅᓆᓇᓈᓉᓊᓋᓌᓍᓎᓏᓐᓑᓒᓓᓔᓕᓖᓚᓛᓜᓝᓞᓟᓠᓡᓢᓤᓦᓧᓨᓩᓪᓫᓬᓭᓮᓯ";
-export const CIPHER_SYLLABICS_4 =
-    "ᓰᓱᓲᓳᓴᓵᓶᓷᓸᓹᓺᓻᓼᓽᓾᓿᔀᔁᔂᔃᔄᔅᔆᔇᔈᔉᔊᔋᔌᔍᔎᔏᔐᔑᔒᔓᔔᔕᔖᔗᔘᔙᔚᔛᔜᔝᔞᔟᔠᔡᔢᔣᔤᔥᔦᔧᔨᔩᔪᔫᔬᔭᔮᔯᔰᔱᔲᔳᔴᔵᔶᔷᔸᔹᔺᔻ" +
-    "ᔼᔽᔾᔿ";
-export const CIPHER_SYLLABICS_5 =
-    "ᕀᕁᕂᕃᕄᕅᕆᕇᕈᕉᕊᕋᕌᕍᕎᕏᕐᕑᕒᕓᕔᕕᕖᕗᕘᕙᕚᕛᕜᕝᕞᕟᕠᕡᕢᕣᕤᕥᕦᕧᕨᕩᕪᕫᕬᕭᕮᕯᕰᕱᕲᕴᕵᕶᕷᕸᕹᕺᕻᕼᕽᕾᕿᖀᖁᖂᖃᖄᖅᖆᖇᖈᖉᖊᖋᖌ" +
-    "ᖍᖎᖏ";
-export const CIPHER_SYLLABICS_6 =
-    "ᖐᖑᖒᖓᖔᖕᖖᖗᖘᖙᖚᖛᖜᖝᖞᖟᖠᖡᖤᖥᖦᖧᖨᖩᖪᖫᖬᖭᖮᖯᖰᖱᖲᖳᖴᖵᖶᖷᖸᖹᖺᖻᖼᖽᖾᖿᗀᗁᗂᗃᗄᗅᗆᗇᗈᗉᗊᗋᗌᗍᗎᗏᗐᗑᗒᗓᗔᗕᗖᗗᗘᗙᗚᗛᗜᗝ" +
-    "ᗞᗟ";
-export const CIPHER_SYLLABICS_7 =
-    "ᗠᗡᗢᗣᗤᗥᗦᗧᗨᗩᗪᗫᗬᗭᗯᗰᗱᗲᗳᗴᗵᗶᗷᗸᗹᗺᗻᗼᗽᗾᗿᘀᘁᘂᘃᘄᘅᘆᘇᘈᘉᘊᘋᘌᘍᘎᘏᘐᘑᘒᘓᘔᘕᘖᘗᘘᘙᘚᘛᘜᘝᘞᘟᘠᘡᘢᘣᘤᘥᘦᘧᘨᘩᘪᘫᘬ" +
-    "ᘭᘮᘯ";
-export const CIPHER_SYLLABICS_8 =
-    "ᘰᘱᘲᘳᘴᘵᘶᘷᘸᘹᘺᘻᘼᘽᘾᘿᙀᙁᙂᙃᙄᙅᙆᙇᙈᙉᙊᙋᙌᙍᙎᙏᙐᙑᙒᙓᙔᙕᙖᙗᙘᙙᙚᙛᙜᙝᙞᙟᙠᙡᙢᙣᙤᙥᙦᙧᙨᙩᙪᙫᙬ᙭᙮ᙯᙰᙱᙲᙳᙴᙵᙶᙷᙸᙹᙺᙻ" +
-    "ᙼᙽᙾᙿ";
-
-export const CIPHER_CANADIAN_SYLLABICS =
-    CIPHER_SYLLABICS_1 +
-    CIPHER_SYLLABICS_2 +
-    CIPHER_SYLLABICS_3 +
-    CIPHER_SYLLABICS_4 +
-    CIPHER_SYLLABICS_5 +
-    CIPHER_SYLLABICS_6 +
-    CIPHER_SYLLABICS_7 +
-    CIPHER_SYLLABICS_8;
-
 // ─── Caucasus, Ethiopian & other scripts ───────────────────────────────────
 
 /** Georgian Mkhedruli + Asomtavruli / Nuskhuri supplement. */
@@ -146,31 +116,14 @@ export const CIPHER_VAI =
 
 export const CIPHER_ETHIOPIC = "ሀለሐመሠረሰቀበተኀነአከወዐዘየደገጠጰጸፀፈፐ";
 
-// ─── Alchemical (Unicode 1F700–1F77F; omit missing-glyph code points) ───────
-
-export const ALCHEMICAL_CIPHER_1 =
-    "🜁🜂🜃🜄🜅🜆🜇🜈🜉🜊🜋🜌🜍🜎🜏🜐🜑🜒🜓🜔🜕🜖🜗🜘🜙🜛🜜🜝🜞🜟🜠🜡🜢🜣🜤🜥";
-export const ALCHEMICAL_CIPHER_2 =
-    "🜦🜧🜨🜩🜪🜫🜬🜭🜮🜯🜰🜱🜲🜳🜵🜶🜷🜸🜹🜻🜼🜾🜿🝀🝁🝂🝃🝅🝈🝉🝊🝋";
-export const ALCHEMICAL_CIPHER_3 =
-    "🝌🝍🝎🝏🝒🝓🝔🝕🝖🝗🝘🝝🝡🝢🝣🝤🝥🝦🝧🝨🝩🝪🝫🝬🝭🝮🝰🝱";
-export const ALCHEMICAL_CIPHER_4 =
-    "🝲🝳";
-
-export const ALCHEMICAL_CIPHER_CHARS =
-    ALCHEMICAL_CIPHER_1 +
-    ALCHEMICAL_CIPHER_2 +
-    ALCHEMICAL_CIPHER_3 +
-    ALCHEMICAL_CIPHER_4;
-
 /** Desktop matrix rain — concatenation order matches category sections above. */
 export const FULL_MATRIX_CHARS =
     CIPHER_LATIN_EXTENDED +
     CIPHER_GREEK +
+    CIPHER_BMP_SAFE_EXTRA +
     CIPHER_MATH_DECORATIVE +
     DECORATIVE_CIPHER_CHARS +
     HEBREW_CIPHER_CHARS +
-    CIPHER_ARABIC +
     CIPHER_DEVANAGARI +
     CIPHER_CYRILLIC +
     CIPHER_CJK +
@@ -185,11 +138,9 @@ export const FULL_MATRIX_CHARS =
     CIPHER_MALAYALAM +
     CIPHER_BAYBAYIN +
     CIPHER_CHEROKEE +
-    CIPHER_CANADIAN_SYLLABICS +
     CIPHER_KHMER +
     CIPHER_THAI +
     CIPHER_SINHALA +
     ARMENIAN_CIPHER_CHARS +
-    ALCHEMICAL_CIPHER_CHARS +
     CIPHER_GEORGIAN_MTAVRULI +
     CIPHER_VAI;

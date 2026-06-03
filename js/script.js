@@ -520,11 +520,16 @@ let cellSize = 16;
 const font = '16px Arial, sans-serif';
 // Cipher wheel glyphs by category — keep in sync with js/data/cipher-glyphs.data.js
 const CIPHER_LATIN_EXTENDED = "ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ×÷";
-const CIPHER_GREEK = "ϫϞ";
+const CIPHER_GREEK = "αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩϫϞ";
+const CIPHER_BMP_SAFE_EXTRA =
+    "♠♣♥♦" +
+    "←→↑↓↔⇐⇒" +
+    "◆●▪■▲▼" +
+    "✦✧✩✪✫✭✯" +
+    "∀∃∅∈∉";
 const CIPHER_MATH_DECORATIVE = "∑∆∞≈µ¥£€¢±∂∇√∝∠∧∨∩∪∵∼≅≠≤≥⊂⊃⊆⊇⊕⊗─□△▽◇○◎★☆♀♂☼";
 const DECORATIVE_CIPHER_CHARS = "※⁂⁜⊙⊛⟠❀❖✡";
 const HEBREW_CIPHER_CHARS = "אבגדהוזחטיכךלמםנןסעפףצץקרשת״־";
-const CIPHER_ARABIC = "آأئةتثطظ";
 const CIPHER_DEVANAGARI = "पफबभमयरलवशषसहअआइईउऊऋएऐओऔॐॠ";
 const CIPHER_CYRILLIC = "ѢѪѦѮѰѲѴѶѸѠѾѼӁӃӇӋӚӜӞӠӢӤӦӨӪӬӮӰӲӴӶӸӺӼӾԂԄԆԈԊԌԎԐԒЖЗЛФЦЧШЩЪЫЬЭЮЯ";
 const CIPHER_CJK = "道无极阴阳气玄虚禅空觉悟幻仁义礼智信理天命心变";
@@ -542,40 +547,21 @@ const CIPHER_MALAYALAM = "അആഇഈഉഊഋഎഏഐഒഓഔകഖഗഘങ
 const CIPHER_BAYBAYIN = "ᜀᜁᜂᜃᜄᜅᜆᜇᜈᜉᜊᜋᜌᜎᜏᜐᜑ";
 const CIPHER_CHEROKEE = "ᎡᎢᎣᎤᎥᎦᎧᎨᎩᎪᎬᎭᎮᎯᎰᎱᎲᎳᎴᎵᎶᎷᎸᎹᎺᎻᎼᎽᎾᎿᏀᏁᏂᏃᏄᏅᏆᏇᏈᏉᏊᏋᏌᏍ" +
     "ᏎᏏᏐᏑᏓᏔᏕᏖᏘᏙᏚᏛᏜᏝᏞᏟᏠᏡᏢᏣᏤᏥᏦᏧᏨᏩᏪᏫᏬᏭᏮᏯᏰᏱᏲᏳᏴᏵᏸᏹᏺᏻᏼᏽ";
-const CIPHER_SYLLABICS_1 = "᐀ᐁᐂᐃᐄᐅᐆᐇᐈᐉᐊᐋᐌᐍᐎᐏᐐᐑᐒᐓᐔᐕᐖᐗᐘᐙᐚᐛᐜᐝᐞᐟᐠᐡᐢᐣᐤᐥᐦ" +
-    "ᐨᐩᐪᐫᐬᐭᐮᐯᐰᐱᐲᐳᐴᐵᐶᐷᐸᐹᐺᐻᐼᐽᐾᐿᑀᑁᑂᑃᑄᑅᑆᑇᑈᑉᑋᑌᑍᑎᑏ";
-const CIPHER_SYLLABICS_2 = "ᑐᑑᑒᑓᑔᑗᑘᑙᑚᑛᑜᑝᑞᑟᑠᑡᑢᑣᑤᑥᑦᑧᑨᑩᑪᑫᑬᑭᑮᑯᑰᑱᑲᑳᑴᑵᑶᑷ" +
-    "ᑸᑹᑺᑻᑼᑽᑾᑿᒀᒁᒂᒃᒄᒅᒆᒇᒈᒉᒊᒍᒎᒏᒐᒑᒒᒓᒔᒖᒗᒘᒙᒚᒛᒜᒝᒞᒟ";
-const CIPHER_SYLLABICS_3 = "ᒠᒡᒢᒣᒤᒩᒪᒫᒬᒭᒮᒰᒲᒴᒶᒷᒸᒹᒺᒻᒼᒽᒾᒿᓀᓁᓂᓃᓄᓅᓆᓇᓈᓉᓊᓋᓌᓍᓎᓏᓐᓑᓒᓓᓔᓕᓖᓚᓛᓜᓝᓞᓟᓠᓡᓢᓤᓦᓧᓨᓩᓪᓫᓬᓭᓮᓯ";
-const CIPHER_SYLLABICS_4 = "ᓰᓱᓲᓳᓴᓵᓶᓷᓸᓹᓺᓻᓼᓽᓾᓿᔀᔁᔂᔃᔄᔅᔆᔇᔈᔉᔊᔋᔌᔍᔎᔏᔐᔑᔒᔓᔔᔕᔖᔗ" +
-    "ᔘᔙᔚᔛᔜᔝᔞᔟᔠᔡᔢᔣᔤᔥᔦᔧᔨᔩᔪᔫᔬᔭᔮᔯᔰᔱᔲᔳᔴᔵᔶᔷᔸᔹᔺᔻᔼᔽᔾᔿ";
-const CIPHER_SYLLABICS_5 = "ᕀᕁᕂᕃᕄᕅᕆᕇᕈᕉᕊᕋᕌᕍᕎᕏᕐᕑᕒᕓᕔᕕᕖᕗᕘᕙᕚᕛᕜᕝᕞᕟᕠᕡᕢᕣᕤᕥᕦᕧ" +
-    "ᕨᕩᕪᕫᕬᕭᕮᕯᕰᕱᕲᕴᕵᕶᕷᕸᕹᕺᕻᕼᕽᕾᕿᖀᖁᖂᖃᖄᖅᖆᖇᖈᖉᖊᖋᖌᖍᖎᖏ";
-const CIPHER_SYLLABICS_6 = "ᖐᖑᖒᖓᖔᖕᖖᖗᖘᖙᖚᖛᖜᖝᖞᖟᖠᖡᖤᖥᖦᖧᖨᖩᖪᖫᖬᖭᖮᖯᖰᖱᖲᖳᖴᖵᖶᖷᖸ" +
-    "ᖹᖺᖻᖼᖽᖾᖿᗀᗁᗂᗃᗄᗅᗆᗇᗈᗉᗊᗋᗌᗍᗎᗏᗐᗑᗒᗓᗔᗕᗖᗗᗘᗙᗚᗛᗜᗝᗞᗟ";
-const CIPHER_SYLLABICS_7 = "ᗠᗡᗢᗣᗤᗥᗦᗧᗨᗩᗪᗫᗬᗭᗯᗰᗱᗲᗳᗴᗵᗶᗷᗸᗹᗺᗻᗼᗽᗾᗿᘀᘁᘂᘃᘄᘅᘆᘇᘈ" +
-    "ᘉᘊᘋᘌᘍᘎᘏᘐᘑᘒᘓᘔᘕᘖᘗᘘᘙᘚᘛᘜᘝᘞᘟᘠᘡᘢᘣᘤᘥᘦᘧᘨᘩᘪᘫᘬᘭᘮᘯ";
-const CIPHER_SYLLABICS_8 = "ᘰᘱᘲᘳᘴᘵᘶᘷᘸᘹᘺᘻᘼᘽᘾᘿᙀᙁᙂᙃᙄᙅᙆᙇᙈᙉᙊᙋᙌᙍᙎᙏᙐᙑᙒᙓᙔᙕᙖᙗ" +
-    "ᙘᙙᙚᙛᙜᙝᙞᙟᙠᙡᙢᙣᙤᙥᙦᙧᙨᙩᙪᙫᙬ᙭᙮ᙯᙰᙱᙲᙳᙴᙵᙶᙷᙸᙹᙺᙻᙼᙽᙾᙿ";
 const CIPHER_KHMER = "កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ";
 const CIPHER_THAI = "กขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสห";
 const CIPHER_SINHALA = "අආඇඈඉඊඋඌඍඑඒඓඔඕඖකඛගඝඞඟචඡජඣඤඥඦටඨඩඪණඬතථදධනඳපඵබභමඹයරලවශෂසහළෆ";
 const ARMENIAN_CIPHER_UPPER = "ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՒՓՔՕՖ";
 const ARMENIAN_CIPHER_LOWER = "աբգդեզէըթժիխծկհձղճմնշոչպջռսվտրցւփ";
 const ARMENIAN_CIPHER_PUNCT = "ֆքօ֍";
-const ALCHEMICAL_CIPHER_1 = "🜁🜂🜃🜄🜅🜆🜇🜈🜉🜊🜋🜌🜍🜎🜏🜐🜑🜒🜓🜔🜕🜖🜗🜘🜙🜛🜜🜝🜞🜟🜠🜡🜢🜣🜤🜥";
-const ALCHEMICAL_CIPHER_2 = "🜦🜧🜨🜩🜪🜫🜬🜭🜮🜯🜰🜱🜲🜳🜵🜶🜷🜸🜹🜻🜼🜾🜿🝀🝁🝂🝃🝅🝈🝉🝊🝋";
-const ALCHEMICAL_CIPHER_3 = "🝌🝍🝎🝏🝒🝓🝔🝕🝖🝗🝘🝝🝡🝢🝣🝤🝥🝦🝧🝨🝩🝪🝫🝬🝭🝮🝰🝱";
-const ALCHEMICAL_CIPHER_4 = "🝲🝳";
 const CIPHER_GEORGIAN_MTAVRULI = "ⴀⴁⴂⴃⴄⴅⴆⴇⴈⴉⴊⴋⴌⴍⴎⴏⴐⴑⴒⴓⴔⴕⴖⴗⴘⴙⴚⴛⴜⴝⴞⴟⴠ";
 const CIPHER_VAI = "ꔀꔃꔉꔊꔋꔌꔚꔛꔤꔥꔪ";
 const FULL_MATRIX_CHARS =
     CIPHER_LATIN_EXTENDED +
     CIPHER_GREEK +
+    CIPHER_BMP_SAFE_EXTRA +
     CIPHER_MATH_DECORATIVE +
     DECORATIVE_CIPHER_CHARS +
     HEBREW_CIPHER_CHARS +
-    CIPHER_ARABIC +
     CIPHER_DEVANAGARI +
     CIPHER_CYRILLIC +
     CIPHER_CJK +
@@ -590,24 +576,12 @@ const FULL_MATRIX_CHARS =
     CIPHER_MALAYALAM +
     CIPHER_BAYBAYIN +
     CIPHER_CHEROKEE +
-    CIPHER_SYLLABICS_1 +
-    CIPHER_SYLLABICS_2 +
-    CIPHER_SYLLABICS_3 +
-    CIPHER_SYLLABICS_4 +
-    CIPHER_SYLLABICS_5 +
-    CIPHER_SYLLABICS_6 +
-    CIPHER_SYLLABICS_7 +
-    CIPHER_SYLLABICS_8 +
     CIPHER_KHMER +
     CIPHER_THAI +
     CIPHER_SINHALA +
     ARMENIAN_CIPHER_UPPER +
     ARMENIAN_CIPHER_LOWER +
     ARMENIAN_CIPHER_PUNCT +
-    ALCHEMICAL_CIPHER_1 +
-    ALCHEMICAL_CIPHER_2 +
-    ALCHEMICAL_CIPHER_3 +
-    ALCHEMICAL_CIPHER_4 +
     CIPHER_GEORGIAN_MTAVRULI +
     CIPHER_VAI;
 const chars = FULL_MATRIX_CHARS;

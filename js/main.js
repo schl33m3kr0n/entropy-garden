@@ -72,7 +72,6 @@ function prefetchGardenBoot() {
     warmSound(sfx.collectible);
     warmSound(sfx.loading);
     warmSound(sfx.boop);
-    ensureMatrix().catch(() => {});
 }
 
 function beginGardenExperience() {
@@ -122,10 +121,6 @@ function bindInitButton() {
 }
 
 bindInitButton();
-
-// ==========================================
-// ENTROPY GARDEN - v24.0 ENGINE
-// ==========================================
 
 // ==========================================
 // ENTROPY GARDEN - v24.0 ENGINE
@@ -431,6 +426,8 @@ const weirdLoadingPhrases = [
 function revealGardenUI() {
     document.body.classList.remove('garden-loading');
     document.body.classList.add('garden-ready');
+    startGlitchLoop();
+    startIdleDissociation();
 
     const term = document.getElementById('terminal-container');
     window.dispatchEvent(new Event('entropy:garden-ready'));
@@ -1256,18 +1253,26 @@ function triggerRandomGlitch() {
     setTimeout(triggerRandomGlitch, nextGlitchTime);
 }
 
-// Start the continuous loop immediately when the script loads
-triggerRandomGlitch();
+let glitchLoopStarted = false;
+
+function startGlitchLoop() {
+    if (glitchLoopStarted) return;
+    glitchLoopStarted = true;
+    triggerRandomGlitch();
+}
 
 // --- IDLE DISSOCIATION ENGINE ---
 let idleTimer;
 
 function resetIdleTimer() {
+    if (!gardenHasStarted) return;
     clearTimeout(idleTimer);
-    
-    // Snap back to reality instantly if they move
-    document.body.style.transition = 'filter 0.2s ease';
-    document.body.style.filter = 'none';
+
+    // Only touch styles when dissociation blur is active (avoid main-thread churn on every mousemove).
+    if (document.body.style.filter) {
+        document.body.style.transition = 'filter 0.2s ease';
+        document.body.style.filter = 'none';
+    }
 
     if (document.body.classList.contains('pong-playing')) return;
     
@@ -1294,8 +1299,9 @@ window.addEventListener('click', resetIdleTimer);
 window.addEventListener('touchstart', resetIdleTimer, { passive: true });
 window.addEventListener('touchmove', resetIdleTimer, { passive: true });
 
-// Start the timer on boot
-resetIdleTimer();
+function startIdleDissociation() {
+    resetIdleTimer();
+}
 
 // Replace your old carousel script with this block
 const track = document.getElementById('manifold-track');
