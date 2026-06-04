@@ -1196,6 +1196,7 @@ function resetArming() {
     if (activationHintOwner === 'pong' && !active && !fading) {
         updateActivationHintHtml('pong', buildPongHintHtml(0));
     }
+    syncPanopticonCodeSequenceComments();
 }
 
 function dismissIdleArmingHint() {

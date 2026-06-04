@@ -72,6 +72,7 @@ function fadeKonamiHint() {
     if (getActivationHintOwner() !== 'konami') return;
     resetKonamiState();
     dismissActivationHint('konami', true);
+    syncPanopticonCodeSequenceComments();
 }
 
 function showKonamiHint() {

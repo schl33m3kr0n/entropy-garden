@@ -628,13 +628,32 @@ function positionPanopticonComment() {
     if (!panopticonCommentEl || !panopticonEl) return;
 
     const eyeRect = panopticonEl.getBoundingClientRect();
-    const boxW = panopticonCommentEl.offsetWidth;
+    const boxW = panopticonCommentEl.offsetWidth || panopticonCommentEl.scrollWidth;
     const margin = 8;
     const left = eyeRect.left + eyeRect.width / 2 - boxW / 2;
     const clampedLeft = Math.max(margin, Math.min(left, window.innerWidth - boxW - margin));
 
     panopticonCommentEl.style.left = `${clampedLeft}px`;
     panopticonCommentEl.style.top = `${eyeRect.bottom + 10}px`;
+}
+
+function repositionVisiblePanopticonComment() {
+    if (!panopticonCommentEl?.classList.contains('visible')) return;
+    positionPanopticonComment();
+}
+
+let panopticonCommentViewportBound = false;
+
+function bindPanopticonCommentViewportSync() {
+    if (panopticonCommentViewportBound || !perf.isIOS) return;
+    panopticonCommentViewportBound = true;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    vv.addEventListener('resize', repositionVisiblePanopticonComment);
+    vv.addEventListener('scroll', repositionVisiblePanopticonComment);
+    document.getElementById('ios-scroll-shell')?.addEventListener('scroll', repositionVisiblePanopticonComment, {
+        passive: true,
+    });
 }
 
 function showPanopticonIdleComment(text, ttlMs = 4400) {
@@ -675,10 +694,9 @@ export function syncPanopticonCodeSequenceComments() {
     const active = isPanopticonCodeSequenceActive();
     if (active && !panopticonCodeSequenceActivePrev) {
         hidePanopticonComment();
-        clearPanopticonIdleCommentTimer();
         if (panopticonCommentEl) panopticonCommentEl.textContent = '';
     } else if (!active && panopticonCodeSequenceActivePrev) {
-        schedulePanopticonIdleCommentTimer();
+        if (!panopticonIdleCommentTimer) schedulePanopticonIdleCommentTimer();
     }
     panopticonCodeSequenceActivePrev = active;
 }
@@ -714,6 +732,7 @@ function clearPanopticonIdleCommentTimer() {
 }
 
 export function startPanopticonIdleComments() {
+    bindPanopticonCommentViewportSync();
     resetPanopticonIdleCommentTimer();
 }
 
@@ -721,9 +740,6 @@ function schedulePanopticonIdleCommentTimer() {
     clearPanopticonIdleCommentTimer();
 
     if (!gardenHasStarted) return;
-    if (isPanopticonCodeSequenceActive()) return;
-    if (document.body.classList.contains('pong-playing')) return;
-    if (panopticonSleepWakeActive()) return;
 
     panopticonIdleCommentTimer = setTimeout(() => {
         syncPanopticonCodeSequenceComments();
@@ -740,7 +756,6 @@ function schedulePanopticonIdleCommentTimer() {
 
 export function resetPanopticonIdleCommentTimer() {
     syncPanopticonCodeSequenceComments();
-    if (isPanopticonCodeSequenceActive()) return;
     schedulePanopticonIdleCommentTimer();
 }
 
@@ -1016,7 +1031,6 @@ export function triggerPanopticonSleep() {
     if (panopticonGodActive || godEyeSequence) return;
     if (eyeMode === 'reroll' || eyeMode === 'sleeping') return;
     cancelPanopticonCatEye();
-    clearPanopticonIdleCommentTimer();
     hidePanopticonComment();
     eyeMode = 'sleeping';
     const closeMs = panopticonSleepCloseMs();
@@ -1435,6 +1449,7 @@ function updatePanopticonSleepWake(now) {
         eyeMode = 'idle';
         panopticonEl?.classList.remove('panopticon-sleeping');
         cancelPanopticonAuxLoop();
+        if (!panopticonIdleCommentTimer) schedulePanopticonIdleCommentTimer();
         return true;
     }
 
