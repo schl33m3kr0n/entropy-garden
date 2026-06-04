@@ -134,8 +134,18 @@ if [ -f "$DEST/js/ios-pingpong.js" ]; then
   exit 1
 fi
 
-if ! grep -q "from './game/pong.js'" "$DEST/js/main.js" || ! grep -q "from '../game/pong.js'" "$DEST/js/ios/ios-ui.js"; then
-  echo "Deploy check failed: dist bundle must import game/pong.js from main.js and ios-ui.js" >&2
+if ! grep -q "import('./game/pong.js')" "$DEST/js/lazy.js"; then
+  echo "Deploy check failed: dist/js/lazy.js must lazy-load game/pong.js" >&2
+  exit 1
+fi
+
+if ! grep -q 'bootGameAddons' "$DEST/js/main.js"; then
+  echo "Deploy check failed: dist/js/main.js must boot game addons via lazy.js" >&2
+  exit 1
+fi
+
+if grep -qE "from ['\"].*game/pong\.js['\"]" "$DEST/js/ios/ios-ui.js" 2>/dev/null; then
+  echo "Deploy check failed: ios-ui.js must not eagerly import game/pong.js" >&2
   exit 1
 fi
 
