@@ -15,5 +15,34 @@ export function registerServiceWorkerAfterInit() {
         return;
     }
 
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    let reloadOnControllerChange = false;
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!reloadOnControllerChange) return;
+        reloadOnControllerChange = false;
+        window.location.reload();
+    });
+
+    navigator.serviceWorker
+        .register('./sw.js', { updateViaCache: 'none' })
+        .then((reg) => {
+            const promptReload = (worker) => {
+                if (!worker || !navigator.serviceWorker.controller) return;
+                reloadOnControllerChange = true;
+                worker.postMessage({ type: 'SKIP_WAITING' });
+            };
+
+            if (reg.waiting) promptReload(reg.waiting);
+
+            reg.addEventListener('updatefound', () => {
+                const worker = reg.installing;
+                if (!worker) return;
+                worker.addEventListener('statechange', () => {
+                    if (worker.state === 'installed') promptReload(worker);
+                });
+            });
+
+            reg.update().catch(() => {});
+        })
+        .catch(() => {});
 }

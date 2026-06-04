@@ -3,6 +3,7 @@
 
 /js/*
   Content-Type: application/javascript; charset=utf-8
+  Cache-Control: public, max-age=0, must-revalidate
 
 /pages/*.js
   Content-Type: application/javascript; charset=utf-8
