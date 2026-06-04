@@ -134,6 +134,11 @@ if [ -f "$DEST/js/ios-pingpong.js" ]; then
   exit 1
 fi
 
+if grep -qE "import\(['\"]\./core/" "$DEST/js/modules/"*.js 2>/dev/null; then
+  echo "Deploy check failed: js/modules/* must import ../core/ not ./core/" >&2
+  exit 1
+fi
+
 if ! grep -q "import('./game/pong.js')" "$DEST/js/lazy.js"; then
   echo "Deploy check failed: dist/js/lazy.js must lazy-load game/pong.js" >&2
   exit 1

@@ -678,7 +678,7 @@ export function syncPanopticonCodeSequenceComments() {
         clearPanopticonIdleCommentTimer();
         if (panopticonCommentEl) panopticonCommentEl.textContent = '';
     } else if (!active && panopticonCodeSequenceActivePrev) {
-        resetPanopticonIdleCommentTimer();
+        schedulePanopticonIdleCommentTimer();
     }
     panopticonCodeSequenceActivePrev = active;
 }
@@ -717,11 +717,11 @@ export function startPanopticonIdleComments() {
     resetPanopticonIdleCommentTimer();
 }
 
-export function resetPanopticonIdleCommentTimer() {
+function schedulePanopticonIdleCommentTimer() {
     clearPanopticonIdleCommentTimer();
-    syncPanopticonCodeSequenceComments();
 
     if (!gardenHasStarted) return;
+    if (isPanopticonCodeSequenceActive()) return;
     if (document.body.classList.contains('pong-playing')) return;
     if (panopticonSleepWakeActive()) return;
 
@@ -734,8 +734,14 @@ export function resetPanopticonIdleCommentTimer() {
             }
         }
 
-        resetPanopticonIdleCommentTimer();
+        schedulePanopticonIdleCommentTimer();
     }, PANOPTICON_IDLE_COMMENT_MS);
+}
+
+export function resetPanopticonIdleCommentTimer() {
+    syncPanopticonCodeSequenceComments();
+    if (isPanopticonCodeSequenceActive()) return;
+    schedulePanopticonIdleCommentTimer();
 }
 
 export function handlePanopticonVisibilityChange(hidden) {

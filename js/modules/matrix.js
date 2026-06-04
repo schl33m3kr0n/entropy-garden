@@ -557,28 +557,22 @@ document.addEventListener('focusout', (e) => {
 });
 
 document.addEventListener('visibilitychange', () => {
-    import('./core/state.js').then((s) => {
-        if (document.hidden) {
-            stopGardenLoop();
-            return;
-        }
-        if (s.isSingularityActive) return;
-        resumeGardenLoop();
-    });
+    if (document.hidden) {
+        stopGardenLoop();
+        return;
+    }
+    if (isSingularityActive) return;
+    resumeGardenLoop();
 });
 
 window.addEventListener('pageshow', () => {
-    import('./core/state.js').then((s) => {
-        if (s.isSingularityActive) return;
-        resumeGardenLoop();
-    });
+    if (isSingularityActive) return;
+    resumeGardenLoop();
 });
 
 window.addEventListener('focus', () => {
-    import('./core/state.js').then((s) => {
-        if (s.isSingularityActive) return;
-        resumeGardenLoop();
-    });
+    if (isSingularityActive) return;
+    resumeGardenLoop();
 });
 
 window.addEventListener('orientationchange', () => {
