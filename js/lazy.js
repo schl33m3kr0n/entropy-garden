@@ -333,24 +333,29 @@ export function bootGameAddons(onKonamiComplete) {
         konamiOnComplete = onKonamiComplete;
     }
 
-    if (!gameAddonsPromise) {
-        gameAddonsPromise = import('./game/pong.js')
-            .then((pong) => import('./game/konami.js').then((konami) => ({ pong, konami })))
-            .then(({ pong, konami }) => {
-                pong.initPanopticonPingPong();
-                konami.initKonami({
-                    isPongActive: pong.isPongSessionActive,
-                    onComplete: () => konamiOnComplete?.(),
-                });
-                installGameGardenHooks(pong, konami);
-                return { pong, konami };
-            })
-            .catch((err) => {
-                gameAddonsPromise = null;
-                console.error('[Entropy Garden] pong/konami failed to load', err);
-                throw err;
-            });
-    }
+    if (gameAddonsPromise) return gameAddonsPromise;
+
+    gameAddonsPromise = (async () => {
+        const pong = await import('./game/pong.js');
+        const konami = await import('./game/konami.js');
+        pong.initPanopticonPingPong();
+        konami.initKonami({
+            isPongActive: pong.isPongSessionActive,
+            onComplete: () => konamiOnComplete?.(),
+        });
+        installGameGardenHooks(pong, konami);
+        return { pong, konami };
+    })().catch(async (err) => {
+        gameAddonsPromise = null;
+        try {
+            const pong = await import('./game/pong.js');
+            pong.resetPanopticonPongBoot?.();
+        } catch {
+            /* ignore */
+        }
+        console.error('[Entropy Garden] pong/konami failed to load', err);
+        throw err;
+    });
 
     return gameAddonsPromise;
 }

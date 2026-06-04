@@ -447,12 +447,17 @@ function revealGardenUI() {
     startIdleDissociation();
     startPanopticonIdleComments();
 
-    bootGameAddons(activateGodMode)
-        .then(({ pong }) => pong.notifyGardenReady())
-        .catch((err) => console.error('[Entropy Garden] game addons failed at reveal', err));
-
     const term = document.getElementById('terminal-container');
-    window.dispatchEvent(new Event('entropy:garden-ready'));
+
+    bootGameAddons(activateGodMode)
+        .then(({ pong }) => {
+            pong.notifyGardenReady();
+            window.dispatchEvent(new Event('entropy:garden-ready'));
+        })
+        .catch((err) => {
+            console.error('[Entropy Garden] game addons failed at reveal', err);
+            window.dispatchEvent(new Event('entropy:garden-ready'));
+        });
 
     const hud = document.getElementById('hud');
     const playlistMenu = document.getElementById('playlist-menu');
@@ -1518,6 +1523,8 @@ globalThis.gardenHooks = {
     resetKonamiSequence: () => {},
     setCorrupted: setIsCorrupted,
     syncPanopticonCodeSequenceComments,
+    stopGardenLoop,
+    resumeGardenLoop,
 };
 
 // --- GLOBAL HTML HANDLERS ---

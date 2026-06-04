@@ -13,7 +13,6 @@ import {
 } from '../core/shared.js';
 import { isCorrupted, isSingularityActive } from '../core/state.js';
 import { resizeCanvas } from '../core/canvas-resize.js';
-import { stopGardenLoop, resumeGardenLoop } from '../lazy.js';
 
 const PADDLE_HALF = 8;
 const BALL_R = 3.5;
@@ -1428,7 +1427,7 @@ function togglePause() {
 
 function pauseGardenLoopForPong() {
     if (gardenLoopPausedForPong || isSingularityActive) return;
-    stopGardenLoop();
+    globalThis.gardenHooks?.stopGardenLoop?.();
     gardenLoopPausedForPong = true;
 }
 
@@ -1436,7 +1435,7 @@ function resumeGardenLoopAfterPong() {
     if (!gardenLoopPausedForPong) return;
     gardenLoopPausedForPong = false;
     if (!document.hidden && document.body.classList.contains('garden-ready')) {
-        resumeGardenLoop();
+        globalThis.gardenHooks?.resumeGardenLoop?.();
     }
 }
 
@@ -2002,10 +2001,14 @@ function bindControls() {
     updateControlsVisibility();
 }
 
+export function resetPanopticonPongBoot() {
+    panopticonPongInitialized = false;
+}
+
 export function initPanopticonPingPong() {
     const eye = panopticonEl || document.getElementById('panopticon-eye');
     if (!eye || panopticonPongInitialized) return;
-    panopticonPongInitialized = true;
+
     if (useKeyboardControls) {
         document.body.classList.add('pong-keyboard-mode');
     }
@@ -2017,6 +2020,8 @@ export function initPanopticonPingPong() {
             notifyGardenReady();
         }
     }
+
+    panopticonPongInitialized = true;
 }
 
 export function initIosPingPong() {
