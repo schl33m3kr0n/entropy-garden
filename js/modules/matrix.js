@@ -5,6 +5,7 @@ import {
     animatePanopticon,
     pickCipherChar,
     usesIosCipherGlyphs,
+    usesLiteCipherWheelPaint,
     panopticonEl,
 } from '../core/shared.js';
 import {
@@ -20,10 +21,12 @@ import {
     isCorrupted,
     fontSize,
     cellSize,
+    canvasDpr,
     gardenLoopActive,
     gardenHasStarted,
     gardenAnimId,
     matrixFrameCount,
+    isSingularityActive,
     setGardenLoopActive,
     setGardenAnimId,
     setMatrixFrameCount,
@@ -184,13 +187,9 @@ function wheelConicGradient(cx, cy, alpha) {
     return g;
 }
 
-function usesIosCipherFlatColor() {
-    return perf.isIOS || document.body.classList.contains('ios-ui');
-}
-
 function drawChannelRings(cx, cy) {
     ctx.lineCap = 'round';
-    ctx.strokeStyle = usesIosCipherFlatColor()
+    ctx.strokeStyle = usesLiteCipherWheelPaint()
         ? (isCorrupted ? 'rgba(255, 0, 85, 0.16)' : 'rgba(0, 255, 0, 0.16)')
         : wheelConicGradient(cx, cy, 0.16);
     ctx.lineWidth = perf.isMobile ? 1 : 1.25;
@@ -216,9 +215,11 @@ function drawCipherWheels(cx, cy) {
 
     drawChannelRings(cx, cy);
 
-    ctx.fillStyle = usesIosCipherFlatColor()
+    ctx.fillStyle = usesLiteCipherWheelPaint()
         ? (isCorrupted ? 'rgba(255, 0, 85, 0.24)' : 'rgba(0, 255, 0, 0.24)')
         : wheelConicGradient(cx, cy, 0.24);
+
+    const fastGlyphs = perf.liteGfx && !perf.prefersReducedMotion;
 
     for (let r = 0; r < visibleRingCount; r++) {
         const wheel = wheels[r];
@@ -234,27 +235,48 @@ function drawCipherWheels(cx, cy) {
                 continue;
             }
 
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(theta);
-            ctx.fillText(wheel.glyphs[i], 0, 0);
-            ctx.restore();
+            if (fastGlyphs) {
+                const c = Math.cos(theta);
+                const s = Math.sin(theta);
+                ctx.setTransform(c, s, -s, c, x, y);
+                ctx.fillText(wheel.glyphs[i], 0, 0);
+            } else {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(theta);
+                ctx.fillText(wheel.glyphs[i], 0, 0);
+                ctx.restore();
+            }
         }
+    }
+
+    if (fastGlyphs) {
+        ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     }
 
     setNeedsFullRedraw(false);
 }
 
+let cachedCipherCenter = null;
+
+export function invalidateCipherWheelCenter() {
+    cachedCipherCenter = null;
+}
+
 function getCipherWheelCenter() {
+    if (cachedCipherCenter) return cachedCipherCenter;
+
     const eyeRect = panopticonEl?.getBoundingClientRect();
     const canvasRect = canvas?.getBoundingClientRect();
     if (eyeRect?.width > 0 && eyeRect.height > 0 && canvasRect) {
-        return {
+        cachedCipherCenter = {
             cx: eyeRect.left + eyeRect.width * 0.5 - canvasRect.left,
             cy: eyeRect.top + eyeRect.height * 0.5 - canvasRect.top,
         };
+        return cachedCipherCenter;
     }
-    return { cx: viewW * 0.5, cy: viewH * 0.5 };
+    cachedCipherCenter = { cx: viewW * 0.5, cy: viewH * 0.5 };
+    return cachedCipherCenter;
 }
 
 function animateMatrix() {
@@ -263,7 +285,7 @@ function animateMatrix() {
     const { cx, cy } = getCipherWheelCenter();
 
     if (!matrixFilled) {
-        const revealEvery = perf.isIOS ? 6 : (perf.isMobile ? 4 : 2);
+        const revealEvery = perf.liteGfx ? 6 : (perf.isMobile ? 4 : 2);
         if (matrixFrameCount % revealEvery === 0 && visibleRingCount < wheels.length) {
             visibleRingCount++;
         }
@@ -378,6 +400,7 @@ function resizeCanvas() {
 
     // DPR changes on browser zoom — resize backing store only; keep ring state/center.
     if (!sizeChanged && wheels.length > 0) {
+        invalidateCipherWheelCenter();
         setNeedsFullRedraw(true);
         return;
     }
@@ -386,6 +409,7 @@ function resizeCanvas() {
     visibleRingCount = 0;
     matrixFilled = false;
     ctx.clearRect(0, 0, viewW, viewH);
+    invalidateCipherWheelCenter();
     setNeedsFullRedraw(false);
 }
 
@@ -469,8 +493,20 @@ function restartGardenLoop() {
     });
 }
 
+function isGardenMatrixSuspended() {
+    return isSingularityActive
+        || document.body.classList.contains('singularity-active')
+        || document.body.classList.contains('pong-playing')
+        || document.body.classList.contains('ios-pong-playing');
+}
+
 function animate() {
     if (!gardenLoopActive) return;
+
+    if (isGardenMatrixSuspended()) {
+        scheduleGardenFrame();
+        return;
+    }
 
     incrementMatrixFrameCount();
     const shouldDrawMatrix = !perf.matrixFrameSkip || (matrixFrameCount % (perf.matrixFrameSkip + 1) === 0);
@@ -487,7 +523,7 @@ function animate() {
 
     const timeStep = isCorrupted ? 2 : (perf.isMobile ? 0.25 : 0.5);
     addTime(timeStep);
-    if (!perf.isIOS) {
+    if (!perf.liteGfx) {
         document.documentElement.style.setProperty('--rainbow-offset', `${(time * 0.5) % 200}%`);
         if (!perf.prefersReducedMotion && !isCorrupted) {
             document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);

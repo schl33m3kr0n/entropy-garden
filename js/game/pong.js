@@ -9,8 +9,11 @@ import {
     playSoundOverlap,
     warmSound,
     sfx,
+    syncPanopticonCodeSequenceComments,
 } from '../core/shared.js';
+import { isCorrupted, isSingularityActive } from '../core/state.js';
 import { resizeCanvas } from '../core/canvas-resize.js';
+import { stopGardenLoop, resumeGardenLoop } from '../lazy.js';
 
 const PADDLE_HALF = 8;
 const BALL_R = 3.5;
@@ -123,6 +126,141 @@ const PONG_COMMENT_COMEBACK = [
     'suddenly competitive. how theatrical.',
 ];
 
+const PONG_COMMENT_OPEN_CORRUPTED = [
+    'two paddles. zero dignity.',
+    'the iris expected a blood sport. it got this.',
+    'perform for me. try not to whiff.',
+    'corrupted mode and you still can\'t rally.',
+    'balls are for paddling, not scratching.',
+    'beer pong\'s at the other table.',
+];
+
+const PONG_COMMENT_TIED_CORRUPTED = [
+    'tied. how on-brand for both of you.',
+    'equal failure. heartwarming.',
+    'deadlock of incompetence.',
+    'neither paddle deserves the win. agreed.',
+];
+
+const PONG_COMMENT_CLOSE_CORRUPTED = [
+    'one point. still pathetic.',
+    'almost competitive. almost.',
+    'this is getting embarrassing.',
+    'a single goal ahead. don\'t celebrate yet.',
+];
+
+const PONG_COMMENT_LEFT_LEAD_CORRUPTED = [
+    'left leads. right dissolves.',
+    'west side cheating with confidence.',
+    'left paddle bullying the plot.',
+];
+
+const PONG_COMMENT_RIGHT_LEAD_CORRUPTED = [
+    'right leads. left evaporates.',
+    'east wins the shame olympics.',
+    'right paddle feasting on your reflexes.',
+];
+
+const PONG_COMMENT_LEFT_RUN_CORRUPTED = [
+    'left is running away with your pride.',
+    'this is getting embarrassing for the right paddle.',
+    'right side: ornamental. left side: smug.',
+    'left scores again. someone call a medic.',
+];
+
+const PONG_COMMENT_RIGHT_RUN_CORRUPTED = [
+    'right is filleting the scoreboard.',
+    'left paddle has entered a coma.',
+    'a slaughter. i\'m not impressed, but i\'m watching.',
+    'this is getting embarrassing for civilization.',
+];
+
+const PONG_COMMENT_COMEBACK_CORRUPTED = [
+    'oh. the corpse twitched.',
+    'comeback arc. still ugly.',
+    'they remembered they had paddles. cute.',
+    'suddenly alive. still losing my respect.',
+    'okay forrest gump, you made your point.',
+];
+
+const RALLY_HIT_MIN = 8;
+const EDGE_REL_THRESHOLD = 0.86;
+const EDGE_COMMENT_CHANCE = 0.2;
+const WHIFF_COMMENT_CHANCE = 0.5;
+const MILESTONE_SCORES = new Set([7, 11, 15]);
+const STRAIGHT_REL_THRESHOLD = 0.12;
+const STRAIGHT_STREAK_MIN = 5;
+
+const PONG_COMMENT_LONG_RALLY = [
+    'actual skill. how rare.',
+    'a real rally. shocking.',
+];
+
+const PONG_COMMENT_LONG_RALLY_CORRUPTED = [
+    'actual skill. how rare.',
+    'keep it up. the iris is almost entertained.',
+];
+
+const PONG_COMMENT_FIRST = [
+    'first blood. the rest is downhill.',
+    'a point exists now. progress.',
+    'and so it begins.',
+];
+
+const PONG_COMMENT_FIRST_CORRUPTED = [
+    'first point. only took you forever.',
+    'one down, dignity already gone.',
+    'blood in the water. finally.',
+];
+
+const PONG_COMMENT_MILESTONE = [
+    'the scoreboard groans under the weight.',
+    'quite the tally. someone is trying.',
+    'numbers climbing. how ambitious.',
+];
+
+const PONG_COMMENT_MILESTONE_CORRUPTED = [
+    'still going? touch grass.',
+    'high score, low purpose.',
+    'this rivalry has outlived its welcome.',
+];
+
+const PONG_COMMENT_WHIFF = [
+    'you simply watched it leave.',
+    'a noble statue impression.',
+    'the paddle was decorative that round.',
+];
+
+const PONG_COMMENT_WHIFF_CORRUPTED = [
+    'you blinked and lost. tragic.',
+    'stood there like furniture.',
+    'did the paddle file for divorce?',
+];
+
+const PONG_COMMENT_EDGE = [
+    'edge of the paddle. edge of competence.',
+    'a clutch flick. noted.',
+    'barely. but i saw it.',
+];
+
+const PONG_COMMENT_EDGE_CORRUPTED = [
+    'lucky flail. i\'ll allow it.',
+    'accidental brilliance.',
+    'even a broken paddle is right twice.',
+];
+
+const PONG_COMMENT_STRAIGHT = [
+    'wtf.',
+    'wtf. is this a screensaver?',
+    'perfectly flat. perfectly pointless.',
+];
+
+const PONG_COMMENT_STRAIGHT_CORRUPTED = [
+    'wtf.',
+    'wtf. are you two even moving?',
+    'a flatline. fitting.',
+];
+
 const ARROW_SVG = {
     up: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle class="ios-pong-ring" cx="24" cy="24" r="21"/><path class="ios-pong-chevron" d="M24 12 L34 31 H14 Z"/></svg>`,
     down: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle class="ios-pong-ring" cx="24" cy="24" r="21"/><path class="ios-pong-chevron" d="M24 36 L14 17 H34 Z"/></svg>`,
@@ -150,6 +288,7 @@ let pongGroupEl;
 
 let active = false;
 let fading = false;
+let gardenLoopPausedForPong = false;
 let paused = false;
 let pauseState = null;
 let eyeReturning = false;
@@ -171,6 +310,10 @@ let leftTarget = 50;
 let rightTarget = 50;
 let scoreLeft = 0;
 let scoreRight = 0;
+let rallyHits = 0;
+let rallyCommentShown = false;
+let straightHitStreak = 0;
+let straightCommentShown = false;
 const holdInput = { left: 0, right: 0 };
 let pongGazeX = 0;
 let pongGazeY = 0;
@@ -183,25 +326,93 @@ function pickFrom(pool) {
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function scoreComment(scoringSide, diffBefore) {
+/** Corrupted mode: state flag + body class (CSS toggle). */
+function isPongCorruptedMode() {
+    return isCorrupted || document.body.classList.contains('corrupted');
+}
+
+function pickPongComment(safePool, corruptedPool) {
+    if (isPongCorruptedMode() && corruptedPool?.length) return pickFrom(corruptedPool);
+    return pickFrom(safePool);
+}
+
+function resetRally() {
+    rallyHits = 0;
+    rallyCommentShown = false;
+    straightHitStreak = 0;
+    straightCommentShown = false;
+}
+
+function noteRallyHit(rel = 1) {
+    rallyHits++;
+
+    const absRel = Math.abs(rel);
+    if (absRel < STRAIGHT_REL_THRESHOLD) straightHitStreak++;
+    else straightHitStreak = 0;
+
+    // Near-flat volley for several straight returns — "wtf".
+    if (straightHitStreak >= STRAIGHT_STREAK_MIN && !straightCommentShown) {
+        straightCommentShown = true;
+        rallyCommentShown = true;
+        showPongComment(pickPongComment(PONG_COMMENT_STRAIGHT, PONG_COMMENT_STRAIGHT_CORRUPTED));
+        return;
+    }
+
+    if (rallyCommentShown) return;
+
+    if (rallyHits >= RALLY_HIT_MIN) {
+        rallyCommentShown = true;
+        showPongComment(pickPongComment(PONG_COMMENT_LONG_RALLY, PONG_COMMENT_LONG_RALLY_CORRUPTED));
+        return;
+    }
+
+    if (absRel > EDGE_REL_THRESHOLD && Math.random() < EDGE_COMMENT_CHANCE) {
+        rallyCommentShown = true;
+        showPongComment(pickPongComment(PONG_COMMENT_EDGE, PONG_COMMENT_EDGE_CORRUPTED));
+    }
+}
+
+function scoreComment(scoringSide, diffBefore, hitsThisRally = 0) {
     const diff = scoreLeft - scoreRight;
     const absDiff = Math.abs(diff);
+    const total = scoreLeft + scoreRight;
+    const leaderScore = Math.max(scoreLeft, scoreRight);
 
-    if (scoreLeft === scoreRight) return pickFrom(PONG_COMMENT_TIED);
+    if (total === 1) {
+        return pickPongComment(PONG_COMMENT_FIRST, PONG_COMMENT_FIRST_CORRUPTED);
+    }
 
-    if (absDiff === 1) return pickFrom(PONG_COMMENT_CLOSE);
+    if (MILESTONE_SCORES.has(leaderScore)) {
+        return pickPongComment(PONG_COMMENT_MILESTONE, PONG_COMMENT_MILESTONE_CORRUPTED);
+    }
+
+    if (hitsThisRally === 0 && Math.random() < WHIFF_COMMENT_CHANCE) {
+        return pickPongComment(PONG_COMMENT_WHIFF, PONG_COMMENT_WHIFF_CORRUPTED);
+    }
+
+    if (scoreLeft === scoreRight) {
+        return pickPongComment(PONG_COMMENT_TIED, PONG_COMMENT_TIED_CORRUPTED);
+    }
+
+    if (absDiff === 1) {
+        return pickPongComment(PONG_COMMENT_CLOSE, PONG_COMMENT_CLOSE_CORRUPTED);
+    }
 
     const wasTrailing =
         (scoringSide === 'left' && diffBefore < 0) || (scoringSide === 'right' && diffBefore > 0);
     if (wasTrailing && absDiff < Math.abs(diffBefore)) {
-        return pickFrom(PONG_COMMENT_COMEBACK);
+        return pickPongComment(PONG_COMMENT_COMEBACK, PONG_COMMENT_COMEBACK_CORRUPTED);
     }
 
     if (absDiff >= 4) {
-        return diff > 0 ? pickFrom(PONG_COMMENT_LEFT_RUN) : pickFrom(PONG_COMMENT_RIGHT_RUN);
+        return diff > 0
+            ? pickPongComment(PONG_COMMENT_LEFT_RUN, PONG_COMMENT_LEFT_RUN_CORRUPTED)
+            : pickPongComment(PONG_COMMENT_RIGHT_RUN, PONG_COMMENT_RIGHT_RUN_CORRUPTED);
     }
 
-    return diff > 0 ? pickFrom(PONG_COMMENT_LEFT_LEAD) : pickFrom(PONG_COMMENT_RIGHT_LEAD);
+    return diff > 0
+        ? pickPongComment(PONG_COMMENT_LEFT_LEAD, PONG_COMMENT_LEFT_LEAD_CORRUPTED)
+        : pickPongComment(PONG_COMMENT_RIGHT_LEAD, PONG_COMMENT_RIGHT_LEAD_CORRUPTED);
 }
 
 function showPongComment(text, { persist = false, ttlMs = 3400 } = {}) {
@@ -336,7 +547,7 @@ function startServeCountdown() {
             if (useKeyboardControls) {
                 hidePongComment();
             } else {
-                showPongComment(pickFrom(PONG_COMMENT_OPEN));
+                showPongComment(pickPongComment(PONG_COMMENT_OPEN, PONG_COMMENT_OPEN_CORRUPTED));
             }
         }, SERVE_COUNTDOWN_MS);
     };
@@ -779,6 +990,7 @@ function capBallSpeed() {
 }
 
 function serveBall(towardLeft = Math.random() < 0.5) {
+    resetRally();
     ball.x = courtCenterX();
     const span = courtPlayBottom() - courtPlayTop();
     ball.y = courtPlayTop() + span * (0.35 + Math.random() * 0.3);
@@ -790,12 +1002,14 @@ function serveBall(towardLeft = Math.random() < 0.5) {
 }
 
 function scorePoint(side) {
+    const hitsThisRally = rallyHits;
+    resetRally();
     const diffBefore = scoreLeft - scoreRight;
     if (side === 'left') scoreLeft++;
     else scoreRight++;
     updateScoreboard();
     dropScoreboard();
-    showPongComment(scoreComment(side, diffBefore));
+    showPongComment(scoreComment(side, diffBefore, hitsThisRally));
     playSound(sfx.gameStart);
     scheduleReservice(side === 'left');
 }
@@ -832,7 +1046,10 @@ function collideWall() {
     }
 
     ball.y = clamp(ball.y, yMin, yMax);
-    if (bounced) playSoundOverlap(sfx.pop);
+    if (bounced) {
+        straightHitStreak = 0;
+        playSoundOverlap(sfx.pop);
+    }
 }
 
 function collidePaddle(paddleX, paddleY, isLeft) {
@@ -861,6 +1078,7 @@ function collidePaddle(paddleX, paddleY, isLeft) {
 
     capBallSpeed();
     playSoundOverlap(sfx.hit);
+    noteRallyHit(rel);
     return true;
 }
 
@@ -1002,6 +1220,7 @@ function onEyeSideTap(side) {
     tryActivateFromTaps();
     clearTimeout(armTimeout);
     armTimeout = setTimeout(resetArming, ACTIVATE_WINDOW_MS);
+    syncPanopticonCodeSequenceComments();
 }
 
 function buildPongHintHtml(confirmed = keyboardArmIndex) {
@@ -1093,6 +1312,7 @@ function clearPongStartHint() {
 function cancelPongArming() {
     resetArming();
     if (activationHintOwner === 'pong') dismissActivationHint('pong', true);
+    syncPanopticonCodeSequenceComments();
 }
 
 function onKeyboardArmPress(side) {
@@ -1128,6 +1348,7 @@ function onKeyboardArmPress(side) {
 
     clearTimeout(armTimeout);
     armTimeout = setTimeout(fadeArmingHint, ACTIVATE_WINDOW_MS);
+    syncPanopticonCodeSequenceComments();
 }
 
 function fadeArmingHint() {
@@ -1205,8 +1426,24 @@ function togglePause() {
     pokeUserActivity();
 }
 
+function pauseGardenLoopForPong() {
+    if (gardenLoopPausedForPong || isSingularityActive) return;
+    stopGardenLoop();
+    gardenLoopPausedForPong = true;
+}
+
+function resumeGardenLoopAfterPong() {
+    if (!gardenLoopPausedForPong) return;
+    gardenLoopPausedForPong = false;
+    if (!document.hidden && document.body.classList.contains('garden-ready')) {
+        resumeGardenLoop();
+    }
+}
+
 function activatePong() {
     if (active || !panopticonEl) return;
+    syncPanopticonCodeSequenceComments();
+    pauseGardenLoopForPong();
     clearPongStartHint();
     pokeUserActivity();
     paused = false;
@@ -1222,6 +1459,7 @@ function activatePong() {
     pongGroupEl?.setAttribute('aria-hidden', 'false');
     scoreLeft = 0;
     scoreRight = 0;
+    resetRally();
     leftY = rightY = leftTarget = rightTarget = 50;
     resetPongGaze();
     updateScoreboard();
@@ -1273,11 +1511,14 @@ function deactivatePong() {
     setPaddleLine(paddleRightEl, 50, 0);
     updateControlsVisibility();
     pokeUserActivity();
+    syncPanopticonCodeSequenceComments();
+    resumeGardenLoopAfterPong();
     return wasActive;
 }
 
 function fadeOutAndQuit() {
     if (!active || fading) return;
+    syncPanopticonCodeSequenceComments();
     paused = false;
     pauseState = null;
     clearHoldInput();
@@ -1332,6 +1573,14 @@ function canArmPongFromKeyboard() {
     if (document.getElementById('lightbox')?.classList.contains('active')) return false;
     if (isVaultModalOpen()) return false;
     return true;
+}
+
+export function isPongArmingActive() {
+    return (
+        keyboardArmIndex > 0
+        || leftTapCount > 0
+        || rightTapCount > 0
+    );
 }
 
 export function isPongSessionActive() {

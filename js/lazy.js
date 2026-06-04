@@ -7,6 +7,8 @@ let terminalMod;
 let singularityMod;
 let matrixMod;
 let arcadeMod;
+let gameAddonsPromise = null;
+let konamiOnComplete = null;
 
 let terminalPromise;
 let singularityPromise;
@@ -307,6 +309,50 @@ export function resizeCanvas() {
 
 export function setMatrixNeedsRedraw() {
     import('./core/state.js').then((s) => s.setNeedsFullRedraw(true));
+}
+
+function installGameGardenHooks(pong, konami) {
+    globalThis.gardenHooks = {
+        ...globalThis.gardenHooks,
+        konamiBlocksPongArming: konami.isKonamiInProgress,
+        isKonamiInProgress: konami.isKonamiInProgress,
+        isKonamiActivelyEntering: konami.isKonamiActivelyEntering,
+        isPongArmingActive: pong.isPongArmingActive,
+        isPongSessionActive: pong.isPongSessionActive,
+        pongBlocksArrowNav: pong.pongBlocksArrowNav,
+        konamiClaimsKey: (e) => konami.konamiClaimsKey(e, pong.isPongSessionActive),
+        cancelPongArming: pong.cancelPongArmingSequence,
+        cancelKonamiArming: konami.cancelKonamiArmingSequence,
+        resetKonamiSequence: konami.resetKonamiSequence,
+    };
+}
+
+/** Lazy-load pong + konami after garden-ready (started during loader in main.js). */
+export function bootGameAddons(onKonamiComplete) {
+    if (typeof onKonamiComplete === 'function') {
+        konamiOnComplete = onKonamiComplete;
+    }
+
+    if (!gameAddonsPromise) {
+        gameAddonsPromise = import('./game/pong.js')
+            .then((pong) => import('./game/konami.js').then((konami) => ({ pong, konami })))
+            .then(({ pong, konami }) => {
+                pong.initPanopticonPingPong();
+                konami.initKonami({
+                    isPongActive: pong.isPongSessionActive,
+                    onComplete: () => konamiOnComplete?.(),
+                });
+                installGameGardenHooks(pong, konami);
+                return { pong, konami };
+            })
+            .catch((err) => {
+                gameAddonsPromise = null;
+                console.error('[Entropy Garden] pong/konami failed to load', err);
+                throw err;
+            });
+    }
+
+    return gameAddonsPromise;
 }
 
 export async function loadArcadeLevel() {

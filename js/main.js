@@ -13,6 +13,12 @@ import {
     perf,
     triggerPanopticonReroll,
     triggerPanopticonEyeRoll,
+    triggerPanopticonSleep,
+    triggerPanopticonWake,
+    resetPanopticonIdleCommentTimer,
+    startPanopticonIdleComments,
+    syncPanopticonCodeSequenceComments,
+    handlePanopticonVisibilityChange,
     setPanopticonGodMode,
     updatePanopticonVisibility,
     currentTrackIndex,
@@ -23,6 +29,7 @@ import {
     getBgmTrack,
     getBgmTrackTitle,
     applyTrackTitleMarquee,
+    panopticonEl,
 } from './core/shared.js';
 import {
     time,
@@ -40,6 +47,7 @@ import {
     setIsSingularityActive,
     resetArtifactSlots,
     toggleIsCorrupted,
+    setIsCorrupted,
     setNeedsFullRedraw,
 } from './core/state.js';
 import {
@@ -61,11 +69,10 @@ import {
     rebuildTerminalLogPool,
     reconcileSingularityPoem,
     stopSingularity3D,
+    bootGameAddons,
 } from './lazy.js';
 import { registerServiceWorkerAfterInit } from './core/sw-register.js';
 import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios/ios-ui.js';
-import { initKonami, isKonamiInProgress, konamiClaimsKey, cancelKonamiArmingSequence, resetKonamiSequence } from './game/konami.js';
-import { initPanopticonPingPong, notifyGardenReady, pongBlocksArrowNav, isPongSessionActive, cancelPongArmingSequence } from './game/pong.js';
 
 // Bind init immediately so a later module error cannot block the gatekeeper.
 function prefetchGardenBoot() {
@@ -102,6 +109,14 @@ function beginGardenExperience() {
     }).catch((err) => console.error('[Entropy Garden] matrix failed to load', err));
 
     registerServiceWorkerAfterInit();
+
+    bootGameAddons(activateGodMode).catch((err) => {
+        console.error('[Entropy Garden] game addons prefetch failed', err);
+    });
+
+    panopticonEl?.addEventListener('pointerdown', () => {
+        bootGameAddons(activateGodMode).catch(() => {});
+    }, { once: true, passive: true });
 
     requestAnimationFrame(() => {
         playSound(sfx.collectible);
@@ -297,6 +312,7 @@ function handlePageReturn(event) {
 
 document.addEventListener("visibilitychange", () => {
     document.title = document.hidden ? needyTitles[Math.floor(Math.random() * needyTitles.length)] : originalTitle;
+    handlePanopticonVisibilityChange(document.hidden);
     if (document.hidden) {
         stopGardenLoop();
         if (isSingularityActive) pauseSingularityPresentation();
@@ -426,8 +442,14 @@ const weirdLoadingPhrases = [
 function revealGardenUI() {
     document.body.classList.remove('garden-loading');
     document.body.classList.add('garden-ready');
+    updatePanopticonVisibility();
     startGlitchLoop();
     startIdleDissociation();
+    startPanopticonIdleComments();
+
+    bootGameAddons(activateGodMode)
+        .then(({ pong }) => pong.notifyGardenReady())
+        .catch((err) => console.error('[Entropy Garden] game addons failed at reveal', err));
 
     const term = document.getElementById('terminal-container');
     window.dispatchEvent(new Event('entropy:garden-ready'));
@@ -480,9 +502,12 @@ function revealGardenUI() {
             playlistMenu.style.display = 'block';
             updatePlaylistUI();
         }
-        notifyGardenReady();
     }, 750);
 }
+
+const LOADER_MIN_MS = 4000;
+const LOADER_FADE_HOLD_MS = 500;
+const LOADER_FADE_MAX_MS = 900;
 
 function startLoader() {
     const loader = document.getElementById('loader'); 
@@ -493,17 +518,17 @@ function startLoader() {
     
     const pingInterval = setInterval(() => {
         playSound(sfx.loading);
-    }, 2000); 
+    }, 3000); 
     
     let progress = 0; 
     let startTime = Date.now();
     let tickCounter = 0; // Keeps track of time to stabilize the text
     
     const interval = setInterval(() => {
-        progress += Math.random() * 4; 
+        progress += Math.random() * 5 + 1.5; 
         tickCounter++; 
         
-        if (progress >= 99 && (Date.now() - startTime) < 7000) { progress = 99; }
+        if (progress >= 99 && (Date.now() - startTime) < LOADER_MIN_MS) { progress = 99; }
         
 if (progress >= 100) {
             progress = 100; 
@@ -530,8 +555,8 @@ if (progress >= 100) {
                 loader.addEventListener('transitionend', (e) => {
                     if (e.propertyName === 'opacity') finishLoaderFade();
                 }, { once: true });
-                setTimeout(finishLoaderFade, 1300);
-            }, 900);
+                setTimeout(finishLoaderFade, LOADER_FADE_MAX_MS);
+            }, LOADER_FADE_HOLD_MS);
 
         } else {
             // Changes text exactly every 8 ticks (1.6 seconds)
@@ -1011,7 +1036,6 @@ function onModalDragEnd() {
 // --- INITIALIZATION & EVENT BINDING ---
 function bindDomEvents() {
     initIosUi();
-    initPanopticonPingPong();
     // 1. Bind Modal Close Buttons
     document.querySelectorAll('.modal-close').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -1272,6 +1296,7 @@ function resetIdleTimer() {
     if (document.body.style.filter) {
         document.body.style.transition = 'filter 0.2s ease';
         document.body.style.filter = 'none';
+        triggerPanopticonWake();
     }
 
     if (document.body.classList.contains('pong-playing')) return;
@@ -1287,7 +1312,8 @@ function resetIdleTimer() {
             
             // A slow, 15-second descent into a blurry void
             document.body.style.transition = 'filter 15s ease-in-out';
-            document.body.style.filter = 'grayscale(100%) blur(3px)'; 
+            document.body.style.filter = 'grayscale(100%) blur(3px)';
+            triggerPanopticonSleep();
         }
     }, 60000); // 60 seconds of total inactivity
 }
@@ -1301,6 +1327,7 @@ window.addEventListener('touchmove', resetIdleTimer, { passive: true });
 
 function startIdleDissociation() {
     resetIdleTimer();
+    resetPanopticonIdleCommentTimer();
 }
 
 // Replace your old carousel script with this block
@@ -1447,10 +1474,19 @@ lightbox?.addEventListener('click', (e) => {
   if (e.target === lightbox) closeLightbox();
 });
 
+function pongBlocksArrowNav(e) {
+    return globalThis.gardenHooks?.pongBlocksArrowNav?.(e) ?? false;
+}
+
+function konamiClaimsKey(e) {
+    const isPongActive = globalThis.gardenHooks?.isPongSessionActive ?? (() => false);
+    return globalThis.gardenHooks?.konamiClaimsKey?.(e, isPongActive) ?? false;
+}
+
 // -- 3. Unified Keyboard Logic --
 document.addEventListener('keydown', (e) => {
   if (pongBlocksArrowNav(e)) return;
-  if (konamiClaimsKey(e, isPongSessionActive)) return;
+  if (konamiClaimsKey(e)) return;
   if (e.key === 'ArrowRight') {
     currentIndex = (currentIndex + 1) % slides.length;
     isLightboxOpen ? updateLightbox() : updateCarousel();
@@ -1471,14 +1507,18 @@ globalThis.gardenHooks = {
     toggleMode,
     resetTimeline,
     resetIdleTimer,
-    konamiBlocksPongArming: isKonamiInProgress,
-    konamiClaimsKey: (e) => konamiClaimsKey(e, isPongSessionActive),
-    cancelPongArming: cancelPongArmingSequence,
-    cancelKonamiArming: cancelKonamiArmingSequence,
-    resetKonamiSequence,
+    konamiBlocksPongArming: () => false,
+    isKonamiInProgress: () => false,
+    isKonamiActivelyEntering: () => false,
+    isPongArmingActive: () => false,
+    isPongSessionActive: () => false,
+    konamiClaimsKey: () => false,
+    cancelPongArming: () => {},
+    cancelKonamiArming: () => {},
+    resetKonamiSequence: () => {},
+    setCorrupted: setIsCorrupted,
+    syncPanopticonCodeSequenceComments,
 };
-
-initKonami({ isPongActive: isPongSessionActive, onComplete: activateGodMode });
 
 // --- GLOBAL HTML HANDLERS ---
 window.openModal = openModal;

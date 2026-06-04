@@ -12,10 +12,13 @@ include_roots:
   - sw.js
   - css/
   - js/main.js
-  - js/state.js
-  - js/shared.js
   - js/lazy.js
-  - js/sw-register.js
+  - js/core/
+  - js/boot/
+  - js/cipher/
+  - js/data/
+  - js/game/
+  - js/ios/
   - js/modules/
   - pages/
   - assets/

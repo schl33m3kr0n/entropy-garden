@@ -29,6 +29,7 @@ export function getCipherStage() {
 
 export function setCipherStage(stage) {
     cipherStage = stage;
+    globalThis.gardenHooks?.syncPanopticonCodeSequenceComments?.();
 }
 
 globalThis.getCipherStage = getCipherStage;
@@ -88,6 +89,10 @@ export function setCanvasMetrics(dpr, fs, cs, c, r) {
 export function toggleIsCorrupted() {
     isCorrupted = !isCorrupted;
     return isCorrupted;
+}
+
+export function setIsCorrupted(value) {
+    isCorrupted = Boolean(value);
 }
 
 export function setSingularityAnimId(value) {

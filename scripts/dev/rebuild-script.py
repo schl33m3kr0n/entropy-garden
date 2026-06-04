@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Rebuild js/script.js from corrupted split pieces."""
+"""Rebuild archive/legacy/script.js from corrupted split pieces."""
 
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-script_path = ROOT / "js/script.js"
+script_path = ROOT / "archive/legacy/script.js"
 lines = script_path.read_text(encoding="utf-8").splitlines(keepends=True)
 
 terminal = (

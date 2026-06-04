@@ -4,10 +4,20 @@ import {
     gardenLoopActive,
     singularityAnimId,
     isCorrupted,
+    isSingularityActive,
+    getCipherStage,
 } from './state.js';
 import { FULL_MATRIX_CHARS, HEBREW_CIPHER_CHARS } from '../data/cipher-glyphs.data.js';
+import {
+    isIOS,
+    isSafari,
+    isRealIOSDevice,
+    isSafariBrowser,
+    isFileProtocol,
+} from './environment.js';
 
-export { gardenHasStarted, gardenLoopActive, singularityAnimId, isCorrupted };
+export { gardenHasStarted, gardenLoopActive, singularityAnimId, isCorrupted, isSingularityActive };
+export { isIOS, isSafari, isRealIOSDevice, isSafariBrowser, isFileProtocol };
 
 export const asset = (path) => `assets/${path}`;
 export const sfxPath = (file) => asset(`audio/sfx/${file}`);
@@ -469,8 +479,13 @@ const IOS_CIPHER_CHARS =
     HEBREW_CIPHER_CHARS +
     '!?@#$%&*_+=<>[]{}|/~';
 
+/** Smaller glyph pool + flat wheel paint on WebKit (iOS / Safari). */
 export function usesIosCipherGlyphs() {
-    return isIOS || document.body?.classList.contains('ios-ui');
+    return perf.liteGfx || document.body?.classList.contains('ios-ui');
+}
+
+export function usesLiteCipherWheelPaint() {
+    return usesIosCipherGlyphs();
 }
 
 export function pickCipherChar() {
@@ -478,49 +493,55 @@ export function pickCipherChar() {
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
-/** iPhone / iPad / iPod — excludes macOS laptops (same MacIntel touch heuristic, but hover: hover). */
-export function isRealIOSDevice() {
-    if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) return true;
-    return navigator.platform === 'MacIntel'
-        && navigator.maxTouchPoints > 1
-        && window.matchMedia('(hover: none)').matches;
-}
-
-export const isIOS = isRealIOSDevice();
-
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
 const isNarrowViewport = window.innerWidth <= 768;
 const isMobile = isCoarsePointer || isNarrowViewport;
 
+function applyPerfNumbers() {
+    const rm = perf.prefersReducedMotion;
+    const ios = perf.isIOS;
+    const saf = perf.isSafari;
+    const mob = perf.isMobile;
+
+    perf.liteGfx = ios || saf;
+    perf.dprCap = ios ? 1 : (saf ? 1 : (mob ? 1.5 : 2));
+    perf.spawnPerFrame = rm ? 12 : (ios ? 2 : (saf ? 3 : (mob ? 4 : 8)));
+    perf.steadySwapsPerFrame = rm ? 8 : (ios ? 4 : (saf ? 6 : (mob ? 12 : 30)));
+    perf.matrixFrameSkip = rm
+        ? 0
+        : (ios ? 2 : (saf ? 2 : (mob ? 1 : 0)));
+    perf.panopticonFrameSkip = rm ? 0 : ((ios || saf) ? 1 : 0);
+    perf.maxCipherRings = ios ? 7 : (saf ? 8 : null);
+    perf.cellSpacing = mob ? 1.45 : 1.65;
+}
+
 export const perf = {
     isIOS,
+    isSafari,
     isMobile,
+    liteGfx: isIOS || isSafari,
     prefersReducedMotion: reducedMotionQuery.matches,
-    dprCap: isIOS ? 1 : (isMobile ? 1.5 : 2),
-    spawnPerFrame: reducedMotionQuery.matches ? 12 : (isIOS ? 2 : (isMobile ? 4 : 8)),
-    steadySwapsPerFrame: reducedMotionQuery.matches ? 8 : (isIOS ? 4 : (isMobile ? 12 : 30)),
-    matrixFrameSkip: isIOS && !reducedMotionQuery.matches
-        ? 2
-        : (isMobile && !reducedMotionQuery.matches ? 1 : 0),
-    panopticonFrameSkip: isIOS && !reducedMotionQuery.matches ? 1 : 0,
-    maxCipherRings: isIOS ? 7 : null,
-    cellSpacing: isMobile ? 1.45 : 1.65,
+    dprCap: 2,
+    spawnPerFrame: 8,
+    steadySwapsPerFrame: 30,
+    matrixFrameSkip: 0,
+    panopticonFrameSkip: 0,
+    maxCipherRings: null,
+    cellSpacing: 1.65,
 };
 
+applyPerfNumbers();
+
 export function applyPerfClass() {
-    document.body.classList.toggle('perf-lite', isMobile || perf.prefersReducedMotion);
+    document.body.classList.toggle('perf-lite', isMobile || perf.prefersReducedMotion || perf.isSafari);
+    document.body.classList.toggle('perf-safari', perf.isSafari);
 }
 
 applyPerfClass();
 reducedMotionQuery.addEventListener('change', (e) => {
     perf.prefersReducedMotion = e.matches;
-    perf.spawnPerFrame = e.matches ? 12 : (perf.isIOS ? 2 : (perf.isMobile ? 4 : 8));
-    perf.steadySwapsPerFrame = e.matches ? 8 : (perf.isIOS ? 4 : (perf.isMobile ? 12 : 30));
-    perf.matrixFrameSkip = perf.isIOS && !e.matches
-        ? 2
-        : (perf.isMobile && !e.matches ? 1 : 0);
-    perf.panopticonFrameSkip = perf.isIOS && !e.matches ? 1 : 0;
+    applyPerfNumbers();
     applyPerfClass();
     import('./state.js').then((s) => s.setNeedsFullRedraw(true));
 });
@@ -528,6 +549,7 @@ reducedMotionQuery.addEventListener('change', (e) => {
 export let eyeAngle = 0;
 export let eyeMode = 'idle';
 
+export const panopticonCommentEl = document.getElementById('panopticon-comment');
 export const panopticonEl = document.getElementById('panopticon-eye');
 export const panopticonInnerEl = panopticonEl?.querySelector('.panopticon-inner');
 export const panopticonGazeEl = document.getElementById('panopticon-gaze');
@@ -552,10 +574,301 @@ const PANOPTICON_LID_OPEN = 'M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z
 const PANOPTICON_LID_CLOSED = 'M 8 50 L 92 50';
 const PANOPTICON_CAT_MORPH_MS = 420;
 const PANOPTICON_CAT_HOLD_MS = 1100;
+const PANOPTICON_WAKE_PEEK_MS = 520;
+const PANOPTICON_WAKE_BLINK_MS = 880;
+const PANOPTICON_WAKE_BLINK_COUNT = 2;
+const PANOPTICON_WAKE_YAWN_MS = 640;
+const PANOPTICON_WAKE_SETTLE_MS = 360;
+const PANOPTICON_WAKE_HALF_SHUT = 0.52;
+const PANOPTICON_WAKE_BLINK_SHUT = 0.88;
+const PANOPTICON_IDLE_COMMENT_MS = 10000;
+const PANOPTICON_IDLE_COMMENT_CHANCE = 1;
+const PANOPTICON_TAB_RETURN_MIN_MS = 500;
 
 let catEyePhase = null;
 let catEyeStart = 0;
 let catEyeAudioEl = null;
+
+let sleepStart = 0;
+let wakeStart = 0;
+let lidShutNow = 0;
+let wakeFromShut = 1;
+let panopticonAuxId = null;
+let panopticonIdleCommentTimer = null;
+let panopticonCommentTimeout = null;
+let panopticonTabHiddenAt = 0;
+let panopticonCodeSequenceActivePrev = false;
+
+function isPanopticonCodeSequenceActive() {
+    if (panopticonGodActive || godEyeSequence) return true;
+    if (getCipherStage() > 0) return true;
+    const hooks = globalThis.gardenHooks;
+    if (hooks?.isKonamiActivelyEntering?.()) return true;
+    if (hooks?.isPongArmingActive?.()) return true;
+    if (hooks?.isPongSessionActive?.()) return true;
+    return false;
+}
+
+function canShowPanopticonComment() {
+    if (!gardenHasStarted || !panopticonEl?.classList.contains('visible')) return false;
+    if (isPanopticonCodeSequenceActive()) return false;
+    if (eyeMode === 'reroll' || eyeMode === 'waking') return false;
+    if (document.body.classList.contains('pong-playing')) return false;
+    if (document.hidden || isSingularityActive) return false;
+    return true;
+}
+
+function canShowPanopticonIdleComment() {
+    if (!canShowPanopticonComment()) return false;
+    if (panopticonSleepWakeActive()) return false;
+    return true;
+}
+
+function positionPanopticonComment() {
+    if (!panopticonCommentEl || !panopticonEl) return;
+
+    const eyeRect = panopticonEl.getBoundingClientRect();
+    const boxW = panopticonCommentEl.offsetWidth;
+    const margin = 8;
+    const left = eyeRect.left + eyeRect.width / 2 - boxW / 2;
+    const clampedLeft = Math.max(margin, Math.min(left, window.innerWidth - boxW - margin));
+
+    panopticonCommentEl.style.left = `${clampedLeft}px`;
+    panopticonCommentEl.style.top = `${eyeRect.bottom + 10}px`;
+}
+
+function showPanopticonIdleComment(text, ttlMs = 4400) {
+    if (!panopticonCommentEl || !text || !canShowPanopticonIdleComment()) return;
+
+    panopticonCommentEl.textContent = text;
+    panopticonCommentEl.classList.add('visible');
+    panopticonCommentEl.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => {
+        if (!panopticonCommentEl.classList.contains('visible')) return;
+        positionPanopticonComment();
+    });
+
+    clearTimeout(panopticonCommentTimeout);
+    panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), ttlMs);
+}
+
+export function showPanopticonComment(text, ttlMs = 4400) {
+    if (!panopticonCommentEl || !text || !canShowPanopticonComment()) return;
+
+    panopticonCommentEl.textContent = text;
+    panopticonCommentEl.classList.add('visible');
+    positionPanopticonComment();
+    panopticonCommentEl.setAttribute('aria-hidden', 'false');
+
+    clearTimeout(panopticonCommentTimeout);
+    panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), ttlMs);
+}
+
+export function hidePanopticonComment() {
+    clearTimeout(panopticonCommentTimeout);
+    panopticonCommentEl?.classList.remove('visible');
+    panopticonCommentEl?.setAttribute('aria-hidden', 'true');
+}
+
+/** Hide idle/return bubbles when konami, pong, cipher, or god-eye sequences start. */
+export function syncPanopticonCodeSequenceComments() {
+    const active = isPanopticonCodeSequenceActive();
+    if (active && !panopticonCodeSequenceActivePrev) {
+        hidePanopticonComment();
+        clearPanopticonIdleCommentTimer();
+        if (panopticonCommentEl) panopticonCommentEl.textContent = '';
+    } else if (!active && panopticonCodeSequenceActivePrev) {
+        resetPanopticonIdleCommentTimer();
+    }
+    panopticonCodeSequenceActivePrev = active;
+}
+
+let panopticonIdleCommentBag = null;
+let panopticonIdleCommentBagPool = null;
+let panopticonReturnCommentBag = null;
+let panopticonReturnCommentBagPool = null;
+
+function pickPanopticonIdleComment() {
+    const pool = globalThis.lorePools?.panopticonIdleComments;
+    if (!pool?.length) return null;
+    if (panopticonIdleCommentBagPool !== pool) {
+        panopticonIdleCommentBagPool = pool;
+        panopticonIdleCommentBag = createBag(pool);
+    }
+    return panopticonIdleCommentBag();
+}
+
+function pickPanopticonReturnComment() {
+    const pool = globalThis.lorePools?.panopticonReturnComments;
+    if (!pool?.length) return 'missed me?';
+    if (panopticonReturnCommentBagPool !== pool) {
+        panopticonReturnCommentBagPool = pool;
+        panopticonReturnCommentBag = createBag(pool);
+    }
+    return panopticonReturnCommentBag();
+}
+
+function clearPanopticonIdleCommentTimer() {
+    clearTimeout(panopticonIdleCommentTimer);
+    panopticonIdleCommentTimer = null;
+}
+
+export function startPanopticonIdleComments() {
+    resetPanopticonIdleCommentTimer();
+}
+
+export function resetPanopticonIdleCommentTimer() {
+    clearPanopticonIdleCommentTimer();
+    syncPanopticonCodeSequenceComments();
+
+    if (!gardenHasStarted) return;
+    if (document.body.classList.contains('pong-playing')) return;
+    if (panopticonSleepWakeActive()) return;
+
+    panopticonIdleCommentTimer = setTimeout(() => {
+        syncPanopticonCodeSequenceComments();
+        if (!isPanopticonCodeSequenceActive() && canShowPanopticonIdleComment()) {
+            if (Math.random() < PANOPTICON_IDLE_COMMENT_CHANCE) {
+                const text = pickPanopticonIdleComment();
+                if (text) showPanopticonIdleComment(text);
+            }
+        }
+
+        resetPanopticonIdleCommentTimer();
+    }, PANOPTICON_IDLE_COMMENT_MS);
+}
+
+export function handlePanopticonVisibilityChange(hidden) {
+    if (hidden) {
+        panopticonTabHiddenAt = performance.now();
+        hidePanopticonComment();
+        return;
+    }
+
+    if (!gardenHasStarted || !panopticonTabHiddenAt) return;
+
+    const awayMs = performance.now() - panopticonTabHiddenAt;
+    panopticonTabHiddenAt = 0;
+    if (awayMs < PANOPTICON_TAB_RETURN_MIN_MS) return;
+
+    const text = pickPanopticonReturnComment();
+    requestAnimationFrame(() => {
+        if (canShowPanopticonComment()) showPanopticonComment(text);
+    });
+}
+
+function panopticonSleepWakeActive() {
+    return eyeMode === 'sleeping' || eyeMode === 'waking';
+}
+
+function cancelPanopticonAuxLoop() {
+    if (panopticonAuxId != null) {
+        cancelAnimationFrame(panopticonAuxId);
+        panopticonAuxId = null;
+    }
+}
+
+function schedulePanopticonAuxLoop() {
+    if (panopticonAuxId != null) return;
+
+    const frame = () => {
+        panopticonAuxId = null;
+        if (!panopticonSleepWakeActive()) return;
+
+        updatePanopticonVisibility();
+        if (!animatePanopticonGodEye(performance.now())) {
+            updatePanopticonSleepWake(performance.now());
+        }
+
+        if (panopticonSleepWakeActive()) {
+            panopticonAuxId = requestAnimationFrame(frame);
+        }
+    };
+
+    panopticonAuxId = requestAnimationFrame(frame);
+}
+
+function panopticonSleepCloseMs() {
+    return perf.prefersReducedMotion ? 300 : PANOPTICON_GOD_CLOSE_MS;
+}
+
+function panopticonWakeTimings() {
+    const rm = perf.prefersReducedMotion;
+    return {
+        peekMs: rm ? 280 : PANOPTICON_WAKE_PEEK_MS,
+        blinkMs: rm ? 480 : PANOPTICON_WAKE_BLINK_MS,
+        yawnMs: rm ? 320 : PANOPTICON_WAKE_YAWN_MS,
+        settleMs: rm ? 180 : PANOPTICON_WAKE_SETTLE_MS,
+    };
+}
+
+function applyPanopticonSleepVisual(shut, breatheY = 0) {
+    const clamped = Math.max(0, Math.min(1, shut));
+    applyPanopticonLidShut(clamped);
+    if (panopticonInnerEl) {
+        panopticonInnerEl.style.transform = breatheY ? `translateY(${breatheY}px)` : '';
+    }
+}
+
+/** Round-cap arch for yawn (single smooth curve, same stroke/fill as normal lid). */
+function panopticonYawnArchPath(intensity) {
+    const k = smoothstep(Math.max(0, Math.min(1, intensity)));
+    if (k < 0.001) return PANOPTICON_LID_CLOSED;
+
+    const rise = k * 26;
+    const yMid = 50;
+    const yPeak = yMid - rise;
+    const yLower = yMid + 3 + k * 5;
+    return `M 8 ${yMid} C 26 ${yPeak}, 74 ${yPeak}, 92 ${yMid} C 74 ${yLower}, 26 ${yLower}, 8 ${yMid} Z`;
+}
+
+function applyPanopticonSocketPath(path, gazeStrength = 0) {
+    panopticonLidEl?.setAttribute('d', path);
+
+    if (path === PANOPTICON_LID_CLOSED) {
+        panopticonClipPathEl?.setAttribute('d', 'M 8 50 L 92 50 L 92 50 L 8 50 Z');
+        if (panopticonGazeEl) panopticonGazeEl.style.opacity = '0';
+        return;
+    }
+
+    panopticonClipPathEl?.setAttribute('d', path);
+    if (panopticonGazeEl) {
+        panopticonGazeEl.style.opacity = String(Math.min(1, Math.max(0, gazeStrength)));
+    }
+}
+
+function applyPanopticonYawnShape(progress) {
+    const p = Math.max(0, Math.min(1, progress));
+
+    if (p < 0.28) {
+        const shut = PANOPTICON_WAKE_HALF_SHUT + (1 - PANOPTICON_WAKE_HALF_SHUT) * smoothstep(p / 0.28);
+        lidShutNow = shut;
+        applyPanopticonLidShut(shut);
+        if (panopticonInnerEl) panopticonInnerEl.style.transform = '';
+        return;
+    }
+
+    if (p < 0.72) {
+        const archPhase = (p - 0.28) / 0.44;
+        const intensity = Math.sin(Math.PI * archPhase);
+        const path = panopticonYawnArchPath(intensity);
+        lidShutNow = 1 - intensity * 0.82;
+        applyPanopticonSocketPath(path, intensity * 0.45);
+        if (panopticonInnerEl) panopticonInnerEl.style.transform = '';
+        return;
+    }
+
+    const shut = 1 - smoothstep((p - 0.72) / 0.28) * (1 - PANOPTICON_WAKE_HALF_SHUT);
+    lidShutNow = shut;
+    applyPanopticonLidShut(shut);
+    if (panopticonInnerEl) panopticonInnerEl.style.transform = '';
+}
+
+function easePanopticonWakeGaze() {
+    panopticonGazeX += (0 - panopticonGazeX) * 0.18;
+    panopticonGazeY += (0 - panopticonGazeY) * 0.18;
+    panopticonGazeEl?.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
+}
 
 let panopticonGodActive = false;
 let godEyeSequence = null;
@@ -688,6 +1001,34 @@ export function triggerPanopticonCenterStare() {
     stareFromY = panopticonGazeY;
     stareStart = performance.now();
     eyeMode = 'stare';
+}
+
+export function triggerPanopticonSleep() {
+    if (!panopticonEl) return;
+    updatePanopticonVisibility();
+    if (!panopticonEl.classList.contains('visible')) return;
+    if (panopticonGodActive || godEyeSequence) return;
+    if (eyeMode === 'reroll' || eyeMode === 'sleeping') return;
+    cancelPanopticonCatEye();
+    clearPanopticonIdleCommentTimer();
+    hidePanopticonComment();
+    eyeMode = 'sleeping';
+    const closeMs = panopticonSleepCloseMs();
+    sleepStart = document.hidden ? performance.now() - closeMs : performance.now();
+    panopticonEl.classList.add('panopticon-sleeping');
+    schedulePanopticonAuxLoop();
+    updatePanopticonSleepWake(performance.now());
+}
+
+export function triggerPanopticonWake() {
+    if (!panopticonEl) return;
+    if (eyeMode !== 'sleeping') return;
+    resetPanopticonIdleCommentTimer();
+    wakeFromShut = lidShutNow;
+    eyeMode = 'waking';
+    wakeStart = performance.now();
+    schedulePanopticonAuxLoop();
+    updatePanopticonSleepWake(performance.now());
 }
 
 function onCatEyeAudioEnded() {
@@ -857,9 +1198,13 @@ function animatePanopticonCatEye(now) {
 
 function resetPanopticonLidGeometry() {
     cancelPanopticonCatEye();
+    cancelPanopticonAuxLoop();
+    panopticonEl?.classList.remove('panopticon-sleeping');
+    lidShutNow = 0;
     panopticonLidEl?.setAttribute('d', PANOPTICON_LID_OPEN);
     panopticonClipPathEl?.setAttribute('d', PANOPTICON_LID_OPEN);
     if (panopticonGazeEl) panopticonGazeEl.style.opacity = '1';
+    if (panopticonInnerEl) panopticonInnerEl.style.transform = '';
 }
 
 function applyPanopticonLidShut(shut) {
@@ -910,6 +1255,7 @@ export function setPanopticonGodMode(active) {
         godEyeSeqStart = performance.now();
         godSymbolIndex = 0;
         godSymbolTick = 0;
+        syncPanopticonCodeSequenceComments();
         return;
     }
 
@@ -917,11 +1263,13 @@ export function setPanopticonGodMode(active) {
     if (godEyeSequence === 'open') {
         godEyeSequence = 'deactivating';
         godEyeSeqStart = performance.now();
+        syncPanopticonCodeSequenceComments();
         return;
     }
 
     resetPanopticonNormalPupil();
     godEyeSequence = null;
+    syncPanopticonCodeSequenceComments();
 }
 
 function animatePanopticonGodEye(now) {
@@ -1017,19 +1365,91 @@ function animatePanopticonGodEye(now) {
     return false;
 }
 
+/** @returns {boolean} true when sleep/wake consumed this frame */
+function updatePanopticonSleepWake(now) {
+    if (!panopticonGazeEl || !panopticonInnerEl) return false;
+
+    if (eyeMode === 'sleeping') {
+        const closeMs = panopticonSleepCloseMs();
+        const elapsed = now - sleepStart;
+
+        if (elapsed >= closeMs) {
+            lidShutNow = 1;
+            applyPanopticonLidShut(1);
+            if (panopticonInnerEl) panopticonInnerEl.style.transform = '';
+            return true;
+        }
+
+        const shut = smoothstep(elapsed / closeMs);
+        lidShutNow = shut;
+        applyPanopticonLidShut(shut);
+        if (panopticonInnerEl) panopticonInnerEl.style.transform = '';
+        return true;
+    }
+
+    if (eyeMode === 'waking') {
+        const elapsed = now - wakeStart;
+        const { peekMs, blinkMs, yawnMs, settleMs } = panopticonWakeTimings();
+        easePanopticonWakeGaze();
+
+        if (elapsed < peekMs) {
+            const t = smoothstep(elapsed / peekMs);
+            const shut = wakeFromShut + (PANOPTICON_WAKE_HALF_SHUT - wakeFromShut) * t;
+            lidShutNow = shut;
+            applyPanopticonSleepVisual(shut);
+            return true;
+        }
+
+        const blinkElapsed = elapsed - peekMs;
+        if (blinkElapsed < blinkMs) {
+            const wave = Math.abs(Math.sin((blinkElapsed / blinkMs) * PANOPTICON_WAKE_BLINK_COUNT * Math.PI));
+            const shut = PANOPTICON_WAKE_HALF_SHUT
+                + (PANOPTICON_WAKE_BLINK_SHUT - PANOPTICON_WAKE_HALF_SHUT) * wave;
+            lidShutNow = shut;
+            applyPanopticonSleepVisual(shut);
+            return true;
+        }
+
+        const yawnElapsed = blinkElapsed - blinkMs;
+        if (yawnElapsed < yawnMs) {
+            applyPanopticonYawnShape(yawnElapsed / yawnMs);
+            return true;
+        }
+
+        const settleElapsed = yawnElapsed - yawnMs;
+        if (settleElapsed < settleMs) {
+            const shut = PANOPTICON_WAKE_HALF_SHUT * (1 - smoothstep(settleElapsed / settleMs));
+            lidShutNow = shut;
+            applyPanopticonSleepVisual(shut);
+            return true;
+        }
+
+        lidShutNow = 0;
+        applyPanopticonSleepVisual(0);
+        eyeMode = 'idle';
+        panopticonEl?.classList.remove('panopticon-sleeping');
+        cancelPanopticonAuxLoop();
+        return true;
+    }
+
+    return false;
+}
+
 export function animatePanopticon() {
     if (!panopticonGazeEl || !panopticonInnerEl) return;
 
     updatePanopticonVisibility();
     if (!panopticonEl?.classList.contains('visible')) return;
 
-    if (panopticonEl.classList.contains('pong-active')) return;
-
     if (panopticonEl.classList.contains('god-rainbow')) {
         syncPanopticonRainbow();
     }
 
     if (animatePanopticonGodEye(performance.now())) return;
+
+    if (updatePanopticonSleepWake(performance.now())) return;
+
+    if (panopticonEl.classList.contains('pong-active')) return;
 
     animatePanopticonCatEye(performance.now());
 

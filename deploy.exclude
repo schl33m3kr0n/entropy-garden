@@ -1,19 +1,20 @@
-# Paths omitted from production bundles (see scripts/deploy-netlify.sh)
+# Omitted from production dist/ (rsync + Cloudflare tar). See scripts/deploy/deploy.py
+
 .git/
 .gitignore
 .DS_Store
 .netlify/
 node_modules/
 dist/
+
+# Dev-only trees (includes archive/legacy/script.js and old file-pong bundles)
 /archive/
 /scripts/
 /docs/
-/js/script.js
-/js/file-pong.bundle.js
-/js/file-pong-boot.js
-/js/file-lazy-shim.js
+
 /assets/video/genesis-web.mov
 /assets/img/vault/sun-poster.png
+
 deploy.exclude
 deploy.manifest
 .netlifyignore

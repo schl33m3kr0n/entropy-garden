@@ -4,7 +4,6 @@ import { perf } from '../core/shared.js';
 
 import { resizeCanvas, stopGardenLoop, resumeGardenLoop } from '../lazy.js';
 import { isSingularityActive } from '../core/state.js';
-import { initIosPingPong } from '../game/pong.js';
 
 
 
@@ -341,8 +340,6 @@ export function initIosUi() {
     addIosModalRerollButtons();
 
     bindIosTerminalToggle();
-
-    initIosPingPong();
 
     import('./ios/ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
 

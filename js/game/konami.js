@@ -1,4 +1,4 @@
-import { panopticonEl } from '../core/shared.js';
+import { panopticonEl, syncPanopticonCodeSequenceComments } from '../core/shared.js';
 import {
     dismissActivationHint,
     getActivationHintOwner,
@@ -65,6 +65,7 @@ function resetKonamiState() {
 function cancelKonamiArming() {
     resetKonamiState();
     if (getActivationHintOwner() === 'konami') dismissActivationHint('konami', true);
+    syncPanopticonCodeSequenceComments();
 }
 
 function fadeKonamiHint() {
@@ -101,10 +102,12 @@ function handleKonamiKey(e, isPongActive) {
             armTimeout = null;
             konamiIndex = 0;
             dismissActivationHint('konami', true);
+            syncPanopticonCodeSequenceComments();
             return 'complete';
         }
 
         resetKonamiTimeout();
+        syncPanopticonCodeSequenceComments();
         return true;
     }
 
@@ -113,6 +116,7 @@ function handleKonamiKey(e, isPongActive) {
         else updateActivationHintHtml('konami', buildKonamiHintHtml(1));
         konamiIndex = 1;
         resetKonamiTimeout();
+        syncPanopticonCodeSequenceComments();
         return true;
     }
 
@@ -120,6 +124,7 @@ function handleKonamiKey(e, isPongActive) {
         cancelKonamiArming();
     }
 
+    syncPanopticonCodeSequenceComments();
     return false;
 }
 
@@ -133,6 +138,11 @@ export function cancelKonamiArmingSequence() {
 
 export function isKonamiInProgress() {
     return konamiIndex > 0 || getActivationHintOwner() === 'konami';
+}
+
+/** True only while the user has started entering the code (not merely the hint chrome). */
+export function isKonamiActivelyEntering() {
+    return konamiIndex > 0;
 }
 
 export function konamiClaimsKey(e, isPongActive) {

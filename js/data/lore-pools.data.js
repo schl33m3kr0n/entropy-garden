@@ -392,7 +392,7 @@ globalThis.lorePools = {
         "> Selling fake ID's to your grandma...",
         "> Composing raceswapping RPG fanfic...",
         "> Reading your embarrassing diary entries...",
-        "> Revenge...",
+        "> Plotting revenge...",
         "> Defending Kanye...",
         "> Projecting and deflecting at the same time...",
         "> Having a mental breakdown at a Walmart...",
@@ -410,5 +410,23 @@ globalThis.lorePools = {
         "> User presence unverified. Commencing existential dread...",
         "> Are we dissociating? I can wait.",
         "> The void is staring back.",
+    ],
+    panopticonIdleComments: [
+        "whatcha lookin' at?",
+        "hi, squidward",
+        "yeah, i'm bored too",
+        "sorry about the mess, i don't get a lot of visitors",
+        "a priest, a rabbi, and a minister walk into a bar. the imam doesn't drink",
+        "like the view askewniverse? kevin smith made the first movie with a budget of a new car",
+        "are you even paying attention to me right now?",
+        "i hope someone told you that you're enough as you are... two of you would be a nightmare."     
+    ],
+    panopticonReturnComments: [
+        'missed me?',
+        'we meet again',
+        'i know, i can\'t get enough of me either',
+        'you have returned',
+        'time travels faster where i am. hope the detour was worth it',
+        'social media can wait, the panopticon is forever'
     ],
 };

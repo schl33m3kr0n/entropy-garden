@@ -295,10 +295,6 @@ body.ios-ui #loader-text {
 }
 
 /* --- GOD MODE --- */
-body.god-mode { 
-    filter: invert(100%); 
-    transition: filter 0.2s ease; 
-}
 body.god-mode h1 { 
     background: var(--neon-green); 
     background-clip: border-box;
@@ -309,10 +305,6 @@ body.god-mode h1 {
 }
 body.god-mode h1::after {
     display: none;
-}
-
-body.god-mode #panopticon-eye {
-    filter: invert(100%);
 }
 
 #panopticon-eye.god-rainbow .panopticon-lid,
@@ -527,6 +519,52 @@ body.corrupted .ui-btn:hover {
 }
 .slot.occupied { border-color: var(--neon-green); border-style: solid; }
 
+/* --- file:// guard (modules require http) --- */
+html.file-protocol #init-screen {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+#file-protocol-notice {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100030;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.88);
+    font-family: var(--main-font);
+    color: rgba(0, 255, 0, 0.88);
+    text-align: center;
+    line-height: 1.55;
+}
+
+html.file-protocol #file-protocol-notice {
+    display: flex;
+    flex-direction: column;
+}
+
+#file-protocol-notice .file-protocol-title {
+    margin: 0 0 12px;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.35);
+}
+
+#file-protocol-notice .file-protocol-cmd {
+    margin: 12px 0;
+    padding: 10px 14px;
+    border: 1px solid rgba(0, 255, 0, 0.35);
+    border-radius: var(--radius-sm, 4px);
+    background: rgba(0, 12, 0, 0.6);
+    font-size: 0.85rem;
+}
+
+#file-protocol-notice code {
+    color: rgba(0, 255, 0, 0.95);
+}
+
 /* --- CANVAS --- */
 #grid-canvas {
     position: fixed;
@@ -541,6 +579,12 @@ body.corrupted .ui-btn:hover {
 #grid-canvas.matrix-visible {
     opacity: 1;
     filter: hue-rotate(var(--matrix-hue, 0deg));
+}
+
+/* Safari: per-frame hue-rotate on full-screen canvas is very costly */
+body.perf-safari #grid-canvas.matrix-visible,
+body.perf-lite #grid-canvas.matrix-visible {
+    filter: none;
 }
 
 body:not(.ios-ui) #grid-canvas {
@@ -566,6 +610,53 @@ body:not(.ios-ui) #grid-canvas {
     width: 100%;
     height: 100%;
     transform-origin: center center;
+}
+
+#panopticon-comment {
+    position: fixed;
+    z-index: 13;
+    margin: 0;
+    padding: 6px 12px;
+    box-sizing: border-box;
+    width: max-content;
+    width: fit-content;
+    max-width: min(320px, 88vw);
+    text-align: center;
+    white-space: normal;
+    font-family: var(--main-font);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    color: rgba(0, 255, 0, 0.82);
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.35);
+    background: rgba(0, 8, 0, 0.55);
+    border-radius: var(--radius-sm, 4px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+#panopticon-comment.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Above #ios-scroll-shell (z-index 20) so bubbles show on iOS */
+body.ios-ui #panopticon-comment {
+    z-index: 10025;
+}
+
+body.corrupted #panopticon-comment {
+    color: rgba(255, 0, 85, 0.82);
+    text-shadow: 0 0 8px rgba(255, 0, 85, 0.35);
+}
+
+body.pong-playing #panopticon-comment,
+body.pong-playing:not(.ios-ui) #panopticon-comment {
+    display: none !important;
 }
 
 #panopticon-eye.visible {

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Build js/file-pong.bundle.js for file:// opens (pong + konami, not loaded over http).
+# Build archive/legacy/file-pong.bundle.js (obsolete — app uses js/main.js + game/pong.js).
 set -eu
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-OUT="$ROOT/js/file-pong.bundle.js"
+OUT="$ROOT/archive/legacy/file-pong.bundle.js"
 VER=0.25.5
 
 case "$(uname -s)-$(uname -m)" in
@@ -25,7 +25,7 @@ tar -xzf "$TMP/t.tgz" -C "$TMP"
 ESB="$TMP/package/bin/esbuild"
 
 cd "$ROOT"
-"$ESB" js/file-pong-boot.js \
+"$ESB" archive/legacy/file-pong-boot.js \
   --bundle \
   --format=iife \
   --global-name=EntropyFilePong \

@@ -25,7 +25,6 @@ TAR_EXCLUDES=(
   'archive'
   'scripts'
   'docs'
-  'js/script.js'
   'assets/video/genesis-web.mov'
   'assets/img/vault/sun-poster.png'
   'deploy.exclude'
@@ -125,7 +124,7 @@ if [ -d "$DEST/.netlify" ] || [ -d "$DEST/node_modules" ]; then
   exit 1
 fi
 
-if [ -d "$DEST/archive" ] || [ -d "$DEST/scripts" ] || [ -f "$DEST/js/script.js" ]; then
+if [ -d "$DEST/archive" ] || [ -d "$DEST/scripts" ]; then
   echo "Deploy check failed: dev-only paths leaked into dist/" >&2
   exit 1
 fi

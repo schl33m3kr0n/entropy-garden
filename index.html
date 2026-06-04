@@ -171,6 +171,7 @@
             </svg>
         </div>
     </div>
+    <div id="panopticon-comment" aria-live="polite" aria-hidden="true"></div>
 
     <div id="refresh-hint">[ PRESS R TO REROLL ]</div>
 
@@ -354,6 +355,7 @@
   <button class="lightbox-btn lb-next">&#10095;</button>
 </div>
 
+<script src="js/boot/file-protocol-guard.js"></script>
 <script src="js/boot/terminal-sfx.js" defer></script>
 <script src="js/ios/terminal-boot.js" defer></script>
 <script src="js/data/lore-pools.data.js"></script>
@@ -362,51 +364,17 @@
 <script src="js/boot/trophies.js"></script>
 <script>
 (function () {
-    function loadPongAddon(onReady) {
-        var pong = document.createElement('script');
-        pong.src = 'js/file-pong.bundle.js';
-        pong.defer = true;
-        pong.onload = function () {
-            if (globalThis.EntropyFilePong?.bootAddons) globalThis.EntropyFilePong.bootAddons();
-            else if (globalThis.EntropyFilePong?.bootPong) globalThis.EntropyFilePong.bootPong();
-            if (onReady) onReady();
-        };
-        pong.onerror = function () {
-            console.warn('[Entropy Garden] file-pong.bundle.js missing — run: bash scripts/dev/build-file-pong.sh');
-            if (onReady) onReady();
-        };
-        document.body.appendChild(pong);
-    }
-
-    function loadLegacyBundle() {
-        console.warn(
-            '[Entropy Garden] Could not load js/main.js — falling back to js/script.js. '
-            + 'For full modules use Serve Entropy Garden.command or npm run preview'
-        );
-        var fb = document.createElement('script');
-        fb.src = 'js/script.js';
-        fb.defer = true;
-        fb.onload = function () { loadPongAddon(); };
-        document.body.appendChild(fb);
-    }
-
-    function loadFileBundle() {
-        var fb = document.createElement('script');
-        fb.src = 'js/script.js';
-        fb.defer = true;
-        fb.onload = function () { loadPongAddon(); };
-        document.body.appendChild(fb);
-    }
-
-    if (location.protocol === 'file:') {
-        loadFileBundle();
-        return;
-    }
+    if (location.protocol === 'file:') return;
 
     var s = document.createElement('script');
     s.type = 'module';
     s.src = 'js/main.js';
-    s.onerror = loadLegacyBundle;
+    s.onerror = function () {
+        console.error(
+            '[Entropy Garden] js/main.js failed to load. '
+            + 'Preview with: bash scripts/dev/serve-local.sh'
+        );
+    };
     document.body.appendChild(s);
 })();
 </script>

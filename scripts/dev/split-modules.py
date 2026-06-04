@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Split js/script.js into ES modules with lazy loading."""
+"""Split archive/legacy/script.js into ES modules with lazy loading."""
 
 from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "js" / "script.js"
+SRC = ROOT / "archive" / "legacy" / "script.js"
 MODULES = ROOT / "js" / "modules"
 
-# 1-based inclusive line ranges to extract from script.js
+# 1-based inclusive line ranges to extract from archive/legacy/script.js
 EXTRACT = {
     "terminal": [(388, 878)],
     "singularity": [(1327, 1617), (1777, 2127)],
