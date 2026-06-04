@@ -73,6 +73,7 @@ import {
 } from './lazy.js';
 import { registerServiceWorkerAfterInit } from './core/sw-register.js';
 import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios/ios-ui.js';
+import { setGodTitleArrangement } from './core/god-title.js';
 
 // Bind init immediately so a later module error cannot block the gatekeeper.
 function prefetchGardenBoot() {
@@ -148,18 +149,19 @@ function activateGodMode() {
 
     // CHECK IF ALREADY ACTIVE
     if (body.classList.contains('god-mode')) {
-        body.classList.remove('god-mode');
-        h1.innerText = "ENTROPY GARDEN";
         setPanopticonGodMode(false);
         globalThis.EntropyCipherHint?.onGodModeOff?.();
         pushTerminalLog("> SYSTEM OVERRIDE TERMINATED. RETURNING TO NORMALCY.");
-        playSound(sfx.glitch); // A good "power down" sound
-    } 
+        playSound(sfx.glitch);
+        setGodTitleArrangement(h1, false).then(() => {
+            body.classList.remove('god-mode');
+        });
+    }
     // IF NOT ACTIVE, TURN IT ON
     else {
         body.classList.add('god-mode');
-        h1.innerText = "PONDERY ARGENT";
         setPanopticonGodMode(true);
+        setGodTitleArrangement(h1, true);
         pushTerminalLog("!!! OVERRIDE ACCEPTED !!!");
         playSound(sfx.missionCleared);
         globalThis.unlockTrophy?.('konami_god');

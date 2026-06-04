@@ -295,6 +295,22 @@ body.ios-ui #loader-text {
 }
 
 /* --- GOD MODE --- */
+h1.god-title-live .god-title-chrome {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+h1.god-title-live .god-title-letter {
+    display: inline-block;
+    will-change: transform;
+}
+
+h1.god-title-live .god-title-letter.is-space {
+    min-width: 0.38em;
+}
+
 body.god-mode h1 { 
     background: var(--neon-green); 
     background-clip: border-box;
@@ -303,6 +319,21 @@ body.god-mode h1 {
     box-shadow: 0 0 20px var(--neon-green); 
     border-radius: var(--radius-xl);
 }
+
+body.god-mode h1.god-title-live {
+    background: var(--neon-green);
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: #000;
+}
+
+body.god-mode h1.god-title-live .god-title-letter {
+    color: #000;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+}
+
 body.god-mode h1::after {
     display: none;
 }
