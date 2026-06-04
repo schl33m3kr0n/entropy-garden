@@ -133,29 +133,48 @@ export function rebuildTerminalLogPool() {
     drawTerminalLog = createBag(activeTerminalPool());
 }
 
+/** How long after Enter to keep following output (covers delayed cipher/log lines). */
+const TERMINAL_SCROLL_PIN_MS = 12000;
+
+let terminalScrollPinnedUntil = 0;
+
+export function scrollTerminalOutputToBottom() {
+    const term = document.getElementById('terminal-output');
+    if (!term) return;
+    term.scrollTop = term.scrollHeight;
+}
+
+function pinTerminalScroll(ms = TERMINAL_SCROLL_PIN_MS) {
+    terminalScrollPinnedUntil = performance.now() + ms;
+    scrollTerminalOutputToBottom();
+}
+
+function terminalOutputShouldFollow() {
+    const term = document.getElementById('terminal-output');
+    if (!term) return false;
+    if (performance.now() < terminalScrollPinnedUntil) return true;
+    return term.scrollHeight - term.clientHeight <= term.scrollTop + 50;
+}
+
 export function pushTerminalLog(msg, options) {
     const term = document.getElementById('terminal-output');
     if (!term) return;
     const finalMsg = msg || drawTerminalLog();
-    
-    // 1. Check if the user is currently looking at the bottom BEFORE adding the new message.
-    // We add a 50px buffer so it's forgiving if they are just slightly off the exact bottom pixel.
-    const isScrolledToBottom = term.scrollHeight - term.clientHeight <= term.scrollTop + 50;
 
-    const p = document.createElement('div'); 
+    const p = document.createElement('div');
     p.className = 'term-entry';
     if (options?.html) {
         p.innerHTML = finalMsg;
     } else {
         p.innerText = finalMsg;
     }
-    term.appendChild(p); 
-    
-    if(term.children.length > 50) term.removeChild(term.firstChild); 
-    
-    // 2. Only force the scrollbar down if they were already at the bottom
-    if (isScrolledToBottom) {
-        term.scrollTop = term.scrollHeight; 
+    term.appendChild(p);
+
+    if (term.children.length > 50) term.removeChild(term.firstChild);
+
+    if (options?.scroll === false) return;
+    if (terminalOutputShouldFollow()) {
+        scrollTerminalOutputToBottom();
     }
 }
 function startTerminalLogFeed() {
@@ -208,9 +227,12 @@ function submitTerminalCommand() {
     const val = termInput.value.trim();
     if (!val) return;
     const normalized = val.toLowerCase();
-    pushTerminalLog(`> ${normalized}`);
+    pinTerminalScroll();
+    pushTerminalLog(`> ${val}`);
     termInput.value = '';
     processCommand(normalized);
+    scrollTerminalOutputToBottom();
+    requestAnimationFrame(scrollTerminalOutputToBottom);
 }
 
 function bindTermInputHandlers() {

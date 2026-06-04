@@ -1269,6 +1269,17 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     padding-bottom: 15px;
 }
 
+/* Identity + Bio Dump: centered avatar above copy */
+.modal .bio-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.modal .bio-header > :not(.pfp-wrapper) {
+    width: 100%;
+}
+
 /* --- BIO PROFILE PICTURE --- */
 .pfp-wrapper {
     width: 100px;
@@ -1281,12 +1292,25 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-inline: auto;
+}
+
+.pfp-wrapper picture {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
 }
 
 .pfp-image {
-    width: 125%; /* Zooms the image in by 25% to hide the beige corners */
-    height: 125%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: center center;
+    /* Zoom past beige corners while keeping the face centered */
+    transform: scale(1.25);
+    transform-origin: center center;
 }
 
 /* --- VAULT GRID --- */
@@ -3050,10 +3074,6 @@ body.ios-ui #sequence-display,
 body.ios-ui .interactive-square,
 body.ios-ui .matrix-grid {
     border-radius: var(--ios-radius-md);
-}
-
-body.ios-ui .pfp-wrapper {
-    border-radius: var(--ios-radius-lg);
 }
 
 body.ios-ui #lightbox .lightbox-image-wrapper,
