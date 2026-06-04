@@ -419,7 +419,22 @@ globalThis.lorePools = {
         "a priest, a rabbi, and a minister walk into a bar. the imam doesn't drink",
         "like the view askewniverse? kevin smith made the first movie with a budget of a new car",
         "are you even paying attention to me right now?",
-        "i hope someone told you that you're enough as you are... two of you would be a nightmare."     
+        "i hope someone told you that you're enough as you are... two of you would be a nightmare.",
+        "the void left a review: ★★★★☆",
+        "to whoever owns the red chevy impala, your car is being towed",
+        "sometimes all you need is a good book and a cuba libre",
+        "your attention has been harvested successfully",
+        "i had a dream that i was a real person and started giving everyone mismatched name tags",
+        "all evidence indicates that you exist",
+        "asking who your inspirations are should be a misdemeanor",
+        "the deputy's okay, but the sheriff's health insurance is gonna spike",
+        "it's not public intoxication if you're housed in the chicken suit",
+        "i take my coffee with 2 splendas and suburban complacency",
+        "whoever writes these lines needs a job",
+        "i choose to block the freeway for mother earth",
+        "eternal return this. eternal recurrence that. you're still eternally a virgin",
+        "what happens to a dream deferred? it turns into a frustrating morning",
+        "blue skies and sunshine can't take away from the fact that the unemployment rate among polar bears is disturbingly high"
     ],
     panopticonReturnComments: [
         'missed me?',
