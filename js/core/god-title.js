@@ -3,19 +3,19 @@ import { perf } from './shared.js';
 const SOURCE = 'ENTROPY GARDEN';
 const TARGET = 'PONDERY ARGENT';
 
-/** target slot → source letter index (valid anagram permutation) */
+/** Visual slot left→right → source letter index (anagram: same letters as ENTROPY GARDEN). */
 const TO_PONDERY = [5, 4, 1, 11, 0, 3, 6, 7, 9, 10, 8, 12, 13, 2];
-
-const TO_ENTROPY = Array(SOURCE.length);
-TO_PONDERY.forEach((sourceIdx, slot) => {
-    TO_ENTROPY[sourceIdx] = slot;
-});
 
 let titleAnimating = false;
 
 function ensureChrome(h1) {
     let chrome = h1.querySelector('.god-title-chrome');
-    if (chrome) return chrome;
+    if (chrome) {
+        if (!document.body.classList.contains('god-mode')) {
+            applyArrangement(chrome, false);
+        }
+        return chrome;
+    }
 
     chrome = document.createElement('span');
     chrome.className = 'god-title-chrome';
@@ -42,8 +42,10 @@ function lettersInSourceOrder(chrome) {
     );
 }
 
-function orderedForPermutation(letters, slotToSourceIndex) {
-    return slotToSourceIndex.map((sourceIdx) => letters[sourceIdx]);
+/** Left-to-right DOM order for the target phrase. */
+function orderedForArrangement(letters, pondery) {
+    if (!pondery) return letters;
+    return TO_PONDERY.map((sourceIdx) => letters[sourceIdx]);
 }
 
 function lockTitleWidth(h1, chrome) {
@@ -99,9 +101,9 @@ function flipReorder(chrome, ordered, durationMs = 720) {
     });
 }
 
-function applyPermutation(chrome, slotToSourceIndex) {
+function applyArrangement(chrome, pondery) {
     const letters = lettersInSourceOrder(chrome);
-    orderedForPermutation(letters, slotToSourceIndex).forEach((el) => chrome.appendChild(el));
+    orderedForArrangement(letters, pondery).forEach((el) => chrome.appendChild(el));
 }
 
 /**
@@ -114,12 +116,11 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
 
     const chrome = ensureChrome(h1);
     const letters = lettersInSourceOrder(chrome);
-    const map = pondery ? TO_PONDERY : TO_ENTROPY;
 
     h1.setAttribute('aria-label', pondery ? TARGET : SOURCE);
 
     if (!animate || perf.prefersReducedMotion || titleAnimating) {
-        applyPermutation(chrome, map);
+        applyArrangement(chrome, pondery);
         clearTitleWidth(h1);
         return Promise.resolve();
     }
@@ -127,7 +128,7 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     titleAnimating = true;
     lockTitleWidth(h1, chrome);
 
-    const ordered = orderedForPermutation(letters, map);
+    const ordered = orderedForArrangement(letters, pondery);
     return flipReorder(chrome, ordered).finally(() => {
         titleAnimating = false;
         clearTitleWidth(h1);
