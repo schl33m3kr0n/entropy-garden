@@ -273,12 +273,11 @@ export const BGM_TRACKS = [
     'ambient2.mp3',
     'ambient3.mp3',
     'ambient4.mp3',
-    'ambient5.mp3',
     'ambient6.mp3',
     'ambient7.mp3',
     'playboi carti - 7am (slowed reverb).mp3',
     'ambient8.mp3',
-    '13 angels.mp3',
+    'fractals.mp3',
 ];
 
 const bgmCache = new Map();

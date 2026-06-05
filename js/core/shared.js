@@ -101,12 +101,10 @@ export const BGM_TRACKS = [
     'ambient2.mp3',
     'ambient3.mp3',
     'ambient4.mp3',
-    'ambient5.mp3',
     'ambient6.mp3',
     'ambient7.mp3',
     'playboi carti - 7am (slowed reverb).mp3',
     'ambient8.mp3',
-    '13 angels.mp3',
     'fractals.mp3',
 ];
 
@@ -116,12 +114,10 @@ export const BGM_TRACK_INFO = [
     { title: 'Ambient arp', artist: 'freesound_community' },
     { title: 'ambient dream', artist: 'freesound_community' },
     { title: 'Ambient Soundscape - Glitch Bells', artist: 'GregorQuendel' },
-    { title: 'Space Ambient', artist: 'leberch' },
     { title: 'Preparing for the Uncertain', artist: 'Grand_Project' },
     { title: 'Ambient', artist: 'leberch' },
     { title: '7am (slowed + reverb)', artist: 'Adrian' },
     { title: 'Cybernetic Night (Sci-Fi Ambient)', artist: 'KonstantinPazuzuStudio' },
-    { title: "13 Angels Standing Guard 'Round The Side Of Your Bed", artist: 'A Silver Mt. Zion' },
     { title: 'Fractals', artist: '5Δ' },
 ];
 
@@ -304,9 +300,7 @@ function pruneBgmCache() {
 /** Long playlist tracks — buffer to HAVE_FUTURE_DATA before play. */
 const BGM_LARGE_FILES = new Set([
     'ambient3.mp3',
-    'ambient5.mp3',
     'ambient8.mp3',
-    '13 angels.mp3',
     'fractals.mp3',
     'playboi carti - 7am (slowed reverb).mp3',
 ]);

@@ -24,9 +24,7 @@ TARGET_KBPS = 128
 
 LARGE_BGM = {
     "ambient3.mp3",
-    "ambient5.mp3",
     "ambient8.mp3",
-    "13 angels.mp3",
     "fractals.mp3",
     "playboi carti - 7am (slowed reverb).mp3",
 }
