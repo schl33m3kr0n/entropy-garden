@@ -111,7 +111,7 @@ globalThis.lorePools = {
         { label: "Bugs vs Features", val: "1:1 Ratio" },
         { label: "CSS Centering", val: "margin: auto (praying)" },
         { label: "Unsaved Progress", val: "Lost to the Void" },
-        { label: "Cat Translation", val: "G Major" },
+        { label: "Cat Key", val: "G Major (sometimes)" },
         { label: "Korzamuron Vowels", val: "Too Many" },
         { label: "Camping Plans", val: "Pending (Indefinitely)" },
         { label: "Subway Sandwiches", val: "Algorithmic" },
