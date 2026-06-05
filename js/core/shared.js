@@ -229,6 +229,8 @@ export function applyTrackTitleMarquee(container, text, options = {}) {
 }
 
 const bgmCache = new Map();
+/** @type {Map<number, Promise<HTMLAudioElement>>} */
+const bgmBufferPromises = new Map();
 export let currentTrackIndex = 0;
 let bgmPlayGeneration = 0;
 
@@ -272,9 +274,11 @@ function pruneBgmCache() {
         wrapTrackIndex(currentTrackIndex),
         wrapTrackIndex(currentTrackIndex + 1),
         wrapTrackIndex(currentTrackIndex - 1),
+        wrapTrackIndex(currentTrackIndex + 2),
     ]);
     bgmCache.forEach((track, index) => {
         if (keep.has(index)) return;
+        if (bgmBufferPromises.has(index)) return;
         const i = wrapTrackIndex(index);
         const cached = bgmCache.get(i);
         if (!cached) return;
@@ -287,81 +291,154 @@ function pruneBgmCache() {
     });
 }
 
+/** Long playlist tracks — buffer to HAVE_FUTURE_DATA before play. */
 const BGM_LARGE_FILES = new Set([
     'ambient3.mp3',
+    'ambient5.mp3',
     'ambient8.mp3',
     '13 angels.mp3',
+    'fractals.mp3',
+    'playboi carti - 7am (slowed reverb).mp3',
 ]);
 
-function isLargeBgmTrack(track) {
-    const src = track.currentSrc || track.src || '';
-    return BGM_LARGE_FILES.has(decodeURIComponent(src.split('/').pop() || ''));
+function isLargeBgmFile(fileName) {
+    return BGM_LARGE_FILES.has(fileName);
 }
 
-/** Wait for buffer (large tracks) before play(); retry on autoplay/block. */
-function playBgmWhenReady(track, generation, retriesLeft = 4, fileName = '') {
-    if (generation !== bgmPlayGeneration) return;
-
-    const large = isLargeBgmTrack(track) || (fileName && BGM_LARGE_FILES.has(fileName));
-    const minReady = large
+function bgmBufferTarget(fileName) {
+    return isLargeBgmFile(fileName)
         ? HTMLMediaElement.HAVE_FUTURE_DATA
         : HTMLMediaElement.HAVE_CURRENT_DATA;
+}
+
+function bgmBufferTimeoutMs(fileName) {
+    return isLargeBgmFile(fileName) ? 90_000 : 20_000;
+}
+
+function ensureBgmSource(track, fileName) {
+    if (!track.src && fileName) track.src = musicPath(fileName);
+    if (track.readyState === 0 || track.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+        track.load();
+    }
+}
+
+/**
+ * Load a playlist track and wait until enough audio is buffered to play reliably.
+ * Large files wait for HAVE_FUTURE_DATA; shorter tracks use HAVE_CURRENT_DATA.
+ */
+function waitForBgmBuffer(track, fileName) {
+    const minReady = bgmBufferTarget(fileName);
+    const timeoutMs = bgmBufferTimeoutMs(fileName);
+
+    return new Promise((resolve, reject) => {
+        const tryResolve = () => {
+            if (track.readyState >= minReady) {
+                cleanup();
+                resolve(track);
+            }
+        };
+
+        const onError = () => {
+            cleanup();
+            reject(new Error(`bgm-buffer-error:${fileName}`));
+        };
+        const onStalled = () => {
+            if (track.readyState < minReady) track.load();
+        };
+
+        let waitTimeout;
+        const cleanup = () => {
+            clearTimeout(waitTimeout);
+            track.removeEventListener('canplaythrough', tryResolve);
+            track.removeEventListener('canplay', tryResolve);
+            track.removeEventListener('progress', tryResolve);
+            track.removeEventListener('error', onError);
+            track.removeEventListener('stalled', onStalled);
+        };
+
+        if (track.readyState >= minReady) {
+            resolve(track);
+            return;
+        }
+
+        waitTimeout = setTimeout(() => {
+            if (track.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+                cleanup();
+                resolve(track);
+                return;
+            }
+            cleanup();
+            reject(new Error(`bgm-buffer-timeout:${fileName}`));
+        }, timeoutMs);
+
+        track.addEventListener('canplaythrough', tryResolve);
+        track.addEventListener('canplay', tryResolve);
+        track.addEventListener('progress', tryResolve);
+        track.addEventListener('error', onError, { once: true });
+        track.addEventListener('stalled', onStalled);
+        ensureBgmSource(track, fileName);
+        tryResolve();
+    });
+}
+
+/** Eagerly buffer a playlist track (deduped per index). */
+export function bufferBgmTrack(index) {
+    const i = wrapTrackIndex(index);
+    const pending = bgmBufferPromises.get(i);
+    if (pending) return pending;
+
+    const fileName = BGM_TRACKS[i];
+    const track = getBgmTrack(i);
+    const promise = waitForBgmBuffer(track, fileName).finally(() => {
+        if (bgmBufferPromises.get(i) === promise) bgmBufferPromises.delete(i);
+    });
+    bgmBufferPromises.set(i, promise);
+    return promise;
+}
+
+/** Pre-buffer the current track and upcoming large files in the rotation. */
+function prefetchAdjacentBgmBuffers(centerIndex = currentTrackIndex) {
+    const center = wrapTrackIndex(centerIndex);
+    const next = wrapTrackIndex(center + 1);
+    const next2 = wrapTrackIndex(center + 2);
+    const prev = wrapTrackIndex(center - 1);
+
+    bufferBgmTrack(center).catch(() => {});
+    preloadBgmTrack(next);
+    preloadBgmTrack(prev);
+
+    if (isLargeBgmFile(BGM_TRACKS[next])) {
+        bufferBgmTrack(next).catch(() => {});
+    }
+    if (isLargeBgmFile(BGM_TRACKS[next2])) {
+        bufferBgmTrack(next2).catch(() => {});
+    }
+}
+
+/** Wait for buffer then play(); retry on autoplay/block or load failure. */
+function playBgmWhenReady(track, generation, retriesLeft = 4, trackIndex = currentTrackIndex) {
+    if (generation !== bgmPlayGeneration) return;
+
+    const i = wrapTrackIndex(trackIndex);
+    const fileName = BGM_TRACKS[i];
 
     const startPlayback = () => {
         if (generation !== bgmPlayGeneration) return;
         track.volume = 0.3;
         track.play().catch(() => {
             if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
-            setTimeout(() => playBgmWhenReady(track, generation, retriesLeft - 1), 250);
+            setTimeout(() => playBgmWhenReady(track, generation, retriesLeft - 1, trackIndex), 250);
         });
     };
 
-    const onReady = () => {
-        cleanup();
-        startPlayback();
-    };
-    const onError = () => {
-        cleanup();
-        if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
-        const file = fileName || BGM_TRACKS[wrapTrackIndex(currentTrackIndex)];
-        if (!track.src && file) track.src = musicPath(file);
-        track.load();
-        playBgmWhenReady(track, generation, retriesLeft - 1, fileName);
-    };
-    const onStalled = () => {
-        if (generation !== bgmPlayGeneration) return;
-        if (track.readyState < minReady) track.load();
-    };
-    const cleanup = () => {
-        clearTimeout(waitTimeout);
-        track.removeEventListener('canplaythrough', onReady);
-        track.removeEventListener('canplay', onReady);
-        track.removeEventListener('error', onError);
-        track.removeEventListener('stalled', onStalled);
-    };
-
-    if (track.readyState >= minReady) {
-        startPlayback();
-        return;
-    }
-
-    const waitTimeout = setTimeout(() => {
-        if (generation !== bgmPlayGeneration) return;
-        if (track.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-            cleanup();
-            startPlayback();
-        }
-    }, large ? 90_000 : 20_000);
-
-    track.addEventListener('canplaythrough', onReady, { once: true });
-    track.addEventListener('canplay', onReady, { once: true });
-    track.addEventListener('error', onError, { once: true });
-    track.addEventListener('stalled', onStalled);
-    const file = fileName || BGM_TRACKS[wrapTrackIndex(currentTrackIndex)];
-    if (!track.src && file) track.src = musicPath(file);
-    if (track.readyState === 0 || track.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
-        track.load();
-    }
+    bufferBgmTrack(i)
+        .then(() => startPlayback())
+        .catch(() => {
+            if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
+            ensureBgmSource(track, fileName);
+            track.load();
+            setTimeout(() => playBgmWhenReady(track, generation, retriesLeft - 1, trackIndex), 400);
+        });
 }
 
 function schedulePruneBgmCache(track) {
@@ -376,10 +453,9 @@ export function playCurrentBgmTrack() {
     const track = getBgmTrack(i);
     track.loop = false;
     track.onended = playNextTrack;
-    preloadBgmTrack(i);
-    preloadBgmTrack(currentTrackIndex + 1);
-    preloadBgmTrack(currentTrackIndex - 1);
-    playBgmWhenReady(track, generation, 4, BGM_TRACKS[i]);
+    prefetchAdjacentBgmBuffers(i);
+    playBgmWhenReady(track, generation, 4, i);
+    track.addEventListener('playing', () => prefetchAdjacentBgmBuffers(i), { once: true });
     schedulePruneBgmCache(track);
     if (typeof globalThis.updatePlaylistUI === 'function') {
         globalThis.updatePlaylistUI();
