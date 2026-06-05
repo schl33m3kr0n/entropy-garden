@@ -314,8 +314,11 @@ function bgmBufferTarget(fileName) {
 }
 
 function bgmBufferTimeoutMs(fileName) {
-    return isLargeBgmFile(fileName) ? 90_000 : 20_000;
+    return isLargeBgmFile(fileName) ? 30_000 : 20_000;
 }
+
+/** Large MP3s often stall below HAVE_FUTURE_DATA on Safari — play once this much is ready. */
+const BGM_LARGE_EARLY_PLAY_MS = 6_000;
 
 function ensureBgmSource(track, fileName) {
     if (!track.src && fileName) track.src = musicPath(fileName);
@@ -329,57 +332,63 @@ function ensureBgmSource(track, fileName) {
  * Large files wait for HAVE_FUTURE_DATA; shorter tracks use HAVE_CURRENT_DATA.
  */
 function waitForBgmBuffer(track, fileName) {
-    const minReady = bgmBufferTarget(fileName);
+    const idealReady = bgmBufferTarget(fileName);
+    const playableReady = HTMLMediaElement.HAVE_CURRENT_DATA;
     const timeoutMs = bgmBufferTimeoutMs(fileName);
+    const large = isLargeBgmFile(fileName);
 
     return new Promise((resolve, reject) => {
-        const tryResolve = () => {
+        const resolveIfReady = (minReady) => {
             if (track.readyState >= minReady) {
                 cleanup();
                 resolve(track);
+                return true;
             }
+            return false;
         };
+
+        const tryIdeal = () => resolveIfReady(idealReady);
+        const tryPlayable = () => resolveIfReady(playableReady);
 
         const onError = () => {
             cleanup();
             reject(new Error(`bgm-buffer-error:${fileName}`));
         };
         const onStalled = () => {
-            if (track.readyState < minReady) track.load();
+            if (track.readyState < playableReady) track.load();
         };
 
         let waitTimeout;
+        let earlyPlayTimeout;
         const cleanup = () => {
             clearTimeout(waitTimeout);
-            track.removeEventListener('canplaythrough', tryResolve);
-            track.removeEventListener('canplay', tryResolve);
-            track.removeEventListener('progress', tryResolve);
+            clearTimeout(earlyPlayTimeout);
+            track.removeEventListener('canplaythrough', tryIdeal);
+            track.removeEventListener('canplay', tryIdeal);
+            track.removeEventListener('progress', tryIdeal);
             track.removeEventListener('error', onError);
             track.removeEventListener('stalled', onStalled);
         };
 
-        if (track.readyState >= minReady) {
-            resolve(track);
-            return;
+        if (resolveIfReady(idealReady) || (!large && resolveIfReady(playableReady))) return;
+
+        if (large) {
+            earlyPlayTimeout = setTimeout(tryPlayable, BGM_LARGE_EARLY_PLAY_MS);
         }
 
         waitTimeout = setTimeout(() => {
-            if (track.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-                cleanup();
-                resolve(track);
-                return;
-            }
+            if (tryPlayable()) return;
             cleanup();
             reject(new Error(`bgm-buffer-timeout:${fileName}`));
         }, timeoutMs);
 
-        track.addEventListener('canplaythrough', tryResolve);
-        track.addEventListener('canplay', tryResolve);
-        track.addEventListener('progress', tryResolve);
+        track.addEventListener('canplaythrough', tryIdeal);
+        track.addEventListener('canplay', tryIdeal);
+        track.addEventListener('progress', tryIdeal);
         track.addEventListener('error', onError, { once: true });
         track.addEventListener('stalled', onStalled);
         ensureBgmSource(track, fileName);
-        tryResolve();
+        tryIdeal();
     });
 }
 
@@ -424,11 +433,20 @@ function playBgmWhenReady(track, generation, retriesLeft = 4, trackIndex = curre
     const i = wrapTrackIndex(trackIndex);
     const fileName = BGM_TRACKS[i];
 
+    const skipBrokenTrack = () => {
+        if (generation !== bgmPlayGeneration) return;
+        playNextTrack();
+    };
+
     const startPlayback = () => {
         if (generation !== bgmPlayGeneration) return;
         track.volume = 0.3;
         track.play().catch(() => {
-            if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
+            if (generation !== bgmPlayGeneration) return;
+            if (retriesLeft <= 0) {
+                skipBrokenTrack();
+                return;
+            }
             setTimeout(() => playBgmWhenReady(track, generation, retriesLeft - 1, trackIndex), 250);
         });
     };
@@ -436,7 +454,11 @@ function playBgmWhenReady(track, generation, retriesLeft = 4, trackIndex = curre
     bufferBgmTrack(i)
         .then(() => startPlayback())
         .catch(() => {
-            if (generation !== bgmPlayGeneration || retriesLeft <= 0) return;
+            if (generation !== bgmPlayGeneration) return;
+            if (retriesLeft <= 0) {
+                skipBrokenTrack();
+                return;
+            }
             ensureBgmSource(track, fileName);
             track.load();
             setTimeout(() => playBgmWhenReady(track, generation, retriesLeft - 1, trackIndex), 400);
