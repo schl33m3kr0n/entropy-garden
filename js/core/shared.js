@@ -689,10 +689,33 @@ export function showPanopticonComment(text, ttlMs = 4400) {
     panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), ttlMs);
 }
 
+const PANOPTICON_COMMENT_FADE_MS = 450;
+
 export function hidePanopticonComment() {
     clearTimeout(panopticonCommentTimeout);
-    panopticonCommentEl?.classList.remove('visible', 'panopticon-comment-god');
-    panopticonCommentEl?.setAttribute('aria-hidden', 'true');
+    if (!panopticonCommentEl) return;
+
+    panopticonCommentEl.setAttribute('aria-hidden', 'true');
+    if (!panopticonCommentEl.classList.contains('visible')) {
+        panopticonCommentEl.classList.remove('panopticon-comment-god');
+        return;
+    }
+
+    panopticonCommentEl.classList.remove('visible');
+
+    const clearGodChrome = () => {
+        panopticonCommentEl.classList.remove('panopticon-comment-god');
+    };
+
+    const onFadeEnd = (e) => {
+        if (e.target !== panopticonCommentEl || e.propertyName !== 'opacity') return;
+        panopticonCommentEl.removeEventListener('transitionend', onFadeEnd);
+        clearTimeout(fadeFallback);
+        clearGodChrome();
+    };
+
+    const fadeFallback = setTimeout(clearGodChrome, PANOPTICON_COMMENT_FADE_MS + 80);
+    panopticonCommentEl.addEventListener('transitionend', onFadeEnd);
 }
 
 /** Hide idle/return bubbles when konami, pong, cipher, or god-eye sequences start. */
@@ -953,14 +976,15 @@ function rerollWobbleEnvelope(elapsedSec, durationSec, speedNorm) {
     return inertiaBlend * rampOut;
 }
 
-function panopticonGodGazeLocked() {
-    if (!godEyeSequence && !panopticonGodActive) return false;
-    return godEyeSequence !== 'open';
+function applyPanopticonGazeEase() {
+    const ease = perf.prefersReducedMotion ? 0.08 : 0.14;
+    panopticonGazeX += (panopticonTargetX - panopticonGazeX) * ease;
+    panopticonGazeY += (panopticonTargetY - panopticonGazeY) * ease;
+    panopticonGazeEl?.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
 }
 
 function setPanopticonCursor(clientX, clientY) {
     if (!panopticonEl || !panopticonEl.classList.contains('visible')) return;
-    if (panopticonGodGazeLocked()) return;
     if (eyeMode !== 'idle' && eyeMode !== 'eyeroll' && eyeMode !== 'stare') return;
 
     const rect = panopticonInnerEl.getBoundingClientRect();
@@ -1272,9 +1296,6 @@ function enablePanopticonGodPupil() {
         panopticonGodPupilEl.textContent = ICO_SYMBOLS[godSymbolIndex];
         panopticonGodPupilEl.style.display = 'block';
     }
-    panopticonGazeX = 0;
-    panopticonGazeY = 0;
-    panopticonGazeEl?.setAttribute('transform', 'translate(0, 0)');
 }
 
 export function setPanopticonGodMode(active) {
@@ -1316,6 +1337,7 @@ function animatePanopticonGodEye(now) {
     if (godEyeSequence === 'closing') {
         const shut = smoothstep(Math.min(1, elapsed / closeMs));
         applyPanopticonLidShut(shut);
+        applyPanopticonGazeEase();
 
         if (elapsed >= closeMs) {
             panopticonEl.classList.add('god-rainbow');
@@ -1328,6 +1350,7 @@ function animatePanopticonGodEye(now) {
     if (godEyeSequence === 'closed') {
         applyPanopticonLidShut(1);
         panopticonEl.classList.add('god-rainbow');
+        applyPanopticonGazeEase();
 
         if (elapsed >= holdMs) {
             godEyeSequence = 'opening';
@@ -1340,6 +1363,7 @@ function animatePanopticonGodEye(now) {
         const shut = 1 - smoothstep(Math.min(1, elapsed / openMs));
         applyPanopticonLidShut(shut);
         panopticonEl.classList.add('god-rainbow');
+        applyPanopticonGazeEase();
 
         if (elapsed >= openMs) {
             enablePanopticonGodPupil();
@@ -1361,10 +1385,7 @@ function animatePanopticonGodEye(now) {
             godSymbolTick = now;
         }
 
-        const ease = perf.prefersReducedMotion ? 0.08 : 0.14;
-        panopticonGazeX += (panopticonTargetX - panopticonGazeX) * ease;
-        panopticonGazeY += (panopticonTargetY - panopticonGazeY) * ease;
-        panopticonGazeEl?.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
+        applyPanopticonGazeEase();
         return true;
     }
 
@@ -1372,18 +1393,21 @@ function animatePanopticonGodEye(now) {
         if (elapsed < closeMs) {
             const shut = smoothstep(elapsed / closeMs);
             applyPanopticonLidShut(shut);
+            applyPanopticonGazeEase();
             return true;
         }
 
         if (elapsed < closeMs + holdMs) {
             applyPanopticonLidShut(1);
             resetPanopticonGodStyling();
+            applyPanopticonGazeEase();
             return true;
         }
 
         const openElapsed = elapsed - closeMs - holdMs;
         const shut = 1 - smoothstep(Math.min(1, openElapsed / openMs));
         applyPanopticonLidShut(shut);
+        applyPanopticonGazeEase();
 
         if (openElapsed >= openMs) {
             resetPanopticonNormalPupil();
@@ -1591,11 +1615,8 @@ export function animatePanopticon() {
         return;
     }
 
-    const ease = perf.prefersReducedMotion ? 0.08 : 0.14;
-    panopticonGazeX += (panopticonTargetX - panopticonGazeX) * ease;
-    panopticonGazeY += (panopticonTargetY - panopticonGazeY) * ease;
     panopticonInnerEl.style.transform = '';
-    panopticonGazeEl.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
+    applyPanopticonGazeEase();
 }
 
 export function playPrevTrack() {
