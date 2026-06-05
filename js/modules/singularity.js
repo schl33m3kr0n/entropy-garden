@@ -1,4 +1,4 @@
-import { sfx, playSound, perf } from '../core/shared.js';
+import { sfx, playSound, perf, ICO_SYMBOLS } from '../core/shared.js';
 import {
     isSingularityActive,
     currentPoemIndex,
@@ -166,8 +166,7 @@ function init3D() {
         [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]
     ];
     
-    // 20 esoteric symbols, one for each face
-    const symbols = ["⛦", "⚛︎", "☯︎", "❖", "◉", "⧊", "☉", "⛬", "⛢", "☧", "☥", "♁", "𖣂", "🜲", "🜁", "𖤓", "✖", "☸", "⚖", "∞"];
+    const symbols = ICO_SYMBOLS;
     
     const iosSingularity = perf.isIOS || document.body.classList.contains('ios-ui');
 

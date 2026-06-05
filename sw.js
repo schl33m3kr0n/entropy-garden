@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v110';
+const CACHE_VERSION = 'entropy-garden-v111';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -149,17 +149,31 @@ async function cacheAudioAfterFetch(request) {
     }
 
     try {
+        // Browsers often open audio with a Range request; cache the full file first so
+        // later refreshes can serve byte ranges from a complete cached blob.
+        if (request.headers.get('Range')) {
+            const fullResponse = await fetch(new Request(request.url, { method: 'GET' }));
+            if (fullResponse.ok) {
+                await cache.put(cacheKey, fullResponse.clone());
+                const fullCached = await cache.match(cacheKey);
+                if (fullCached) {
+                    return serveRangeFromCached(fullCached, request);
+                }
+            }
+        }
+
         const response = await fetch(request);
         if (response.ok && !request.headers.get('Range')) {
             cache.put(cacheKey, response.clone());
         }
         return response;
     } catch (error) {
-        if (cached) {
+        const fallback = await cache.match(cacheKey);
+        if (fallback) {
             if (request.headers.get('Range')) {
-                return serveRangeFromCached(cached, request);
+                return serveRangeFromCached(fallback, request);
             }
-            return cached;
+            return fallback;
         }
         throw error;
     }

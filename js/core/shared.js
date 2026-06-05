@@ -289,11 +289,8 @@ function pruneBgmCache() {
 
 const BGM_LARGE_FILES = new Set([
     'ambient3.mp3',
-    'ambient5.mp3',
     'ambient8.mp3',
     '13 angels.mp3',
-    'fractals.mp3',
-    'playboi carti - 7am (slowed reverb).mp3',
 ]);
 
 function isLargeBgmTrack(track) {
@@ -561,6 +558,7 @@ export const panopticonLidEl = document.getElementById('panopticon-lid');
 export const panopticonClipPathEl = document.getElementById('panopticon-clip-path');
 export const panopticonRainbowGradEl = document.getElementById('panopticon-rainbow');
 
+/** One glyph per icosphere face (same set as singularity 3D). */
 export const ICO_SYMBOLS = [
     '⛦', '⚛︎', '☯︎', '❖', '◉', '⧊', '☉', '⛬', '⛢', '☧',
     '☥', '♁', '𖣂', '🜲', '🜁', '𖤓', '✖', '☸', '⚖', '∞',
@@ -927,8 +925,17 @@ function easePanopticonWakeGaze() {
 let panopticonGodActive = false;
 let godEyeSequence = null;
 let godEyeSeqStart = 0;
-let godSymbolIndex = 0;
+let godSymbolBag = null;
 let godSymbolTick = 0;
+
+function resetGodSymbolBag() {
+    godSymbolBag = createBag(ICO_SYMBOLS);
+}
+
+function drawGodSymbol() {
+    if (!godSymbolBag) resetGodSymbolBag();
+    return godSymbolBag();
+}
 
 const PANOPTICON_MAX_GAZE = 14;
 const PANOPTICON_REROLL_MS = 2800;
@@ -1293,7 +1300,7 @@ function enablePanopticonGodPupil() {
     panopticonEl?.classList.add('god-active', 'god-rainbow');
     if (panopticonPupilEl) panopticonPupilEl.style.display = 'none';
     if (panopticonGodPupilEl) {
-        panopticonGodPupilEl.textContent = ICO_SYMBOLS[godSymbolIndex];
+        panopticonGodPupilEl.textContent = drawGodSymbol();
         panopticonGodPupilEl.style.display = 'block';
     }
 }
@@ -1304,7 +1311,7 @@ export function setPanopticonGodMode(active) {
         panopticonGodActive = true;
         godEyeSequence = 'closing';
         godEyeSeqStart = performance.now();
-        godSymbolIndex = 0;
+        resetGodSymbolBag();
         godSymbolTick = 0;
         syncPanopticonCodeSequenceComments();
         return;
@@ -1378,9 +1385,8 @@ function animatePanopticonGodEye(now) {
         syncPanopticonRainbow();
 
         if (now - godSymbolTick >= (perf.prefersReducedMotion ? 380 : PANOPTICON_GOD_SYMBOL_MS)) {
-            godSymbolIndex = (godSymbolIndex + 1) % ICO_SYMBOLS.length;
             if (panopticonGodPupilEl) {
-                panopticonGodPupilEl.textContent = ICO_SYMBOLS[godSymbolIndex];
+                panopticonGodPupilEl.textContent = drawGodSymbol();
             }
             godSymbolTick = now;
         }
