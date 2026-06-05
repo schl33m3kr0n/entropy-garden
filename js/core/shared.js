@@ -599,13 +599,17 @@ let panopticonCommentTimeout = null;
 let panopticonTabHiddenAt = 0;
 let panopticonCodeSequenceActivePrev = false;
 
+function isPanopticonGodModeCommentary() {
+    return document.body.classList.contains('god-mode');
+}
+
 function isPanopticonCodeSequenceActive() {
-    if (panopticonGodActive || godEyeSequence) return true;
     if (getCipherStage() > 0) return true;
     const hooks = globalThis.gardenHooks;
     if (hooks?.isKonamiActivelyEntering?.()) return true;
     if (hooks?.isPongArmingActive?.()) return true;
     if (hooks?.isPongSessionActive?.()) return true;
+    if (godEyeSequence && godEyeSequence !== 'open') return true;
     return false;
 }
 
@@ -659,6 +663,7 @@ function bindPanopticonCommentViewportSync() {
 function showPanopticonIdleComment(text, ttlMs = 4400) {
     if (!panopticonCommentEl || !text || !canShowPanopticonIdleComment()) return;
 
+    syncPanopticonCommentChrome();
     panopticonCommentEl.textContent = text;
     panopticonCommentEl.classList.add('visible');
     panopticonCommentEl.setAttribute('aria-hidden', 'false');
@@ -674,6 +679,7 @@ function showPanopticonIdleComment(text, ttlMs = 4400) {
 export function showPanopticonComment(text, ttlMs = 4400) {
     if (!panopticonCommentEl || !text || !canShowPanopticonComment()) return;
 
+    syncPanopticonCommentChrome();
     panopticonCommentEl.textContent = text;
     panopticonCommentEl.classList.add('visible');
     positionPanopticonComment();
@@ -685,7 +691,7 @@ export function showPanopticonComment(text, ttlMs = 4400) {
 
 export function hidePanopticonComment() {
     clearTimeout(panopticonCommentTimeout);
-    panopticonCommentEl?.classList.remove('visible');
+    panopticonCommentEl?.classList.remove('visible', 'panopticon-comment-god');
     panopticonCommentEl?.setAttribute('aria-hidden', 'true');
 }
 
@@ -701,29 +707,33 @@ export function syncPanopticonCodeSequenceComments() {
     panopticonCodeSequenceActivePrev = active;
 }
 
-let panopticonIdleCommentBag = null;
-let panopticonIdleCommentBagPool = null;
-let panopticonReturnCommentBag = null;
-let panopticonReturnCommentBagPool = null;
+function syncPanopticonCommentChrome() {
+    if (!panopticonCommentEl) return;
+    panopticonCommentEl.classList.toggle('panopticon-comment-god', isPanopticonGodModeCommentary());
+}
 
 function pickPanopticonIdleComment() {
-    const pool = globalThis.lorePools?.panopticonIdleComments;
-    if (!pool?.length) return null;
-    if (panopticonIdleCommentBagPool !== pool) {
-        panopticonIdleCommentBagPool = pool;
-        panopticonIdleCommentBag = createBag(pool);
+    const pools = globalThis.lorePools;
+    if (!pools) return null;
+    if (isPanopticonGodModeCommentary()) {
+        const god = pools.panopticonGodModeComments;
+        return god?.length ? pickOne(god, []) : null;
     }
-    return panopticonIdleCommentBag();
+    const safe = pools.panopticonIdleCommentsSafe;
+    if (!safe?.length) return null;
+    return pickOne(safe, pools.panopticonIdleCommentsGritty || []);
 }
 
 function pickPanopticonReturnComment() {
-    const pool = globalThis.lorePools?.panopticonReturnComments;
-    if (!pool?.length) return 'missed me?';
-    if (panopticonReturnCommentBagPool !== pool) {
-        panopticonReturnCommentBagPool = pool;
-        panopticonReturnCommentBag = createBag(pool);
+    const pools = globalThis.lorePools;
+    if (!pools) return 'missed me?';
+    if (isPanopticonGodModeCommentary()) {
+        const god = pools.panopticonGodModeComments;
+        return god?.length ? pickOne(god, []) : 'YOU HAVE RETURNED TO THE THRESHOLD';
     }
-    return panopticonReturnCommentBag();
+    const safe = pools.panopticonReturnCommentsSafe;
+    if (!safe?.length) return 'missed me?';
+    return pickOne(safe, pools.panopticonReturnCommentsGritty || []);
 }
 
 function clearPanopticonIdleCommentTimer() {

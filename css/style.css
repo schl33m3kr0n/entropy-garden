@@ -687,6 +687,15 @@ body.corrupted #panopticon-comment {
     text-shadow: 0 0 8px rgba(255, 0, 85, 0.35);
 }
 
+body.god-mode #panopticon-comment.visible,
+#panopticon-comment.panopticon-comment-god.visible {
+    color: rgba(210, 225, 255, 0.88);
+    text-shadow: 0 0 10px rgba(160, 200, 255, 0.45);
+    letter-spacing: 0.12em;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+}
+
 body.pong-playing #panopticon-comment,
 body.pong-playing:not(.ios-ui) #panopticon-comment {
     display: none !important;
