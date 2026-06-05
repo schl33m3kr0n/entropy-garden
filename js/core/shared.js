@@ -92,6 +92,8 @@ export const sfx = {
     stop: createLazyAudio(sfxPath('stop it.mp3')),
     boop: createEagerAudio(sfxPath('boop.mp3')),
     meow: createLazyAudio(sfxPath('meow.mp3')),
+    blip: createLazyAudio(sfxPath('blip.mp3')),
+    harp: createLazyAudio(sfxPath('harp.mp3')),
 };
 
 export const BGM_TRACKS = [
@@ -734,10 +736,15 @@ function bindPanopticonCommentViewportSync() {
     });
 }
 
+function playPanopticonCommentSfx() {
+    playSoundOverlap(isPanopticonGodModeCommentary() ? sfx.harp : sfx.blip);
+}
+
 function showPanopticonIdleComment(text, ttlMs = 4400) {
     if (!panopticonCommentEl || !text || !canShowPanopticonIdleComment()) return;
 
     syncPanopticonCommentChrome();
+    playPanopticonCommentSfx();
     panopticonCommentEl.textContent = text;
     panopticonCommentEl.classList.add('visible');
     panopticonCommentEl.setAttribute('aria-hidden', 'false');
@@ -754,6 +761,7 @@ export function showPanopticonComment(text, ttlMs = 4400) {
     if (!panopticonCommentEl || !text || !canShowPanopticonComment()) return;
 
     syncPanopticonCommentChrome();
+    playPanopticonCommentSfx();
     panopticonCommentEl.textContent = text;
     panopticonCommentEl.classList.add('visible');
     positionPanopticonComment();
