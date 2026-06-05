@@ -26,6 +26,7 @@ import {
     playPrevTrack,
     playNextTrack,
     resetBgmToStart,
+    prefetchLargeBgmTracks,
     getBgmTrack,
     getBgmTrackTitle,
     applyTrackTitleMarquee,
@@ -96,6 +97,7 @@ function beginGardenExperience() {
     canvas.classList.remove('matrix-visible');
     setGardenHasStarted(true);
     updatePanopticonVisibility();
+    prefetchLargeBgmTracks();
     startLoader();
 
     if (perf.isIOS) loadTerminal();

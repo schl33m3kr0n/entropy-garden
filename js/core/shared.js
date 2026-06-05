@@ -279,6 +279,14 @@ function pruneBgmCache() {
         wrapTrackIndex(currentTrackIndex + 2),
     ]);
     bgmCache.forEach((track, index) => {
+        const fileName = BGM_TRACKS[wrapTrackIndex(index)];
+        if (
+            isLargeBgmFile(fileName) &&
+            track.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+        ) {
+            keep.add(index);
+            return;
+        }
         if (keep.has(index)) return;
         if (bgmBufferPromises.has(index)) return;
         const i = wrapTrackIndex(index);
@@ -389,6 +397,13 @@ function waitForBgmBuffer(track, fileName) {
         track.addEventListener('stalled', onStalled);
         ensureBgmSource(track, fileName);
         tryIdeal();
+    });
+}
+
+/** Warm all large playlist files (e.g. during the boot loader). */
+export function prefetchLargeBgmTracks() {
+    BGM_TRACKS.forEach((file, index) => {
+        if (isLargeBgmFile(file)) bufferBgmTrack(index).catch(() => {});
     });
 }
 
