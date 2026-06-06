@@ -909,19 +909,23 @@ export function handlePanopticonVisibilityChange(hidden) {
     if (hidden) {
         panopticonTabHiddenAt = performance.now();
         hidePanopticonComment();
+        clearPanopticonIdleCommentTimer();
         return;
     }
 
-    if (!gardenHasStarted || !panopticonTabHiddenAt) return;
+    if (!gardenHasStarted) return;
 
-    const awayMs = performance.now() - panopticonTabHiddenAt;
+    const awayMs = panopticonTabHiddenAt ? performance.now() - panopticonTabHiddenAt : 0;
     panopticonTabHiddenAt = 0;
-    if (awayMs < PANOPTICON_TAB_RETURN_MIN_MS) return;
 
-    const text = pickPanopticonReturnComment();
-    requestAnimationFrame(() => {
-        if (canShowPanopticonComment()) showPanopticonComment(text);
-    });
+    if (awayMs >= PANOPTICON_TAB_RETURN_MIN_MS) {
+        const text = pickPanopticonReturnComment();
+        requestAnimationFrame(() => {
+            if (canShowPanopticonComment()) showPanopticonComment(text);
+        });
+    }
+
+    resetPanopticonIdleCommentTimer();
 }
 
 function panopticonSleepWakeActive() {

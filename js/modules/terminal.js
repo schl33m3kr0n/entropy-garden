@@ -426,7 +426,7 @@ function processCommand(cmd) {
     // ==========================================
     // NORMAL TERMINAL COMMANDS
     // ==========================================
-    if (['hello', 'hi', 'hey', 'sup', 'yo', 'greetings', 'howdy'].includes(cleanCmd)) {
+    if (isCorrupted && ['hello', 'hi', 'hey', 'sup', 'yo', 'greetings', 'howdy'].includes(cleanCmd)) {
         pushTerminalLog("> shut up. 🖕");
         playSound(sfx.stfu);
         triggerPanopticonCenterStare();
