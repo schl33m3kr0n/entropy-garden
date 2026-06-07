@@ -58,12 +58,10 @@ const PONG_QUIT_COMMENT = '[ press 0 to quit ]';
 const useKeyboardControls = !perf.isIOS;
 
 const KEY_HOLD = {
-    KeyA: { side: 'left', dir: -1 },
-    KeyD: { side: 'left', dir: 1 },
     KeyW: { side: 'left', dir: -1 },
     KeyS: { side: 'left', dir: 1 },
-    ArrowLeft: { side: 'right', dir: -1 },
-    ArrowRight: { side: 'right', dir: 1 },
+    ArrowUp: { side: 'right', dir: -1 },
+    ArrowDown: { side: 'right', dir: 1 },
 };
 
 const SIX_SEVEN_DANCE_MS = 2600;
@@ -308,7 +306,7 @@ let paused = false;
 let pauseState = null;
 let eyeReturning = false;
 let serveCountdownActive = false;
-let pendingReserviceTowardBottom = null;
+let pendingReserviceTowardLeft = null;
 let morphStart = 0;
 let animId = null;
 let lastTick = 0;
@@ -317,13 +315,15 @@ let hintIdleTimeout = null;
 let leftTapCount = 0;
 let rightTapCount = 0;
 
-let ball = { x: 50, y: 50, vx: 0.26, vy: 0.38 };
+let ball = { x: 50, y: 50, vx: 0.38, vy: 0.26 };
 let courtViewW = 100;
-let leftX = 50;
-let rightX = 50;
+let leftY = 50;
+let rightY = 50;
 let leftTarget = 50;
 let rightTarget = 50;
 let sixSevenUntil = 0;
+let sixSevenLeftCx = 50;
+let sixSevenRightCx = 50;
 let scoreLeft = 0;
 let scoreRight = 0;
 let rallyHits = 0;
@@ -363,10 +363,12 @@ function isSixSevenDanceActive(now = performance.now()) {
 
 function applySixSevenPaddleDance(now) {
     const wobble = Math.sin(now * 0.022);
-    const bottomX = courtViewW * (0.6 + wobble * 0.04);
-    const topX = courtViewW * (0.7 + Math.cos(now * 0.022) * 0.04);
-    leftX = leftTarget = bottomX;
-    rightX = rightTarget = topX;
+    sixSevenLeftCx = courtViewW * (0.6 + wobble * 0.04);
+    sixSevenRightCx = courtViewW * (0.7 + Math.cos(now * 0.022) * 0.04);
+}
+
+function courtPlaySpan() {
+    return courtPlayBottom() - courtPlayTop();
 }
 
 function resetRally() {
@@ -475,7 +477,7 @@ function clearServeCountdown() {
 function clearReserviceDelay() {
     clearTimeout(reserviceTimer);
     reserviceTimer = null;
-    pendingReserviceTowardBottom = null;
+    pendingReserviceTowardLeft = null;
     if (!serveCountdownTimer) ballHeld = false;
 }
 
@@ -588,12 +590,12 @@ function startServeCountdown() {
     serveCountdownTimer = setTimeout(advance, SERVE_COUNTDOWN_MS);
 }
 
-function paddleBottomY() {
-    return courtPlayBottom() - PADDLE_EDGE_INSET;
+function paddleLeftX() {
+    return PADDLE_EDGE_INSET;
 }
 
-function paddleTopY() {
-    return courtPlayTop() + PADDLE_EDGE_INSET;
+function paddleRightX() {
+    return courtViewW - PADDLE_EDGE_INSET;
 }
 
 function courtCenterX() {
@@ -655,10 +657,8 @@ function syncCourtViewBox(pixelW, pixelH) {
         const ratio = nextViewW / courtViewW;
         ball.x *= ratio;
         ball.vx *= ratio;
-        leftX *= ratio;
-        rightX *= ratio;
-        leftTarget *= ratio;
-        rightTarget *= ratio;
+        sixSevenLeftCx *= ratio;
+        sixSevenRightCx *= ratio;
     }
     courtViewW = nextViewW;
     courtOverlayEl.setAttribute('viewBox', `0 0 ${courtViewW} 100`);
@@ -932,14 +932,22 @@ function getPongLayout() {
     };
 }
 
-function clampPaddleX(x) {
-    const left = PADDLE_EDGE_INSET + PADDLE_HALF;
-    const right = courtViewW - PADDLE_EDGE_INSET - PADDLE_HALF;
-    return Math.max(left, Math.min(right, x));
+function clampPaddleY(y) {
+    const top = courtPlayTop() + PADDLE_HALF;
+    const bottom = courtPlayBottom() - PADDLE_HALF;
+    return Math.max(top, Math.min(bottom, y));
 }
 
 function clamp(v, min, max) {
     return Math.max(min, Math.min(max, v));
+}
+
+function setPaddleVertical(el, x, cy, half) {
+    if (!el) return;
+    el.setAttribute('x1', String(x));
+    el.setAttribute('x2', String(x));
+    el.setAttribute('y1', String(cy - half));
+    el.setAttribute('y2', String(cy + half));
 }
 
 function setPaddleHorizontal(el, y, cx, half) {
@@ -950,9 +958,17 @@ function setPaddleHorizontal(el, y, cx, half) {
     el.setAttribute('y2', String(y));
 }
 
-function syncPaddles(half) {
-    setPaddleHorizontal(paddleLeftEl, paddleBottomY(), leftX, half);
-    setPaddleHorizontal(paddleRightEl, paddleTopY(), rightX, half);
+function syncPaddles(half, now = performance.now()) {
+    if (isSixSevenDanceActive(now)) {
+        const span = courtPlaySpan();
+        const leftYPos = courtPlayTop() + span * 0.6;
+        const rightYPos = courtPlayTop() + span * 0.7;
+        setPaddleHorizontal(paddleLeftEl, leftYPos, sixSevenLeftCx, half);
+        setPaddleHorizontal(paddleRightEl, rightYPos, sixSevenRightCx, half);
+        return;
+    }
+    setPaddleVertical(paddleLeftEl, paddleLeftX(), leftY, half);
+    setPaddleVertical(paddleRightEl, paddleRightX(), rightY, half);
 }
 
 /** Counteract court SVG stretch so the ball stays a screen-space circle. */
@@ -1024,14 +1040,14 @@ function capBallSpeed() {
     ball.vy *= scale;
 }
 
-function serveBall(towardBottom = Math.random() < 0.5) {
+function serveBall(towardLeft = Math.random() < 0.5) {
     resetRally();
-    const span = courtViewW - (PADDLE_EDGE_INSET + PADDLE_HALF) * 2;
-    ball.x = (PADDLE_EDGE_INSET + PADDLE_HALF) + span * (0.35 + Math.random() * 0.3);
-    ball.y = courtPlayTop() + (courtPlayBottom() - courtPlayTop()) * 0.5;
+    ball.x = courtCenterX();
+    const span = courtPlayBottom() - courtPlayTop();
+    ball.y = courtPlayTop() + span * (0.35 + Math.random() * 0.3);
     const speed = (perf.prefersReducedMotion ? 0.52 : 0.72) * pongSpeedScale();
-    ball.vy = towardBottom ? speed : -speed;
-    ball.vx = (Math.random() - 0.5) * speed * 1.2;
+    ball.vx = towardLeft ? -speed : speed;
+    ball.vy = (Math.random() - 0.5) * speed * 1.2;
     capBallSpeed();
     syncBallEl();
 }
@@ -1051,12 +1067,12 @@ function scorePoint(side) {
     } else {
         playSound(sfx.gameStart);
     }
-    scheduleReservice(side === 'right');
+    scheduleReservice(side === 'left');
 }
 
-function scheduleReservice(towardBottom) {
+function scheduleReservice(towardLeft) {
     clearReserviceDelay();
-    pendingReserviceTowardBottom = towardBottom;
+    pendingReserviceTowardLeft = towardLeft;
     ballHeld = true;
     ball.vx = 0;
     ball.vy = 0;
@@ -1064,56 +1080,56 @@ function scheduleReservice(towardBottom) {
     syncBallEl();
     reserviceTimer = setTimeout(() => {
         reserviceTimer = null;
-        pendingReserviceTowardBottom = null;
+        pendingReserviceTowardLeft = null;
         ballHeld = false;
-        serveBall(towardBottom);
+        serveBall(towardLeft);
     }, RESERVE_AFTER_MISS_MS);
 }
 
 function collideWall() {
-    const xMin = BALL_R;
-    const xMax = courtViewW - BALL_R;
+    const yMin = courtPlayTop() + BALL_R;
+    const yMax = courtPlayBottom() - BALL_R;
     let bounced = false;
 
-    if (ball.x < xMin) {
-        ball.x = xMin + (xMin - ball.x);
-        ball.vx = Math.abs(ball.vx) * 1.01;
+    if (ball.y < yMin) {
+        ball.y = yMin + (yMin - ball.y);
+        ball.vy = Math.abs(ball.vy) * 1.01;
         bounced = true;
-    } else if (ball.x > xMax) {
-        ball.x = xMax - (ball.x - xMax);
-        ball.vx = -Math.abs(ball.vx) * 1.01;
+    } else if (ball.y > yMax) {
+        ball.y = yMax - (ball.y - yMax);
+        ball.vy = -Math.abs(ball.vy) * 1.01;
         bounced = true;
     }
 
-    ball.x = clamp(ball.x, xMin, xMax);
+    ball.y = clamp(ball.y, yMin, yMax);
     if (bounced) {
         straightHitStreak = 0;
         playSoundOverlap(sfx.pop);
     }
 }
 
-function collidePaddle(paddleY, paddleX, isBottom) {
-    if (isBottom && ball.vy <= 0) return false;
-    if (!isBottom && ball.vy >= 0) return false;
+function collidePaddle(paddleX, paddleY, isLeft) {
+    if (isLeft && ball.vx >= 0) return false;
+    if (!isLeft && ball.vx <= 0) return false;
 
-    const left = paddleX - PADDLE_HALF;
-    const right = paddleX + PADDLE_HALF;
+    const top = paddleY - PADDLE_HALF;
+    const bottom = paddleY + PADDLE_HALF;
     const reach = BALL_R + 1.2;
 
-    if (Math.abs(ball.y - paddleY) > reach) return false;
-    if (ball.x + BALL_R < left || ball.x - BALL_R > right) return false;
+    if (Math.abs(ball.x - paddleX) > reach) return false;
+    if (ball.y + BALL_R < top || ball.y - BALL_R > bottom) return false;
 
-    ball.y = isBottom ? paddleY - reach : paddleY + reach;
+    ball.x = isLeft ? paddleX + reach : paddleX - reach;
 
-    const rel = clamp((ball.x - paddleX) / PADDLE_HALF, -1, 1);
+    const rel = clamp((ball.y - paddleY) / PADDLE_HALF, -1, 1);
     const speed = Math.min(ballSpeed() * 1.08, getMaxBallSpeed());
     const angle = rel * 0.82;
 
-    ball.vy = (isBottom ? -1 : 1) * speed * Math.cos(angle);
-    ball.vx = speed * Math.sin(angle);
+    ball.vx = (isLeft ? 1 : -1) * speed * Math.cos(angle);
+    ball.vy = speed * Math.sin(angle);
 
-    if (Math.abs(ball.vy) < getMinBallVx()) {
-        ball.vy = isBottom ? -getMinBallVx() : getMinBallVx();
+    if (Math.abs(ball.vx) < getMinBallVx()) {
+        ball.vx = isLeft ? getMinBallVx() : -getMinBallVx();
     }
 
     capBallSpeed();
@@ -1122,23 +1138,23 @@ function collidePaddle(paddleY, paddleX, isBottom) {
     return true;
 }
 
-function isExitingTop() {
-    return ball.vy < 0 && ball.y <= paddleTopY() + BALL_R;
+function isExitingLeft() {
+    return ball.vx < 0 && ball.x <= paddleLeftX() + BALL_R;
 }
 
-function isExitingBottom() {
-    return ball.vy > 0 && ball.y >= paddleBottomY() - BALL_R;
+function isExitingRight() {
+    return ball.vx > 0 && ball.x >= paddleRightX() - BALL_R;
 }
 
 function inGoalRun() {
-    return isExitingTop() || isExitingBottom();
+    return isExitingLeft() || isExitingRight();
 }
 
-function constrainBallY() {
+function constrainBallX() {
     if (inGoalRun()) return;
-    const yMin = courtPlayTop() + BALL_R;
-    const yMax = courtPlayBottom() - BALL_R;
-    ball.y = clamp(ball.y, yMin, yMax);
+    const xMin = BALL_R;
+    const xMax = courtViewW - BALL_R;
+    ball.x = clamp(ball.x, xMin, xMax);
 }
 
 function stepBall(dt) {
@@ -1150,20 +1166,20 @@ function stepBall(dt) {
         ball.x += ball.vx * subDt;
         ball.y += ball.vy * subDt;
         collideWall();
-        collidePaddle(paddleBottomY(), leftX, true);
-        collidePaddle(paddleTopY(), rightX, false);
-        constrainBallY();
+        collidePaddle(paddleLeftX(), leftY, true);
+        collidePaddle(paddleRightX(), rightY, false);
+        constrainBallX();
     }
 }
 
 function applyHoldInput(dt) {
     if (holdInput.left) {
-        const next = clampPaddleX(leftX + holdInput.left * PADDLE_HOLD_SPEED * dt);
-        leftX = leftTarget = next;
+        const next = clampPaddleY(leftY + holdInput.left * PADDLE_HOLD_SPEED * dt);
+        leftY = leftTarget = next;
     }
     if (holdInput.right) {
-        const next = clampPaddleX(rightX + holdInput.right * PADDLE_HOLD_SPEED * dt);
-        rightX = rightTarget = next;
+        const next = clampPaddleY(rightY + holdInput.right * PADDLE_HOLD_SPEED * dt);
+        rightY = rightTarget = next;
     }
 }
 
@@ -1189,11 +1205,11 @@ function tickPong(now) {
     } else if (!paused && morphT >= 1 && (holdInput.left || holdInput.right)) {
         applyHoldInput(dt);
     } else if (!paused) {
-        leftX += (leftTarget - leftX) * (0.22 * dt);
-        rightX += (rightTarget - rightX) * (0.22 * dt);
+        leftY += (leftTarget - leftY) * (0.22 * dt);
+        rightY += (rightTarget - rightY) * (0.22 * dt);
     }
 
-    syncPaddles(half);
+    syncPaddles(half, now);
 
     if (morphT < 1) {
         updatePongGaze();
@@ -1210,10 +1226,10 @@ function tickPong(now) {
 
     stepBall(dt);
 
-    if (ball.y - BALL_R < courtPlayTop()) {
-        scorePoint('left');
-    } else if (ball.y + BALL_R > courtPlayBottom()) {
+    if (ball.x + BALL_R < 0) {
         scorePoint('right');
+    } else if (ball.x - BALL_R > courtViewW) {
+        scorePoint('left');
     }
 
     syncBallEl();
@@ -1439,7 +1455,7 @@ function togglePause() {
             vy: ball.vy,
             wasHeld: ballHeld,
             restartServe: serveCountdownActive,
-            reserviceTowardBottom: reserviceTimer ? pendingReserviceTowardBottom : null,
+            reserviceTowardLeft: reserviceTimer ? pendingReserviceTowardLeft : null,
         };
         clearServeCountdown();
         clearReserviceDelay();
@@ -1456,8 +1472,8 @@ function togglePause() {
     courtOverlayEl?.classList.remove('is-paused');
     if (pauseState?.restartServe) {
         startServeCountdown();
-    } else if (pauseState?.reserviceTowardBottom != null) {
-        scheduleReservice(pauseState.reserviceTowardBottom);
+    } else if (pauseState?.reserviceTowardLeft != null) {
+        scheduleReservice(pauseState.reserviceTowardLeft);
     } else {
         ballHeld = pauseState?.wasHeld ?? false;
         ball.vx = pauseState?.vx ?? 0;
@@ -1503,7 +1519,9 @@ function activatePong() {
     scoreRight = 0;
     resetRally();
     sixSevenUntil = 0;
-    leftX = rightX = leftTarget = rightTarget = courtViewW * 0.5;
+    leftY = rightY = leftTarget = rightTarget = 50;
+    sixSevenLeftCx = courtViewW * 0.6;
+    sixSevenRightCx = courtViewW * 0.7;
     resetPongGaze();
     updateScoreboard();
     dropScoreboard();
