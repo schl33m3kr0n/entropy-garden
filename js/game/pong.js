@@ -322,8 +322,8 @@ let rightY = 50;
 let leftTarget = 50;
 let rightTarget = 50;
 let sixSevenUntil = 0;
-let sixSevenLeftCx = 50;
-let sixSevenRightCx = 50;
+let sixSevenLeftY = 50;
+let sixSevenRightY = 50;
 let scoreLeft = 0;
 let scoreRight = 0;
 let rallyHits = 0;
@@ -362,9 +362,12 @@ function isSixSevenDanceActive(now = performance.now()) {
 }
 
 function applySixSevenPaddleDance(now) {
-    const wobble = Math.sin(now * 0.022);
-    sixSevenLeftCx = courtViewW * (0.6 + wobble * 0.04);
-    sixSevenRightCx = courtViewW * (0.7 + Math.cos(now * 0.022) * 0.04);
+    const span = courtPlaySpan();
+    const bob = Math.sin(now * 0.0045) * span * 0.07;
+    const baseLeft = courtPlayTop() + span * 0.6;
+    const baseRight = courtPlayTop() + span * 0.7;
+    sixSevenLeftY = clampPaddleY(baseLeft + bob);
+    sixSevenRightY = clampPaddleY(baseRight - bob);
 }
 
 function courtPlaySpan() {
@@ -657,8 +660,6 @@ function syncCourtViewBox(pixelW, pixelH) {
         const ratio = nextViewW / courtViewW;
         ball.x *= ratio;
         ball.vx *= ratio;
-        sixSevenLeftCx *= ratio;
-        sixSevenRightCx *= ratio;
     }
     courtViewW = nextViewW;
     courtOverlayEl.setAttribute('viewBox', `0 0 ${courtViewW} 100`);
@@ -960,11 +961,10 @@ function setPaddleHorizontal(el, y, cx, half) {
 
 function syncPaddles(half, now = performance.now()) {
     if (isSixSevenDanceActive(now)) {
-        const span = courtPlaySpan();
-        const leftYPos = courtPlayTop() + span * 0.6;
-        const rightYPos = courtPlayTop() + span * 0.7;
-        setPaddleHorizontal(paddleLeftEl, leftYPos, sixSevenLeftCx, half);
-        setPaddleHorizontal(paddleRightEl, rightYPos, sixSevenRightCx, half);
+        const leftCx = paddleLeftX() + half;
+        const rightCx = paddleRightX() - half;
+        setPaddleHorizontal(paddleLeftEl, sixSevenLeftY, leftCx, half);
+        setPaddleHorizontal(paddleRightEl, sixSevenRightY, rightCx, half);
         return;
     }
     setPaddleVertical(paddleLeftEl, paddleLeftX(), leftY, half);
@@ -1520,8 +1520,7 @@ function activatePong() {
     resetRally();
     sixSevenUntil = 0;
     leftY = rightY = leftTarget = rightTarget = 50;
-    sixSevenLeftCx = courtViewW * 0.6;
-    sixSevenRightCx = courtViewW * 0.7;
+    sixSevenLeftY = sixSevenRightY = 50;
     resetPongGaze();
     updateScoreboard();
     dropScoreboard();
