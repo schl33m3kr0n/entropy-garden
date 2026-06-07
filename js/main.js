@@ -15,7 +15,6 @@ import {
     triggerPanopticonEyeRoll,
     triggerPanopticonSleep,
     triggerPanopticonWake,
-    resetPanopticonIdleCommentTimer,
     startPanopticonIdleComments,
     syncPanopticonCodeSequenceComments,
     handlePanopticonVisibilityChange,
@@ -1352,7 +1351,6 @@ window.addEventListener('touchmove', resetIdleTimer, { passive: true });
 
 function startIdleDissociation() {
     resetIdleTimer();
-    resetPanopticonIdleCommentTimer();
 }
 
 // Replace your old carousel script with this block

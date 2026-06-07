@@ -676,6 +676,11 @@ body:not(.ios-ui) #grid-canvas {
     visibility: visible;
 }
 
+body.garden-loading #panopticon-comment,
+body:not(.garden-ready) #panopticon-comment {
+    display: none !important;
+}
+
 /* Above #ios-scroll-shell (z-index 20) so bubbles show on iOS */
 body.ios-ui #panopticon-comment {
     z-index: 10025;

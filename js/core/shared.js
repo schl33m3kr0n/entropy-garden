@@ -720,8 +720,12 @@ function isPanopticonCodeSequenceActive() {
     return false;
 }
 
+function isGardenReady() {
+    return document.body.classList.contains('garden-ready');
+}
+
 function canShowPanopticonComment() {
-    if (!gardenHasStarted || !panopticonEl?.classList.contains('visible')) return false;
+    if (!gardenHasStarted || !isGardenReady() || !panopticonEl?.classList.contains('visible')) return false;
     if (isPanopticonCodeSequenceActive()) return false;
     if (eyeMode === 'reroll' || eyeMode === 'waking') return false;
     if (document.body.classList.contains('pong-playing')) return false;
@@ -885,7 +889,7 @@ export function startPanopticonIdleComments() {
 function schedulePanopticonIdleCommentTimer() {
     clearPanopticonIdleCommentTimer();
 
-    if (!gardenHasStarted) return;
+    if (!gardenHasStarted || !isGardenReady()) return;
 
     panopticonIdleCommentTimer = setTimeout(() => {
         syncPanopticonCodeSequenceComments();
