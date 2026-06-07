@@ -857,6 +857,11 @@ function syncPanopticonCommentChrome() {
 function pickPanopticonIdleComment() {
     const pools = globalThis.lorePools;
     if (!pools) return null;
+    if (isApril420()) {
+        const high = pools.panopticonHighCommentsSafe;
+        if (!high?.length) return null;
+        return pickOne(high, pools.panopticonHighCommentsGritty || []);
+    }
     if (isPanopticonGodModeCommentary()) {
         const god = pools.panopticonGodModeComments;
         return god?.length ? pickOne(god, []) : null;
@@ -869,6 +874,11 @@ function pickPanopticonIdleComment() {
 function pickPanopticonReturnComment() {
     const pools = globalThis.lorePools;
     if (!pools) return 'missed me?';
+    if (isApril420()) {
+        const high = pools.panopticonHighReturnCommentsSafe;
+        if (!high?.length) return 'welcome back. did you forget where you were';
+        return pickOne(high, pools.panopticonHighReturnCommentsGritty || []);
+    }
     if (isPanopticonGodModeCommentary()) {
         const god = pools.panopticonGodModeComments;
         return god?.length ? pickOne(god, []) : 'YOU HAVE RETURNED TO THE THRESHOLD';
