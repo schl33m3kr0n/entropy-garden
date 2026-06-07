@@ -250,6 +250,30 @@ body.garden-loading #loader {
     margin-top: 30px;
 }
 
+#loader-leaf {
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: var(--neon-green);
+    -webkit-mask-image: url('../assets/icons/cannabis-leaf.png');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: url('../assets/icons/cannabis-leaf.png');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    animation: spinSnake 4s linear infinite;
+}
+
+body.april-420 #ouroboros-svg {
+    display: none;
+}
+
+body.april-420 #loader-leaf {
+    display: block;
+}
+
 #ouroboros-svg {
     width: 100%;
     height: 100%;
@@ -1898,7 +1922,8 @@ body.singularity-active #singularity-controls {
     }
 
     /* 3. Slow the Ouroboros down to a safe, ambient rotation */
-    #ouroboros-svg {
+    #ouroboros-svg,
+    #loader-leaf {
         animation-duration: 20s !important;
     }
 
@@ -1936,7 +1961,8 @@ body.singularity-active #singularity-controls {
 
     /* 7. Pause GPU-heavy ambient layers */
     body::before,
-    #ouroboros-svg {
+    #ouroboros-svg,
+    #loader-leaf {
         animation-play-state: paused !important;
     }
 }
@@ -1948,7 +1974,8 @@ body.perf-lite::before {
     height: 120vmax;
 }
 
-body.perf-lite #ouroboros-svg {
+body.perf-lite #ouroboros-svg,
+body.perf-lite #loader-leaf {
     animation-duration: 12s;
 }
 

@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v111';
+const CACHE_VERSION = 'entropy-garden-v112';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -33,6 +33,7 @@ const PRECACHE_URLS = [
     'assets/icons/identity.svg',
     'assets/icons/joystick.svg',
     'assets/icons/ouroboros.svg',
+    'assets/icons/cannabis-leaf.png',
     'assets/icons/trophy.svg',
     'assets/icons/signal.svg',
     'assets/icons/stats.svg',
