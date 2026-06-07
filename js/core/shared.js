@@ -691,6 +691,8 @@ const PANOPTICON_WAKE_BLINK_SHUT = 0.88;
 const PANOPTICON_IDLE_COMMENT_MS = 10000;
 const PANOPTICON_IDLE_COMMENT_CHANCE = 1;
 const PANOPTICON_TAB_RETURN_MIN_MS = 500;
+const PANOPTICON_PUPIL_R = 7;
+const PANOPTICON_PUPIL_R_HIGH = 12;
 
 let catEyePhase = null;
 let catEyeStart = 0;
@@ -1239,6 +1241,43 @@ export function triggerPanopticonCatEye(audioEl = null) {
     catEyeStart = performance.now();
 }
 
+function isApril420() {
+    try {
+        const params = new URLSearchParams(globalThis.location?.search || '');
+        if (params.has('420') || params.get('preview420') === '1') return true;
+    } catch {
+        /* non-browser */
+    }
+    const now = new Date();
+    return now.getMonth() === 3 && now.getDate() === 20;
+}
+
+function syncPanopticonApril420() {
+    const on = isApril420();
+    document.body.classList.toggle('april-420', on);
+    panopticonEl?.classList.toggle('panopticon-high', on);
+    if (panopticonPupilEl) {
+        panopticonPupilEl.setAttribute('r', String(on ? PANOPTICON_PUPIL_R_HIGH : PANOPTICON_PUPIL_R));
+    }
+}
+
+function animatePanopticonHighIdle(now) {
+    const t = now * 0.001;
+    const droop = 0.34 + Math.sin(t * 1.2) * 0.05;
+    applyPanopticonLidShut(droop);
+
+    const driftX = Math.sin(t * 0.7) * 4 + Math.sin(t * 1.35) * 2;
+    const driftY = Math.cos(t * 0.55) * 3 + Math.sin(t * 0.95) * 2;
+    const ease = perf.prefersReducedMotion ? 0.07 : 0.05;
+
+    panopticonGazeX += (panopticonTargetX + driftX - panopticonGazeX) * ease;
+    panopticonGazeY += (panopticonTargetY + driftY - panopticonGazeY) * ease;
+    panopticonGazeEl?.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
+    panopticonInnerEl.style.transform = perf.prefersReducedMotion
+        ? ''
+        : `rotate(${Math.sin(t * 0.4) * 2.5}deg)`;
+}
+
 export function updatePanopticonVisibility() {
     if (!panopticonEl) return;
 
@@ -1246,6 +1285,7 @@ export function updatePanopticonVisibility() {
     const boss = document.getElementById('boss-key-overlay');
     const hidden = singularity?.style.display === 'flex' || boss?.classList.contains('active');
     panopticonEl.classList.toggle('visible', gardenHasStarted && !hidden);
+    syncPanopticonApril420();
 }
 
 function horizontalOffset(angle) {
@@ -1638,6 +1678,7 @@ export function animatePanopticon() {
     animatePanopticonCatEye(performance.now());
 
     if (eyeMode === 'eyeroll') {
+        if (isApril420()) applyPanopticonLidShut(0);
         const elapsed = performance.now() - eyerollStart;
         const duration = perf.prefersReducedMotion ? 900 : PANOPTICON_EYEROLL_MS;
         const p = Math.min(1, elapsed / duration);
@@ -1663,6 +1704,7 @@ export function animatePanopticon() {
     }
 
     if (eyeMode === 'stare') {
+        if (isApril420()) applyPanopticonLidShut(0);
         const elapsed = performance.now() - stareStart;
         const duration = perf.prefersReducedMotion ? 1800 : PANOPTICON_STARE_MS;
         const arriveT = smoothstep(Math.min(1, elapsed / 320));
@@ -1685,6 +1727,7 @@ export function animatePanopticon() {
     }
 
     if (eyeMode === 'reroll') {
+        if (isApril420()) applyPanopticonLidShut(0);
         const now = performance.now();
 
         if (rerollPhase === 'land') {
@@ -1741,6 +1784,16 @@ export function animatePanopticon() {
         if (readyToLand || timedOut) {
             beginPanopticonLand(displayAngle, gazeX, gazeY);
         }
+        return;
+    }
+
+    if (
+        isApril420() &&
+        eyeMode === 'idle' &&
+        !panopticonGodActive &&
+        !panopticonEl.classList.contains('pong-active')
+    ) {
+        animatePanopticonHighIdle(performance.now());
         return;
     }
 

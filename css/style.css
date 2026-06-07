@@ -749,6 +749,42 @@ body.corrupted #panopticon-eye.dizzy {
     filter: drop-shadow(0 0 26px rgba(255, 0, 85, 0.65));
 }
 
+#panopticon-eye.panopticon-high {
+    filter:
+        drop-shadow(0 0 16px rgba(255, 90, 170, 0.55))
+        drop-shadow(0 0 28px rgba(120, 255, 140, 0.28));
+    animation: panopticonHighPulse 4.2s ease-in-out infinite;
+}
+
+#panopticon-eye.panopticon-high .panopticon-iris-outer {
+    stroke: #ff8fd0;
+    opacity: 0.75;
+}
+
+#panopticon-eye.panopticon-high .panopticon-iris-mid {
+    stroke: #b6ffb8;
+    opacity: 0.95;
+}
+
+#panopticon-eye.panopticon-high .panopticon-pupil {
+    fill: #ff4fa8;
+}
+
+#panopticon-eye.panopticon-high .panopticon-lid {
+    stroke: #c8ffc8;
+}
+
+body.corrupted #panopticon-eye.panopticon-high {
+    filter:
+        drop-shadow(0 0 18px rgba(255, 0, 85, 0.5))
+        drop-shadow(0 0 26px rgba(255, 120, 200, 0.35));
+}
+
+@keyframes panopticonHighPulse {
+    0%, 100% { opacity: 0.72; }
+    50% { opacity: 0.56; }
+}
+
 #panopticon-eye svg {
     width: 100%;
     height: 100%;
@@ -1875,6 +1911,11 @@ body.singularity-active #singularity-controls {
 
     #panopticon-eye.dizzy {
         animation: none !important;
+    }
+
+    #panopticon-eye.panopticon-high {
+        animation: none !important;
+        opacity: 0.62;
     }
 
     #panopticon-eye.visible {
