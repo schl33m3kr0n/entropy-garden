@@ -339,6 +339,34 @@ body.god-mode h1::after {
     display: none;
 }
 
+body.corrupted:not(.god-mode) h1 {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    color: var(--alert-red);
+    text-shadow: 0 0 12px rgba(255, 0, 85, 0.55), 0 0 24px rgba(255, 0, 85, 0.25);
+}
+
+body.corrupted:not(.god-mode) h1.god-title-live {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    color: var(--alert-red);
+}
+
+body.corrupted:not(.god-mode) h1.god-title-live .god-title-letter {
+    color: var(--alert-red);
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+}
+
+body.corrupted:not(.god-mode) h1::after {
+    background: var(--alert-red);
+    background-size: 100% 100%;
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.45);
+}
+
 #panopticon-eye.god-rainbow .panopticon-lid,
 #panopticon-eye.god-rainbow .panopticon-iris-outer,
 #panopticon-eye.god-rainbow .panopticon-iris-mid {
