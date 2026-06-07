@@ -19,6 +19,8 @@ import {
     startPanopticonIdleComments,
     syncPanopticonCodeSequenceComments,
     handlePanopticonVisibilityChange,
+    showPanopticonComment,
+    hidePanopticonComment,
     setPanopticonGodMode,
     updatePanopticonVisibility,
     currentTrackIndex,
@@ -1094,7 +1096,21 @@ function bindDomEvents() {
     // 4. Main Initialization Button — bound early via bindInitButton()
 
     // Bind existing UI buttons
-    if (document.getElementById('mode-btn')) document.getElementById('mode-btn').addEventListener('click', toggleMode);
+    const modeBtn = document.getElementById('mode-btn');
+    if (modeBtn) {
+        modeBtn.addEventListener('click', toggleMode);
+        if (!modeBtn.dataset.satchHoverBound) {
+            modeBtn.dataset.satchHoverBound = '1';
+            modeBtn.addEventListener('mouseenter', () => {
+                if (isCorrupted) return;
+                showPanopticonComment('are you sure you want to do that?', 3200);
+            });
+            modeBtn.addEventListener('mouseleave', () => {
+                if (isCorrupted) return;
+                hidePanopticonComment();
+            });
+        }
+    }
     /* next-poem / reset-timeline: bound in singularity.js (iOS touchend-safe) */
 
     initializeCycleSlots();
