@@ -77,6 +77,7 @@ export const sfx = {
     gamePoint: createLazyAudio(sfxPath('game-point.mp3')),
     hit: createLazyAudio(sfxPath('hit.mp3')),
     pop: createLazyAudio(sfxPath('pop.mp3')),
+    sixSeven: createLazyAudio(sfxPath('67.mp3')),
     eat: createLazyAudio(sfxPath('eat.mp3')),
     exit: createLazyAudio(sfxPath('exit.mp3')),
     burp: document.getElementById('burp-sound'),
@@ -1251,7 +1252,7 @@ export function triggerPanopticonCatEye(audioEl = null) {
     catEyeStart = performance.now();
 }
 
-function isApril420() {
+export function isApril420() {
     try {
         const params = new URLSearchParams(globalThis.location?.search || '');
         if (params.has('420') || params.get('preview420') === '1') return true;
