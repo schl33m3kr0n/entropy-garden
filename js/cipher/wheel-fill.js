@@ -2,7 +2,7 @@
  * Detects blank / tofu cipher wheel slots and refills them from a render-tested pool.
  * Raster tests use an offscreen canvas (not the game canvas).
  */
-import { FULL_MATRIX_CHARS, HEBREW_CIPHER_CHARS, CIPHER_ARABIC, CIPHER_TIBETAN } from '../data/cipher-glyphs.data.js';
+import { FULL_MATRIX_CHARS, HEBREW_CIPHER_CHARS, CIPHER_ARABIC, CIPHER_TIBETAN, CIPHER_KANNADA } from '../data/cipher-glyphs.data.js';
 import { usesIosCipherGlyphs } from '../core/shared.js';
 
 const IOS_CIPHER_CHARS =
@@ -16,6 +16,7 @@ const IOS_CIPHER_CHARS =
     HEBREW_CIPHER_CHARS +
     CIPHER_ARABIC +
     CIPHER_TIBETAN +
+    CIPHER_KANNADA +
     '!?@#$%&*_+=<>[]{}|/~';
 
 const RASTER_SIZE = 28;
