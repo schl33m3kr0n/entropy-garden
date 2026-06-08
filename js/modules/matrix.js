@@ -236,16 +236,10 @@ function drawCipherWheels(cx, cy) {
             }
 
             if (fastGlyphs) {
-                const c = Math.cos(theta);
-                const s = Math.sin(theta);
-                ctx.setTransform(c, s, -s, c, x, y);
+                ctx.setTransform(canvasDpr, 0, 0, canvasDpr, x * canvasDpr, y * canvasDpr);
                 ctx.fillText(wheel.glyphs[i], 0, 0);
             } else {
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.rotate(theta);
-                ctx.fillText(wheel.glyphs[i], 0, 0);
-                ctx.restore();
+                ctx.fillText(wheel.glyphs[i], x, y);
             }
         }
     }
