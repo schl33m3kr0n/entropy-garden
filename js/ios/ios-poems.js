@@ -5,7 +5,6 @@ import { isCorrupted, isCipherSolved, setIosTransmissionsOverride } from '../cor
 import {
     buildSingularityPoemPool,
     poemTitleFromText,
-    findPoemIndexByTitle,
 } from '../data/singularity-poems.data.js';
 
 const IOS_POEM_TITLE_SLOTS = 3;
@@ -141,13 +140,6 @@ export function openIosPoemArchive(index = 0) {
         const modal = modalEl();
         if (modal) modal.style.display = 'block';
     }
-}
-
-export function openIosOspreyPoem() {
-    if (!iosPoemsAllowed()) return;
-    const pool = poemPool();
-    const idx = findPoemIndexByTitle(pool, 'orchids for an osprey');
-    openIosPoemArchive(idx >= 0 ? idx : 0);
 }
 
 export function initIosPoemArchive() {

@@ -12,7 +12,7 @@ import {
     setGardenLoopActive,
     setGardenAnimId,
 } from '../core/state.js';
-import { buildSingularityPoemPool, ospreyPoem } from '../data/singularity-poems.data.js';
+import { buildSingularityPoemPool } from '../data/singularity-poems.data.js';
 
 function pushTerminalLog(msg) {
     if (typeof globalThis.pushTerminalLog === 'function') globalThis.pushTerminalLog(msg);
@@ -448,19 +448,6 @@ function triggerSingularity() {
     setTimeout(() => openSingularityRitual(true), 500);
 }
 
-function triggerOspreyEvent() {
-    if (isIosSingularity()) return;
-
-    setIsSingularityActive(true);
-    hideSingularityChrome();
-
-    setTimeout(() => {
-        playSound(sfx.missionCleared);
-        revealSingularityOverlay(false);
-        speakSingularity(ospreyPoem);
-    }, 500);
-}
-
 function highlightPoemLine(lineElements, index) {
     lineElements.forEach((el, i) => {
         if (i < index) {
@@ -808,7 +795,6 @@ if (document.readyState === 'loading') {
 
 export {
     triggerSingularity,
-    triggerOspreyEvent,
     cyclePoem,
     init3D,
     bindSingularityControls,

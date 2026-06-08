@@ -15,7 +15,7 @@ import {
     incrementExtraPizzas,
     isCorrupted,
 } from '../core/state.js';
-import { triggerOspreyEvent, resizeCanvas, triggerSingularity } from '../lazy.js';
+import { resizeCanvas, triggerSingularity } from '../lazy.js';
 
 export function getCipherStage() {
     return cipherStage;
@@ -458,9 +458,6 @@ function processCommand(cmd) {
     }
     else if(cmd === 'pizza') { pushTerminalLog("Fuel deployed."); spawnPizza(); }
     else if(cmd === 'scatter') { pushTerminalLog("FATAL: DESKTOP CONTAINMENT BREACH."); triggerScatter(); }
-    else if(cmd === 'osprey') { 
-        triggerOspreyEvent();
-	}
     else if(cmd === 'compose') {
         pushTerminalLog("> INITIATING VOID EDITOR...");
         globalThis.openComposer?.();

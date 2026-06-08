@@ -336,42 +336,6 @@ it's a code red when i go number 2,
 life gets rough, but you know what to do,
 shit everywhere, for the red white and blue.`
 ];
-export const ospreyPoem = `orchids for an osprey
-
-to you i wrote a letter, a mirror of internal turmoil & chaos,
-where i held absurd fictions like divine convictions, and careless words untouched by reflection
-left wounds that refused to heal.
-
-to you i write another letter. before i wore those elixirs of divinity like badges
-—but they were only poison, shrouding what little shred of reason remained in me.
-
-i stumbled from deadline to deadline, chasing the ghost of ambition i had left in me four years ago. 
-as i committed myself to isolation & intoxication, the nonsense started to make sense, and the nonsense then became too intense,
-a language of its own, etched in delirium & desperation.
-
-it wasn't success i wished for but only connection,
-or at least some illusion of it, a mirage that could keep me afloat in the sea-storm of my own making.
-
-in my confused haze, you were everyone, but somehow also no-one. everyone knew me at a fundamental level
-because i imagined they were all you.
-
-i had no privacy, naked under three layers of clothes,
-to your ideal image, i surrendered my will. you were the answer,
-but you were also the mystery that led to more questions my voice of reason such as it was
-could never fully explain.
-
-the jadedness & detachment of times past
-had colored what was drawn within,
-and sadly reflected what i set forth without.
-
-to you i write this letter, not just as an admission, but as a reckoning. a way to acknowledge the missteps
-and the regret i hold, heavy & unspoken, like stones in my pockets.
-because finally, finally, i've stopped searching for you in places you never were.
-this is my apology, my acknowledgment, & my farewell.
-
-may it find you well
-
-—ᛝ`;
 
 export function buildSingularityPoemPool(isCorrupted) {
     return isCorrupted
@@ -382,9 +346,4 @@ export function buildSingularityPoemPool(isCorrupted) {
 export function poemTitleFromText(text) {
     const line = text.split('\n').map((l) => l.trim()).find(Boolean);
     return line || 'Transmission';
-}
-
-export function findPoemIndexByTitle(pool, titleNeedle) {
-    const needle = titleNeedle.trim().toLowerCase();
-    return pool.findIndex((text) => poemTitleFromText(text).toLowerCase() === needle);
 }

@@ -209,13 +209,6 @@ function revealSingularityShell() {
     });
 }
 
-export function triggerOspreyEvent() {
-    if (isIosPoemMode()) {
-        return import('./ios/ios-poems.js').then((m) => m.openIosOspreyPoem());
-    }
-    loadSingularity().then((mod) => mod.triggerOspreyEvent());
-}
-
 export function stopSingularity3D() {
     if (isIosPoemMode()) return;
     if (singularityMod?.stopSingularity3D) singularityMod.stopSingularity3D();
