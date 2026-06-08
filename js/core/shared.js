@@ -395,11 +395,9 @@ function waitForBgmBuffer(track, fileName) {
     });
 }
 
-/** Warm all large playlist files (e.g. during the boot loader). */
+/** Warm current + adjacent playlist tracks during the boot loader (not the whole rotation). */
 export function prefetchLargeBgmTracks() {
-    BGM_TRACKS.forEach((file, index) => {
-        if (isLargeBgmFile(file)) bufferBgmTrack(index).catch(() => {});
-    });
+    prefetchAdjacentBgmBuffers(currentTrackIndex);
 }
 
 /** Eagerly buffer a playlist track (deduped per index). */

@@ -1,9 +1,10 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v113';
+const CACHE_VERSION = 'entropy-garden-v114';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
 
+/** Shell + boot path only; feature modules cache on first import (lazy.js). */
 const PRECACHE_URLS = [
     'index.html',
     'css/style.css',
@@ -11,24 +12,19 @@ const PRECACHE_URLS = [
     'js/lazy.js',
     'js/core/state.js',
     'js/core/shared.js',
+    'js/core/environment.js',
     'js/core/sw-register.js',
+    'js/core/god-title.js',
+    'js/core/canvas-resize.js',
     'js/data/lore-pools.data.js',
     'js/data/cipher-glyphs.data.js',
-    'js/data/singularity-poems.data.js',
     'js/cipher/vigenere.js',
     'js/cipher/entropy-hint.js',
     'js/cipher/wheel-fill.js',
     'js/boot/trophies.js',
-    'js/modules/terminal.js',
-    'js/modules/matrix.js',
-    'js/modules/singularity.js',
-    'js/modules/arcade.js',
+    'js/boot/file-protocol-guard.js',
     'js/ios/ios-ui.js',
-    'js/ios/ios-poems.js',
-    'js/game/pong.js',
-    'js/game/konami.js',
-    'pages/genesis.html',
-    'pages/genesis.js',
+    'js/ios/terminal-boot.js',
     'assets/icons/about.svg',
     'assets/icons/identity.svg',
     'assets/icons/joystick.svg',
@@ -40,7 +36,6 @@ const PRECACHE_URLS = [
     'assets/icons/storage.svg',
     'assets/icons/vault.svg',
     'assets/img/vault/sun-poster.webp',
-    'assets/img/vault/sun-poster.jpg',
 ];
 
 function isAudioRequest(pathname) {
