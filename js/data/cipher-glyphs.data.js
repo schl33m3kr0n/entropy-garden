@@ -31,6 +31,10 @@ export const HEBREW_CIPHER_CHARS =
 export const CIPHER_ARABIC =
     "ابتثجحخدذرزسشصضطظعغفقكلمنهويأإآءىةؤئ";
 
+/** Tibetan (consonants + base vowel carrier). */
+export const CIPHER_TIBETAN =
+    "ཀཁགངཅཆཇཉཏཐདནཔཕབམཙཚཛཝཞཟའཡརལཤསཧཨ";
+
 /** Cyrillic and related letters. */
 export const CIPHER_CYRILLIC =
     "ѢѪѦѮѰѲѴѶѸѠѾѼӁӃӇӋӚӜӞӠӢӤӦӨӪӬӮӰӲӴӶӸӺӼӾԂԄԆԈԊԌԎԐԒЖЗЛФЦЧШЩЪЫЬЭЮЯ";
@@ -129,6 +133,7 @@ export const FULL_MATRIX_CHARS =
     DECORATIVE_CIPHER_CHARS +
     HEBREW_CIPHER_CHARS +
     CIPHER_ARABIC +
+    CIPHER_TIBETAN +
     CIPHER_DEVANAGARI +
     CIPHER_CYRILLIC +
     CIPHER_CJK +
