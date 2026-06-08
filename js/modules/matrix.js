@@ -70,10 +70,11 @@ function fillEmptyWheelGlyphs() {
 }
 
 function cipherWheelFont() {
+    const arabic = '"Geeza Pro", "Noto Sans Arabic", "Arial Unicode MS"';
     if (usesIosCipherGlyphs()) {
-        return `${fontSize}px Avenir, -apple-system, BlinkMacSystemFont, sans-serif`;
+        return `${fontSize}px Avenir, ${arabic}, -apple-system, BlinkMacSystemFont, sans-serif`;
     }
-    return `${fontSize}px monospace`;
+    return `${fontSize}px ${arabic}, monospace, sans-serif`;
 }
 
 function buildWheels() {

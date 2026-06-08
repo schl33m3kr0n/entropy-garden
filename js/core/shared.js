@@ -7,7 +7,7 @@ import {
     isSingularityActive,
     getCipherStage,
 } from './state.js';
-import { FULL_MATRIX_CHARS, HEBREW_CIPHER_CHARS } from '../data/cipher-glyphs.data.js';
+import { FULL_MATRIX_CHARS, HEBREW_CIPHER_CHARS, CIPHER_ARABIC } from '../data/cipher-glyphs.data.js';
 import {
     isIOS,
     isSafari,
@@ -584,6 +584,7 @@ const IOS_CIPHER_CHARS =
     'ハヒフヘホマミムメモヤユヨラリルレロワン' +
     '道禅空幻心理气天阴阳' +
     HEBREW_CIPHER_CHARS +
+    CIPHER_ARABIC +
     '!?@#$%&*_+=<>[]{}|/~';
 
 /** Smaller glyph pool + flat wheel paint on WebKit (iOS / Safari). */

@@ -21,11 +21,15 @@ export const CIPHER_BMP_SAFE_EXTRA =
 
 /** Elder Futhark runes. */
 export const CIPHER_RUNIC =
-    "ᚠᚢᚦᚬᚱᚴᚼᚽᚾᚿᛋᛏᛐᛒᛘᛚᛦ";
+    "ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ";
 
 /** Hebrew aleph-bet + finals + geresh/gershayim/maqaf. */
 export const HEBREW_CIPHER_CHARS =
     "אבגדהוזחטיכךלמםנןסעפףצץקרשת״־";
+
+/** Arabic (isolated letters + hamza/alef variants). */
+export const CIPHER_ARABIC =
+    "ابتثجحخدذرزسشصضطظعغفقكلمنهويأإآءىةؤئ";
 
 /** Cyrillic and related letters. */
 export const CIPHER_CYRILLIC =
@@ -124,6 +128,7 @@ export const FULL_MATRIX_CHARS =
     CIPHER_MATH_DECORATIVE +
     DECORATIVE_CIPHER_CHARS +
     HEBREW_CIPHER_CHARS +
+    CIPHER_ARABIC +
     CIPHER_DEVANAGARI +
     CIPHER_CYRILLIC +
     CIPHER_CJK +
