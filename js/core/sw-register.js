@@ -15,33 +15,11 @@ export function registerServiceWorkerAfterInit() {
         return;
     }
 
-    let reloadOnControllerChange = false;
-
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!reloadOnControllerChange) return;
-        reloadOnControllerChange = false;
-        window.location.reload();
-    });
-
     navigator.serviceWorker
         .register('./sw.js', { updateViaCache: 'none' })
         .then((reg) => {
-            const promptReload = (worker) => {
-                if (!worker || !navigator.serviceWorker.controller) return;
-                reloadOnControllerChange = true;
-                worker.postMessage({ type: 'SKIP_WAITING' });
-            };
-
-            if (reg.waiting) promptReload(reg.waiting);
-
-            reg.addEventListener('updatefound', () => {
-                const worker = reg.installing;
-                if (!worker) return;
-                worker.addEventListener('statechange', () => {
-                    if (worker.state === 'installed') promptReload(worker);
-                });
-            });
-
+            // Install updates in the background; avoid skipWaiting + reload mid-session
+            // (that was interrupting boot audio and pong init on the custom domain).
             reg.update().catch(() => {});
         })
         .catch(() => {});

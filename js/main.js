@@ -123,6 +123,7 @@ function beginGardenExperience() {
     }, { once: true, passive: true });
 
     requestAnimationFrame(() => {
+        warmSound(sfx.collectible);
         playSound(sfx.collectible);
         warmSound(sfx.boop);
         lastTerminalLoggedTrackIndex = -1;

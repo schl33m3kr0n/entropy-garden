@@ -1537,6 +1537,7 @@ function resumeGardenLoopAfterPong() {
 
 function activatePong() {
     if (active || !panopticonEl) return;
+    ensureKeyboardHintPanels();
     syncPanopticonCodeSequenceComments();
     pauseGardenLoopForPong();
     clearPongStartHint();
@@ -1818,6 +1819,12 @@ function bindPanel(side) {
     return panel;
 }
 
+function ensureKeyboardHintPanels() {
+    if (!useKeyboardControls) return;
+    if (!panelLeftEl) panelLeftEl = bindKeyboardHintPanel('left');
+    if (!panelRightEl) panelRightEl = bindKeyboardHintPanel('right');
+}
+
 function bindKeyboardHintPanel(side) {
     const panel = document.createElement('div');
     panel.className = `pong-keyboard-hint-panel pong-keyboard-hint-${side} ios-pong-unselectable`;
@@ -2040,7 +2047,7 @@ function positionControls() {
 
 function updateControlsVisibility() {
     const panVisible = panopticonEl?.classList.contains('visible');
-    const showPanels = panVisible && (active || fading);
+    const showPanels = (active || fading) && (useKeyboardControls || panVisible);
     const showEyeTaps = panVisible && !active && !fading && !useKeyboardControls;
     const showCourt = panVisible && (active || fading);
 
@@ -2141,6 +2148,7 @@ export function initPanopticonPingPong() {
     }
     bindMagnifierGuards();
     bindControls();
+    ensureKeyboardHintPanels();
     if (useKeyboardControls) {
         bindKeyboardControls();
         if (document.body.classList.contains('garden-ready')) {

@@ -3365,7 +3365,8 @@ body:not(.ios-ui) .ios-pong-eye-tap {
     -webkit-touch-callout: none;
 }
 
-.pong-keyboard-hint-panel.visible {
+.pong-keyboard-hint-panel.visible,
+body.pong-keyboard-mode.pong-playing .pong-keyboard-hint-panel {
     opacity: 1;
     visibility: visible;
 }

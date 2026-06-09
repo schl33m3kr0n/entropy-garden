@@ -496,8 +496,24 @@ export function playCurrentBgmTrack() {
 
 export function playSound(sound) {
     if (!sound) return;
-    sound.currentTime = 0;
-    sound.play().catch(() => {});
+
+    const playNow = () => {
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+    };
+
+    if (sound.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        sound.preload = 'auto';
+        sound.load();
+        if (sound.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+            playNow();
+            return;
+        }
+        sound.addEventListener('canplay', playNow, { once: true });
+        return;
+    }
+
+    playNow();
 }
 
 export function warmSound(sound) {

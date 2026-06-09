@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v115';
+const CACHE_VERSION = 'entropy-garden-v116';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -56,7 +56,6 @@ function isCacheableAsset(pathname) {
 }
 
 self.addEventListener('install', (event) => {
-    self.skipWaiting();
     event.waitUntil(
         caches.open(SHELL_CACHE).then(async (cache) => {
             await Promise.allSettled(PRECACHE_URLS.map((url) => cache.add(url)));
