@@ -671,7 +671,10 @@ function cyclePoem() {
     const activeSound = wasInterrupted ? sfx.clearThroat : sfx.transition;
     playSound(activeSound);
 
+    let decoded = false;
     const unlock = () => {
+        if (decoded) return;
+        decoded = true;
         activeSound.onended = null;
         finishCycle();
     };

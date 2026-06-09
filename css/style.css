@@ -15,6 +15,17 @@
     --radius-lg: 22px;
     --radius-xl: 28px;
     --radius-pill: 999px;
+
+    /* Cipher / preview chromatic aberration (drop-shadow RGB split) */
+    --chroma-filter:
+        drop-shadow(2px 0.5px 0 rgba(255, 0, 85, 0.65))
+        drop-shadow(-2px -0.5px 0 rgba(0, 255, 255, 0.65));
+    --chroma-filter-lite:
+        drop-shadow(1.5px 0.5px 0 rgba(255, 0, 85, 0.55))
+        drop-shadow(-1.5px -0.5px 0 rgba(0, 255, 255, 0.55));
+    --chroma-filter-corrupted:
+        drop-shadow(2px 0.5px 0 rgba(255, 0, 85, 0.72))
+        drop-shadow(-2px -0.5px 0 rgba(255, 80, 120, 0.45));
 }
 
 /* --- CUSTOM FONTS --- */
@@ -663,16 +674,13 @@ html.file-protocol #file-protocol-notice {
     opacity: 1;
     filter:
         hue-rotate(var(--matrix-hue, 0deg))
-        drop-shadow(2px 0.5px 0 rgba(255, 0, 85, 0.65))
-        drop-shadow(-2px -0.5px 0 rgba(0, 255, 255, 0.65));
+        var(--chroma-filter);
 }
 
 /* Safari / lite: skip animated hue-rotate; keep static chromatic split */
 body.perf-safari #grid-canvas.matrix-visible,
 body.perf-lite #grid-canvas.matrix-visible {
-    filter:
-        drop-shadow(1.5px 0.5px 0 rgba(255, 0, 85, 0.55))
-        drop-shadow(-1.5px -0.5px 0 rgba(0, 255, 255, 0.55));
+    filter: var(--chroma-filter-lite);
 }
 
 body:not(.ios-ui) #grid-canvas {
@@ -737,9 +745,14 @@ body:not(.garden-ready) #panopticon-comment {
     display: none !important;
 }
 
-/* Above #ios-scroll-shell (z-index 20) so bubbles show on iOS */
+/* iOS: centered on screen, behind sidebar menu (z-index 10008) */
 body.ios-ui #panopticon-comment {
-    z-index: 10025;
+    z-index: 10004;
+    left: calc(50% + var(--ios-vv-offset-x, 0px));
+    top: calc(50% + var(--ios-vv-offset-y, 0px));
+    right: auto;
+    transform: translate(-50%, -50%);
+    max-width: min(340px, 84vw);
 }
 
 body.corrupted #panopticon-comment {
@@ -902,9 +915,7 @@ body.corrupted .panopticon-pupil {
 }
 
 body.corrupted #grid-canvas.matrix-visible {
-    filter:
-        drop-shadow(2px 0.5px 0 rgba(255, 0, 85, 0.72))
-        drop-shadow(-2px -0.5px 0 rgba(255, 80, 120, 0.45));
+    filter: var(--chroma-filter-corrupted);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -913,9 +924,7 @@ body.corrupted #grid-canvas.matrix-visible {
     }
 
     #grid-canvas.matrix-visible {
-        filter:
-            drop-shadow(1.5px 0.5px 0 rgba(255, 0, 85, 0.55))
-            drop-shadow(-1.5px -0.5px 0 rgba(0, 255, 255, 0.55));
+        filter: var(--chroma-filter-lite);
     }
 }
 

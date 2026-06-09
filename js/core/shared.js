@@ -743,8 +743,16 @@ function canShowPanopticonIdleComment() {
     return true;
 }
 
+function clearIosPanopticonCommentInlinePosition() {
+    if (!perf.isIOS || !panopticonCommentEl) return;
+    panopticonCommentEl.style.removeProperty('left');
+    panopticonCommentEl.style.removeProperty('top');
+    panopticonCommentEl.style.removeProperty('transform');
+}
+
 function positionPanopticonComment() {
     if (!panopticonCommentEl || !panopticonEl) return;
+    if (perf.isIOS) return;
 
     const eyeRect = panopticonEl.getBoundingClientRect();
     const boxW = panopticonCommentEl.offsetWidth || panopticonCommentEl.scrollWidth;
@@ -782,6 +790,7 @@ function playPanopticonCommentSfx() {
 function showPanopticonIdleComment(text, ttlMs = 4400) {
     if (!panopticonCommentEl || !text || !canShowPanopticonIdleComment()) return;
 
+    clearIosPanopticonCommentInlinePosition();
     syncPanopticonCommentChrome();
     playPanopticonCommentSfx();
     panopticonCommentEl.textContent = text;
@@ -799,6 +808,7 @@ function showPanopticonIdleComment(text, ttlMs = 4400) {
 export function showPanopticonComment(text, ttlMs = 4400) {
     if (!panopticonCommentEl || !text || !canShowPanopticonComment()) return;
 
+    clearIosPanopticonCommentInlinePosition();
     syncPanopticonCommentChrome();
     playPanopticonCommentSfx();
     panopticonCommentEl.textContent = text;

@@ -208,3 +208,8 @@ echo "  • Not found behavior: use 404 page (404.html) — NOT Single Page Appl
 echo "    (SPA serves index.html for /js/modules/*.js → singularity import fails)"
 echo "  • _headers / _redirects / _routes.json are config — not in the file list"
 echo "  • functions/_middleware.js sets JS MIME types if _headers is skipped"
+echo ""
+echo "Custom domain (www.entropy-garden.com):"
+echo "  Must be attached under Workers & Pages → entropy-garden-8r2 → Custom domains."
+echo "  DNS: CNAME www → <project>.pages.dev (proxied). Apex needs a separate record or redirect."
+echo "  Note: entropy.garden is a different hostname (Obsidian Publish) — not this Pages project."
