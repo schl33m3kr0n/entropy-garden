@@ -279,6 +279,17 @@ const ARROW_SVG = {
     down: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle class="ios-pong-ring" cx="24" cy="24" r="21"/><path class="ios-pong-chevron" d="M24 36 L14 17 H34 Z"/></svg>`,
 };
 
+const KEYBOARD_HINT_KEYS = {
+    left: [
+        { code: 'KeyW', label: 'W' },
+        { code: 'KeyS', label: 'S' },
+    ],
+    right: [
+        { code: 'ArrowUp', label: '↑' },
+        { code: 'ArrowDown', label: '↓' },
+    ],
+};
+
 let panelLeftEl;
 let panelRightEl;
 let stripLeftEl;
@@ -854,19 +865,28 @@ function getDesktopPongLayout() {
     const eyeSize = Math.min(Math.max(56, window.innerWidth * 0.08), 88);
     const stackAboveCourt = eyeSize + eyeGap + commentH + commentGap;
     const stackBelowCourt = scoreboardGap + scoreboardH + 36;
-    const maxCourtW = window.innerWidth - 2 * EDGE_INSET;
+    const hintCol = ARROW_SIZE + ARROW_COURT_GAP;
+    const maxCourtW = window.innerWidth - 2 * EDGE_INSET - 2 * hintCol;
     const maxCourtH = availH - stackTop - stackAboveCourt - stackBelowCourt - safeBottom;
     const courtSize = Math.max(
         220,
         Math.min(maxCourtW * 0.58, maxCourtH, 400),
     );
-    const courtLeft = (window.innerWidth - courtSize) * 0.5;
+    const groupW = courtSize + 2 * hintCol;
+    const groupLeft = (window.innerWidth - groupW) * 0.5;
+    const courtLeft = groupLeft + hintCol;
     const courtTop = stackTop + stackAboveCourt;
     const eyeLeft = courtLeft + courtSize * 0.5 - eyeSize * 0.5;
+    const hintStackH = ARROW_SIZE * 2 + ARROW_GAP;
+    const panelsTop = courtTop + (courtSize - hintStackH) * 0.5;
 
     return {
         court: { left: courtLeft, top: courtTop, width: courtSize, height: courtSize },
-        panels: { left: 0, right: 0, top: 0 },
+        panels: {
+            left: groupLeft,
+            right: groupLeft + hintCol + courtSize + ARROW_COURT_GAP,
+            top: panelsTop,
+        },
         eye: { top: stackTop, left: eyeLeft, size: eyeSize },
         comment: {
             top: stackTop + eyeSize + eyeGap,
@@ -1188,6 +1208,22 @@ function clearHoldInput() {
     holdInput.right = 0;
     if (panelLeftEl || panelRightEl) {
         document.querySelectorAll('.ios-pong-arrow.is-held').forEach((el) => el.classList.remove('is-held'));
+    }
+    syncKeyboardHintHoldState();
+}
+
+function syncKeyboardHintHoldState() {
+    if (!useKeyboardControls) return;
+    for (const panel of [panelLeftEl, panelRightEl]) {
+        if (!panel) continue;
+        for (const el of panel.querySelectorAll('.pong-key-hint')) {
+            const hold = KEY_HOLD[el.dataset.code];
+            if (!hold) continue;
+            const held = hold.side === 'left'
+                ? holdInput.left === hold.dir
+                : holdInput.right === hold.dir;
+            el.classList.toggle('is-held', held);
+        }
     }
 }
 
@@ -1684,6 +1720,7 @@ function bindKeyboardControls() {
             pokeUserActivity();
             if (hold.side === 'left') holdInput.left = hold.dir;
             else holdInput.right = hold.dir;
+            syncKeyboardHintHoldState();
             e.preventDefault();
             e.stopPropagation();
             return;
@@ -1716,6 +1753,7 @@ function bindKeyboardControls() {
         pokeUserActivity();
         if (hold.side === 'left' && holdInput.left === hold.dir) holdInput.left = 0;
         if (hold.side === 'right' && holdInput.right === hold.dir) holdInput.right = 0;
+        syncKeyboardHintHoldState();
     }, true);
 
     window.addEventListener('blur', clearHoldInput);
@@ -1732,14 +1770,14 @@ function isPongAppChrome(target) {
 function bindMagnifierGuards() {
     document.addEventListener('selectstart', (e) => {
         if (!pongUiActive() || isPongAppChrome(e.target)) return;
-        if (e.target.closest?.('.ios-pong-unselectable, #ios-pong-court, #ios-pong-scoreboard, #ios-pong-comment')) {
+        if (e.target.closest?.('.ios-pong-unselectable, .pong-keyboard-hint-panel, #ios-pong-court, #ios-pong-scoreboard, #ios-pong-comment')) {
             e.preventDefault();
         }
     }, true);
 
     document.addEventListener('contextmenu', (e) => {
         if (!pongUiActive() || isPongAppChrome(e.target)) return;
-        if (e.target.closest?.('.ios-pong-unselectable, #ios-pong-court, #ios-pong-scoreboard, #ios-pong-comment')) {
+        if (e.target.closest?.('.ios-pong-unselectable, .pong-keyboard-hint-panel, #ios-pong-court, #ios-pong-scoreboard, #ios-pong-comment')) {
             e.preventDefault();
         }
     }, true);
@@ -1774,6 +1812,23 @@ function bindPanel(side) {
     const panel = document.createElement('div');
     panel.className = `ios-pong-panel ios-pong-panel-${side} ios-pong-unselectable`;
     panel.append(bindArrowButton(side, 'up'), bindArrowButton(side, 'down'));
+    document.body.appendChild(panel);
+    return panel;
+}
+
+function bindKeyboardHintPanel(side) {
+    const panel = document.createElement('div');
+    panel.className = `pong-keyboard-hint-panel pong-keyboard-hint-${side} ios-pong-unselectable`;
+    panel.setAttribute('aria-hidden', 'true');
+
+    for (const key of KEYBOARD_HINT_KEYS[side]) {
+        const el = document.createElement('span');
+        el.className = 'pong-key-hint';
+        el.dataset.code = key.code;
+        el.textContent = key.label;
+        panel.appendChild(el);
+    }
+
     document.body.appendChild(panel);
     return panel;
 }
@@ -1978,12 +2033,12 @@ function positionControls() {
 
 function updateControlsVisibility() {
     const panVisible = panopticonEl?.classList.contains('visible');
-    const showArrows = panVisible && (active || fading) && !useKeyboardControls;
+    const showPanels = panVisible && (active || fading);
     const showEyeTaps = panVisible && !active && !fading && !useKeyboardControls;
     const showCourt = panVisible && (active || fading);
 
-    panelLeftEl?.classList.toggle('visible', showArrows);
-    panelRightEl?.classList.toggle('visible', showArrows);
+    panelLeftEl?.classList.toggle('visible', showPanels);
+    panelRightEl?.classList.toggle('visible', showPanels);
     stripLeftEl?.classList.toggle('visible', showEyeTaps);
     stripRightEl?.classList.toggle('visible', showEyeTaps);
     courtOverlayEl?.classList.toggle('visible', showCourt);
@@ -1993,7 +2048,10 @@ function updateControlsVisibility() {
 function bindControls() {
     bindCourtOverlay();
     bindCommentEl();
-    if (!useKeyboardControls) {
+    if (useKeyboardControls) {
+        panelLeftEl = bindKeyboardHintPanel('left');
+        panelRightEl = bindKeyboardHintPanel('right');
+    } else {
         stripLeftEl = bindEyeTapZone('left');
         stripRightEl = bindEyeTapZone('right');
         panelLeftEl = bindPanel('left');

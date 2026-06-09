@@ -3349,6 +3349,66 @@ body:not(.ios-ui) .ios-pong-eye-tap {
     pointer-events: auto;
 }
 
+.pong-keyboard-hint-panel {
+    position: fixed;
+    z-index: 10006;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.pong-keyboard-hint-panel.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.pong-key-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    font-family: var(--main-font);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--neon-green);
+    border: 2px solid rgba(0, 255, 0, 0.55);
+    border-radius: var(--radius-sm);
+    background: rgba(0, 12, 0, 0.45);
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.28);
+    transition: color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.pong-key-hint.is-held {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.75);
+    background: rgba(0, 40, 0, 0.65);
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.55);
+}
+
+body.corrupted .pong-key-hint {
+    color: var(--alert-red);
+    border-color: rgba(255, 0, 85, 0.55);
+    background: rgba(24, 0, 8, 0.45);
+    box-shadow: 0 0 8px rgba(255, 0, 85, 0.28);
+}
+
+body.corrupted .pong-key-hint.is-held {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.75);
+    background: rgba(48, 0, 16, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
+}
+
 .ios-pong-arrow {
     width: 54px;
     height: 54px;
