@@ -71,6 +71,10 @@ export const CIPHER_NUMERALS_LITE =
 
 // ─── Europe ───────────────────────────────────────────────────────────────────
 
+/** Basic Latin alphabet — anchors legibility amid exotic scripts. */
+export const CIPHER_LATIN =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
 /** Latin extended, phonetic, and archaic Latin. */
 export const CIPHER_LATIN_EXTENDED =
     "ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ×÷";
@@ -196,6 +200,7 @@ export const FULL_MATRIX_CHARS =
     CIPHER_MATH_DECORATIVE +
     DECORATIVE_CIPHER_CHARS +
     CIPHER_NUMERALS +
+    CIPHER_LATIN +
     CIPHER_LATIN_EXTENDED +
     CIPHER_GREEK +
     CIPHER_CYRILLIC +
