@@ -661,13 +661,18 @@ html.file-protocol #file-protocol-notice {
 
 #grid-canvas.matrix-visible {
     opacity: 1;
-    filter: hue-rotate(var(--matrix-hue, 0deg));
+    filter:
+        hue-rotate(var(--matrix-hue, 0deg))
+        drop-shadow(2px 0.5px 0 rgba(255, 0, 85, 0.65))
+        drop-shadow(-2px -0.5px 0 rgba(0, 255, 255, 0.65));
 }
 
-/* Safari: per-frame hue-rotate on full-screen canvas is very costly */
+/* Safari / lite: skip animated hue-rotate; keep static chromatic split */
 body.perf-safari #grid-canvas.matrix-visible,
 body.perf-lite #grid-canvas.matrix-visible {
-    filter: none;
+    filter:
+        drop-shadow(1.5px 0.5px 0 rgba(255, 0, 85, 0.55))
+        drop-shadow(-1.5px -0.5px 0 rgba(0, 255, 255, 0.55));
 }
 
 body:not(.ios-ui) #grid-canvas {
@@ -897,7 +902,9 @@ body.corrupted .panopticon-pupil {
 }
 
 body.corrupted #grid-canvas.matrix-visible {
-    filter: none;
+    filter:
+        drop-shadow(2px 0.5px 0 rgba(255, 0, 85, 0.72))
+        drop-shadow(-2px -0.5px 0 rgba(255, 80, 120, 0.45));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -906,7 +913,9 @@ body.corrupted #grid-canvas.matrix-visible {
     }
 
     #grid-canvas.matrix-visible {
-        filter: none;
+        filter:
+            drop-shadow(1.5px 0.5px 0 rgba(255, 0, 85, 0.55))
+            drop-shadow(-1.5px -0.5px 0 rgba(0, 255, 255, 0.55));
     }
 }
 
