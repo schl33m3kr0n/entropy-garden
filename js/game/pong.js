@@ -1469,6 +1469,7 @@ export function notifyGardenReady() {}
 
 function setUiPlaying(playing) {
     if (quitBtnEl) quitBtnEl.hidden = !playing || useKeyboardControls;
+    if (playing) positionControls();
     updateControlsVisibility();
 }
 
@@ -1564,6 +1565,7 @@ function activatePong() {
     requestAnimationFrame(() => {
         positionControls();
         resizeCanvas();
+        updateControlsVisibility();
     });
     warmSound(sfx.hit);
     warmSound(sfx.pop);
@@ -1829,6 +1831,7 @@ function bindKeyboardHintPanel(side) {
         panel.appendChild(el);
     }
 
+    panel.style.zIndex = '10021';
     document.body.appendChild(panel);
     return panel;
 }
@@ -1995,10 +1998,14 @@ function positionControls() {
         }
 
         if (panelLeftEl && panelRightEl) {
+            const hintW = ARROW_SIZE;
+            const margin = 8;
+            const leftPos = Math.max(margin, layout.panels.left);
+            const rightPos = Math.min(window.innerWidth - hintW - margin, layout.panels.right);
             panelLeftEl.style.top = `${layout.panels.top}px`;
-            panelLeftEl.style.left = `${layout.panels.left}px`;
+            panelLeftEl.style.left = `${leftPos}px`;
             panelRightEl.style.top = `${layout.panels.top}px`;
-            panelRightEl.style.left = `${layout.panels.right}px`;
+            panelRightEl.style.left = `${rightPos}px`;
         }
 
         positionQuitButton(layout.court.left + layout.court.width * 0.5);

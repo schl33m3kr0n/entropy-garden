@@ -174,6 +174,16 @@ if grep -q 'setTimeout(showPongArmingHint' "$DEST/js/game/pong.js"; then
   exit 1
 fi
 
+if ! grep -q 'pong-keyboard-hint-panel' "$DEST/css/style.css"; then
+  echo "Deploy check failed: dist/css/style.css missing desktop pong keyboard hints" >&2
+  exit 1
+fi
+
+if ! grep -q 'bindKeyboardHintPanel' "$DEST/js/game/pong.js"; then
+  echo "Deploy check failed: dist/js/game/pong.js missing desktop pong keyboard hints" >&2
+  exit 1
+fi
+
 SW_VER="$(grep -E "const CACHE_VERSION = " "$ROOT/sw.js" | head -1)"
 if ! grep -qF "$SW_VER" "$DEST/sw.js"; then
   echo "Deploy check failed: dist/sw.js out of sync with source (re-run scripts/deploy/cloudflare.sh)" >&2
