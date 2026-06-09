@@ -745,13 +745,12 @@ body:not(.garden-ready) #panopticon-comment {
     display: none !important;
 }
 
-/* iOS: centered on screen, behind sidebar menu (z-index 10008) */
+/* iOS: horizontally centered; top set in JS below the eye; behind sidebar (z-index 10008) */
 body.ios-ui #panopticon-comment {
     z-index: 10004;
     left: calc(50% + var(--ios-vv-offset-x, 0px));
-    top: calc(50% + var(--ios-vv-offset-y, 0px));
     right: auto;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     max-width: min(340px, 84vw);
 }
 

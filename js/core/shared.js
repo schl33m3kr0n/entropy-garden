@@ -746,15 +746,19 @@ function canShowPanopticonIdleComment() {
 function clearIosPanopticonCommentInlinePosition() {
     if (!perf.isIOS || !panopticonCommentEl) return;
     panopticonCommentEl.style.removeProperty('left');
-    panopticonCommentEl.style.removeProperty('top');
     panopticonCommentEl.style.removeProperty('transform');
 }
 
 function positionPanopticonComment() {
     if (!panopticonCommentEl || !panopticonEl) return;
-    if (perf.isIOS) return;
 
     const eyeRect = panopticonEl.getBoundingClientRect();
+
+    if (perf.isIOS) {
+        panopticonCommentEl.style.top = `${eyeRect.bottom + 10}px`;
+        return;
+    }
+
     const boxW = panopticonCommentEl.offsetWidth || panopticonCommentEl.scrollWidth;
     const margin = 8;
     const left = eyeRect.left + eyeRect.width / 2 - boxW / 2;
