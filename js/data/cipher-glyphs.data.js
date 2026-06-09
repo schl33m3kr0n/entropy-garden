@@ -19,6 +19,56 @@ export const CIPHER_MATH_DECORATIVE =
 export const DECORATIVE_CIPHER_CHARS =
     "※⁂⁜⊙⊛⟠❀❖✡";
 
+// ─── Numerals (multi-script) ──────────────────────────────────────────────────
+
+/** Western, fullwidth, Roman, and CJK digit forms. */
+export const CIPHER_NUMERALS_WEST_EAST =
+    "0123456789" +
+    "０１２３４５６７８９" +
+    "ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫ" +
+    "〇一二三四五六七八九";
+
+/** Arabic-Indic and Eastern Arabic-Indic digits. */
+export const CIPHER_NUMERALS_ARABIC =
+    "٠١٢٣٤٥٦٧٨٩" +
+    "۰۱۲۳۴۵۶۷۸۹";
+
+/** South & Southeast Asian digit sets. */
+export const CIPHER_NUMERALS_INDIC =
+    "०१२३४५६७८९" +
+    "০১২৩৪৫৬৭৮৯" +
+    "౦౧౨౩౪౫౬౭౮౯" +
+    "೦೧೨೩೪೫೬೭೮೯" +
+    "൦൧൨൩൪൫൬൭൮൯";
+
+export const CIPHER_NUMERALS_SEA =
+    "༠༡༢༣༤༥༦༧༨༩" +
+    "๐๑๒๓๔๕๖๗๘๙" +
+    "០១២៣៤៥៦៧៨៩" +
+    "၀၁၂၃၄၅၆၇၈၉";
+
+/** Ethiopic (1–9) and Cherokee (0–9) numerals. */
+export const CIPHER_NUMERALS_OTHER =
+    "፩፪፫፬፭፮፯፰፱" +
+    "ᏐᏑᏒᏓᏔᏕᏖᏗᏘ";
+
+export const CIPHER_NUMERALS =
+    CIPHER_NUMERALS_WEST_EAST +
+    CIPHER_NUMERALS_ARABIC +
+    CIPHER_NUMERALS_INDIC +
+    CIPHER_NUMERALS_SEA +
+    CIPHER_NUMERALS_OTHER;
+
+/** Non-ASCII numerals for iOS / Safari cipher wheels (ASCII 0–9 added separately in pool). */
+export const CIPHER_NUMERALS_LITE =
+    "０１２３４５６７８９" +
+    "ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ" +
+    "〇一二三四五六七八九" +
+    "٠١٢٣٤٥٦٧٨٩" +
+    "০১২৩৪৫৬৭৮৯" +
+    "๐๑๒๓๔๕๖๗๘๙" +
+    "ᏐᏑᏒᏓᏔᏕᏖᏗᏘ";
+
 // ─── Europe ───────────────────────────────────────────────────────────────────
 
 /** Latin extended, phonetic, and archaic Latin. */
@@ -145,6 +195,7 @@ export const FULL_MATRIX_CHARS =
     CIPHER_BMP_SAFE_EXTRA +
     CIPHER_MATH_DECORATIVE +
     DECORATIVE_CIPHER_CHARS +
+    CIPHER_NUMERALS +
     CIPHER_LATIN_EXTENDED +
     CIPHER_GREEK +
     CIPHER_CYRILLIC +
