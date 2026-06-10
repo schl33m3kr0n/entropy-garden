@@ -494,6 +494,7 @@ globalThis.lorePools = {
         "a jar of mayonnaise can indeed be a percussive instrument",
         "my other car is an x-wing starfighter",
         "i'm sorry, dave. i'm afraid i can't do that",
+        "my therapist said i use humor to deflect from uncomfortable emotions, so i put my fingers in my ears and went 'lalalalala.'",
     ],
     panopticonIdleCommentsGritty: [
         "the void left a review: ★★★★☆",
