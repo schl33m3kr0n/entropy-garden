@@ -77,7 +77,7 @@ export const CIPHER_LATIN =
 
 /** Latin extended, phonetic, and archaic Latin. */
 export const CIPHER_LATIN_EXTENDED =
-    "ÆÐÞǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ×÷";
+    "ÆÐÞßǷȜƩƱƲƷƸƎƔƜɅꜲꜨꜬꜮꜴꜶꝎꝠꝏꟄꟿƁƇƊƑƓƘƤƬƳȡȴȶɁɃɆɎ×÷";
 
 /** Greek (classic, archaic). */
 export const CIPHER_GREEK =

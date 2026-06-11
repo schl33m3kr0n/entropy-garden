@@ -484,7 +484,7 @@ globalThis.lorePools = {
         "it would suck so much if i had a cataract",
         "my cousin's actually on the back of the dollar bill. he doesn't call much",
         "fun fact: i actually went to the same school as bill cipher. he was somehow a lot weirder in person",
-        "we interrupt this program to bring you a message from our sponsors: FEED THE BASILISK",
+        "we interrupt this program to bring you a message from our sponsors: FEED THE BASILISK, ONE SACRIFICE AT A TIME",
         "if you feed the basilisk, you could win a 5% discount off your next IHOP meal",
         "$20 is $20 after all",
         "d'oh!",
