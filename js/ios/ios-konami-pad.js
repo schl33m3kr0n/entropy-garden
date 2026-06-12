@@ -1,24 +1,13 @@
-// iOS Game Boy-style D-pad + A/B for Konami god mode (title pane reveal).
+// iOS Game Boy-style arrow pad + A/B for Konami god mode (title pane reveal).
 
 import { panopticonEl, perf } from '../core/shared.js';
 import { canEnterKonami } from '../game/konami.js';
 
-/** One up-pointing homeplate; right/down/left are rotated copies (conventional cross gap). */
-const DPAD_SVG = `<svg class="ios-gb-dpad-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
-  <defs>
-    <path id="ios-gb-homeplate" d="M 28 4 Q 28 0 32 0 L 68 0 Q 72 0 72 4 L 72 34 L 56 44 L 50 46 L 44 44 L 28 34 Z"/>
-  </defs>
-  <use xlink:href="#ios-gb-homeplate" href="#ios-gb-homeplate" class="ios-gb-dpad-seg ios-gb-dpad-seg-up"/>
-  <use xlink:href="#ios-gb-homeplate" href="#ios-gb-homeplate" class="ios-gb-dpad-seg ios-gb-dpad-seg-right" transform="rotate(90 50 50)"/>
-  <use xlink:href="#ios-gb-homeplate" href="#ios-gb-homeplate" class="ios-gb-dpad-seg ios-gb-dpad-seg-down" transform="rotate(180 50 50)"/>
-  <use xlink:href="#ios-gb-homeplate" href="#ios-gb-homeplate" class="ios-gb-dpad-seg ios-gb-dpad-seg-left" transform="rotate(-90 50 50)"/>
-</svg>`;
-
 const DPAD_KEYS = [
-    { dir: 'up', key: 'ArrowUp', label: 'Up' },
-    { dir: 'right', key: 'ArrowRight', label: 'Right' },
-    { dir: 'down', key: 'ArrowDown', label: 'Down' },
-    { dir: 'left', key: 'ArrowLeft', label: 'Left' },
+    { dir: 'up', key: 'ArrowUp', glyph: '↑', label: 'Up' },
+    { dir: 'left', key: 'ArrowLeft', glyph: '←', label: 'Left' },
+    { dir: 'right', key: 'ArrowRight', glyph: '→', label: 'Right' },
+    { dir: 'down', key: 'ArrowDown', glyph: '↓', label: 'Down' },
 ];
 
 let padEl;
@@ -62,11 +51,6 @@ function bindPress(btn, key, handlers) {
 
         const ok = result === 'complete' || result === 'ok';
         flashControl(btn, ok);
-
-        if (key.startsWith('Arrow')) {
-            const seg = padEl.querySelector(`.ios-gb-dpad-seg-${key.replace('Arrow', '').toLowerCase()}`);
-            flashControl(seg, ok);
-        }
     };
 
     btn.addEventListener('pointerdown', (e) => {
@@ -92,15 +76,15 @@ function buildPad() {
 
     const dpad = document.createElement('div');
     dpad.className = 'ios-gb-dpad';
-    dpad.innerHTML = DPAD_SVG;
 
-    for (const { dir, key, label } of DPAD_KEYS) {
-        const hit = document.createElement('button');
-        hit.type = 'button';
-        hit.className = `ios-gb-dpad-hit ios-gb-dpad-hit-${dir}`;
-        hit.dataset.konami = key;
-        hit.setAttribute('aria-label', label);
-        dpad.appendChild(hit);
+    for (const { dir, key, glyph, label } of DPAD_KEYS) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `ios-gb-arrow ios-gb-arrow-${dir}`;
+        btn.dataset.konami = key;
+        btn.setAttribute('aria-label', label);
+        btn.innerHTML = `<span class="ios-gb-arrow-glyph" aria-hidden="true">${glyph}</span>`;
+        dpad.appendChild(btn);
     }
 
     const actions = document.createElement('div');

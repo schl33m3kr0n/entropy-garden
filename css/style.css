@@ -343,12 +343,17 @@ h1.god-title-live .god-title-letter {
     will-change: transform;
 }
 
-/* Outside god mode, letters inherit the original unified h1 rainbow treatment. */
+/* Outside god mode each letter carries the rainbow clip (required once chrome splits the title). */
 body:not(.god-mode) h1.god-title-live .god-title-letter {
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-    color: inherit;
+    background: linear-gradient(90deg,
+        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
+        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
+    );
+    background-size: 200% 100%;
+    background-position: var(--rainbow-offset, 0%) 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     text-shadow: none;
 }
 
@@ -2790,80 +2795,64 @@ body.ios-ui .ios-konami-pad.is-visible {
 }
 
 .ios-gb-dpad {
-    position: relative;
-    width: 124px;
-    height: 124px;
+    display: grid;
+    grid-template-columns: repeat(3, 46px);
+    grid-template-rows: repeat(3, 46px);
+    gap: 8px;
     flex-shrink: 0;
 }
 
-.ios-gb-dpad-art {
-    display: block;
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.35));
-}
-
-.ios-gb-dpad-seg {
-    fill: rgba(0, 255, 0, 0.92);
-    transition: fill 0.12s ease, filter 0.12s ease;
-}
-
-.ios-gb-dpad-seg.is-ok,
-.ios-gb-dpad-seg.is-held {
-    fill: #fff;
-    filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.75));
-}
-
-.ios-gb-dpad-seg.is-bad {
-    fill: var(--alert-red);
-    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.55));
-}
-
-.ios-gb-dpad-seg.is-held.is-bad {
-    fill: var(--alert-red);
-    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.55));
-}
-
-.ios-gb-dpad-hit {
-    position: absolute;
+.ios-gb-arrow {
+    width: 46px;
+    height: 46px;
     margin: 0;
     padding: 0;
-    border: none;
-    background: transparent;
+    border: 2px solid rgba(0, 255, 0, 0.55);
+    border-radius: 50%;
+    background: rgba(0, 12, 0, 0.72);
+    color: var(--neon-green);
+    font-family: var(--main-font);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.ios-gb-dpad-hit-up {
-    top: 0;
-    left: 35px;
-    width: 54px;
-    height: 46px;
-    clip-path: polygon(16% 0%, 84% 0%, 100% 100%, 0% 100%);
+.ios-gb-arrow-glyph {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
 }
 
-.ios-gb-dpad-hit-right {
-    top: 35px;
-    right: 0;
-    width: 46px;
-    height: 54px;
-    clip-path: polygon(0% 16%, 100% 0%, 100% 100%, 0% 84%);
+.ios-gb-arrow-up { grid-column: 2; grid-row: 1; }
+.ios-gb-arrow-left { grid-column: 1; grid-row: 2; }
+.ios-gb-arrow-right { grid-column: 3; grid-row: 2; }
+.ios-gb-arrow-down { grid-column: 2; grid-row: 3; }
+
+.ios-gb-arrow.is-held,
+.ios-gb-arrow.is-ok {
+    color: #050505;
+    background: var(--neon-green);
+    border-color: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 14px rgba(0, 255, 0, 0.65);
 }
 
-.ios-gb-dpad-hit-down {
-    bottom: 0;
-    left: 35px;
-    width: 54px;
-    height: 46px;
-    clip-path: polygon(0% 0%, 100% 0%, 84% 100%, 16% 100%);
+.ios-gb-arrow.is-bad {
+    color: #fff;
+    background: var(--alert-red);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
 }
 
-.ios-gb-dpad-hit-left {
-    top: 35px;
-    left: 0;
-    width: 46px;
-    height: 54px;
-    clip-path: polygon(100% 16%, 0% 0%, 0% 100%, 100% 84%);
+.ios-gb-arrow.is-held.is-bad {
+    color: #fff;
+    background: var(--alert-red);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
 }
 
 .ios-gb-actions {
@@ -2925,12 +2914,16 @@ body.ios-ui .ios-konami-pad.is-visible {
     box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
 }
 
-body.corrupted .ios-gb-dpad-seg {
-    fill: rgba(255, 0, 85, 0.92);
+body.corrupted .ios-gb-arrow {
+    color: var(--alert-red);
+    border-color: rgba(255, 0, 85, 0.55);
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.28);
 }
 
-body.corrupted .ios-gb-dpad-art {
-    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.35));
+body.corrupted .ios-gb-arrow.is-held,
+body.corrupted .ios-gb-arrow.is-ok {
+    color: #050505;
+    background: var(--alert-red);
 }
 
 body.corrupted .ios-gb-btn {
