@@ -22,6 +22,7 @@ import {
     isSafariBrowser,
     isFileProtocol,
 } from './environment.js';
+import { isRenderableCipherGlyph } from '../cipher/wheel-fill.js';
 
 export { gardenHasStarted, gardenLoopActive, singularityAnimId, isCorrupted, isSingularityActive };
 export { isIOS, isSafari, isRealIOSDevice, isSafariBrowser, isFileProtocol };
@@ -699,6 +700,68 @@ export const ICO_SYMBOLS = [
     '☥', '♁', '∴', '△', '⊕', 'ψ', '✖', '☸', '⚖', '∞',
 ];
 
+const ICO_SYMBOL_FALLBACKS = {
+    '⛦': '◆',
+    '⚛︎': '◎',
+    '☯︎': '☯',
+    '❖': '◆',
+    '◉': '●',
+    '⧊': '◇',
+    '☉': '○',
+    '⛬': '▲',
+    '⛢': '◈',
+    '☧': '✚',
+    '☥': '✚',
+    '♁': '⊕',
+    '∴': '∴',
+    '△': '△',
+    '⊕': '⊕',
+    'ψ': 'ψ',
+    '✖': '✕',
+    '☸': '✦',
+    '⚖': '⚖',
+    '∞': '∞',
+};
+
+const PANOPTICON_GOD_PUPIL_FONT = '22px Apple Symbols, Menlo, PingFang SC, sans-serif';
+const ICO_SYMBOL_SAFE_FALLBACK = '◆';
+
+function stripVariationSelectors(symbol) {
+    return symbol.replace(/[\uFE0E\uFE0F]/g, '');
+}
+
+function probeIcoSymbol(symbol) {
+    if (isRenderableCipherGlyph(symbol, PANOPTICON_GOD_PUPIL_FONT)) return symbol;
+    const stripped = stripVariationSelectors(symbol);
+    if (stripped !== symbol && isRenderableCipherGlyph(stripped, PANOPTICON_GOD_PUPIL_FONT)) {
+        return stripped;
+    }
+    return null;
+}
+
+function resolveIcoSymbol(symbol) {
+    if (!perf.isIOS) return symbol;
+    const probed = probeIcoSymbol(symbol);
+    if (probed) return probed;
+    const fallback = ICO_SYMBOL_FALLBACKS[symbol] ?? ICO_SYMBOL_FALLBACKS[stripVariationSelectors(symbol)];
+    if (fallback) {
+        const probedFallback = probeIcoSymbol(fallback);
+        return probedFallback || fallback;
+    }
+    return ICO_SYMBOL_SAFE_FALLBACK;
+}
+
+let icoSymbolsForPlatform = null;
+
+export function getIcoSymbolsForPlatform() {
+    if (!icoSymbolsForPlatform) {
+        icoSymbolsForPlatform = perf.isIOS
+            ? ICO_SYMBOLS.map(resolveIcoSymbol)
+            : ICO_SYMBOLS.slice();
+    }
+    return icoSymbolsForPlatform;
+}
+
 const PANOPTICON_GOD_CLOSE_MS = 480;
 const PANOPTICON_GOD_HOLD_MS = 280;
 const PANOPTICON_GOD_OPEN_MS = 480;
@@ -1104,7 +1167,7 @@ let godSymbolBag = null;
 let godSymbolTick = 0;
 
 function resetGodSymbolBag() {
-    godSymbolBag = createBag(ICO_SYMBOLS);
+    godSymbolBag = createBag(getIcoSymbolsForPlatform());
 }
 
 function drawGodSymbol() {

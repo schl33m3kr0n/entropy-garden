@@ -287,8 +287,16 @@ function syncIosOrientation() {
     document.body.classList.toggle('ios-landscape', window.innerWidth > window.innerHeight);
 }
 
+function syncIosTabletClass() {
+    document.body.classList.toggle(
+        'ios-tablet',
+        Math.min(window.innerWidth, window.innerHeight) >= 768,
+    );
+}
+
 function onIosViewportChange() {
     syncIosOrientation();
+    syncIosTabletClass();
     scrollRailHome('instant');
     resizeCanvas();
 }
@@ -330,6 +338,7 @@ export function initIosUi() {
 
     document.body.classList.add('ios-ui');
     syncIosOrientation();
+    syncIosTabletClass();
 
     buildScrollShell();
 
@@ -351,6 +360,7 @@ export function initIosUi() {
     });
     window.addEventListener('resize', () => {
         syncIosOrientation();
+        syncIosTabletClass();
     }, { passive: true });
 
     requestAnimationFrame(() => {

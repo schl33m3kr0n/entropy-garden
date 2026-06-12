@@ -24,9 +24,9 @@ const PADDLE_EDGE_INSET = 3;
 const MORPH_MS = 480;
 const ACTIVATE_TAPS_REQUIRED = 3;
 const ACTIVATE_WINDOW_MS = 4500;
-const PADDLE_HOLD_SPEED = 1.08;
-const MAX_BALL_SPEED = 1.78;
-const LANDSCAPE_BALL_SPEED = 1.88;
+const PADDLE_HOLD_SPEED = 1.45;
+const MAX_BALL_SPEED = 2.05;
+const LANDSCAPE_BALL_SPEED = 2.15;
 const MIN_BALL_VX = 0.44;
 const ARROW_SIZE = 54;
 const ARROW_GAP = 16;
@@ -678,21 +678,30 @@ function syncCourtViewBox(pixelW, pixelH) {
     syncPaddles(PADDLE_HALF);
 }
 
+function isTabletViewport() {
+    return Math.min(window.innerWidth, window.innerHeight) >= 768;
+}
+
 function getHorizontalLayout() {
     const landscape = window.innerWidth > window.innerHeight;
-    const courtRatio = landscape ? 0.68 : COURT_W_RATIO;
+    const tablet = perf.isIOS && isTabletViewport();
+    const courtRatio = tablet
+        ? (landscape ? 0.84 : 0.92)
+        : (landscape ? 0.68 : COURT_W_RATIO);
+    const edgeInset = tablet ? 6 : EDGE_INSET;
+    const arrowCourtGap = tablet ? 6 : ARROW_COURT_GAP;
 
     if (useKeyboardControls) {
         const courtW = Math.max(
             220,
-            Math.min(window.innerWidth * courtRatio, window.innerWidth - 2 * EDGE_INSET),
+            Math.min(window.innerWidth * courtRatio, window.innerWidth - 2 * edgeInset),
         );
         const courtLeft = (window.innerWidth - courtW) * 0.5;
         return { courtLeft, courtW, panelLeft: 0, panelRight: 0 };
     }
 
-    const arrowCol = ARROW_SIZE + ARROW_COURT_GAP;
-    const maxCourtW = window.innerWidth - 2 * (EDGE_INSET + arrowCol);
+    const arrowCol = ARROW_SIZE + arrowCourtGap;
+    const maxCourtW = window.innerWidth - 2 * (edgeInset + arrowCol);
     const courtW = Math.max(220, Math.min(window.innerWidth * courtRatio, maxCourtW));
     const groupW = courtW + 2 * arrowCol;
     const groupLeft = (window.innerWidth - groupW) * 0.5;
@@ -701,7 +710,7 @@ function getHorizontalLayout() {
         courtLeft: groupLeft + arrowCol,
         courtW,
         panelLeft: groupLeft,
-        panelRight: groupLeft + arrowCol + courtW + ARROW_COURT_GAP,
+        panelRight: groupLeft + arrowCol + courtW + arrowCourtGap,
     };
 }
 
@@ -726,9 +735,10 @@ function fitPongStack({
 }) {
     let court = courtH;
     let stackH = eyeSize + eyeGap + commentH + commentGap + court + scoreboardGap + scoreboardH;
+    const tabletPortrait = perf.isIOS && isTabletViewport() && !landscape;
     let stackTop = landscape
         ? safeTop + 6
-        : Math.max(72, (availH - stackH) * 0.38);
+        : Math.max(72, (availH - stackH) * (tabletPortrait ? 0.32 : 0.38));
 
     if (stackTop + stackH > availH - safeBottom) {
         court -= stackTop + stackH - (availH - safeBottom);
@@ -743,6 +753,11 @@ function fitPongStack({
 function getCourtHeight() {
     const landscape = window.innerWidth > window.innerHeight;
     const availH = getViewportHeight();
+    if (perf.isIOS && isTabletViewport()) {
+        return landscape
+            ? Math.min(Math.max(availH * 0.58, 150), 280)
+            : Math.min(Math.max(availH * 0.52, 260), 400);
+    }
     return landscape
         ? Math.min(Math.max(availH * 0.5, 130), 200)
         : Math.min(Math.max(availH * 0.46, 236), 330);
@@ -1065,7 +1080,7 @@ function serveBall(towardLeft = Math.random() < 0.5) {
     ball.x = courtCenterX();
     const span = courtPlayBottom() - courtPlayTop();
     ball.y = courtPlayTop() + span * (0.35 + Math.random() * 0.3);
-    const speed = (perf.prefersReducedMotion ? 0.52 : 0.72) * pongSpeedScale();
+    const speed = (perf.prefersReducedMotion ? 0.52 : 0.88) * pongSpeedScale();
     ball.vx = towardLeft ? -speed : speed;
     ball.vy = (Math.random() - 0.5) * speed * 1.2;
     capBallSpeed();

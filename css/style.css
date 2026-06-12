@@ -427,6 +427,7 @@ body.corrupted:not(.god-mode) h1::after {
 
 .panopticon-god-pupil {
     display: none;
+    font-family: "Apple Symbols", Menlo, "PingFang SC", sans-serif;
     font-size: 22px;
     text-anchor: middle;
     dominant-baseline: middle;
@@ -2729,6 +2730,50 @@ body.ios-ui .ios-pane-bottom {
     }
 }
 
+body.ios-ui.ios-tablet .ios-pane-top {
+    min-height: min(38dvh, 280px);
+    max-height: min(38dvh, 280px);
+    align-items: flex-start;
+    scroll-snap-align: start;
+}
+
+body.ios-ui.ios-tablet .ios-pane-bottom {
+    min-height: min(34dvh, 260px);
+    max-height: min(34dvh, 260px);
+    align-items: flex-end;
+    scroll-snap-align: start;
+}
+
+body.ios-ui.ios-tablet .ios-pane-main {
+    min-height: 100dvh;
+    max-height: none;
+    scroll-snap-align: center;
+}
+
+@media (orientation: landscape) {
+    body.ios-ui.ios-tablet .ios-pane-top,
+    body.ios-ui.ios-tablet .ios-pane-main,
+    body.ios-ui.ios-tablet .ios-pane-bottom {
+        min-height: unset;
+        max-height: none;
+    }
+
+    body.ios-ui.ios-tablet .ios-pane-top {
+        min-height: min(38dvh, 280px);
+        max-height: min(38dvh, 280px);
+    }
+
+    body.ios-ui.ios-tablet .ios-pane-bottom {
+        min-height: min(34dvh, 260px);
+        max-height: min(34dvh, 260px);
+    }
+
+    body.ios-ui.ios-tablet .ios-pane-main {
+        min-height: 100dvh;
+        scroll-snap-align: center;
+    }
+}
+
 body.ios-ui #hud {
     position: relative;
     top: auto;
@@ -2785,6 +2830,29 @@ body.ios-ui .ios-konami-pad.is-visible {
     visibility: visible;
     transform: translateY(0);
     pointer-events: auto;
+}
+
+body.ios-ui.ios-tablet .ios-konami-pad {
+    top: 50%;
+    bottom: auto;
+    padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+    transform: translateY(-50%) translateY(-44px);
+}
+
+body.ios-ui.ios-tablet .ios-konami-pad.is-visible {
+    transform: translateY(-50%);
+}
+
+body.ios-ui.ios-tablet .ios-gb-layout {
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
+    margin: 0;
+    gap: 0;
+}
+
+body.ios-ui.ios-tablet .ios-gb-dpad {
+    margin-left: 0;
 }
 
 .ios-gb-layout {
