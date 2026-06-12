@@ -9,6 +9,13 @@ import {
     CIPHER_TIBETAN,
     CIPHER_KANNADA,
     CIPHER_NUMERALS_LITE,
+    CIPHER_LATIN,
+    CIPHER_MATH_DECORATIVE,
+    CIPHER_BMP_SAFE_EXTRA,
+    CIPHER_VAI,
+    CIPHER_BAYBAYIN,
+    CIPHER_CHEROKEE,
+    CIPHER_TIBETAN,
 } from '../data/cipher-glyphs.data.js';
 import { usesIosCipherGlyphs } from '../core/shared.js';
 
@@ -27,9 +34,30 @@ const IOS_CIPHER_CHARS =
     CIPHER_NUMERALS_LITE +
     '!?@#$%&*_+=<>[]{}|/~';
 
+/** WebKit-safe pool — drops scripts that often render as numbered Last Resort boxes. */
+const IOS_CIPHER_SAFE =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' +
+    '∑∫∆∞≈±×÷√∧∨∩∪∴∵∼≠≤≥⊕⊗⊥─□△▽◇○◎★☆♪♀♂☼' +
+    'αβγδεζηθικλμνξοπρστυφχψω' +
+    'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЮЯ' +
+    'アイウエオカキクケコサシスセソタチツテトナニヌネノ' +
+    'ハヒフヘホマミムメモヤユヨラリルレロワン' +
+    '道禅空幻心理气天阴阳' +
+    CIPHER_ARABIC +
+    CIPHER_KANNADA +
+    CIPHER_NUMERALS_LITE +
+    '!?@#$%&*_+=<>[]{}|/~';
+
+const LAST_RESORT_PROBE_CHARS =
+    CIPHER_VAI + CIPHER_BAYBAYIN + CIPHER_CHEROKEE.slice(0, 16) + CIPHER_TIBETAN.slice(0, 8);
+
 const RASTER_SIZE = 28;
 const RASTER_CX = RASTER_SIZE / 2;
 const RASTER_CY = RASTER_SIZE / 2;
+const MIN_RENDER_POOL = 12;
+
+const DESKTOP_CIPHER_FALLBACK =
+    CIPHER_LATIN + CIPHER_MATH_DECORATIVE + CIPHER_BMP_SAFE_EXTRA + '0123456789';
 
 let probeCtx = null;
 let desktopRenderable = null;
@@ -77,22 +105,51 @@ function rasterSignature(ch, font) {
     return { bits, pixels };
 }
 
+function isUnsafeCodePoint(ch) {
+    const cp = ch.codePointAt(0);
+    if (cp == null) return true;
+    if (cp < 0x20 || cp === 0x7f) return true;
+    if (cp >= 0x80 && cp <= 0x9f) return true;
+    if (cp >= 0x200b && cp <= 0x200f) return true;
+    if (cp >= 0x202a && cp <= 0x202e) return true;
+    if (cp === 0xfeff) return true;
+    return false;
+}
+
+function isLikelyNumberedFallback(ch, font) {
+    const sig = rasterSignature(ch, font);
+    const narrow = rasterSignature('i', font);
+    const wide = rasterSignature('W', font);
+    const maxNormal = Math.max(wide.pixels, narrow.pixels * 2, 8);
+    return sig.pixels > maxNormal + 7;
+}
+
 function buildTofuRefBits(font) {
     if (tofuRefBits && tofuRefFont === font) return tofuRefBits;
     tofuRefFont = font;
-    const refs = ['\uFFFD', '\u{10FFFF}'];
-    tofuRefBits = new Set(refs.map((ch) => rasterSignature(ch, font).bits));
+    const bits = new Set(['\uFFFD', '\u{10FFFF}'].map((ch) => rasterSignature(ch, font).bits));
+    const baseline = rasterSignature('n', font).pixels;
+    for (const ch of LAST_RESORT_PROBE_CHARS) {
+        const sig = rasterSignature(ch, font);
+        if (sig.pixels > Math.max(20, baseline * 2.2)) {
+            bits.add(sig.bits);
+        }
+    }
+    tofuRefBits = bits;
     return tofuRefBits;
 }
 
 /** True when the glyph has no visible ink or draws the missing-glyph box. */
 export function isRenderableCipherGlyph(ch, font) {
     if (!ch || typeof ch !== 'string') return false;
+    if ([...ch].length !== 1) return false;
+    if (isUnsafeCodePoint(ch)) return false;
     const trimmed = ch.trim();
     if (!trimmed) return false;
     const { bits, pixels } = rasterSignature(ch, font);
     if (pixels === 0) return false;
     if (buildTofuRefBits(font).has(bits)) return false;
+    if (isLikelyNumberedFallback(ch, font)) return false;
     return true;
 }
 
@@ -104,15 +161,41 @@ function filterRenderablePool(pool, font) {
     return out;
 }
 
+/** False when canvas readback/fonts are blocked (common in private browsing). */
+function isCanvasProbeReliable(font) {
+    const known = rasterSignature('M', font);
+    const missing = rasterSignature('\uFFFD', font);
+    if (known.pixels === 0) return false;
+    return known.bits !== missing.bits;
+}
+
+function buildRenderablePool(source, font, fallbackSource) {
+    let pool = filterRenderablePool(source, font);
+    if (pool.length >= MIN_RENDER_POOL && isCanvasProbeReliable(font)) {
+        return pool.join('');
+    }
+    pool = filterRenderablePool(fallbackSource, font);
+    if (pool.length >= MIN_RENDER_POOL) return pool.join('');
+    return [...fallbackSource].join('');
+}
+
 /** Build once per font channel (desktop monospace vs iOS). */
 export function ensureCipherRenderCache(font, ios = usesIosCipherGlyphs()) {
     if (ios) {
         if (iosRenderable) return iosRenderable;
-        iosRenderable = filterRenderablePool([...IOS_CIPHER_CHARS], font).join('');
+        iosRenderable = buildRenderablePool(
+            [...IOS_CIPHER_SAFE],
+            font,
+            [...IOS_CIPHER_SAFE],
+        );
         return iosRenderable;
     }
     if (desktopRenderable) return desktopRenderable;
-    desktopRenderable = filterRenderablePool([...FULL_MATRIX_CHARS], font).join('');
+    desktopRenderable = buildRenderablePool(
+        [...FULL_MATRIX_CHARS],
+        font,
+        [...DESKTOP_CIPHER_FALLBACK],
+    );
     return desktopRenderable;
 }
 
@@ -168,4 +251,21 @@ export function populateEmptyWheelGlyphs(wheels, pickChar, font, options = {}) {
     }
 
     return filled;
+}
+
+/** Re-check every slot and replace numbered-box / tofu glyphs. */
+export function scrubWheelGlyphs(wheels, font, ios = usesIosCipherGlyphs()) {
+    if (!wheels?.length || !font) return 0;
+    ensureCipherRenderCache(font, ios);
+    let scrubbed = 0;
+    for (const wheel of wheels) {
+        if (wheel.isHintWheel) continue;
+        for (let i = 0; i < wheel.glyphs.length; i++) {
+            const glyph = wheel.glyphs[i];
+            if (!isEmptyWheelGlyph(glyph) && isRenderableCipherGlyph(glyph, font)) continue;
+            wheel.glyphs[i] = pickRenderableCipherChar(font, ios);
+            scrubbed++;
+        }
+    }
+    return scrubbed;
 }

@@ -1156,6 +1156,7 @@ body.corrupted #terminal-container {
     background-position: var(--rainbow-offset, 0%) 50%;
     -webkit-background-clip: text;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
     color: transparent;
 }
 
@@ -1163,8 +1164,18 @@ body.corrupted .hud-credit {
     background: none;
     -webkit-background-clip: unset;
     background-clip: unset;
+    -webkit-text-fill-color: currentColor;
     color: var(--alert-red);
     text-shadow: 0 0 12px rgba(255, 0, 85, 0.55), 0 0 24px rgba(255, 0, 85, 0.25);
+}
+
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+    .hud-credit {
+        background: none;
+        -webkit-text-fill-color: var(--neon-green);
+        color: var(--neon-green);
+        text-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+    }
 }
 
 /* --- GHOST REFRESH HINT --- */
@@ -1253,7 +1264,8 @@ h1 {
     background-position: var(--rainbow-offset, 0%) 50%;
     -webkit-background-clip: text;
     background-clip: text;
-    color: transparent; 
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 /* Title border lives on .hud-title-card so the credit sits inside the same frame. */

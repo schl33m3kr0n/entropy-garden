@@ -3,7 +3,6 @@ import {
     ctx,
     perf,
     animatePanopticon,
-    pickCipherChar,
     usesIosCipherGlyphs,
     usesLiteCipherWheelPaint,
     panopticonEl,
@@ -15,6 +14,7 @@ import {
     pickRenderableCipherChar,
     populateEmptyWheelGlyphs,
     resetCipherRenderCache,
+    scrubWheelGlyphs,
 } from '../cipher/wheel-fill.js';
 import {
     time,
@@ -51,8 +51,24 @@ function initCipherRenderCacheIfNeeded() {
     cipherRenderCacheReady = true;
 }
 
+function rebuildCipherGlyphsAfterFontsReady() {
+    cipherRenderCacheReady = false;
+    resetCipherRenderCache();
+    if (!wheels.length) return;
+    initCipherRenderCacheIfNeeded();
+    scrubWheelGlyphs(wheels, cipherWheelFont(), usesIosCipherGlyphs());
+    fillEmptyWheelGlyphs();
+    setNeedsFullRedraw(true);
+}
+
+if (document.fonts?.ready) {
+    document.fonts.ready
+        .then(() => rebuildCipherGlyphsAfterFontsReady())
+        .catch(() => {});
+}
+
 function randomChar() {
-    if (!cipherRenderCacheReady) return pickCipherChar();
+    initCipherRenderCacheIfNeeded();
     return pickRenderableCipherChar(cipherWheelFont(), usesIosCipherGlyphs());
 }
 
@@ -122,6 +138,7 @@ function buildWheels() {
     }
 
     fillEmptyWheelGlyphs();
+    scrubWheelGlyphs(wheels, cipherWheelFont(), usesIosCipherGlyphs());
 }
 
 function cycleGlyphs(wheel) {
