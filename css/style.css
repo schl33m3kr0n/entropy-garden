@@ -343,6 +343,18 @@ h1.god-title-live .god-title-letter {
     will-change: transform;
 }
 
+body:not(.god-mode) h1.god-title-live .god-title-letter {
+    background: linear-gradient(90deg,
+        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
+        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
+    );
+    background-size: 200% 100%;
+    background-position: var(--rainbow-offset, 0%) 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
 h1.god-title-live .god-title-letter.is-space {
     min-width: 0.38em;
 }

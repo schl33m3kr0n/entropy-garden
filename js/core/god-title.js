@@ -9,9 +9,7 @@ const TO_PONDERY = [5, 4, 1, 11, 0, 3, 6, 7, 9, 10, 8, 12, 13, 2];
 let titleAnimating = false;
 let titleAnimToken = 0;
 
-function cancelTitleAnimation(chrome) {
-    titleAnimToken += 1;
-    titleAnimating = false;
+function clearLetterStyles(chrome) {
     chrome.classList.remove('god-title-shuffling');
     chrome.querySelectorAll('.god-title-letter').forEach((el) => {
         el.style.transition = '';
@@ -19,11 +17,28 @@ function cancelTitleAnimation(chrome) {
     });
 }
 
+function restoreSourceLetters(chrome) {
+    chrome.querySelectorAll('.god-title-letter').forEach((el) => {
+        const i = Number(el.dataset.sourceIndex);
+        if (!Number.isFinite(i) || i < 0 || i >= SOURCE.length) return;
+        const ch = SOURCE[i];
+        el.textContent = ch === ' ' ? '\u00a0' : ch;
+    });
+}
+
+function cancelTitleAnimation(chrome) {
+    titleAnimToken += 1;
+    titleAnimating = false;
+    clearLetterStyles(chrome);
+}
+
 function ensureChrome(h1) {
     let chrome = h1.querySelector('.god-title-chrome');
     if (chrome) {
         if (!document.body.classList.contains('god-mode')) {
+            clearLetterStyles(chrome);
             applyArrangement(chrome, false);
+            restoreSourceLetters(chrome);
         }
         return chrome;
     }
@@ -84,6 +99,7 @@ function flipReorder(chrome, ordered, token, durationMs = 720) {
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 if (token !== titleAnimToken) {
+                    clearLetterStyles(chrome);
                     resolve();
                     return;
                 }
@@ -122,8 +138,10 @@ function flipReorder(chrome, ordered, token, durationMs = 720) {
 }
 
 function applyArrangement(chrome, pondery) {
+    clearLetterStyles(chrome);
     const letters = lettersInSourceOrder(chrome);
     orderedForArrangement(letters, pondery).forEach((el) => chrome.appendChild(el));
+    if (!pondery) restoreSourceLetters(chrome);
 }
 
 /**
@@ -140,6 +158,11 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     h1.setAttribute('aria-label', pondery ? TARGET : SOURCE);
 
     if (titleAnimating) cancelTitleAnimation(chrome);
+
+    if (!pondery) {
+        clearLetterStyles(chrome);
+        restoreSourceLetters(chrome);
+    }
 
     if (!animate || perf.prefersReducedMotion) {
         applyArrangement(chrome, pondery);
