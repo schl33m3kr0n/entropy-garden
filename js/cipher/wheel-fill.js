@@ -54,6 +54,8 @@ const RASTER_SIZE = 28;
 const RASTER_CX = RASTER_SIZE / 2;
 const RASTER_CY = RASTER_SIZE / 2;
 const MIN_RENDER_POOL = 12;
+const UPGRADE_CHUNK_SIZE = 60;
+const POOL_GROWTH_SCRUB_THRESHOLD = 32;
 
 const DESKTOP_CIPHER_FALLBACK =
     CIPHER_LATIN + CIPHER_MATH_DECORATIVE + CIPHER_BMP_SAFE_EXTRA + '0123456789';
@@ -66,6 +68,18 @@ let tofuRefFont = '';
 let canvasProbeBlocked = false;
 let probeSafeCharSet = null;
 
+/** @type {{ active: boolean, complete: boolean, font: string, ios: boolean, pendingChars: string[], pendingIndex: number, lastScrubSize: number, onPoolGrowth: ((size: number) => void) | null }} */
+let upgradeState = {
+    active: false,
+    complete: false,
+    font: '',
+    ios: false,
+    pendingChars: [],
+    pendingIndex: 0,
+    lastScrubSize: 0,
+    onPoolGrowth: null,
+};
+
 function getProbeCtx() {
     if (!probeCtx) {
         const canvas = document.createElement('canvas');
@@ -76,8 +90,31 @@ function getProbeCtx() {
     return probeCtx;
 }
 
+function cancelCipherPoolBackgroundUpgrade() {
+    upgradeState.active = false;
+    upgradeState.complete = false;
+    upgradeState.pendingChars = [];
+    upgradeState.pendingIndex = 0;
+    upgradeState.font = '';
+    upgradeState.onPoolGrowth = null;
+}
+
+function getFullSourcePool(ios) {
+    return ios ? [...IOS_CIPHER_CHARS] : [...FULL_MATRIX_CHARS];
+}
+
+function getRenderablePoolRef(ios) {
+    return ios ? iosRenderable : desktopRenderable;
+}
+
+function setRenderablePool(ios, pool) {
+    if (ios) iosRenderable = pool;
+    else desktopRenderable = pool;
+}
+
 /** Clear cached render tests (call after resize or font change). */
 export function resetCipherRenderCache() {
+    cancelCipherPoolBackgroundUpgrade();
     desktopRenderable = null;
     iosRenderable = null;
     tofuRefBits = null;
@@ -231,6 +268,130 @@ export function pickRenderableCipherChar(font, ios = usesIosCipherGlyphs()) {
     const pool = ensureCipherRenderCache(font, ios);
     if (!pool.length) return '·';
     return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/** Live renderable pool size (code points, not string length). */
+export function getCipherPoolSize(ios = usesIosCipherGlyphs()) {
+    const pool = getRenderablePoolRef(ios);
+    return pool ? [...pool].length : 0;
+}
+
+/** True when background upgrade finished or was skipped (unreliable probe). */
+export function isCipherPoolUpgradeComplete(ios = usesIosCipherGlyphs()) {
+    if (canvasProbeBlocked) return true;
+    if (upgradeState.active) return false;
+    return upgradeState.complete && upgradeState.ios === ios;
+}
+
+export function isCipherPoolUpgradeActive() {
+    return upgradeState.active;
+}
+
+function scheduleUpgradeSlice() {
+    const runSlice = (deadline) => {
+        processUpgradeSlice(deadline);
+    };
+    if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(runSlice, { timeout: 2000 });
+    } else {
+        setTimeout(() => runSlice({ timeRemaining: () => 16 }), 0);
+    }
+}
+
+function processUpgradeSlice(deadline) {
+    if (!upgradeState.active) return;
+
+    const { font, ios, pendingChars, onPoolGrowth } = upgradeState;
+    const known = new Set(getRenderablePoolRef(ios) || '');
+    const added = [];
+    let processed = 0;
+    const hasTime = () => !deadline?.timeRemaining || deadline.timeRemaining() > 1;
+
+    while (
+        upgradeState.pendingIndex < pendingChars.length
+        && processed < UPGRADE_CHUNK_SIZE
+        && hasTime()
+    ) {
+        const ch = pendingChars[upgradeState.pendingIndex++];
+        processed++;
+        if (known.has(ch)) continue;
+        if (isRenderableCipherGlyph(ch, font)) {
+            known.add(ch);
+            added.push(ch);
+        }
+    }
+
+    if (added.length) {
+        setRenderablePool(ios, (getRenderablePoolRef(ios) || '') + added.join(''));
+        const newSize = known.size;
+        if (
+            onPoolGrowth
+            && newSize - upgradeState.lastScrubSize >= POOL_GROWTH_SCRUB_THRESHOLD
+        ) {
+            upgradeState.lastScrubSize = newSize;
+            onPoolGrowth(newSize);
+        }
+    }
+
+    if (upgradeState.pendingIndex >= pendingChars.length) {
+        upgradeState.active = false;
+        upgradeState.complete = true;
+        upgradeState.onPoolGrowth = null;
+        return;
+    }
+
+    scheduleUpgradeSlice();
+}
+
+/**
+ * Lazily widen the renderable pool from the full source alphabet after boot.
+ * No-op when canvas probing is blocked or unreliable (private browsing).
+ * @param {string} font
+ * @param {boolean} [ios]
+ * @param {{ onPoolGrowth?: (size: number) => void }} [options]
+ * @returns {boolean} true when a new upgrade run was started
+ */
+export function startCipherPoolBackgroundUpgrade(font, ios = usesIosCipherGlyphs(), options = {}) {
+    if (upgradeState.active) return false;
+    if (upgradeState.complete && upgradeState.font === font && upgradeState.ios === ios) {
+        return false;
+    }
+
+    ensureCipherRenderCache(font, ios);
+
+    if (canvasProbeBlocked || !isCanvasProbeReliable(font)) {
+        upgradeState.complete = true;
+        upgradeState.font = font;
+        upgradeState.ios = ios;
+        return false;
+    }
+
+    const current = new Set(getRenderablePoolRef(ios) || '');
+    const pendingChars = [];
+    for (const ch of getFullSourcePool(ios)) {
+        if (!current.has(ch)) pendingChars.push(ch);
+    }
+
+    if (!pendingChars.length) {
+        upgradeState.complete = true;
+        upgradeState.font = font;
+        upgradeState.ios = ios;
+        return false;
+    }
+
+    upgradeState = {
+        active: true,
+        complete: false,
+        font,
+        ios,
+        pendingChars,
+        pendingIndex: 0,
+        lastScrubSize: current.size,
+        onPoolGrowth: options.onPoolGrowth || null,
+    };
+
+    scheduleUpgradeSlice();
+    return true;
 }
 
 export function isEmptyWheelGlyph(glyph) {

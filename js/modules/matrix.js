@@ -15,6 +15,7 @@ import {
     populateEmptyWheelGlyphs,
     resetCipherRenderCache,
     scrubWheelGlyphs,
+    startCipherPoolBackgroundUpgrade,
 } from '../cipher/wheel-fill.js';
 import {
     time,
@@ -45,10 +46,23 @@ let viewH = 0;
 
 let cipherRenderCacheReady = false;
 
+function scheduleCipherPoolBackgroundUpgrade() {
+    const font = cipherWheelFont();
+    const ios = usesIosCipherGlyphs();
+    startCipherPoolBackgroundUpgrade(font, ios, {
+        onPoolGrowth() {
+            if (!wheels.length) return;
+            scrubWheelGlyphs(wheels, font, ios);
+            setNeedsFullRedraw(true);
+        },
+    });
+}
+
 function initCipherRenderCacheIfNeeded() {
     if (cipherRenderCacheReady) return;
     ensureCipherRenderCache(cipherWheelFont(), usesIosCipherGlyphs());
     cipherRenderCacheReady = true;
+    scheduleCipherPoolBackgroundUpgrade();
 }
 
 function rebuildCipherGlyphsAfterFontsReady() {
