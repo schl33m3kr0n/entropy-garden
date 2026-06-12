@@ -43,6 +43,12 @@ function modalEl() {
     return document.getElementById('modal-poems');
 }
 
+function scrollPoemReaderToTop() {
+    const reader = document.getElementById('ios-poem-reader');
+    if (!reader) return;
+    reader.scrollTop = 0;
+}
+
 /** Three title buttons: previous, current, next poem in the corpus. */
 function renderPoemList() {
     const list = document.getElementById('ios-poem-list');
@@ -80,6 +86,7 @@ export function selectPoem(index) {
     const body = document.getElementById('ios-poem-body');
     if (body) body.textContent = pool[currentIndex];
     renderPoemList();
+    scrollPoemReaderToTop();
 }
 
 export function stepIosPoem(delta) {
