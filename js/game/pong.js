@@ -740,18 +740,13 @@ function fitPongStack({
 }) {
     let court = courtH;
     let stackH = eyeSize + eyeGap + commentH + commentGap + court + scoreboardGap + scoreboardH;
-    const tabletPortrait = perf.isIOS && isTabletViewport() && !landscape;
-    const tabletLandscape = isTabletLandscape();
     let stackTop = landscape
-        ? (tabletLandscape
-            ? Math.max(safeTop + 4, (availH - stackH) * 0.24)
-            : safeTop + 6)
-        : Math.max(72, (availH - stackH) * (tabletPortrait ? 0.32 : 0.38));
+        ? safeTop + 6
+        : Math.max(72, (availH - stackH) * 0.38);
 
     if (stackTop + stackH > availH - safeBottom) {
         court -= stackTop + stackH - (availH - safeBottom);
-        const minCourt = tabletLandscape ? 170 : (landscape ? 110 : 160);
-        court = Math.max(minCourt, court);
+        court = Math.max(landscape ? 110 : 160, court);
         stackH = eyeSize + eyeGap + commentH + commentGap + court + scoreboardGap + scoreboardH;
         stackTop = Math.max(safeTop, availH - safeBottom - stackH);
     }
@@ -759,14 +754,33 @@ function fitPongStack({
     return { courtH: court, stackTop };
 }
 
+/** iPad: court fills all vertical space between eye, scoreboard, and safe areas. */
+function fitTabletPongStack({
+    landscape,
+    eyeSize,
+    commentH,
+    eyeGap,
+    commentGap,
+    scoreboardGap,
+    scoreboardH,
+    availH,
+    safeTop,
+    safeBottom,
+}) {
+    const overhead = eyeSize + eyeGap + commentH + commentGap + scoreboardGap + scoreboardH;
+    const stackTop = safeTop + (landscape ? 2 : 6);
+    const court = availH - stackTop - safeBottom - overhead;
+    const minCourt = landscape ? 140 : 180;
+
+    return {
+        courtH: Math.max(minCourt, court),
+        stackTop,
+    };
+}
+
 function getCourtHeight() {
     const landscape = window.innerWidth > window.innerHeight;
     const availH = getViewportHeight();
-    if (perf.isIOS && isTabletViewport()) {
-        return landscape
-            ? Math.min(Math.max(availH * 0.64, 180), Math.min(availH - 140, 340))
-            : Math.min(Math.max(availH * 0.52, 260), 400);
-    }
     return landscape
         ? Math.min(Math.max(availH * 0.5, 130), 200)
         : Math.min(Math.max(availH * 0.46, 236), 330);
@@ -928,21 +942,30 @@ function getPongLayout() {
     if (useKeyboardControls) return getDesktopPongLayout();
 
     const landscape = window.innerWidth > window.innerHeight;
+    const tablet = perf.isIOS && isTabletViewport();
     const { courtLeft, courtW, panelLeft, panelRight } = getHorizontalLayout();
     const availH = getViewportHeight();
-    const safeTop = 10;
-    const safeBottom = landscape ? 16 : 24;
+    const safeTop = tablet ? 8 : 10;
+    const safeBottom = landscape ? (tablet ? 12 : 16) : (tablet ? 18 : 24);
     const scoreboardH = 36;
-    const scoreboardGap = 8;
-    const commentH = landscape ? 16 : 22;
-    const eyeGap = landscape ? 6 : EYE_COURT_GAP;
-    const commentGap = landscape ? 4 : COMMENT_GAP;
+    const scoreboardGap = tablet ? 6 : 8;
+    const commentH = tablet
+        ? (landscape ? 12 : 16)
+        : (landscape ? 16 : 22);
+    const eyeGap = tablet
+        ? (landscape ? 4 : 8)
+        : (landscape ? 6 : EYE_COURT_GAP);
+    const commentGap = tablet
+        ? (landscape ? 2 : 4)
+        : (landscape ? 4 : COMMENT_GAP);
     const eyeSize = landscape
         ? (isTabletLandscape()
-            ? Math.min(Math.max(56, window.innerWidth * 0.06), 76)
+            ? Math.min(Math.max(48, window.innerWidth * 0.05), 64)
             : Math.min(Math.max(48, window.innerWidth * 0.07), 68))
-        : Math.min(Math.max(88, window.innerWidth * 0.21), 128);
-    const { courtH, stackTop } = fitPongStack({
+        : (tablet
+            ? Math.min(Math.max(72, window.innerWidth * 0.14), 96)
+            : Math.min(Math.max(88, window.innerWidth * 0.21), 128));
+    const stackOpts = {
         landscape,
         eyeSize,
         commentH,
@@ -950,11 +973,13 @@ function getPongLayout() {
         commentGap,
         scoreboardGap,
         scoreboardH,
-        courtH: getCourtHeight(),
         availH,
         safeTop,
         safeBottom,
-    });
+    };
+    const { courtH, stackTop } = tablet
+        ? fitTabletPongStack(stackOpts)
+        : fitPongStack({ ...stackOpts, courtH: getCourtHeight() });
     const arrowStackH = ARROW_SIZE * 2 + ARROW_GAP;
     const courtTop = stackTop + eyeSize + eyeGap + commentH + commentGap;
     const eyeLeft = courtLeft + courtW * 0.5 - eyeSize * 0.5;
