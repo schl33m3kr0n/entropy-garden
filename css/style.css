@@ -2796,15 +2796,16 @@ body.ios-ui .ios-konami-pad.is-visible {
 
 .ios-gb-dpad {
     display: grid;
-    grid-template-columns: repeat(3, 46px);
-    grid-template-rows: repeat(3, 46px);
-    gap: 8px;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+    gap: 4px;
     flex-shrink: 0;
+    margin-left: -14px;
 }
 
 .ios-gb-arrow {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     margin: 0;
     padding: 0;
     border: 2px solid rgba(0, 255, 0, 0.55);

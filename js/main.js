@@ -157,8 +157,9 @@ function activateGodMode() {
         globalThis.EntropyCipherHint?.onGodModeOff?.();
         pushTerminalLog("> SYSTEM OVERRIDE TERMINATED. RETURNING TO NORMALCY.");
         playSound(sfx.glitch);
-        body.classList.remove('god-mode');
-        setGodTitleArrangement(h1, false);
+        setGodTitleArrangement(h1, false).then(() => {
+            body.classList.remove('god-mode');
+        });
     }
     // IF NOT ACTIVE, TURN IT ON
     else {

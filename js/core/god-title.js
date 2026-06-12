@@ -25,13 +25,20 @@ function clearLetterStyles(chrome) {
 function restoreTitlePresentation(h1, pondery) {
     if (!h1) return;
     h1.classList.toggle('god-title-pondery', pondery);
-    if (!pondery) {
-        h1.style.removeProperty('color');
-        h1.style.removeProperty('background');
-        h1.style.removeProperty('-webkit-background-clip');
-        h1.style.removeProperty('background-clip');
-        h1.style.removeProperty('text-shadow');
-    }
+}
+
+/** Collapse letter chrome back to plain h1 so the unified title-card gradient returns. */
+function collapseGodTitleChrome(h1) {
+    if (!h1?.classList.contains('god-title-live')) return;
+    clearTitleWidth(h1);
+    h1.textContent = SOURCE;
+    h1.classList.remove('god-title-live', 'god-title-pondery');
+    h1.style.removeProperty('color');
+    h1.style.removeProperty('background');
+    h1.style.removeProperty('-webkit-background-clip');
+    h1.style.removeProperty('background-clip');
+    h1.style.removeProperty('text-shadow');
+    h1.setAttribute('aria-label', SOURCE);
 }
 
 function restoreSourceLetters(chrome) {
@@ -51,15 +58,7 @@ function cancelTitleAnimation(chrome) {
 
 function ensureChrome(h1) {
     let chrome = h1.querySelector('.god-title-chrome');
-    if (chrome) {
-        if (!document.body.classList.contains('god-mode')) {
-            clearLetterStyles(chrome);
-            applyArrangement(chrome, false);
-            restoreSourceLetters(chrome);
-            restoreTitlePresentation(h1, false);
-        }
-        return chrome;
-    }
+    if (chrome) return chrome;
 
     chrome = document.createElement('span');
     chrome.className = 'god-title-chrome';
@@ -170,6 +169,13 @@ function applyArrangement(chrome, pondery) {
 export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     if (!h1) return Promise.resolve();
 
+    const existingChrome = h1.querySelector('.god-title-chrome');
+    if (!pondery && !existingChrome) {
+        h1.textContent = SOURCE;
+        restoreTitlePresentation(h1, false);
+        return Promise.resolve();
+    }
+
     const chrome = ensureChrome(h1);
     const letters = lettersInSourceOrder(chrome);
 
@@ -178,14 +184,16 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
 
     if (titleAnimating) cancelTitleAnimation(chrome);
 
-    if (!pondery) {
-        clearLetterStyles(chrome);
-        restoreSourceLetters(chrome);
-    }
+    if (!pondery) restoreSourceLetters(chrome);
+
+    const finish = () => {
+        clearTitleWidth(h1);
+        if (!pondery) collapseGodTitleChrome(h1);
+    };
 
     if (!animate || perf.prefersReducedMotion) {
         applyArrangement(chrome, pondery);
-        clearTitleWidth(h1);
+        finish();
         return Promise.resolve();
     }
 
@@ -195,8 +203,9 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
 
     const ordered = orderedForArrangement(letters, pondery);
     return flipReorder(chrome, ordered, token).finally(() => {
-        if (token === titleAnimToken) titleAnimating = false;
-        clearTitleWidth(h1);
+        if (token !== titleAnimToken) return;
+        titleAnimating = false;
+        finish();
     });
 }
 
