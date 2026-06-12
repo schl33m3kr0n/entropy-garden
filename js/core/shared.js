@@ -592,7 +592,7 @@ export function pickMany(safe, gritty, count) {
 }
 
 export const canvas = document.getElementById('grid-canvas');
-export const ctx = canvas.getContext('2d');
+export const ctx = canvas?.getContext('2d') ?? null;
 
 export { FULL_MATRIX_CHARS };
 export const chars = FULL_MATRIX_CHARS;

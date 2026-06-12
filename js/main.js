@@ -85,50 +85,58 @@ function prefetchGardenBoot() {
 }
 
 function beginGardenExperience() {
-    // Show loader before audio decode / BGM load (those can block the main thread).
-    document.body.classList.add('garden-loading');
-    document.body.classList.remove('garden-ready');
+    try {
+        // Show loader before audio decode / BGM load (those can block the main thread).
+        document.body.classList.add('garden-loading');
+        document.body.classList.remove('garden-ready');
 
-    const term = document.getElementById('terminal-container');
-    term?.classList.remove('active', 'reveal-in', 'is-sliver');
-    term?.setAttribute('hidden', '');
-    document.getElementById('ios-terminal-toggle')?.setAttribute('hidden', '');
+        const term = document.getElementById('terminal-container');
+        term?.classList.remove('active', 'reveal-in', 'is-sliver');
+        term?.setAttribute('hidden', '');
+        document.getElementById('ios-terminal-toggle')?.setAttribute('hidden', '');
 
-    document.getElementById('init-screen').style.display = 'none';
-    canvas.classList.remove('matrix-visible');
-    setGardenHasStarted(true);
-    updatePanopticonVisibility();
-    prefetchLargeBgmTracks();
-    startLoader();
-
-    if (perf.isIOS) loadTerminal();
-
-    ensureMatrix().then((mod) => {
-        mod.resizeCanvas();
-        mod.startGardenLoop();
+        const initScreen = document.getElementById('init-screen');
+        if (initScreen) initScreen.style.display = 'none';
+        canvas?.classList.remove('matrix-visible');
+        setGardenHasStarted(true);
         updatePanopticonVisibility();
-        if (document.body.classList.contains('ios-ui')) {
-            setTimeout(() => mod.resizeCanvas(), 300);
-        }
-    }).catch((err) => console.error('[Entropy Garden] matrix failed to load', err));
+        prefetchLargeBgmTracks();
+        startLoader();
 
-    registerServiceWorkerAfterInit();
+        if (perf.isIOS) loadTerminal();
 
-    bootGameAddons(activateGodMode).catch((err) => {
-        console.error('[Entropy Garden] game addons prefetch failed', err);
-    });
+        ensureMatrix().then((mod) => {
+            mod.resizeCanvas();
+            mod.startGardenLoop();
+            updatePanopticonVisibility();
+            if (document.body.classList.contains('ios-ui')) {
+                setTimeout(() => mod.resizeCanvas(), 300);
+            }
+        }).catch((err) => console.error('[Entropy Garden] matrix failed to load', err));
 
-    panopticonEl?.addEventListener('pointerdown', () => {
-        bootGameAddons(activateGodMode).catch(() => {});
-    }, { once: true, passive: true });
+        registerServiceWorkerAfterInit();
 
-    requestAnimationFrame(() => {
-        warmSound(sfx.collectible);
-        playSound(sfx.collectible);
-        warmSound(sfx.boop);
-        lastTerminalLoggedTrackIndex = -1;
-        resetBgmToStart();
-    });
+        bootGameAddons(activateGodMode).catch((err) => {
+            console.error('[Entropy Garden] game addons prefetch failed', err);
+        });
+
+        panopticonEl?.addEventListener('pointerdown', () => {
+            bootGameAddons(activateGodMode).catch(() => {});
+        }, { once: true, passive: true });
+
+        requestAnimationFrame(() => {
+            warmSound(sfx.collectible);
+            playSound(sfx.collectible);
+            warmSound(sfx.boop);
+            lastTerminalLoggedTrackIndex = -1;
+            resetBgmToStart();
+        });
+    } catch (err) {
+        console.error('[Entropy Garden] initialize failed', err);
+        document.body.classList.remove('garden-loading');
+        const initScreen = document.getElementById('init-screen');
+        if (initScreen) initScreen.style.display = '';
+    }
 }
 
 function bindInitButton() {
@@ -521,9 +529,10 @@ const LOADER_FADE_HOLD_MS = 500;
 const LOADER_FADE_MAX_MS = 900;
 
 function startLoader() {
-    const loader = document.getElementById('loader'); 
+    const loader = document.getElementById('loader');
     const text = document.getElementById('loader-text');
-    
+    if (!loader || !text) return;
+
     sfx.loading.loop = false;
     playSound(sfx.loading); 
     

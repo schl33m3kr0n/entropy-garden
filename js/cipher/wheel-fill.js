@@ -15,7 +15,6 @@ import {
     CIPHER_VAI,
     CIPHER_BAYBAYIN,
     CIPHER_CHEROKEE,
-    CIPHER_TIBETAN,
 } from '../data/cipher-glyphs.data.js';
 import { usesIosCipherGlyphs } from '../core/shared.js';
 
@@ -64,6 +63,8 @@ let desktopRenderable = null;
 let iosRenderable = null;
 let tofuRefBits = null;
 let tofuRefFont = '';
+let canvasProbeBlocked = false;
+let probeSafeCharSet = null;
 
 function getProbeCtx() {
     if (!probeCtx) {
@@ -81,28 +82,48 @@ export function resetCipherRenderCache() {
     iosRenderable = null;
     tofuRefBits = null;
     tofuRefFont = '';
+    probeSafeCharSet = null;
+}
+
+function getProbeSafeCharSet(ios = usesIosCipherGlyphs()) {
+    if (!probeSafeCharSet) {
+        probeSafeCharSet = new Set(ios ? [...IOS_CIPHER_SAFE] : [...DESKTOP_CIPHER_FALLBACK]);
+    }
+    return probeSafeCharSet;
 }
 
 function rasterSignature(ch, font) {
+    if (canvasProbeBlocked) return { bits: '', pixels: 0 };
     const ctx = getProbeCtx();
-    ctx.clearRect(0, 0, RASTER_SIZE, RASTER_SIZE);
-    ctx.font = font;
-    ctx.fillStyle = '#00ff00';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(ch, RASTER_CX, RASTER_CY);
-    const { data } = ctx.getImageData(0, 0, RASTER_SIZE, RASTER_SIZE);
-    let pixels = 0;
-    let bits = '';
-    for (let y = 0; y < 14; y += 2) {
-        for (let x = 0; x < 14; x += 2) {
-            const a = data[((y * RASTER_SIZE + x) * 4) + 3];
-            const on = a > 24 ? 1 : 0;
-            pixels += on;
-            bits += on;
-        }
+    if (!ctx) {
+        canvasProbeBlocked = true;
+        return { bits: '', pixels: 0 };
     }
-    return { bits, pixels };
+    try {
+        ctx.clearRect(0, 0, RASTER_SIZE, RASTER_SIZE);
+        ctx.font = font;
+        ctx.fillStyle = '#00ff00';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ch, RASTER_CX, RASTER_CY);
+        const { data } = ctx.getImageData(0, 0, RASTER_SIZE, RASTER_SIZE);
+        let pixels = 0;
+        let bits = '';
+        for (let y = 0; y < 14; y += 2) {
+            for (let x = 0; x < 14; x += 2) {
+                const a = data[((y * RASTER_SIZE + x) * 4) + 3];
+                const on = a > 24 ? 1 : 0;
+                pixels += on;
+                bits += on;
+            }
+        }
+        return { bits, pixels };
+    } catch {
+        canvasProbeBlocked = true;
+        tofuRefBits = null;
+        tofuRefFont = '';
+        return { bits: '', pixels: 0 };
+    }
 }
 
 function isUnsafeCodePoint(ch) {
@@ -142,10 +163,13 @@ function buildTofuRefBits(font) {
 /** True when the glyph has no visible ink or draws the missing-glyph box. */
 export function isRenderableCipherGlyph(ch, font) {
     if (!ch || typeof ch !== 'string') return false;
-    if ([...ch].length !== 1) return false;
     if (isUnsafeCodePoint(ch)) return false;
     const trimmed = ch.trim();
     if (!trimmed) return false;
+    if (canvasProbeBlocked) {
+        return getProbeSafeCharSet().has(ch);
+    }
+    if ([...ch].length !== 1) return false;
     const { bits, pixels } = rasterSignature(ch, font);
     if (pixels === 0) return false;
     if (buildTofuRefBits(font).has(bits)) return false;
@@ -163,6 +187,7 @@ function filterRenderablePool(pool, font) {
 
 /** False when canvas readback/fonts are blocked (common in private browsing). */
 function isCanvasProbeReliable(font) {
+    if (canvasProbeBlocked) return false;
     const known = rasterSignature('M', font);
     const missing = rasterSignature('\uFFFD', font);
     if (known.pixels === 0) return false;
@@ -170,12 +195,15 @@ function isCanvasProbeReliable(font) {
 }
 
 function buildRenderablePool(source, font, fallbackSource) {
-    let pool = filterRenderablePool(source, font);
-    if (pool.length >= MIN_RENDER_POOL && isCanvasProbeReliable(font)) {
-        return pool.join('');
+    if (canvasProbeBlocked || !isCanvasProbeReliable(font)) {
+        return [...fallbackSource].join('');
     }
-    pool = filterRenderablePool(fallbackSource, font);
+    let pool = filterRenderablePool(fallbackSource, font);
     if (pool.length >= MIN_RENDER_POOL) return pool.join('');
+    if (source.length <= fallbackSource.length) {
+        pool = filterRenderablePool(source, font);
+        if (pool.length >= MIN_RENDER_POOL) return pool.join('');
+    }
     return [...fallbackSource].join('');
 }
 
@@ -192,7 +220,7 @@ export function ensureCipherRenderCache(font, ios = usesIosCipherGlyphs()) {
     }
     if (desktopRenderable) return desktopRenderable;
     desktopRenderable = buildRenderablePool(
-        [...FULL_MATRIX_CHARS],
+        [...DESKTOP_CIPHER_FALLBACK],
         font,
         [...DESKTOP_CIPHER_FALLBACK],
     );

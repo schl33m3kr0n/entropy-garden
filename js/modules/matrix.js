@@ -52,13 +52,17 @@ function initCipherRenderCacheIfNeeded() {
 }
 
 function rebuildCipherGlyphsAfterFontsReady() {
-    cipherRenderCacheReady = false;
-    resetCipherRenderCache();
-    if (!wheels.length) return;
-    initCipherRenderCacheIfNeeded();
-    scrubWheelGlyphs(wheels, cipherWheelFont(), usesIosCipherGlyphs());
-    fillEmptyWheelGlyphs();
-    setNeedsFullRedraw(true);
+    try {
+        cipherRenderCacheReady = false;
+        resetCipherRenderCache();
+        if (!wheels.length) return;
+        initCipherRenderCacheIfNeeded();
+        scrubWheelGlyphs(wheels, cipherWheelFont(), usesIosCipherGlyphs());
+        fillEmptyWheelGlyphs();
+        setNeedsFullRedraw(true);
+    } catch (err) {
+        console.warn('[Entropy Garden] cipher glyph rebuild skipped', err);
+    }
 }
 
 if (document.fonts?.ready) {
@@ -419,12 +423,18 @@ function resizeCanvas() {
         return;
     }
 
-    buildWheels();
-    visibleRingCount = 0;
-    matrixFilled = false;
-    ctx.clearRect(0, 0, viewW, viewH);
-    invalidateCipherWheelCenter();
-    setNeedsFullRedraw(false);
+    try {
+        buildWheels();
+        visibleRingCount = 0;
+        matrixFilled = false;
+        ctx.clearRect(0, 0, viewW, viewH);
+        invalidateCipherWheelCenter();
+        setNeedsFullRedraw(false);
+    } catch (err) {
+        console.error('[Entropy Garden] cipher wheel build failed', err);
+        cipherRenderCacheReady = false;
+        resetCipherRenderCache();
+    }
 }
 
 let resizeFrame = null;
