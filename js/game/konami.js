@@ -34,7 +34,7 @@ function isTypingTarget(el) {
     return Boolean(el.closest?.('#term-input, [contenteditable="true"]'));
 }
 
-function canEnterKonami(isPongActive) {
+export function canEnterKonami(isPongActive) {
     if (isPongActive()) return false;
     if (!document.body.classList.contains('garden-ready')) return false;
     if (!panopticonEl?.classList.contains('visible')) return false;
@@ -150,6 +150,23 @@ export function konamiClaimsKey(e, isPongActive) {
     if (isPongActive()) return false;
     if (isKonamiInProgress()) return true;
     return normalizeKey(e) === KONAMI_CODE[0];
+}
+
+/** Touch / on-screen pad input (iOS Game Boy layout). Returns ok | bad | complete | blocked. */
+export function submitKonamiInput(key, isPongActive, onComplete) {
+    if (!canEnterKonami(isPongActive)) return 'blocked';
+    const e = { key, repeat: false };
+    const result = handleKonamiKey(e, isPongActive);
+    if (result === 'complete') {
+        onComplete?.();
+        return 'complete';
+    }
+    if (result === true) return 'ok';
+    return 'bad';
+}
+
+export function getKonamiProgress() {
+    return konamiIndex;
 }
 
 export function initKonami({ isPongActive, onComplete }) {

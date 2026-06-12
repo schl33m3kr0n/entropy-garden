@@ -2632,8 +2632,10 @@ body.ios-ui .ios-pane {
 body.ios-ui .ios-pane-top {
     min-height: 46dvh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: clamp(12px, 4vw, 24px);
     padding: calc(env(safe-area-inset-top) + 20px) 16px 28px;
     box-sizing: border-box;
 }
@@ -2740,6 +2742,194 @@ body.ios-ui #hud h1 {
     letter-spacing: 0.12em;
     padding: 16px 22px 10px;
     line-height: 1.05;
+}
+
+/* iOS Konami — Game Boy D-pad + A/B (title pane reveal) */
+.ios-konami-pad {
+    width: min(100%, 320px);
+    margin: 0 auto;
+    padding: 4px 8px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-22px);
+    pointer-events: none;
+    transition:
+        opacity 0.55s ease,
+        transform 0.75s cubic-bezier(0.25, 1, 0.45, 1),
+        visibility 0.55s ease;
+}
+
+.ios-konami-pad.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.ios-gb-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(28px, 10vw, 52px);
+}
+
+.ios-gb-dpad {
+    position: relative;
+    width: 118px;
+    height: 118px;
+    flex-shrink: 0;
+}
+
+.ios-gb-dpad-art {
+    display: block;
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.35));
+}
+
+.ios-gb-dpad-seg {
+    fill: rgba(0, 255, 0, 0.92);
+    transition: fill 0.12s ease, filter 0.12s ease;
+}
+
+.ios-gb-dpad-seg.is-ok,
+.ios-gb-dpad-seg.is-held {
+    fill: #fff;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.75));
+}
+
+.ios-gb-dpad-seg.is-bad {
+    fill: var(--alert-red);
+    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.55));
+}
+
+.ios-gb-dpad-seg.is-held.is-bad {
+    fill: var(--alert-red);
+    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.55));
+}
+
+.ios-gb-dpad-hit {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.ios-gb-dpad-hit-up {
+    top: 0;
+    left: 34px;
+    width: 50px;
+    height: 46px;
+}
+
+.ios-gb-dpad-hit-right {
+    top: 34px;
+    right: 0;
+    width: 46px;
+    height: 50px;
+}
+
+.ios-gb-dpad-hit-down {
+    bottom: 0;
+    left: 34px;
+    width: 50px;
+    height: 46px;
+}
+
+.ios-gb-dpad-hit-left {
+    top: 34px;
+    left: 0;
+    width: 46px;
+    height: 50px;
+}
+
+.ios-gb-actions {
+    position: relative;
+    width: 108px;
+    height: 118px;
+    flex-shrink: 0;
+}
+
+.ios-gb-btn {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    padding: 0;
+    border: 2px solid rgba(0, 255, 0, 0.55);
+    border-radius: 50%;
+    background: rgba(0, 12, 0, 0.72);
+    color: var(--neon-green);
+    font-family: var(--main-font);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.28);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.ios-gb-btn-b {
+    top: 10px;
+    left: 0;
+}
+
+.ios-gb-btn-a {
+    right: 0;
+    bottom: 8px;
+}
+
+.ios-gb-btn.is-held,
+.ios-gb-btn.is-ok {
+    color: #050505;
+    background: var(--neon-green);
+    border-color: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 14px rgba(0, 255, 0, 0.65);
+}
+
+.ios-gb-btn.is-bad {
+    color: #fff;
+    background: var(--alert-red);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
+}
+
+.ios-gb-btn.is-held.is-bad {
+    color: #fff;
+    background: var(--alert-red);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
+}
+
+body.corrupted .ios-gb-dpad-seg {
+    fill: rgba(255, 0, 85, 0.92);
+}
+
+body.corrupted .ios-gb-dpad-art {
+    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.35));
+}
+
+body.corrupted .ios-gb-btn {
+    color: var(--alert-red);
+    border-color: rgba(255, 0, 85, 0.55);
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.28);
+}
+
+body.corrupted .ios-gb-btn.is-held,
+body.corrupted .ios-gb-btn.is-ok {
+    color: #050505;
+    background: var(--alert-red);
+}
+
+body.ios-pong-playing .ios-konami-pad,
+body.singularity-active .ios-konami-pad {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 body.ios-ui #docking-bay {

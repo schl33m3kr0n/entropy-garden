@@ -337,6 +337,15 @@ export function bootGameAddons(onKonamiComplete) {
             onComplete: () => konamiOnComplete?.(),
         });
         installGameGardenHooks(pong, konami);
+        if (perf.isIOS) {
+            import('./ios/ios-konami-pad.js').then((m) => {
+                m.initIosKonamiPad({
+                    isPongActive: pong.isPongSessionActive,
+                    onComplete: () => konamiOnComplete?.(),
+                    konami,
+                });
+            }).catch(() => {});
+        }
         return { pong, konami };
     })().catch(async (err) => {
         gameAddonsPromise = null;
