@@ -682,11 +682,15 @@ function isTabletViewport() {
     return Math.min(window.innerWidth, window.innerHeight) >= 768;
 }
 
+function isTabletLandscape() {
+    return perf.isIOS && isTabletViewport() && window.innerWidth > window.innerHeight;
+}
+
 function getHorizontalLayout() {
     const landscape = window.innerWidth > window.innerHeight;
     const tablet = perf.isIOS && isTabletViewport();
     const courtRatio = tablet
-        ? (landscape ? 0.84 : 0.92)
+        ? (landscape ? 0.9 : 0.92)
         : (landscape ? 0.68 : COURT_W_RATIO);
     const edgeInset = tablet ? 6 : EDGE_INSET;
     const arrowCourtGap = tablet ? 6 : ARROW_COURT_GAP;
@@ -736,13 +740,17 @@ function fitPongStack({
     let court = courtH;
     let stackH = eyeSize + eyeGap + commentH + commentGap + court + scoreboardGap + scoreboardH;
     const tabletPortrait = perf.isIOS && isTabletViewport() && !landscape;
+    const tabletLandscape = isTabletLandscape();
     let stackTop = landscape
-        ? safeTop + 6
+        ? (tabletLandscape
+            ? Math.max(safeTop + 4, (availH - stackH) * 0.24)
+            : safeTop + 6)
         : Math.max(72, (availH - stackH) * (tabletPortrait ? 0.32 : 0.38));
 
     if (stackTop + stackH > availH - safeBottom) {
         court -= stackTop + stackH - (availH - safeBottom);
-        court = Math.max(landscape ? 110 : 160, court);
+        const minCourt = tabletLandscape ? 170 : (landscape ? 110 : 160);
+        court = Math.max(minCourt, court);
         stackH = eyeSize + eyeGap + commentH + commentGap + court + scoreboardGap + scoreboardH;
         stackTop = Math.max(safeTop, availH - safeBottom - stackH);
     }
@@ -755,7 +763,7 @@ function getCourtHeight() {
     const availH = getViewportHeight();
     if (perf.isIOS && isTabletViewport()) {
         return landscape
-            ? Math.min(Math.max(availH * 0.58, 150), 280)
+            ? Math.min(Math.max(availH * 0.64, 180), Math.min(availH - 140, 340))
             : Math.min(Math.max(availH * 0.52, 260), 400);
     }
     return landscape
@@ -929,7 +937,9 @@ function getPongLayout() {
     const eyeGap = landscape ? 6 : EYE_COURT_GAP;
     const commentGap = landscape ? 4 : COMMENT_GAP;
     const eyeSize = landscape
-        ? Math.min(Math.max(48, window.innerWidth * 0.07), 68)
+        ? (isTabletLandscape()
+            ? Math.min(Math.max(56, window.innerWidth * 0.06), 76)
+            : Math.min(Math.max(48, window.innerWidth * 0.07), 68))
         : Math.min(Math.max(88, window.innerWidth * 0.21), 128);
     const { courtH, stackTop } = fitPongStack({
         landscape,
