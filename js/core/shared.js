@@ -696,7 +696,7 @@ export const panopticonRainbowGradEl = document.getElementById('panopticon-rainb
 /** One glyph per icosphere face (same set as singularity 3D). */
 export const ICO_SYMBOLS = [
     '⛦', '⚛︎', '☯︎', '❖', '◉', '⧊', '☉', '⛬', '⛢', '☧',
-    '☥', '♁', '𖣂', '🜲', '🜁', '𖤓', '✖', '☸', '⚖', '∞',
+    '☥', '♁', '∴', '△', '⊕', 'ψ', '✖', '☸', '⚖', '∞',
 ];
 
 const PANOPTICON_GOD_CLOSE_MS = 480;
