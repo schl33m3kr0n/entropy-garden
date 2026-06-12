@@ -14,7 +14,24 @@ function clearLetterStyles(chrome) {
     chrome.querySelectorAll('.god-title-letter').forEach((el) => {
         el.style.transition = '';
         el.style.transform = '';
+        el.style.removeProperty('color');
+        el.style.removeProperty('background');
+        el.style.removeProperty('-webkit-background-clip');
+        el.style.removeProperty('background-clip');
+        el.style.removeProperty('text-shadow');
     });
+}
+
+function restoreTitlePresentation(h1, pondery) {
+    if (!h1) return;
+    h1.classList.toggle('god-title-pondery', pondery);
+    if (!pondery) {
+        h1.style.removeProperty('color');
+        h1.style.removeProperty('background');
+        h1.style.removeProperty('-webkit-background-clip');
+        h1.style.removeProperty('background-clip');
+        h1.style.removeProperty('text-shadow');
+    }
 }
 
 function restoreSourceLetters(chrome) {
@@ -39,6 +56,7 @@ function ensureChrome(h1) {
             clearLetterStyles(chrome);
             applyArrangement(chrome, false);
             restoreSourceLetters(chrome);
+            restoreTitlePresentation(h1, false);
         }
         return chrome;
     }
@@ -156,6 +174,7 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     const letters = lettersInSourceOrder(chrome);
 
     h1.setAttribute('aria-label', pondery ? TARGET : SOURCE);
+    restoreTitlePresentation(h1, pondery);
 
     if (titleAnimating) cancelTitleAnimation(chrome);
 

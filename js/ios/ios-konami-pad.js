@@ -3,11 +3,15 @@
 import { panopticonEl, perf } from '../core/shared.js';
 import { canEnterKonami } from '../game/konami.js';
 
-const DPAD_SVG = `<svg class="ios-gb-dpad-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-up" d="M 28 6 Q 28 3 31 3 L 69 3 Q 72 3 72 6 L 72 36 L 54 44 L 50 46 L 46 44 L 28 36 Z"/>
-  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-right" d="M 64 28 L 94 28 Q 97 28 97 31 L 97 69 Q 97 72 94 72 L 64 72 L 56 54 L 54 50 L 56 46 L 64 46 Z"/>
-  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-down" d="M 28 64 L 46 56 L 50 54 L 54 56 L 72 64 L 72 94 Q 72 97 69 97 L 31 97 Q 28 97 28 94 Z"/>
-  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-left" d="M 6 31 Q 3 31 3 34 L 3 66 Q 3 69 6 69 L 36 69 L 44 54 L 46 50 L 44 46 L 36 46 Z"/>
+/** One up-pointing homeplate; right/down/left are rotated copies (conventional cross gap). */
+const DPAD_SVG = `<svg class="ios-gb-dpad-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
+  <defs>
+    <path id="ios-gb-homeplate" d="M 28 4 Q 28 0 32 0 L 68 0 Q 72 0 72 4 L 72 34 L 56 44 L 50 46 L 44 44 L 28 34 Z"/>
+  </defs>
+  <use xlink:href="#ios-gb-homeplate" href="#ios-gb-homeplate" class="ios-gb-dpad-seg ios-gb-dpad-seg-up"/>
+  <use xlink:href="#ios-gb-homeplate" href="#ios-gb-homeplate" class="ios-gb-dpad-seg ios-gb-dpad-seg-right" transform="rotate(90 50 50)"/>
+  <use xlink:href="#ios-gb-homeplate" href="#ios-gb-homeplate" class="ios-gb-dpad-seg ios-gb-dpad-seg-down" transform="rotate(180 50 50)"/>
+  <use xlink:href="#ios-gb-homeplate" href="#ios-gb-homeplate" class="ios-gb-dpad-seg ios-gb-dpad-seg-left" transform="rotate(-90 50 50)"/>
 </svg>`;
 
 const DPAD_KEYS = [

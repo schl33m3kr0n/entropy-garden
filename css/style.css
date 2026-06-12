@@ -343,16 +343,13 @@ h1.god-title-live .god-title-letter {
     will-change: transform;
 }
 
+/* Outside god mode, letters inherit the original unified h1 rainbow treatment. */
 body:not(.god-mode) h1.god-title-live .god-title-letter {
-    background: linear-gradient(90deg,
-        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
-        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
-    );
-    background-size: 200% 100%;
-    background-position: var(--rainbow-offset, 0%) 50%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    color: inherit;
+    text-shadow: none;
 }
 
 h1.god-title-live .god-title-letter.is-space {
@@ -2794,8 +2791,8 @@ body.ios-ui .ios-konami-pad.is-visible {
 
 .ios-gb-dpad {
     position: relative;
-    width: 118px;
-    height: 118px;
+    width: 124px;
+    height: 124px;
     flex-shrink: 0;
 }
 
@@ -2839,34 +2836,34 @@ body.ios-ui .ios-konami-pad.is-visible {
 
 .ios-gb-dpad-hit-up {
     top: 0;
-    left: 36px;
-    width: 46px;
-    height: 34px;
-    clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
+    left: 35px;
+    width: 54px;
+    height: 46px;
+    clip-path: polygon(16% 0%, 84% 0%, 100% 100%, 0% 100%);
 }
 
 .ios-gb-dpad-hit-right {
-    top: 36px;
+    top: 35px;
     right: 0;
-    width: 34px;
-    height: 46px;
-    clip-path: polygon(0% 18%, 100% 0%, 100% 100%, 0% 82%);
+    width: 46px;
+    height: 54px;
+    clip-path: polygon(0% 16%, 100% 0%, 100% 100%, 0% 84%);
 }
 
 .ios-gb-dpad-hit-down {
     bottom: 0;
-    left: 36px;
-    width: 46px;
-    height: 34px;
-    clip-path: polygon(0% 0%, 100% 0%, 82% 100%, 18% 100%);
+    left: 35px;
+    width: 54px;
+    height: 46px;
+    clip-path: polygon(0% 0%, 100% 0%, 84% 100%, 16% 100%);
 }
 
 .ios-gb-dpad-hit-left {
-    top: 36px;
+    top: 35px;
     left: 0;
-    width: 34px;
-    height: 46px;
-    clip-path: polygon(100% 18%, 0% 0%, 0% 100%, 100% 82%);
+    width: 46px;
+    height: 54px;
+    clip-path: polygon(100% 16%, 0% 0%, 0% 100%, 100% 84%);
 }
 
 .ios-gb-actions {
