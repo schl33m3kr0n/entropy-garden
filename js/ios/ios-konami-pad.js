@@ -4,10 +4,10 @@ import { panopticonEl, perf } from '../core/shared.js';
 import { canEnterKonami } from '../game/konami.js';
 
 const DPAD_SVG = `<svg class="ios-gb-dpad-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-up" d="M 24 6 Q 24 3 27 3 L 73 3 Q 76 3 76 6 L 76 37 L 57 43 L 50 50 L 43 43 L 24 37 Z"/>
-  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-right" d="M 63 24 L 94 24 Q 97 24 97 27 L 97 73 Q 97 76 94 76 L 63 76 L 57 57 L 50 50 L 57 43 L 63 43 Z"/>
-  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-down" d="M 24 63 L 43 57 L 50 50 L 57 57 L 76 63 L 76 94 Q 76 97 73 97 L 27 97 Q 24 97 24 94 Z"/>
-  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-left" d="M 6 27 Q 3 27 3 30 L 3 70 Q 3 73 6 73 L 37 73 L 43 57 L 50 50 L 43 43 L 37 43 Z"/>
+  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-up" d="M 28 6 Q 28 3 31 3 L 69 3 Q 72 3 72 6 L 72 36 L 54 44 L 50 46 L 46 44 L 28 36 Z"/>
+  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-right" d="M 64 28 L 94 28 Q 97 28 97 31 L 97 69 Q 97 72 94 72 L 64 72 L 56 54 L 54 50 L 56 46 L 64 46 Z"/>
+  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-down" d="M 28 64 L 46 56 L 50 54 L 54 56 L 72 64 L 72 94 Q 72 97 69 97 L 31 97 Q 28 97 28 94 Z"/>
+  <path class="ios-gb-dpad-seg ios-gb-dpad-seg-left" d="M 6 31 Q 3 31 3 34 L 3 66 Q 3 69 6 69 L 36 69 L 44 54 L 46 50 L 44 46 L 36 46 Z"/>
 </svg>`;
 
 const DPAD_KEYS = [
@@ -75,7 +75,7 @@ function bindPress(btn, key, handlers) {
 }
 
 function buildPad() {
-    if (padEl || !titlePane()) return;
+    if (padEl) return;
 
     padEl = document.createElement('div');
     padEl.id = 'ios-konami-pad';
@@ -119,7 +119,7 @@ function buildPad() {
     actions.append(btnB, btnA);
     layout.append(dpad, actions);
     padEl.appendChild(layout);
-    titlePane().appendChild(padEl);
+    document.body.appendChild(padEl);
 }
 
 function syncPadVisibility(revealed, isPongActive) {

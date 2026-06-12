@@ -2632,10 +2632,8 @@ body.ios-ui .ios-pane {
 body.ios-ui .ios-pane-top {
     min-height: 46dvh;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(12px, 4vw, 24px);
     padding: calc(env(safe-area-inset-top) + 20px) 16px 28px;
     box-sizing: border-box;
 }
@@ -2744,14 +2742,21 @@ body.ios-ui #hud h1 {
     line-height: 1.05;
 }
 
-/* iOS Konami — Game Boy D-pad + A/B (title pane reveal) */
-.ios-konami-pad {
-    width: min(100%, 320px);
-    margin: 0 auto;
-    padding: 4px 8px 0;
+/* iOS Konami — Game Boy D-pad + A/B (fixed bottom, HUD reveal) */
+body.ios-ui .ios-konami-pad {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10018;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0 20px calc(env(safe-area-inset-bottom) + 18px);
+    box-sizing: border-box;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-22px);
+    transform: translateY(-36px);
     pointer-events: none;
     transition:
         opacity 0.55s ease,
@@ -2759,7 +2764,7 @@ body.ios-ui #hud h1 {
         visibility 0.55s ease;
 }
 
-.ios-konami-pad.is-visible {
+body.ios-ui .ios-konami-pad.is-visible {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -2771,6 +2776,8 @@ body.ios-ui #hud h1 {
     align-items: center;
     justify-content: center;
     gap: clamp(28px, 10vw, 52px);
+    width: min(100%, 320px);
+    margin: 0 auto;
 }
 
 .ios-gb-dpad {
@@ -2820,36 +2827,40 @@ body.ios-ui #hud h1 {
 
 .ios-gb-dpad-hit-up {
     top: 0;
-    left: 34px;
-    width: 50px;
-    height: 46px;
+    left: 36px;
+    width: 46px;
+    height: 34px;
+    clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
 }
 
 .ios-gb-dpad-hit-right {
-    top: 34px;
+    top: 36px;
     right: 0;
-    width: 46px;
-    height: 50px;
+    width: 34px;
+    height: 46px;
+    clip-path: polygon(0% 18%, 100% 0%, 100% 100%, 0% 82%);
 }
 
 .ios-gb-dpad-hit-down {
     bottom: 0;
-    left: 34px;
-    width: 50px;
-    height: 46px;
+    left: 36px;
+    width: 46px;
+    height: 34px;
+    clip-path: polygon(0% 0%, 100% 0%, 82% 100%, 18% 100%);
 }
 
 .ios-gb-dpad-hit-left {
-    top: 34px;
+    top: 36px;
     left: 0;
-    width: 46px;
-    height: 50px;
+    width: 34px;
+    height: 46px;
+    clip-path: polygon(100% 18%, 0% 0%, 0% 100%, 100% 82%);
 }
 
 .ios-gb-actions {
     position: relative;
-    width: 108px;
-    height: 118px;
+    width: 96px;
+    height: 96px;
     flex-shrink: 0;
 }
 
@@ -2874,13 +2885,13 @@ body.ios-ui #hud h1 {
 }
 
 .ios-gb-btn-b {
-    top: 10px;
+    bottom: 0;
     left: 0;
 }
 
 .ios-gb-btn-a {
+    top: 0;
     right: 0;
-    bottom: 8px;
 }
 
 .ios-gb-btn.is-held,
