@@ -15,6 +15,7 @@ let visibilityObserver;
 let bound = false;
 let pendingHandlers;
 let paneRetryObs;
+let revealFrame = 0;
 
 function scrollShell() {
     return document.getElementById('ios-scroll-shell');
@@ -69,7 +70,7 @@ function buildPad() {
     padEl.id = 'ios-konami-pad';
     padEl.className = 'ios-konami-pad ios-pong-unselectable';
     padEl.setAttribute('aria-label', 'Konami code input');
-    padEl.hidden = true;
+    padEl.setAttribute('aria-hidden', 'true');
 
     const layout = document.createElement('div');
     layout.className = 'ios-gb-layout';
@@ -113,8 +114,24 @@ function buildPad() {
 function syncPadVisibility(revealed, isPongActive) {
     if (!padEl) return;
     const show = revealed && canShowPad(isPongActive);
-    padEl.hidden = !show;
-    padEl.classList.toggle('is-visible', show);
+    const wasVisible = padEl.classList.contains('is-visible');
+
+    if (show === wasVisible) return;
+
+    if (show) {
+        const frame = ++revealFrame;
+        padEl.classList.remove('is-visible');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (frame !== revealFrame || !padEl) return;
+                padEl.classList.add('is-visible');
+            });
+        });
+    } else {
+        revealFrame += 1;
+        padEl.classList.remove('is-visible');
+    }
+
     padEl.setAttribute('aria-hidden', show ? 'false' : 'true');
 }
 
