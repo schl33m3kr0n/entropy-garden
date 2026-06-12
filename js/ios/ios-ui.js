@@ -1,6 +1,6 @@
 // iOS layout: vertical HUD rail, sidebar tools, playlist text labels.
 
-import { perf } from '../core/shared.js';
+import { perf, isIosTabletScreen } from '../core/shared.js';
 
 import { resizeCanvas, stopGardenLoop, resumeGardenLoop } from '../lazy.js';
 import { isSingularityActive } from '../core/state.js';
@@ -288,10 +288,7 @@ function syncIosOrientation() {
 }
 
 function syncIosTabletClass() {
-    document.body.classList.toggle(
-        'ios-tablet',
-        Math.min(window.innerWidth, window.innerHeight) >= 768,
-    );
+    document.body.classList.toggle('ios-tablet', isIosTabletScreen());
 }
 
 function onIosViewportChange() {
@@ -359,6 +356,11 @@ export function initIosUi() {
         setTimeout(onIosViewportChange, 260);
     });
     window.addEventListener('resize', () => {
+        syncIosOrientation();
+        syncIosTabletClass();
+    }, { passive: true });
+
+    window.visualViewport?.addEventListener('resize', () => {
         syncIosOrientation();
         syncIosTabletClass();
     }, { passive: true });

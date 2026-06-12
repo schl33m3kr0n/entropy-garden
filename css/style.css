@@ -2706,26 +2706,27 @@ body.ios-ui .ios-pane-bottom {
     pointer-events: auto;
 }
 
-@media (orientation: landscape) {
-    body.ios-ui:not(.ios-tablet) .ios-pane-top,
-    body.ios-ui:not(.ios-tablet) .ios-pane-main,
-    body.ios-ui:not(.ios-tablet) .ios-pane-bottom {
+/* Phone landscape only — iPad landscape height stays >= 700px */
+@media (orientation: landscape) and (max-height: 699px) {
+    body.ios-ui .ios-pane-top,
+    body.ios-ui .ios-pane-main,
+    body.ios-ui .ios-pane-bottom {
         min-height: 100svh;
         max-height: 100svh;
         box-sizing: border-box;
     }
 
-    body.ios-ui:not(.ios-tablet) .ios-pane-top {
+    body.ios-ui .ios-pane-top {
         padding-top: calc(env(safe-area-inset-top) + 12px);
         padding-bottom: 12px;
     }
 
-    body.ios-ui:not(.ios-tablet) .ios-pane-bottom {
+    body.ios-ui .ios-pane-bottom {
         padding-top: 12px;
         padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
     }
 
-    body.ios-ui:not(.ios-tablet) .ios-pane-main {
+    body.ios-ui .ios-pane-main {
         scroll-snap-align: start;
     }
 }
@@ -2751,17 +2752,17 @@ body.ios-ui.ios-tablet .ios-pane-main {
 }
 
 body.ios-ui.ios-tablet.ios-landscape .ios-pane-top {
-    min-height: min(30dvh, 200px);
-    max-height: min(30dvh, 200px);
+    min-height: min(26dvh, 168px);
+    max-height: min(26dvh, 168px);
     padding-top: calc(env(safe-area-inset-top) + 8px);
-    padding-bottom: 8px;
+    padding-bottom: 6px;
 }
 
 body.ios-ui.ios-tablet.ios-landscape .ios-pane-bottom {
-    min-height: min(28dvh, 180px);
-    max-height: min(28dvh, 180px);
-    padding-top: 8px;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+    min-height: min(24dvh, 152px);
+    max-height: min(24dvh, 152px);
+    padding-top: 6px;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
 }
 
 body.ios-ui.ios-tablet.ios-landscape .ios-pane-main {
@@ -2858,6 +2859,82 @@ body.ios-ui.ios-tablet.ios-landscape .ios-konami-pad {
 
 body.ios-ui.ios-tablet.ios-landscape .ios-gb-layout {
     padding: 0 8px;
+}
+
+/* iPad / large iOS tablet — CSS fallback when JS class lags or misses */
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+    body.ios-ui .ios-pane-top {
+        min-height: min(38dvh, 280px);
+        max-height: min(38dvh, 280px);
+        align-items: flex-start;
+        scroll-snap-align: start;
+    }
+
+    body.ios-ui .ios-pane-bottom {
+        min-height: min(34dvh, 260px);
+        max-height: min(34dvh, 260px);
+        align-items: flex-end;
+        scroll-snap-align: start;
+    }
+
+    body.ios-ui .ios-pane-main {
+        min-height: 100dvh;
+        max-height: none;
+        scroll-snap-align: center;
+    }
+
+    body.ios-ui .ios-konami-pad {
+        top: 50%;
+        bottom: auto;
+        padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+        transform: translateY(-50%) translateY(-44px);
+    }
+
+    body.ios-ui .ios-konami-pad.is-visible {
+        transform: translateY(-50%);
+    }
+
+    body.ios-ui .ios-gb-layout {
+        width: 100%;
+        max-width: none;
+        justify-content: space-between;
+        margin: 0;
+        gap: 0;
+    }
+
+    body.ios-ui .ios-gb-dpad {
+        margin-left: 0;
+    }
+}
+
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) and (orientation: landscape) {
+    body.ios-ui .ios-pane-top {
+        min-height: min(26dvh, 168px);
+        max-height: min(26dvh, 168px);
+        padding-top: calc(env(safe-area-inset-top) + 8px);
+        padding-bottom: 6px;
+    }
+
+    body.ios-ui .ios-pane-bottom {
+        min-height: min(24dvh, 152px);
+        max-height: min(24dvh, 152px);
+        padding-top: 6px;
+        padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+    }
+
+    body.ios-ui .ios-pane-main {
+        min-height: 100dvh;
+        scroll-snap-align: center;
+    }
+
+    body.ios-ui .ios-konami-pad {
+        padding-left: max(28px, env(safe-area-inset-left));
+        padding-right: max(28px, env(safe-area-inset-right));
+    }
+
+    body.ios-ui .ios-gb-layout {
+        padding: 0 8px;
+    }
 }
 
 .ios-gb-layout {

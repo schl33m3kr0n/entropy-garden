@@ -27,6 +27,18 @@ export function isSafariBrowser() {
 export const isIOS = isRealIOSDevice();
 export const isSafari = isSafariBrowser();
 
+/** iPad / large iOS tablet — screen short edge, not live window (toolbar-safe). */
+export function isIosTabletScreen() {
+    if (/iPad/i.test(navigator.userAgent)) return true;
+    const sw = window.screen?.width ?? 0;
+    const sh = window.screen?.height ?? 0;
+    const minScreen = Math.min(sw, sh);
+    if (minScreen >= 768) return true;
+    return navigator.platform === 'MacIntel'
+        && navigator.maxTouchPoints > 1
+        && minScreen >= 744;
+}
+
 /** Service worker only on deployed https (not file://, not local dev, not iOS). */
 export function shouldRegisterServiceWorker() {
     if (isFileProtocol || !('serviceWorker' in navigator)) return false;

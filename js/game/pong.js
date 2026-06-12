@@ -11,6 +11,7 @@ import {
     sfx,
     syncPanopticonCodeSequenceComments,
     isApril420,
+    isIosTabletScreen,
 } from '../core/shared.js';
 import { isCorrupted, isSingularityActive } from '../core/state.js';
 import { resizeCanvas } from '../core/canvas-resize.js';
@@ -679,7 +680,7 @@ function syncCourtViewBox(pixelW, pixelH) {
 }
 
 function isTabletViewport() {
-    return Math.min(window.innerWidth, window.innerHeight) >= 768;
+    return isIosTabletScreen();
 }
 
 function isTabletLandscape() {

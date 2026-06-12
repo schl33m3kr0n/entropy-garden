@@ -21,11 +21,12 @@ import {
     isRealIOSDevice,
     isSafariBrowser,
     isFileProtocol,
+    isIosTabletScreen,
 } from './environment.js';
 import { isRenderableCipherGlyph } from '../cipher/wheel-fill.js';
 
 export { gardenHasStarted, gardenLoopActive, singularityAnimId, isCorrupted, isSingularityActive };
-export { isIOS, isSafari, isRealIOSDevice, isSafariBrowser, isFileProtocol };
+export { isIOS, isSafari, isRealIOSDevice, isSafariBrowser, isFileProtocol, isIosTabletScreen };
 
 export const asset = (path) => `assets/${path}`;
 export const sfxPath = (file) => asset(`audio/sfx/${file}`);
