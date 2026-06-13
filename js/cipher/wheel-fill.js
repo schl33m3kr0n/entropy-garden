@@ -65,6 +65,26 @@ const UPGRADE_RELIABILITY_RETRY_MS = 4500;
 const DESKTOP_CIPHER_FALLBACK =
     CIPHER_LATIN + CIPHER_MATH_DECORATIVE + CIPHER_BMP_SAFE_EXTRA + '0123456789';
 
+/** ASCII + BMP symbols only — used when private browsing blocks reliable exotic rendering. */
+const CIPHER_STRICT_SAFE =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' +
+    '∑∆∞≈±×÷√∧∨∩∪∴∵∼≠≤≥⊕⊗⊥─□△▽◇○◎★☆♀♂☼' +
+    '♠♣♥♦←→↑↓↔⇐⇒◆●▪■▲▼✦✧✩✪✫✭✯∀∃∅∈∉' +
+    '!?@#$%&*_+=<>[]{}|/~';
+
+function detectPrivateBrowsing() {
+    try {
+        const key = '__eg_pb__';
+        localStorage.setItem(key, '1');
+        localStorage.removeItem(key);
+        return false;
+    } catch {
+        return true;
+    }
+}
+
+const privateBrowsingMode = detectPrivateBrowsing();
+
 let probeCtx = null;
 let desktopRenderable = null;
 let iosRenderable = null;
@@ -78,6 +98,56 @@ let probeSafeCharSet = null;
 let upgradeReliabilityRetryTimer = null;
 let reliabilityRetryCount = 0;
 const MAX_RELIABILITY_RETRIES = 10;
+
+let domProbeEl = null;
+let domBaselineWidths = null;
+let domBaselineFont = '';
+
+function getDomProbeEl() {
+    if (!domProbeEl && typeof document !== 'undefined') {
+        domProbeEl = document.createElement('span');
+        domProbeEl.setAttribute('aria-hidden', 'true');
+        domProbeEl.style.cssText =
+            'position:fixed;left:-9999px;top:0;visibility:hidden;white-space:nowrap;pointer-events:none;';
+        document.body?.appendChild(domProbeEl);
+    }
+    return domProbeEl;
+}
+
+function domGlyphWidth(ch, font) {
+    const el = getDomProbeEl();
+    if (!el) return 0;
+    el.style.font = font;
+    el.textContent = ch;
+    return el.getBoundingClientRect().width;
+}
+
+function getDomBaselineWidths(font) {
+    if (domBaselineWidths && domBaselineFont === font) return domBaselineWidths;
+    domBaselineFont = font;
+    domBaselineWidths = {
+        narrow: domGlyphWidth('i', font),
+        wide: domGlyphWidth('W', font),
+        missing: domGlyphWidth('\uFFFD', font),
+    };
+    return domBaselineWidths;
+}
+
+/** Detect Last Resort numbered boxes via layout width (works when canvas readback is blocked). */
+function isLikelyNumberedFallbackDom(ch, font) {
+    const w = domGlyphWidth(ch, font);
+    if (w <= 0) return true;
+    const { wide, missing } = getDomBaselineWidths(font);
+    if (missing > 0 && Math.abs(w - missing) < 0.6) return true;
+    return w > Math.max(wide * 1.85, 14);
+}
+
+function getFallbackSource(ios = usesIosCipherGlyphs()) {
+    if (privateBrowsingMode || canvasProbeBlocked) {
+        return [...CIPHER_STRICT_SAFE];
+    }
+    return ios ? [...IOS_CIPHER_SAFE] : [...DESKTOP_CIPHER_FALLBACK];
+}
 
 /** @type {{ active: boolean, complete: boolean, font: string, ios: boolean, pendingChars: string[], pendingIndex: number, lastScrubSize: number, onPoolGrowth: ((size: number) => void) | null }} */
 let upgradeState = {
@@ -161,11 +231,13 @@ export function resetCipherRenderCache() {
     probeReadbackFailures = 0;
     restrictiveProbeEnv = false;
     reliabilityRetryCount = 0;
+    domBaselineWidths = null;
+    domBaselineFont = '';
 }
 
 function getProbeSafeCharSet(ios = usesIosCipherGlyphs()) {
     if (!probeSafeCharSet) {
-        probeSafeCharSet = new Set(ios ? [...IOS_CIPHER_SAFE] : [...DESKTOP_CIPHER_FALLBACK]);
+        probeSafeCharSet = new Set(getFallbackSource(ios));
     }
     return probeSafeCharSet;
 }
@@ -233,12 +305,25 @@ function isUnsafeCodePoint(ch) {
     return false;
 }
 
+function isExoticScriptCodePoint(ch) {
+    const cp = ch.codePointAt(0);
+    return cp != null && cp > 0x007f;
+}
+
 function isLikelyNumberedFallback(ch, font) {
+    if (isExoticScriptCodePoint(ch) && isLikelyNumberedFallbackDom(ch, font)) return true;
+    if (canvasProbeBlocked || privateBrowsingMode) {
+        return isLikelyNumberedFallbackDom(ch, font);
+    }
     const sig = rasterSignature(ch, font);
     const narrow = rasterSignature('i', font);
     const wide = rasterSignature('W', font);
     const maxNormal = Math.max(wide.pixels, narrow.pixels * 2, 8);
-    return sig.pixels > maxNormal + 7;
+    if (sig.pixels > maxNormal + 7) return true;
+    if (restrictiveProbeEnv && isExoticScriptCodePoint(ch)) {
+        return isLikelyNumberedFallbackDom(ch, font);
+    }
+    return false;
 }
 
 function buildTofuRefBits(font) {
@@ -262,10 +347,13 @@ export function isRenderableCipherGlyph(ch, font) {
     if (isUnsafeCodePoint(ch)) return false;
     const trimmed = ch.trim();
     if (!trimmed) return false;
-    if (canvasProbeBlocked) {
-        return getProbeSafeCharSet().has(ch);
-    }
     if ([...ch].length !== 1) return false;
+
+    if (privateBrowsingMode || canvasProbeBlocked) {
+        if (isLikelyNumberedFallbackDom(ch, font)) return false;
+        return getProbeSafeCharSet().has(ch) && domGlyphWidth(ch, font) > 0;
+    }
+
     const { bits, pixels } = rasterSignature(ch, font);
     if (pixels === 0) return false;
     if (buildTofuRefBits(font).has(bits)) return false;
@@ -291,6 +379,11 @@ function isCanvasProbeReliable(font) {
 }
 
 function buildRenderablePool(source, font, fallbackSource) {
+    if (privateBrowsingMode) {
+        const pool = filterRenderablePool(fallbackSource, font);
+        if (pool.length >= MIN_RENDER_POOL) return pool.join('');
+        return [...CIPHER_STRICT_SAFE].join('');
+    }
     if (canvasProbeBlocked) {
         return [...fallbackSource].join('');
     }
@@ -308,12 +401,13 @@ function buildRenderablePool(source, font, fallbackSource) {
 
 /** Build once per font channel (desktop monospace vs iOS). */
 export function ensureCipherRenderCache(font, ios = usesIosCipherGlyphs()) {
+    const fallback = getFallbackSource(ios);
     if (ios) {
         if (iosRenderable) return iosRenderable;
         iosRenderable = buildRenderablePool(
             [...IOS_CIPHER_SAFE],
             font,
-            [...IOS_CIPHER_SAFE],
+            fallback,
         );
         return iosRenderable;
     }
@@ -321,7 +415,7 @@ export function ensureCipherRenderCache(font, ios = usesIosCipherGlyphs()) {
     desktopRenderable = buildRenderablePool(
         [...DESKTOP_CIPHER_FALLBACK],
         font,
-        [...DESKTOP_CIPHER_FALLBACK],
+        fallback,
     );
     return desktopRenderable;
 }
@@ -462,7 +556,7 @@ export function startCipherPoolBackgroundUpgrade(font, ios = usesIosCipherGlyphs
 
     ensureCipherRenderCache(font, ios);
 
-    if (canvasProbeBlocked) {
+    if (privateBrowsingMode || canvasProbeBlocked) {
         upgradeState.complete = true;
         upgradeState.font = font;
         upgradeState.ios = ios;

@@ -774,6 +774,10 @@ function toggleMode() {
     const btn = document.getElementById('mode-btn');
     toggleIsCorrupted();
     setNeedsFullRedraw(true);
+    if (document.body.style.filter) {
+        document.body.style.transition = 'filter 0.2s ease';
+        document.body.style.filter = 'none';
+    }
     if (isCorrupted) {
         document.body.classList.add('corrupted');
         btn.innerText = "CORRUPTED MODE";
