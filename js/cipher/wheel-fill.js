@@ -85,6 +85,15 @@ function detectPrivateBrowsing() {
 
 const privateBrowsingMode = detectPrivateBrowsing();
 
+function isFirefoxBrowser() {
+    return /Firefox\//i.test(navigator.userAgent) && !/Seamonkey/i.test(navigator.userAgent);
+}
+
+/** Firefox boots strict until storage estimate confirms a normal (non-private) window. */
+let firefoxBootStrict = isFirefoxBrowser();
+let firefoxPrivateMode = false;
+let restrictiveProbeInitialized = false;
+
 let probeCtx = null;
 let desktopRenderable = null;
 let iosRenderable = null;
@@ -102,6 +111,60 @@ const MAX_RELIABILITY_RETRIES = 10;
 let domProbeEl = null;
 let domBaselineWidths = null;
 let domBaselineFont = '';
+
+let measureBaselines = null;
+let measureBaselineFont = '';
+
+function getRestrictiveGlyphMode() {
+    return privateBrowsingMode
+        || canvasProbeBlocked
+        || firefoxBootStrict
+        || firefoxPrivateMode;
+}
+
+function getProbeCtxForMeasure() {
+    return getProbeCtx() || createProbeSurface();
+}
+
+/** Canvas measureText matches fillText metrics and needs no readback. */
+function canvasMeasureWidth(ch, font) {
+    const ctx = getProbeCtxForMeasure();
+    if (!ctx) return 0;
+    ctx.font = font;
+    return ctx.measureText(ch).width;
+}
+
+function getMeasureBaselines(font) {
+    if (measureBaselines && measureBaselineFont === font) return measureBaselines;
+    measureBaselineFont = font;
+    const ctx = getProbeCtxForMeasure();
+    if (!ctx) {
+        measureBaselines = { missing: 0, narrow: 0, wide: 0, boxRef: 0 };
+        return measureBaselines;
+    }
+    ctx.font = font;
+    const missing = ctx.measureText('\uFFFD').width;
+    const narrow = ctx.measureText('i').width;
+    const wide = ctx.measureText('W').width;
+    let boxRef = missing;
+    for (const ch of LAST_RESORT_PROBE_CHARS) {
+        const w = ctx.measureText(ch).width;
+        if (w > boxRef) boxRef = w;
+    }
+    measureBaselines = { missing, narrow, wide, boxRef };
+    return measureBaselines;
+}
+
+/** Detect Last Resort numbered boxes via canvas/DOM width (no readback). */
+function isLikelyNumberedFallbackMeasure(ch, font) {
+    const w = canvasMeasureWidth(ch, font) || domGlyphWidth(ch, font);
+    if (w <= 0) return true;
+    const { missing, narrow, wide, boxRef } = getMeasureBaselines(font);
+    if (missing > 0 && Math.abs(w - missing) < 0.75) return true;
+    if (boxRef > wide * 1.15 && Math.abs(w - boxRef) < 1.5) return true;
+    if (w > Math.max(wide * 1.55, narrow * 3.2, 11)) return true;
+    return false;
+}
 
 function getDomProbeEl() {
     if (!domProbeEl && typeof document !== 'undefined') {
@@ -133,17 +196,13 @@ function getDomBaselineWidths(font) {
     return domBaselineWidths;
 }
 
-/** Detect Last Resort numbered boxes via layout width (works when canvas readback is blocked). */
+/** Detect Last Resort numbered boxes via layout width (DOM fallback). */
 function isLikelyNumberedFallbackDom(ch, font) {
-    const w = domGlyphWidth(ch, font);
-    if (w <= 0) return true;
-    const { wide, missing } = getDomBaselineWidths(font);
-    if (missing > 0 && Math.abs(w - missing) < 0.6) return true;
-    return w > Math.max(wide * 1.85, 14);
+    return isLikelyNumberedFallbackMeasure(ch, font);
 }
 
 function getFallbackSource(ios = usesIosCipherGlyphs()) {
-    if (privateBrowsingMode || canvasProbeBlocked) {
+    if (getRestrictiveGlyphMode()) {
         return [...CIPHER_STRICT_SAFE];
     }
     return ios ? [...IOS_CIPHER_SAFE] : [...DESKTOP_CIPHER_FALLBACK];
@@ -233,6 +292,49 @@ export function resetCipherRenderCache() {
     reliabilityRetryCount = 0;
     domBaselineWidths = null;
     domBaselineFont = '';
+    measureBaselines = null;
+    measureBaselineFont = '';
+}
+
+/**
+ * Firefox private mode does not throw on localStorage — use storage quota to
+ * detect it, then rebuild the glyph pool. Called once from matrix init.
+ * @param {() => void} [onModeChange]
+ */
+export function initCipherRestrictiveProbe(onModeChange) {
+    if (restrictiveProbeInitialized) return;
+    restrictiveProbeInitialized = true;
+
+    if (!isFirefoxBrowser()) return;
+
+    if (!navigator.storage?.estimate) {
+        firefoxPrivateMode = true;
+        firefoxBootStrict = true;
+        onModeChange?.();
+        return;
+    }
+
+    navigator.storage.estimate()
+        .then(({ quota }) => {
+            const wasRestrictive = getRestrictiveGlyphMode();
+            if (quota != null && quota >= 150_000_000) {
+                firefoxBootStrict = false;
+                firefoxPrivateMode = false;
+            } else {
+                firefoxPrivateMode = true;
+                firefoxBootStrict = true;
+            }
+            probeSafeCharSet = null;
+            if (getRestrictiveGlyphMode() !== wasRestrictive || firefoxPrivateMode) {
+                resetCipherRenderCache();
+                onModeChange?.();
+            }
+        })
+        .catch(() => {
+            firefoxPrivateMode = true;
+            firefoxBootStrict = true;
+            onModeChange?.();
+        });
 }
 
 function getProbeSafeCharSet(ios = usesIosCipherGlyphs()) {
@@ -305,25 +407,14 @@ function isUnsafeCodePoint(ch) {
     return false;
 }
 
-function isExoticScriptCodePoint(ch) {
-    const cp = ch.codePointAt(0);
-    return cp != null && cp > 0x007f;
-}
-
 function isLikelyNumberedFallback(ch, font) {
-    if (isExoticScriptCodePoint(ch) && isLikelyNumberedFallbackDom(ch, font)) return true;
-    if (canvasProbeBlocked || privateBrowsingMode) {
-        return isLikelyNumberedFallbackDom(ch, font);
-    }
+    if (isLikelyNumberedFallbackMeasure(ch, font)) return true;
+    if (getRestrictiveGlyphMode()) return false;
     const sig = rasterSignature(ch, font);
     const narrow = rasterSignature('i', font);
     const wide = rasterSignature('W', font);
     const maxNormal = Math.max(wide.pixels, narrow.pixels * 2, 8);
-    if (sig.pixels > maxNormal + 7) return true;
-    if (restrictiveProbeEnv && isExoticScriptCodePoint(ch)) {
-        return isLikelyNumberedFallbackDom(ch, font);
-    }
-    return false;
+    return sig.pixels > maxNormal + 7;
 }
 
 function buildTofuRefBits(font) {
@@ -349,9 +440,10 @@ export function isRenderableCipherGlyph(ch, font) {
     if (!trimmed) return false;
     if ([...ch].length !== 1) return false;
 
-    if (privateBrowsingMode || canvasProbeBlocked) {
-        if (isLikelyNumberedFallbackDom(ch, font)) return false;
-        return getProbeSafeCharSet().has(ch) && domGlyphWidth(ch, font) > 0;
+    if (isLikelyNumberedFallbackMeasure(ch, font)) return false;
+
+    if (getRestrictiveGlyphMode()) {
+        return getProbeSafeCharSet().has(ch);
     }
 
     const { bits, pixels } = rasterSignature(ch, font);
@@ -379,13 +471,15 @@ function isCanvasProbeReliable(font) {
 }
 
 function buildRenderablePool(source, font, fallbackSource) {
-    if (privateBrowsingMode) {
+    if (getRestrictiveGlyphMode()) {
         const pool = filterRenderablePool(fallbackSource, font);
         if (pool.length >= MIN_RENDER_POOL) return pool.join('');
         return [...CIPHER_STRICT_SAFE].join('');
     }
     if (canvasProbeBlocked) {
-        return [...fallbackSource].join('');
+        const pool = filterRenderablePool(fallbackSource, font);
+        if (pool.length >= MIN_RENDER_POOL) return pool.join('');
+        return [...CIPHER_STRICT_SAFE].join('');
     }
     if (!isCanvasProbeReliable(font)) {
         return [...fallbackSource].join('');
@@ -556,7 +650,7 @@ export function startCipherPoolBackgroundUpgrade(font, ios = usesIosCipherGlyphs
 
     ensureCipherRenderCache(font, ios);
 
-    if (privateBrowsingMode || canvasProbeBlocked) {
+    if (getRestrictiveGlyphMode() || canvasProbeBlocked) {
         upgradeState.complete = true;
         upgradeState.font = font;
         upgradeState.ios = ios;
