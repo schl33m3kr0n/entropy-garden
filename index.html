@@ -124,6 +124,57 @@
     <canvas id="grid-canvas"></canvas>
 
     <div id="panopticon-eye" aria-hidden="true">
+        <div class="panopticon-god-pyramid" aria-hidden="true">
+            <svg viewBox="0 0 100 108" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="">
+                <defs>
+                    <linearGradient id="god-pyramid-limestone-a" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#e8dcc4" />
+                        <stop offset="100%" stop-color="#c8b48e" />
+                    </linearGradient>
+                    <linearGradient id="god-pyramid-limestone-b" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#ddd0b0" />
+                        <stop offset="100%" stop-color="#b9a57f" />
+                    </linearGradient>
+                    <linearGradient id="god-pyramid-limestone-c" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#d2c4a2" />
+                        <stop offset="100%" stop-color="#a8956c" />
+                    </linearGradient>
+                    <linearGradient id="god-pyramid-gold" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#fff1a8" />
+                        <stop offset="45%" stop-color="#e8c547" />
+                        <stop offset="100%" stop-color="#b8860b" />
+                    </linearGradient>
+                </defs>
+                <g class="god-pyramid-layers">
+                    <path d="M 4 100 L 96 100 L 88 90 L 12 90 Z" fill="url(#god-pyramid-limestone-a)" />
+                    <path d="M 12 90 L 88 90 L 80 78 L 20 78 Z" fill="url(#god-pyramid-limestone-b)" />
+                    <path d="M 20 78 L 80 78 L 72 66 L 28 66 Z" fill="url(#god-pyramid-limestone-a)" />
+                    <path d="M 28 66 L 72 66 L 64 54 L 36 54 Z" fill="url(#god-pyramid-limestone-c)" />
+                    <path d="M 36 54 L 64 54 L 56 42 L 44 42 Z" fill="url(#god-pyramid-limestone-b)" />
+                    <path d="M 44 42 L 56 42 L 50 28 Z" fill="url(#god-pyramid-gold)" class="god-pyramid-cap" />
+                    <g class="god-pyramid-strata" stroke="#8a7a5c" stroke-width="0.35" opacity="0.45">
+                        <line x1="14" y1="93" x2="86" y2="93" />
+                        <line x1="14" y1="96" x2="86" y2="96" />
+                        <line x1="22" y1="81" x2="78" y2="81" />
+                        <line x1="22" y1="84" x2="78" y2="84" />
+                        <line x1="30" y1="69" x2="70" y2="69" />
+                        <line x1="30" y1="72" x2="70" y2="72" />
+                        <line x1="38" y1="57" x2="62" y2="57" />
+                        <line x1="38" y1="60" x2="62" y2="60" />
+                        <line x1="46" y1="45" x2="54" y2="45" />
+                    </g>
+                    <g class="god-pyramid-edges" fill="none" stroke="#6e6248" stroke-width="0.6" opacity="0.55">
+                        <path d="M 4 100 L 12 90 L 20 78 L 28 66 L 36 54 L 44 42 L 50 28" />
+                        <path d="M 96 100 L 88 90 L 80 78 L 72 66 L 64 54 L 56 42 L 50 28" />
+                        <path d="M 12 90 L 88 90" />
+                        <path d="M 20 78 L 80 78" />
+                        <path d="M 28 66 L 72 66" />
+                        <path d="M 36 54 L 64 54" />
+                        <path d="M 44 42 L 56 42" />
+                    </g>
+                </g>
+            </svg>
+        </div>
         <div class="panopticon-inner">
             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <defs>
