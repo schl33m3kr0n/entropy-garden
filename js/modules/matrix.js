@@ -16,7 +16,6 @@ import {
     resetCipherRenderCache,
     scrubWheelGlyphs,
     initCipherRestrictiveProbe,
-    setEthiopicExclusionHandler,
     startCipherPoolBackgroundUpgrade,
 } from '../cipher/wheel-fill.js';
 import {
@@ -68,8 +67,6 @@ function rebuildCipherGlyphsAfterRestrictiveProbe() {
     fillEmptyWheelGlyphs();
     setNeedsFullRedraw(true);
 }
-
-setEthiopicExclusionHandler(rebuildCipherGlyphsAfterRestrictiveProbe);
 
 function initCipherRenderCacheIfNeeded() {
     if (cipherRenderCacheReady) return;

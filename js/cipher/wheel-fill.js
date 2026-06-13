@@ -15,7 +15,6 @@ import {
     CIPHER_VAI,
     CIPHER_BAYBAYIN,
     CIPHER_CHEROKEE,
-    CIPHER_ETHIOPIC,
 } from '../data/cipher-glyphs.data.js';
 import { usesIosCipherGlyphs } from '../core/shared.js';
 
@@ -65,7 +64,6 @@ const UPGRADE_RELIABILITY_RETRY_MS = 4500;
 
 const ETHIOPIC_BLOCK_MIN = 0x1200;
 const ETHIOPIC_BLOCK_MAX = 0x137f;
-const LS_ETHIOPIC_SAFE_KEY = 'eg_cipher_ethiopic_u1200_ok';
 
 const DESKTOP_CIPHER_FALLBACK =
     CIPHER_LATIN + CIPHER_MATH_DECORATIVE + CIPHER_BMP_SAFE_EXTRA + '0123456789';
@@ -96,9 +94,6 @@ function isFirefoxBrowser() {
 
 let firefoxPrivateMode = false;
 let restrictiveProbeInitialized = false;
-let ethiopicBlockExcluded = false;
-let numberedBoxesObserved = false;
-let onEthiopicBlockExcluded = null;
 
 let probeCtx = null;
 let desktopRenderable = null;
@@ -132,75 +127,6 @@ function isPrivateGlyphContext() {
 function isEthiopicScript(ch) {
     const cp = ch.codePointAt(0);
     return cp != null && cp >= ETHIOPIC_BLOCK_MIN && cp <= ETHIOPIC_BLOCK_MAX;
-}
-
-function localStorageCarriesEthiopicSafe() {
-    try {
-        return localStorage.getItem(LS_ETHIOPIC_SAFE_KEY) === '1';
-    } catch {
-        return false;
-    }
-}
-
-function markEthiopicSafeInStorage() {
-    try {
-        localStorage.setItem(LS_ETHIOPIC_SAFE_KEY, '1');
-    } catch {
-        /* private / blocked storage */
-    }
-}
-
-/** @param {boolean} ios */
-function stripEthiopicFromRenderablePool(ios) {
-    const pool = getRenderablePoolRef(ios);
-    if (!pool) return;
-    const filtered = [...pool].filter((ch) => !isEthiopicScript(ch)).join('');
-    if (filtered.length !== pool.length) {
-        setRenderablePool(ios, filtered);
-    }
-}
-
-function activateEthiopicExclusion(ios = usesIosCipherGlyphs()) {
-    if (!ethiopicBlockExcluded) return false;
-    stripEthiopicFromRenderablePool(ios);
-    probeSafeCharSet = null;
-    onEthiopicBlockExcluded?.();
-    return true;
-}
-
-/**
- * In private mode, exclude U+1200–U+137F only after numbered boxes are observed
- * and localStorage has not recorded Ethiopic as safe.
- */
-function observeNumberedBoxOnGlyph(ch, font, ios = usesIosCipherGlyphs()) {
-    if (!isLikelyNumberedFallbackMeasure(ch, font)) return false;
-    numberedBoxesObserved = true;
-    if (
-        isEthiopicScript(ch)
-        && isPrivateGlyphContext()
-        && !localStorageCarriesEthiopicSafe()
-    ) {
-        ethiopicBlockExcluded = true;
-        activateEthiopicExclusion(ios);
-    }
-    return true;
-}
-
-/** Register callback to scrub wheels when Ethiopic block is excluded. */
-export function setEthiopicExclusionHandler(handler) {
-    onEthiopicBlockExcluded = handler;
-}
-
-export function isEthiopicCipherBlockExcluded() {
-    return ethiopicBlockExcluded;
-}
-
-function maybePersistEthiopicSafe(font) {
-    if (isPrivateGlyphContext() || localStorageCarriesEthiopicSafe()) return;
-    for (const ch of CIPHER_ETHIOPIC) {
-        if (isLikelyNumberedFallbackMeasure(ch, font)) return;
-    }
-    markEthiopicSafeInStorage();
 }
 
 function getProbeCtxForMeasure() {
@@ -347,7 +273,7 @@ function clearUpgradeReliabilityRetry() {
 
 function getFullSourcePool(ios) {
     const base = ios ? [...IOS_CIPHER_CHARS] : [...FULL_MATRIX_CHARS];
-    if (!ethiopicBlockExcluded) return base;
+    if (!isPrivateGlyphContext()) return base;
     return base.filter((ch) => !isEthiopicScript(ch));
 }
 
@@ -514,12 +440,9 @@ export function isRenderableCipherGlyph(ch, font) {
     if (!trimmed) return false;
     if ([...ch].length !== 1) return false;
 
-    if (ethiopicBlockExcluded && isEthiopicScript(ch)) return false;
+    if (isPrivateGlyphContext() && isEthiopicScript(ch)) return false;
 
-    if (isLikelyNumberedFallbackMeasure(ch, font)) {
-        observeNumberedBoxOnGlyph(ch, font);
-        return false;
-    }
+    if (isLikelyNumberedFallbackMeasure(ch, font)) return false;
 
     if (getRestrictiveGlyphMode()) {
         return getProbeSafeCharSet().has(ch);
@@ -528,10 +451,7 @@ export function isRenderableCipherGlyph(ch, font) {
     const { bits, pixels } = rasterSignature(ch, font);
     if (pixels === 0) return false;
     if (buildTofuRefBits(font).has(bits)) return false;
-    if (isLikelyNumberedFallback(ch, font)) {
-        observeNumberedBoxOnGlyph(ch, font);
-        return false;
-    }
+    if (isLikelyNumberedFallback(ch, font)) return false;
     return true;
 }
 
@@ -710,7 +630,6 @@ function processUpgradeSlice(deadline) {
         upgradeState.active = false;
         upgradeState.complete = true;
         upgradeState.onPoolGrowth = null;
-        maybePersistEthiopicSafe(font);
         return;
     }
 
