@@ -107,13 +107,9 @@ export const ARMENIAN_CIPHER_PUNCT =
 export const ARMENIAN_CIPHER_CHARS =
     ARMENIAN_CIPHER_UPPER + ARMENIAN_CIPHER_LOWER + ARMENIAN_CIPHER_PUNCT;
 
-/** Georgian Mkhedruli + Asomtavruli / Nuskhuri supplement. */
+/** Georgian Mkhedruli (basic letters only). */
 export const CIPHER_GEORGIAN =
-    "აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰჱჲჳჴჵჶჷჸჹჺႠႡႢႣႤႥႦႧႨႩႪႫႬႭႮႯႰႱႲႳႴႵႶႷႸႹႺႻႼႽႾႿჀ";
-
-/** Georgian Mtavruli. */
-export const CIPHER_GEORGIAN_MTAVRULI =
-    "ⴀⴁⴂⴃⴄⴅⴆⴇⴈⴉⴊⴋⴌⴍⴎⴏⴐⴑⴒⴓⴔⴕⴖⴗⴘⴙⴚⴛⴜⴝⴞⴟⴠ";
+    "აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ";
 
 // ─── Middle East ─────────────────────────────────────────────────────────────
 
@@ -202,7 +198,6 @@ export const FULL_MATRIX_CHARS =
     CIPHER_RUNIC +
     ARMENIAN_CIPHER_CHARS +
     CIPHER_GEORGIAN +
-    CIPHER_GEORGIAN_MTAVRULI +
     HEBREW_CIPHER_CHARS +
     CIPHER_ARABIC +
     CIPHER_TIBETAN +

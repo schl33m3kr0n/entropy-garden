@@ -120,15 +120,28 @@
     }
     #fail-list.visible { display: block; }
     canvas#thumb-probe { display: none; }
+    #file-protocol-warn {
+      display: none;
+      margin: 0;
+      padding: 14px 16px;
+      background: #2a1010;
+      border-bottom: 1px solid var(--red);
+      color: #ffccd5;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    #file-protocol-warn code { color: var(--green); }
   </style>
 </head>
 <body>
+  <p id="file-protocol-warn"></p>
   <header>
     <h1>Cipher glyph audit</h1>
     <p class="note">
       Probes every glyph with the same font stack as cipher wheels. Does <strong>not</strong> read or write
-      <code>localStorage</code> — safe for Firefox private. Numbered Last Resort boxes are flagged via
-      <code>measureText</code> width (and optional canvas raster when readback works).
+      <code>localStorage</code> — safe for Firefox private. Open via HTTP (not <code>file://</code>).
+      Deployed: <code>/pages/cipher-glyph-audit.html</code> or <code>/cipher-audit</code> on
+      <a href="https://entropy-garden-8r2.pages.dev/cipher-audit" style="color:var(--green)">pages.dev</a>.
     </p>
     <div class="toolbar">
       <label>
@@ -161,6 +174,15 @@
   <canvas id="thumb-probe" width="28" height="28"></canvas>
 
   <script type="module">
+    if (location.protocol === 'file:') {
+      const warn = document.getElementById('file-protocol-warn');
+      warn.style.display = 'block';
+      warn.innerHTML =
+        'This page cannot load from <code>file://</code> (ES modules are blocked). '
+        + 'From the repo root run: <code>bash scripts/dev/serve-audit.sh</code> '
+        + 'then open <code>http://localhost:8765/pages/cipher-glyph-audit.html</code>';
+    }
+
     import {
       FULL_MATRIX_CHARS,
       CIPHER_BMP_SAFE_EXTRA,
@@ -174,7 +196,6 @@
       CIPHER_RUNIC,
       ARMENIAN_CIPHER_CHARS,
       CIPHER_GEORGIAN,
-      CIPHER_GEORGIAN_MTAVRULI,
       HEBREW_CIPHER_CHARS,
       CIPHER_ARABIC,
       CIPHER_TIBETAN,
@@ -207,7 +228,6 @@
       ['Runic', CIPHER_RUNIC],
       ['Armenian', ARMENIAN_CIPHER_CHARS],
       ['Georgian', CIPHER_GEORGIAN],
-      ['Georgian Mtavruli', CIPHER_GEORGIAN_MTAVRULI],
       ['Hebrew', HEBREW_CIPHER_CHARS],
       ['Arabic', CIPHER_ARABIC],
       ['Tibetan', CIPHER_TIBETAN],
