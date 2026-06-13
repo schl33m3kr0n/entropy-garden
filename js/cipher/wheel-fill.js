@@ -88,11 +88,10 @@ function detectPrivateBrowsing() {
 
 const privateBrowsingMode = detectPrivateBrowsing();
 
-function isFirefoxBrowser() {
-    return /Firefox\//i.test(navigator.userAgent) && !/Seamonkey/i.test(navigator.userAgent);
-}
-
-let firefoxPrivateMode = false;
+/** True when storage quota suggests a private window (Firefox, Chrome Incognito, etc.). */
+let storageQuotaPrivateMode = privateBrowsingMode;
+/** Until quota resolves, withhold Ethiopic so hex boxes never flash in private. */
+let storageQuotaProbePending = !privateBrowsingMode;
 let restrictiveProbeInitialized = false;
 
 let probeCtx = null;
@@ -121,7 +120,8 @@ function getRestrictiveGlyphMode() {
 }
 
 function isPrivateGlyphContext() {
-    return privateBrowsingMode || firefoxPrivateMode;
+    if (privateBrowsingMode) return true;
+    return storageQuotaProbePending || storageQuotaPrivateMode;
 }
 
 function isEthiopicScript(ch) {
@@ -306,33 +306,37 @@ export function resetCipherRenderCache() {
 }
 
 /**
- * Firefox private mode does not throw on localStorage — use storage quota to
- * detect it, then rebuild the glyph pool. Called once from matrix init.
+ * Ethiopic (U+1200–U+137F) renders as numbered hex boxes in private windows but
+ * works in normal browsing. Detect private via storage quota (all browsers) and
+ * Safari localStorage throw; exclude that block only while private.
  * @param {() => void} [onModeChange]
  */
 export function initCipherRestrictiveProbe(onModeChange) {
     if (restrictiveProbeInitialized) return;
     restrictiveProbeInitialized = true;
 
-    if (!isFirefoxBrowser()) return;
+    if (privateBrowsingMode) {
+        storageQuotaPrivateMode = true;
+        storageQuotaProbePending = false;
+        return;
+    }
 
     if (!navigator.storage?.estimate) {
-        firefoxPrivateMode = true;
+        storageQuotaPrivateMode = true;
+        storageQuotaProbePending = false;
         onModeChange?.();
         return;
     }
 
     navigator.storage.estimate()
         .then(({ quota }) => {
-            if (quota != null && quota >= 150_000_000) {
-                firefoxPrivateMode = false;
-            } else {
-                firefoxPrivateMode = true;
-            }
+            storageQuotaProbePending = false;
+            storageQuotaPrivateMode = quota == null || quota < 150_000_000;
             onModeChange?.();
         })
         .catch(() => {
-            firefoxPrivateMode = true;
+            storageQuotaProbePending = false;
+            storageQuotaPrivateMode = true;
             onModeChange?.();
         });
 }
