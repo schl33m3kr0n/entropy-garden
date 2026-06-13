@@ -2,5 +2,3 @@
 # Disable SPA mode in Cloudflare Dashboard → Workers & Pages → your project → Settings.
 
 /pages/genesis.html /pages/genesis.html 200
-/pages/cipher-glyph-audit.html /pages/cipher-glyph-audit.html 200
-/cipher-audit /pages/cipher-glyph-audit.html 200
