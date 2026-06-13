@@ -47,9 +47,8 @@ export const CIPHER_NUMERALS_SEA =
     "០១២៣៤៥៦៧៨៩" +
     "၀၁၂၃၄၅၆၇၈၉";
 
-/** Ethiopic (1–9) and Cherokee (0–9) numerals. */
+/** Cherokee (0–9) numerals. */
 export const CIPHER_NUMERALS_OTHER =
-    "፩፪፫፬፭፮፯፰፱" +
     "ᏐᏑᏒᏓᏔᏕᏖᏗᏘ";
 
 export const CIPHER_NUMERALS =
@@ -125,10 +124,6 @@ export const HEBREW_CIPHER_CHARS =
 /** Arabic (isolated letters + hamza/alef variants). */
 export const CIPHER_ARABIC =
     "ابتثجحخدذرزسشصضطظعغفقكلمنهويأإآءىةؤئ";
-
-// ─── Horn of Africa ───────────────────────────────────────────────────────────
-
-export const CIPHER_ETHIOPIC = "ሀለሐመሠረሰቀበተኀነአከወዐዘየደገጠጰጸፀፈፐ";
 
 // ─── Central & Himalayan Asia ─────────────────────────────────────────────────
 
@@ -210,7 +205,6 @@ export const FULL_MATRIX_CHARS =
     CIPHER_GEORGIAN_MTAVRULI +
     HEBREW_CIPHER_CHARS +
     CIPHER_ARABIC +
-    CIPHER_ETHIOPIC +
     CIPHER_TIBETAN +
     CIPHER_CJK +
     CIPHER_KANA +

@@ -62,9 +62,6 @@ const UPGRADE_IDLE_TIMEOUT_MS = 2000;
 const UPGRADE_IDLE_TIMEOUT_RESTRICTIVE_MS = 6000;
 const UPGRADE_RELIABILITY_RETRY_MS = 4500;
 
-const ETHIOPIC_BLOCK_MIN = 0x1200;
-const ETHIOPIC_BLOCK_MAX = 0x137f;
-
 const DESKTOP_CIPHER_FALLBACK =
     CIPHER_LATIN + CIPHER_MATH_DECORATIVE + CIPHER_BMP_SAFE_EXTRA + '0123456789';
 
@@ -87,12 +84,6 @@ function detectPrivateBrowsing() {
 }
 
 const privateBrowsingMode = detectPrivateBrowsing();
-
-/** True when storage quota suggests a private window (Firefox, Chrome Incognito, etc.). */
-let storageQuotaPrivateMode = privateBrowsingMode;
-/** Until quota resolves, withhold Ethiopic so hex boxes never flash in private. */
-let storageQuotaProbePending = !privateBrowsingMode;
-let restrictiveProbeInitialized = false;
 
 let probeCtx = null;
 let desktopRenderable = null;
@@ -117,16 +108,6 @@ let measureBaselineFont = '';
 
 function getRestrictiveGlyphMode() {
     return privateBrowsingMode || canvasProbeBlocked;
-}
-
-function isPrivateGlyphContext() {
-    if (privateBrowsingMode) return true;
-    return storageQuotaProbePending || storageQuotaPrivateMode;
-}
-
-function isEthiopicScript(ch) {
-    const cp = ch.codePointAt(0);
-    return cp != null && cp >= ETHIOPIC_BLOCK_MIN && cp <= ETHIOPIC_BLOCK_MAX;
 }
 
 function getProbeCtxForMeasure() {
@@ -272,9 +253,7 @@ function clearUpgradeReliabilityRetry() {
 }
 
 function getFullSourcePool(ios) {
-    const base = ios ? [...IOS_CIPHER_CHARS] : [...FULL_MATRIX_CHARS];
-    if (!isPrivateGlyphContext()) return base;
-    return base.filter((ch) => !isEthiopicScript(ch));
+    return ios ? [...IOS_CIPHER_CHARS] : [...FULL_MATRIX_CHARS];
 }
 
 function getRenderablePoolRef(ios) {
@@ -303,42 +282,6 @@ export function resetCipherRenderCache() {
     domBaselineFont = '';
     measureBaselines = null;
     measureBaselineFont = '';
-}
-
-/**
- * Ethiopic (U+1200–U+137F) renders as numbered hex boxes in private windows but
- * works in normal browsing. Detect private via storage quota (all browsers) and
- * Safari localStorage throw; exclude that block only while private.
- * @param {() => void} [onModeChange]
- */
-export function initCipherRestrictiveProbe(onModeChange) {
-    if (restrictiveProbeInitialized) return;
-    restrictiveProbeInitialized = true;
-
-    if (privateBrowsingMode) {
-        storageQuotaPrivateMode = true;
-        storageQuotaProbePending = false;
-        return;
-    }
-
-    if (!navigator.storage?.estimate) {
-        storageQuotaPrivateMode = true;
-        storageQuotaProbePending = false;
-        onModeChange?.();
-        return;
-    }
-
-    navigator.storage.estimate()
-        .then(({ quota }) => {
-            storageQuotaProbePending = false;
-            storageQuotaPrivateMode = quota == null || quota < 150_000_000;
-            onModeChange?.();
-        })
-        .catch(() => {
-            storageQuotaProbePending = false;
-            storageQuotaPrivateMode = true;
-            onModeChange?.();
-        });
 }
 
 function getProbeSafeCharSet(ios = usesIosCipherGlyphs()) {
@@ -443,8 +386,6 @@ export function isRenderableCipherGlyph(ch, font) {
     const trimmed = ch.trim();
     if (!trimmed) return false;
     if ([...ch].length !== 1) return false;
-
-    if (isPrivateGlyphContext() && isEthiopicScript(ch)) return false;
 
     if (isLikelyNumberedFallbackMeasure(ch, font)) return false;
 

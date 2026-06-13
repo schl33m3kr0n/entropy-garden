@@ -15,7 +15,6 @@ import {
     populateEmptyWheelGlyphs,
     resetCipherRenderCache,
     scrubWheelGlyphs,
-    initCipherRestrictiveProbe,
     startCipherPoolBackgroundUpgrade,
 } from '../cipher/wheel-fill.js';
 import {
@@ -59,20 +58,10 @@ function scheduleCipherPoolBackgroundUpgrade() {
     });
 }
 
-function rebuildCipherGlyphsAfterRestrictiveProbe() {
-    cipherRenderCacheReady = false;
-    initCipherRenderCacheIfNeeded();
-    if (!wheels.length) return;
-    scrubWheelGlyphs(wheels, cipherWheelFont(), usesIosCipherGlyphs());
-    fillEmptyWheelGlyphs();
-    setNeedsFullRedraw(true);
-}
-
 function initCipherRenderCacheIfNeeded() {
     if (cipherRenderCacheReady) return;
     ensureCipherRenderCache(cipherWheelFont(), usesIosCipherGlyphs());
     cipherRenderCacheReady = true;
-    initCipherRestrictiveProbe(rebuildCipherGlyphsAfterRestrictiveProbe);
     scheduleCipherPoolBackgroundUpgrade();
 }
 
