@@ -208,6 +208,56 @@ function drawChannelRings(cx, cy) {
     }
 }
 
+function innermostCipherRadius() {
+    if (wheels[0]) return wheels[0].charRadius;
+    return cellSize * (perf.isMobile ? 2 : 2.2);
+}
+
+function shouldDrawGodModeTriangle() {
+    if (!document.body.classList.contains('god-mode') || !panopticonEl) return false;
+    return panopticonEl.classList.contains('god-active')
+        || panopticonEl.classList.contains('god-rainbow');
+}
+
+function godTriangleChromaGradient(cx, cy) {
+    const g = ctx.createConicGradient(-Math.PI * 0.5, cx, cy);
+    if (isCorrupted) {
+        g.addColorStop(0, 'rgba(255, 0, 85, 0.95)');
+        g.addColorStop(1, 'rgba(255, 0, 85, 0.95)');
+        return g;
+    }
+    const hues = [0, 60, 120, 180, 240, 300, 360];
+    for (let i = 0; i < hues.length; i++) {
+        g.addColorStop(i / (hues.length - 1), `hsla(${hues[i]}, 100%, 55%, 0.92)`);
+    }
+    return g;
+}
+
+/** Equilateral triangle inscribed on the innermost cipher ring (god mode). */
+function drawGodModeTriangle(cx, cy) {
+    if (!shouldDrawGodModeTriangle() || visibleRingCount < 1) return;
+
+    const radius = innermostCipherRadius();
+    const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
+
+    ctx.beginPath();
+    for (let i = 0; i < 3; i++) {
+        const x = cx + Math.cos(angles[i]) * radius;
+        const y = cy + Math.sin(angles[i]) * radius;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.lineWidth = Math.max(3, fontSize * 0.12, cellSize * 0.11);
+    ctx.strokeStyle = usesLiteCipherWheelPaint()
+        ? (isCorrupted ? 'rgba(255, 0, 85, 0.9)' : 'rgba(0, 255, 0, 0.88)')
+        : godTriangleChromaGradient(cx, cy);
+    ctx.stroke();
+}
+
 function drawCipherWheels(cx, cy) {
     ctx.clearRect(0, 0, viewW, viewH);
     ctx.font = cipherWheelFont();
@@ -248,6 +298,8 @@ function drawCipherWheels(cx, cy) {
     if (fastGlyphs) {
         ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     }
+
+    drawGodModeTriangle(cx, cy);
 
     setNeedsFullRedraw(false);
 }
