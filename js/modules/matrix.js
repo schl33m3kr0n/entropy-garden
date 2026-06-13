@@ -208,9 +208,14 @@ function drawChannelRings(cx, cy) {
     }
 }
 
-function innermostCipherRadius() {
-    if (wheels[0]) return wheels[0].charRadius;
-    return cellSize * (perf.isMobile ? 2 : 2.2);
+function godModeTriangleRadius() {
+    if (wheels[0] && wheels[1]) {
+        return (wheels[0].charRadius + wheels[1].charRadius) * 0.5;
+    }
+    const r0 = cellSize * (perf.isMobile ? 2 : 2.2);
+    const band = cellSize * (perf.isMobile ? 1.15 : 1.25);
+    const channel = cellSize * (perf.isMobile ? 0.5 : 0.65);
+    return (r0 + r0 + band + channel) * 0.5;
 }
 
 function shouldDrawGodModeTriangle() {
@@ -233,11 +238,11 @@ function godTriangleChromaGradient(cx, cy) {
     return g;
 }
 
-/** Equilateral triangle inscribed on the innermost cipher ring (god mode). */
+/** Equilateral triangle on the first cipher channel ring (god mode). */
 function drawGodModeTriangle(cx, cy) {
     if (!shouldDrawGodModeTriangle() || visibleRingCount < 1) return;
 
-    const radius = innermostCipherRadius();
+    const radius = godModeTriangleRadius();
     const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
 
     ctx.beginPath();
