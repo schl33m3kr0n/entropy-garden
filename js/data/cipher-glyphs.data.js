@@ -1,9 +1,9 @@
 /** Cipher wheel glyph pools by script / category (desktop matrix rain).
- *  Pruned for 16px monospace: drops blank + missing-glyph (tofu) code points. */
+ *  Pruned for 16px monospace: drops blank code points. */
 
 // ─── Symbols (script-neutral) ───────────────────────────────────────────────
 
-/** BMP symbols for desktop monospace (probe-tested via wheel-fill). Avoid emoji-default code points (e.g. zodiac U+2648). */
+/** BMP symbols for desktop monospace cipher wheels. */
 export const CIPHER_BMP_SAFE_EXTRA =
     "♠♣♥♦" +
     "←→↑↓↔⇐⇒" +

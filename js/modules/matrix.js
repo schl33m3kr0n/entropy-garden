@@ -8,14 +8,9 @@ import {
     panopticonEl,
 } from '../core/shared.js';
 import {
-    ensureCipherRenderCache,
     isEmptyWheelGlyph,
-    isRenderableCipherGlyph,
-    pickRenderableCipherChar,
+    pickCipherChar,
     populateEmptyWheelGlyphs,
-    resetCipherRenderCache,
-    scrubWheelGlyphs,
-    startCipherPoolBackgroundUpgrade,
 } from '../cipher/wheel-fill.js';
 import {
     time,
@@ -44,34 +39,9 @@ let matrixFilled = false;
 let viewW = 0;
 let viewH = 0;
 
-let cipherRenderCacheReady = false;
-
-function scheduleCipherPoolBackgroundUpgrade() {
-    const font = cipherWheelFont();
-    const ios = usesIosCipherGlyphs();
-    startCipherPoolBackgroundUpgrade(font, ios, {
-        onPoolGrowth() {
-            if (!wheels.length) return;
-            scrubWheelGlyphs(wheels, font, ios);
-            setNeedsFullRedraw(true);
-        },
-    });
-}
-
-function initCipherRenderCacheIfNeeded() {
-    if (cipherRenderCacheReady) return;
-    ensureCipherRenderCache(cipherWheelFont(), usesIosCipherGlyphs());
-    cipherRenderCacheReady = true;
-    scheduleCipherPoolBackgroundUpgrade();
-}
-
 function rebuildCipherGlyphsAfterFontsReady() {
     try {
-        cipherRenderCacheReady = false;
-        resetCipherRenderCache();
         if (!wheels.length) return;
-        initCipherRenderCacheIfNeeded();
-        scrubWheelGlyphs(wheels, cipherWheelFont(), usesIosCipherGlyphs());
         fillEmptyWheelGlyphs();
         setNeedsFullRedraw(true);
     } catch (err) {
@@ -86,20 +56,16 @@ if (document.fonts?.ready) {
 }
 
 function randomChar() {
-    initCipherRenderCacheIfNeeded();
-    return pickRenderableCipherChar(cipherWheelFont(), usesIosCipherGlyphs());
+    return pickCipherChar(usesIosCipherGlyphs());
 }
 
 function repairWheelGlyph(wheel, index) {
-    const font = cipherWheelFont();
-    const glyph = wheel.glyphs[index];
-    if (!isEmptyWheelGlyph(glyph) && isRenderableCipherGlyph(glyph, font)) return;
-    wheel.glyphs[index] = pickRenderableCipherChar(font, usesIosCipherGlyphs());
+    if (!isEmptyWheelGlyph(wheel.glyphs[index])) return;
+    wheel.glyphs[index] = randomChar();
 }
 
 function fillEmptyWheelGlyphs() {
     if (!wheels.length) return;
-    initCipherRenderCacheIfNeeded();
     populateEmptyWheelGlyphs(wheels, randomChar, cipherWheelFont());
 }
 
@@ -114,7 +80,6 @@ function cipherWheelFont() {
 }
 
 function buildWheels() {
-    initCipherRenderCacheIfNeeded();
     wheels = [];
     const maxRadius = Math.hypot(viewW, viewH) / 2 + cellSize;
     const charBand = cellSize * (perf.isMobile ? 1.15 : 1.25);
@@ -156,7 +121,6 @@ function buildWheels() {
     }
 
     fillEmptyWheelGlyphs();
-    scrubWheelGlyphs(wheels, cipherWheelFont(), usesIosCipherGlyphs());
 }
 
 function cycleGlyphs(wheel) {
@@ -245,7 +209,6 @@ function drawChannelRings(cx, cy) {
 }
 
 function drawCipherWheels(cx, cy) {
-    initCipherRenderCacheIfNeeded();
     ctx.clearRect(0, 0, viewW, viewH);
     ctx.font = cipherWheelFont();
     ctx.textAlign = 'center';
@@ -397,9 +360,6 @@ function getViewportMetrics() {
 function resizeCanvas() {
     if (!canvas || !ctx) return;
 
-    cipherRenderCacheReady = false;
-    resetCipherRenderCache();
-
     const dpr = Math.min(window.devicePixelRatio || 1, perf.dprCap);
     const fs = perf.isIOS
         ? Math.max(28, Math.min(38, window.innerWidth / 28))
@@ -446,9 +406,8 @@ function resizeCanvas() {
         setNeedsFullRedraw(false);
     } catch (err) {
         console.error('[Entropy Garden] cipher wheel build failed', err);
-        cipherRenderCacheReady = false;
-        resetCipherRenderCache();
     }
+}
 }
 
 let resizeFrame = null;

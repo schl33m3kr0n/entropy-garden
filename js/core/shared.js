@@ -23,7 +23,6 @@ import {
     isFileProtocol,
     isIosTabletScreen,
 } from './environment.js';
-import { isRenderableCipherGlyph } from '../cipher/wheel-fill.js';
 
 export { gardenHasStarted, gardenLoopActive, singularityAnimId, isCorrupted, isSingularityActive };
 export { isIOS, isSafari, isRealIOSDevice, isSafariBrowser, isFileProtocol, isIosTabletScreen };
@@ -724,32 +723,19 @@ const ICO_SYMBOL_FALLBACKS = {
     '∞': '∞',
 };
 
-const PANOPTICON_GOD_PUPIL_FONT = '22px Apple Symbols, Menlo, PingFang SC, sans-serif';
 const ICO_SYMBOL_SAFE_FALLBACK = '◆';
 
 function stripVariationSelectors(symbol) {
     return symbol.replace(/[\uFE0E\uFE0F]/g, '');
 }
 
-function probeIcoSymbol(symbol) {
-    if (isRenderableCipherGlyph(symbol, PANOPTICON_GOD_PUPIL_FONT)) return symbol;
-    const stripped = stripVariationSelectors(symbol);
-    if (stripped !== symbol && isRenderableCipherGlyph(stripped, PANOPTICON_GOD_PUPIL_FONT)) {
-        return stripped;
-    }
-    return null;
-}
-
 function resolveIcoSymbol(symbol) {
     if (!perf.isIOS) return symbol;
-    const probed = probeIcoSymbol(symbol);
-    if (probed) return probed;
-    const fallback = ICO_SYMBOL_FALLBACKS[symbol] ?? ICO_SYMBOL_FALLBACKS[stripVariationSelectors(symbol)];
-    if (fallback) {
-        const probedFallback = probeIcoSymbol(fallback);
-        return probedFallback || fallback;
-    }
-    return ICO_SYMBOL_SAFE_FALLBACK;
+    const stripped = stripVariationSelectors(symbol);
+    return ICO_SYMBOL_FALLBACKS[symbol]
+        ?? ICO_SYMBOL_FALLBACKS[stripped]
+        ?? stripped
+        ?? ICO_SYMBOL_SAFE_FALLBACK;
 }
 
 let icoSymbolsForPlatform = null;
