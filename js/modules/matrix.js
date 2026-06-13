@@ -408,7 +408,6 @@ function resizeCanvas() {
         console.error('[Entropy Garden] cipher wheel build failed', err);
     }
 }
-}
 
 let resizeFrame = null;
 

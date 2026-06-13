@@ -9,7 +9,6 @@ import {
     CIPHER_KANNADA,
     CIPHER_NUMERALS_LITE,
 } from '../data/cipher-glyphs.data.js';
-import { usesIosCipherGlyphs } from '../core/shared.js';
 
 const IOS_CIPHER_CHARS =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' +
@@ -26,12 +25,11 @@ const IOS_CIPHER_CHARS =
     CIPHER_NUMERALS_LITE +
     '!?@#$%&*_+=<>[]{}|/~';
 
-function getCipherPool(ios = usesIosCipherGlyphs()) {
-    return ios ? IOS_CIPHER_CHARS : FULL_MATRIX_CHARS;
-}
+const desktopPool = [...FULL_MATRIX_CHARS];
+const iosPool = [...IOS_CIPHER_CHARS];
 
-export function pickCipherChar(ios = usesIosCipherGlyphs()) {
-    const pool = getCipherPool(ios);
+export function pickCipherChar(ios = false) {
+    const pool = ios ? iosPool : desktopPool;
     if (!pool.length) return '·';
     return pool[Math.floor(Math.random() * pool.length)];
 }
