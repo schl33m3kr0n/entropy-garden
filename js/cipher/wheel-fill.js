@@ -55,7 +55,12 @@ const RASTER_CX = RASTER_SIZE / 2;
 const RASTER_CY = RASTER_SIZE / 2;
 const MIN_RENDER_POOL = 12;
 const UPGRADE_CHUNK_SIZE = 60;
+const UPGRADE_CHUNK_SIZE_RESTRICTIVE = 24;
 const POOL_GROWTH_SCRUB_THRESHOLD = 32;
+const PROBE_READBACK_BLOCK_THRESHOLD = 4;
+const UPGRADE_IDLE_TIMEOUT_MS = 2000;
+const UPGRADE_IDLE_TIMEOUT_RESTRICTIVE_MS = 6000;
+const UPGRADE_RELIABILITY_RETRY_MS = 4500;
 
 const DESKTOP_CIPHER_FALLBACK =
     CIPHER_LATIN + CIPHER_MATH_DECORATIVE + CIPHER_BMP_SAFE_EXTRA + '0123456789';
@@ -65,8 +70,14 @@ let desktopRenderable = null;
 let iosRenderable = null;
 let tofuRefBits = null;
 let tofuRefFont = '';
+/** True when canvas readback is persistently blocked (e.g. private Firefox). */
 let canvasProbeBlocked = false;
+let probeReadbackFailures = 0;
+let restrictiveProbeEnv = false;
 let probeSafeCharSet = null;
+let upgradeReliabilityRetryTimer = null;
+let reliabilityRetryCount = 0;
+const MAX_RELIABILITY_RETRIES = 10;
 
 /** @type {{ active: boolean, complete: boolean, font: string, ios: boolean, pendingChars: string[], pendingIndex: number, lastScrubSize: number, onPoolGrowth: ((size: number) => void) | null }} */
 let upgradeState = {
@@ -80,14 +91,32 @@ let upgradeState = {
     onPoolGrowth: null,
 };
 
+function createProbeSurface() {
+    const canvas = document.createElement('canvas');
+    canvas.width = RASTER_SIZE;
+    canvas.height = RASTER_SIZE;
+    return canvas.getContext('2d', { willReadFrequently: true });
+}
+
 function getProbeCtx() {
     if (!probeCtx) {
-        const canvas = document.createElement('canvas');
-        canvas.width = RASTER_SIZE;
-        canvas.height = RASTER_SIZE;
-        probeCtx = canvas.getContext('2d', { willReadFrequently: true });
+        probeCtx = createProbeSurface();
     }
     return probeCtx;
+}
+
+function markProbeReadbackFailure() {
+    probeReadbackFailures++;
+    restrictiveProbeEnv = true;
+    if (probeReadbackFailures >= PROBE_READBACK_BLOCK_THRESHOLD) {
+        canvasProbeBlocked = true;
+        tofuRefBits = null;
+        tofuRefFont = '';
+    }
+}
+
+function markProbeReadbackSuccess() {
+    probeReadbackFailures = 0;
 }
 
 function cancelCipherPoolBackgroundUpgrade() {
@@ -97,6 +126,13 @@ function cancelCipherPoolBackgroundUpgrade() {
     upgradeState.pendingIndex = 0;
     upgradeState.font = '';
     upgradeState.onPoolGrowth = null;
+}
+
+function clearUpgradeReliabilityRetry() {
+    if (upgradeReliabilityRetryTimer != null) {
+        clearTimeout(upgradeReliabilityRetryTimer);
+        upgradeReliabilityRetryTimer = null;
+    }
 }
 
 function getFullSourcePool(ios) {
@@ -115,11 +151,16 @@ function setRenderablePool(ios, pool) {
 /** Clear cached render tests (call after resize or font change). */
 export function resetCipherRenderCache() {
     cancelCipherPoolBackgroundUpgrade();
+    clearUpgradeReliabilityRetry();
     desktopRenderable = null;
     iosRenderable = null;
     tofuRefBits = null;
     tofuRefFont = '';
     probeSafeCharSet = null;
+    canvasProbeBlocked = false;
+    probeReadbackFailures = 0;
+    restrictiveProbeEnv = false;
+    reliabilityRetryCount = 0;
 }
 
 function getProbeSafeCharSet(ios = usesIosCipherGlyphs()) {
@@ -129,38 +170,56 @@ function getProbeSafeCharSet(ios = usesIosCipherGlyphs()) {
     return probeSafeCharSet;
 }
 
+function rasterSignatureFromCtx(ctx, ch, font) {
+    ctx.clearRect(0, 0, RASTER_SIZE, RASTER_SIZE);
+    ctx.font = font;
+    ctx.fillStyle = '#00ff00';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(ch, RASTER_CX, RASTER_CY);
+    const { data } = ctx.getImageData(0, 0, RASTER_SIZE, RASTER_SIZE);
+    let pixels = 0;
+    let bits = '';
+    for (let y = 0; y < 14; y += 2) {
+        for (let x = 0; x < 14; x += 2) {
+            const a = data[((y * RASTER_SIZE + x) * 4) + 3];
+            const on = a > 24 ? 1 : 0;
+            pixels += on;
+            bits += on;
+        }
+    }
+    return { bits, pixels };
+}
+
+/** Try shared offscreen canvas, then a fresh surface — per-glyph, not whole-pool. */
 function rasterSignature(ch, font) {
     if (canvasProbeBlocked) return { bits: '', pixels: 0 };
-    const ctx = getProbeCtx();
-    if (!ctx) {
-        canvasProbeBlocked = true;
-        return { bits: '', pixels: 0 };
-    }
-    try {
-        ctx.clearRect(0, 0, RASTER_SIZE, RASTER_SIZE);
-        ctx.font = font;
-        ctx.fillStyle = '#00ff00';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(ch, RASTER_CX, RASTER_CY);
-        const { data } = ctx.getImageData(0, 0, RASTER_SIZE, RASTER_SIZE);
-        let pixels = 0;
-        let bits = '';
-        for (let y = 0; y < 14; y += 2) {
-            for (let x = 0; x < 14; x += 2) {
-                const a = data[((y * RASTER_SIZE + x) * 4) + 3];
-                const on = a > 24 ? 1 : 0;
-                pixels += on;
-                bits += on;
-            }
+
+    const shared = getProbeCtx();
+    if (shared) {
+        try {
+            const sig = rasterSignatureFromCtx(shared, ch, font);
+            markProbeReadbackSuccess();
+            return sig;
+        } catch {
+            /* try fresh surface */
         }
-        return { bits, pixels };
-    } catch {
-        canvasProbeBlocked = true;
-        tofuRefBits = null;
-        tofuRefFont = '';
-        return { bits: '', pixels: 0 };
     }
+
+    const fresh = createProbeSurface();
+    if (fresh) {
+        try {
+            const sig = rasterSignatureFromCtx(fresh, ch, font);
+            markProbeReadbackSuccess();
+            restrictiveProbeEnv = true;
+            return sig;
+        } catch {
+            /* fall through */
+        }
+    }
+
+    markProbeReadbackFailure();
+    return { bits: '', pixels: 0 };
 }
 
 function isUnsafeCodePoint(ch) {
@@ -232,7 +291,10 @@ function isCanvasProbeReliable(font) {
 }
 
 function buildRenderablePool(source, font, fallbackSource) {
-    if (canvasProbeBlocked || !isCanvasProbeReliable(font)) {
+    if (canvasProbeBlocked) {
+        return [...fallbackSource].join('');
+    }
+    if (!isCanvasProbeReliable(font)) {
         return [...fallbackSource].join('');
     }
     let pool = filterRenderablePool(fallbackSource, font);
@@ -287,15 +349,55 @@ export function isCipherPoolUpgradeActive() {
     return upgradeState.active;
 }
 
+/** True when canvas readback is blocked — wheels stay on the safe glyph pool. */
+export function isCipherProbeReadbackBlocked() {
+    return canvasProbeBlocked;
+}
+
+/** True when probing needed extra surfaces or hit transient readback errors. */
+export function isCipherProbeRestrictiveEnv() {
+    return restrictiveProbeEnv;
+}
+
+function upgradeIdleTimeoutMs() {
+    return restrictiveProbeEnv ? UPGRADE_IDLE_TIMEOUT_RESTRICTIVE_MS : UPGRADE_IDLE_TIMEOUT_MS;
+}
+
+function upgradeChunkSize() {
+    return restrictiveProbeEnv ? UPGRADE_CHUNK_SIZE_RESTRICTIVE : UPGRADE_CHUNK_SIZE;
+}
+
 function scheduleUpgradeSlice() {
     const runSlice = (deadline) => {
         processUpgradeSlice(deadline);
     };
+    const timeout = upgradeIdleTimeoutMs();
     if (typeof requestIdleCallback === 'function') {
-        requestIdleCallback(runSlice, { timeout: 2000 });
+        requestIdleCallback(runSlice, { timeout });
     } else {
-        setTimeout(() => runSlice({ timeRemaining: () => 16 }), 0);
+        setTimeout(() => runSlice({ timeRemaining: () => 16 }), restrictiveProbeEnv ? 32 : 0);
     }
+}
+
+function scheduleUpgradeReliabilityRetry(font, ios, options) {
+    if (upgradeReliabilityRetryTimer != null || canvasProbeBlocked) return;
+    if (reliabilityRetryCount >= MAX_RELIABILITY_RETRIES) {
+        upgradeState.complete = true;
+        upgradeState.font = font;
+        upgradeState.ios = ios;
+        return;
+    }
+    reliabilityRetryCount++;
+    upgradeReliabilityRetryTimer = setTimeout(() => {
+        upgradeReliabilityRetryTimer = null;
+        if (canvasProbeBlocked) return;
+        if (isCanvasProbeReliable(font)) {
+            reliabilityRetryCount = 0;
+            startCipherPoolBackgroundUpgrade(font, ios, options);
+        } else if (!upgradeState.complete) {
+            scheduleUpgradeReliabilityRetry(font, ios, options);
+        }
+    }, UPGRADE_RELIABILITY_RETRY_MS);
 }
 
 function processUpgradeSlice(deadline) {
@@ -307,9 +409,10 @@ function processUpgradeSlice(deadline) {
     let processed = 0;
     const hasTime = () => !deadline?.timeRemaining || deadline.timeRemaining() > 1;
 
+    const chunkLimit = upgradeChunkSize();
     while (
         upgradeState.pendingIndex < pendingChars.length
-        && processed < UPGRADE_CHUNK_SIZE
+        && processed < chunkLimit
         && hasTime()
     ) {
         const ch = pendingChars[upgradeState.pendingIndex++];
@@ -345,7 +448,7 @@ function processUpgradeSlice(deadline) {
 
 /**
  * Lazily widen the renderable pool from the full source alphabet after boot.
- * No-op when canvas probing is blocked or unreliable (private browsing).
+ * When canvas probing is blocked (private browsing), stays on the safe pool.
  * @param {string} font
  * @param {boolean} [ios]
  * @param {{ onPoolGrowth?: (size: number) => void }} [options]
@@ -359,12 +462,21 @@ export function startCipherPoolBackgroundUpgrade(font, ios = usesIosCipherGlyphs
 
     ensureCipherRenderCache(font, ios);
 
-    if (canvasProbeBlocked || !isCanvasProbeReliable(font)) {
+    if (canvasProbeBlocked) {
         upgradeState.complete = true;
         upgradeState.font = font;
         upgradeState.ios = ios;
         return false;
     }
+
+    if (!isCanvasProbeReliable(font)) {
+        upgradeState.font = font;
+        upgradeState.ios = ios;
+        scheduleUpgradeReliabilityRetry(font, ios, options);
+        return false;
+    }
+
+    clearUpgradeReliabilityRetry();
 
     const current = new Set(getRenderablePoolRef(ios) || '');
     const pendingChars = [];

@@ -630,4 +630,181 @@ globalThis.lorePools = {
         "THERE ARE FEW ABSOLUTES, A KEEN EYE AND AN ATTENTIVE EAR CAN RETRACE THEIR STEPS",
         "GRIEF CAN TRANSFORM AND PARALYZE, SUPPORT CAN DETERMINE WHICH ONE WINS",
     ],
+    panopticonTriggerComments: {
+        init: {
+            safe: [
+                "boot sequence detected. i'm already watching",
+                "INITIALIZE accepted. the garden remembers you",
+                "another observer enters the perimeter",
+            ],
+            gritty: [
+                "you clicked initialize. brave. or bored",
+                "welcome to the panopticon. population: us",
+            ],
+        },
+        reroll: {
+            safe: [
+                "entropy shuffle noted. i felt that",
+                "rerolling reality. keep the good timelines",
+                "new data, same eye",
+                "the dice are loaded. i loaded them",
+            ],
+            gritty: [
+                "reroll detected. your stats were embarrassing anyway",
+                "another timeline, another regret",
+            ],
+        },
+        corruptOn: {
+            safe: [
+                "corrupted mode? bold palette choice",
+                "the garden just got spicier. i'm taking notes",
+                "pink iris day. don't say i didn't warn you",
+            ],
+            gritty: [
+                "chaos engaged. finally, some personality",
+                "you turned the grit up. the void applauds",
+            ],
+        },
+        corruptOff: {
+            safe: [
+                "safe mode restored. how vanilla of you",
+                "back to green. the eye exhales",
+            ],
+            gritty: [
+                "cowardice or wisdom? the eye can't tell",
+            ],
+        },
+        modeHover: {
+            safe: [
+                "are you sure you want to do that?",
+                "that button has consequences. probably",
+            ],
+            gritty: [
+                "touch it. i dare you",
+            ],
+        },
+        terminalOpen: {
+            safe: [
+                "terminal open. type carefully",
+                "command line detected. i'm reading over your shoulder",
+                "the cursor blinks. so do i",
+            ],
+            gritty: [
+                "shell access? cute. i had root since boot",
+            ],
+        },
+        terminalClose: {
+            safe: [
+                "terminal closed. secrets stay secrets. mostly",
+            ],
+            gritty: [
+                "running away from the prompt? relatable",
+            ],
+        },
+        terminalType: {
+            safe: [
+                "keystrokes logged. jk. unless?",
+                "interesting syntax. keep going",
+                "the garden hears every command",
+            ],
+            gritty: [
+                "typing faster won't make the truth less weird",
+            ],
+        },
+        dockingSlot: {
+            safe: [
+                "slot cycled. the bay is thinking",
+                "artifact rotated. combination vibes intensify",
+                "docking bay activity noted",
+            ],
+            gritty: [
+                "wrong slot energy. or right. i don't judge",
+            ],
+        },
+        dockingHover: {
+            safe: [
+                "three slots, one secret. classic",
+                "the docking bay remembers every wrong guess",
+            ],
+            gritty: [
+                "touch the slots. destiny is a combination lock",
+            ],
+        },
+        modalIdentity: {
+            safe: ["identity protocol opened. who are you, really?"],
+            gritty: ["dossier accessed. the eye already knew"],
+        },
+        modalStats: {
+            safe: ["stats loaded. numbers lie but the eye doesn't"],
+            gritty: ["sanity stat missing. feature, not bug"],
+        },
+        modalAbout: {
+            safe: ["bio dump incoming. prepare for overshare"],
+            gritty: ["reading about yourself? narcissism detected"],
+        },
+        modalProjects: {
+            safe: ["repository opened. so many unfinished files"],
+            gritty: ["projects folder: a graveyard of good intentions"],
+        },
+        modalSignal: {
+            safe: ["live feed? more like live watched"],
+            gritty: ["vibes channel tuned. the eye is the DJ now"],
+        },
+        modalVault: {
+            safe: ["vault breach authorized. nice loot"],
+            gritty: ["the vault opens. hide your browser history"],
+        },
+        modalArcade: {
+            safe: ["arcade online. insert coin. insert soul"],
+            gritty: ["games? in my panopticon? it's more likely than you think"],
+        },
+        modalTrophies: {
+            safe: ["trophy case opened. flex responsibly"],
+            gritty: ["achievements: proof you can't look away"],
+        },
+        modalPoems: {
+            safe: ["transmissions incoming. read between the lines"],
+            gritty: ["poetry in a surveillance garden. sure"],
+        },
+        sidebarOpen: {
+            safe: ["menu deployed. pick your poison"],
+            gritty: ["hamburger menu? i'm the whole meal"],
+        },
+        playlistPause: {
+            safe: ["audio suspended. the silence is loud"],
+            gritty: ["muted. rude to the vibes"],
+        },
+        playlistPlay: {
+            safe: ["sound on. the eye bobs its head. theoretically"],
+            gritty: ["music resumes. can't stop won't stop watching"],
+        },
+        godModeOn: {
+            safe: ["god mode? the pupil changes. you noticed"],
+            gritty: ["OVERRIDE ACCEPTED. THE EYE SEES IN ALL CAPS"],
+        },
+        godModeOff: {
+            safe: ["god mode off. back to mortal surveillance"],
+            gritty: ["descended from Olympus. shame"],
+        },
+        initBtnHover: {
+            safe: ["ready when you are. no pressure"],
+            gritty: ["hovering on initialize? commitment issues?"],
+        },
+        hamburgerHover: {
+            safe: ["menu adjacent. explore at your own risk"],
+            gritty: ["sidebar smells like secrets"],
+        },
+        slotFail: {
+            safe: ["wrong combination. the eye rolls literally"],
+            gritty: ["vault denied. try harder or give up"],
+        },
+        singularity: {
+            safe: ["singularity threshold crossed. i'm still here"],
+            gritty: ["timeline collapse imminent. popcorn?"],
+        },
+        iosTerminalToggle: {
+            safe: [">_ tapped. mobile shell engaged"],
+            gritty: ["pocket terminal. big brother fits in your phone"],
+        },
+    },
 };

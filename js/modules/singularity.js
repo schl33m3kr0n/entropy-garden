@@ -443,6 +443,7 @@ function triggerSingularity() {
     if (isIosSingularity()) return;
 
     setIsSingularityActive(true);
+    globalThis.gardenHooks?.firePanopticonComment?.('singularity', { force: true });
     hideSingularityChrome();
     globalThis.unlockTrophy?.('singularity_ritual');
     setTimeout(() => openSingularityRitual(true), 500);

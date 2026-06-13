@@ -18,8 +18,6 @@ import {
     startPanopticonIdleComments,
     syncPanopticonCodeSequenceComments,
     handlePanopticonVisibilityChange,
-    showPanopticonComment,
-    hidePanopticonComment,
     setPanopticonGodMode,
     updatePanopticonVisibility,
     currentTrackIndex,
@@ -76,6 +74,11 @@ import {
 import { registerServiceWorkerAfterInit } from './core/sw-register.js';
 import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios/ios-ui.js';
 import { setGodTitleArrangement } from './core/god-title.js';
+import {
+    firePanopticonComment,
+    initPanopticonComments,
+    panopticonCommentForModal,
+} from './modules/panopticon-comments.js';
 
 // Bind init immediately so a later module error cannot block the gatekeeper.
 function prefetchGardenBoot() {
@@ -162,6 +165,7 @@ function activateGodMode() {
     // CHECK IF ALREADY ACTIVE
     if (body.classList.contains('god-mode')) {
         setPanopticonGodMode(false);
+        firePanopticonComment('godModeOff');
         globalThis.EntropyCipherHint?.onGodModeOff?.();
         pushTerminalLog("> SYSTEM OVERRIDE TERMINATED. RETURNING TO NORMALCY.");
         playSound(sfx.glitch);
@@ -173,6 +177,7 @@ function activateGodMode() {
     else {
         body.classList.add('god-mode');
         setPanopticonGodMode(true);
+        firePanopticonComment('godModeOn', { force: true });
         setGodTitleArrangement(h1, true);
         pushTerminalLog("!!! OVERRIDE ACCEPTED !!!");
         playSound(sfx.missionCleared);
@@ -460,6 +465,8 @@ function revealGardenUI() {
     startGlitchLoop();
     startIdleDissociation();
     startPanopticonIdleComments();
+    initPanopticonComments();
+    setTimeout(() => firePanopticonComment('init', { force: true }), 1400);
 
     const term = document.getElementById('terminal-container');
 
@@ -595,6 +602,7 @@ let currentPoemIndex = 0;
 function handleReroll() {
     playSound(sfx.refresh);
     triggerPanopticonReroll();
+    firePanopticonComment('reroll');
     randomizeData();
     globalThis.unlockTrophy?.('entropic_reroll');
 }
@@ -661,6 +669,7 @@ function cycleSlot(slotNumber) {
     slotIndexes[i] = (slotIndexes[i] + 1) % cycleArtifacts.length;
     renderCycleSlot(slotNumber);
     playSound(sfx.collectible);
+    firePanopticonComment('dockingSlot');
     checkCycleWin();
 }
 
@@ -702,6 +711,7 @@ function checkCycleWin() {
     pushTerminalLog("> ERROR: VAULT ENCRYPTED. TERMINAL OVERRIDE REQUIRED.");
     playSound(sfx.oopsy);
     triggerPanopticonEyeRoll();
+    firePanopticonComment('slotFail');
 
     document.querySelectorAll('.slot').forEach((s) => {
         s.style.animation = 'errorShake 0.4s ease';
@@ -769,12 +779,14 @@ function toggleMode() {
         btn.innerText = "CORRUPTED MODE";
         playSound(sfx.glitch);
         pushTerminalLog("> CORRUPTED MODE ENGAGED");
+        firePanopticonComment('corruptOn', { force: true });
         globalThis.unlockTrophy?.('corrupted_bloom');
     } else {
         document.body.classList.remove('corrupted');
         btn.innerText = "SAFE MODE";
         playSound(sfx.it);
         pushTerminalLog("> SAFE MODE RESTORED");
+        firePanopticonComment('corruptOff');
     }
     randomizeData();
     rebuildTerminalLogPool();
@@ -931,9 +943,8 @@ function openModal(id) {
         topZIndex++;
         m.style.zIndex = topZIndex;
 
-        pushTerminalLog(`> Accessing ${resolvedId.toUpperCase()} protocol...`); 
-
-        // Load the arcade logic only if the arcade modal is opened
+        pushTerminalLog(`> Accessing ${resolvedId.toUpperCase()} protocol...`);
+        panopticonCommentForModal(resolvedId);
         if (resolvedId === 'arcade') {
             loadArcadeLevel().catch((err) => {
                 console.error('[Entropy Garden] arcade failed to load', err);
@@ -1083,10 +1094,12 @@ function bindDomEvents() {
                 playCurrentBgmTrack();
                 setPlayPauseLabel(this, true);
                 pushTerminalLog("> AUDIO RESUMED.");
+                firePanopticonComment('playlistPlay');
             } else {
                 track.pause();
                 setPlayPauseLabel(this, false);
                 pushTerminalLog("> AUDIO SUSPENDED.");
+                firePanopticonComment('playlistPause');
             }
         });
     }
@@ -1108,17 +1121,6 @@ function bindDomEvents() {
     const modeBtn = document.getElementById('mode-btn');
     if (modeBtn) {
         modeBtn.addEventListener('click', toggleMode);
-        if (!modeBtn.dataset.satchHoverBound) {
-            modeBtn.dataset.satchHoverBound = '1';
-            modeBtn.addEventListener('mouseenter', () => {
-                if (isCorrupted) return;
-                showPanopticonComment('are you sure you want to do that?', 3200);
-            });
-            modeBtn.addEventListener('mouseleave', () => {
-                if (isCorrupted) return;
-                hidePanopticonComment();
-            });
-        }
     }
     /* next-poem / reset-timeline: bound in singularity.js (iOS touchend-safe) */
 
@@ -1540,6 +1542,7 @@ globalThis.gardenHooks = {
     toggleMode,
     resetTimeline,
     resetIdleTimer,
+    firePanopticonComment,
     konamiBlocksPongArming: () => false,
     isKonamiInProgress: () => false,
     isKonamiActivelyEntering: () => false,

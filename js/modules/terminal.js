@@ -67,6 +67,7 @@ export function toggleTerminal() {
         setTermInputFocusable(false);
         termInput?.blur();
         if (sfx.burp) playSound(sfx.burp);
+        globalThis.gardenHooks?.firePanopticonComment?.('terminalClose');
         if (cipherStage > 0) {
             setCipherStage(0);
             globalThis.EntropyCipherHint?.resetCipherHints?.();
@@ -78,6 +79,7 @@ export function toggleTerminal() {
     if (document.activeElement) document.activeElement.blur();
     playTerminalOpenSound();
     terminalContainer.classList.add('active');
+    globalThis.gardenHooks?.firePanopticonComment?.('terminalOpen');
     setTermInputFocusable(true);
     lastTerminalOpenTime = Date.now();
     setTimeout(() => {
