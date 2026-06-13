@@ -726,16 +726,15 @@ body:not(.ios-ui) #grid-canvas {
 .panopticon-god-pyramid {
     position: absolute;
     left: 50%;
-    top: 72%;
+    top: 50%;
     width: clamp(150px, 22vw, 240px);
-    height: clamp(130px, 19vw, 210px);
-    transform: translate(-50%, -42%);
+    height: clamp(150px, 22vw, 240px);
+    transform: translate(-50%, -50%);
     z-index: 0;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 1.2s ease, visibility 1.2s ease;
-    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.5));
 }
 
 .panopticon-god-pyramid svg {
@@ -744,19 +743,10 @@ body:not(.ios-ui) #grid-canvas {
     height: 100%;
 }
 
-.god-pyramid-cap {
-    filter: drop-shadow(0 0 6px rgba(232, 197, 71, 0.55));
-}
-
 body.god-mode #panopticon-eye.god-active .panopticon-god-pyramid,
 body.god-mode #panopticon-eye.god-rainbow .panopticon-god-pyramid {
     opacity: 0.94;
     visibility: visible;
-}
-
-body.god-mode #panopticon-eye.god-active .panopticon-god-pyramid {
-    filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.55))
-        drop-shadow(0 0 14px rgba(232, 197, 71, 0.18));
 }
 
 body.pong-playing .panopticon-god-pyramid,
