@@ -444,6 +444,7 @@ function triggerSingularity() {
 
     setIsSingularityActive(true);
     globalThis.gardenHooks?.firePanopticonComment?.('singularity', { force: true });
+    globalThis.gardenHooks?.recordBehavior?.('singularity');
     hideSingularityChrome();
     globalThis.unlockTrophy?.('singularity_ritual');
     setTimeout(() => openSingularityRitual(true), 500);

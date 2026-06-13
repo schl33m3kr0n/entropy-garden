@@ -79,6 +79,12 @@ import {
     initPanopticonComments,
     panopticonCommentForModal,
 } from './modules/panopticon-comments.js';
+import {
+    initBehavioralAnalysis,
+    recordBehavior,
+    printBehaviorReport,
+    getBehaviorSnapshot,
+} from './modules/behavioral-analysis.js';
 
 // Bind init immediately so a later module error cannot block the gatekeeper.
 function prefetchGardenBoot() {
@@ -166,6 +172,7 @@ function activateGodMode() {
     if (body.classList.contains('god-mode')) {
         setPanopticonGodMode(false);
         firePanopticonComment('godModeOff');
+        recordBehavior('god_mode');
         globalThis.EntropyCipherHint?.onGodModeOff?.();
         pushTerminalLog("> SYSTEM OVERRIDE TERMINATED. RETURNING TO NORMALCY.");
         playSound(sfx.glitch);
@@ -178,6 +185,7 @@ function activateGodMode() {
         body.classList.add('god-mode');
         setPanopticonGodMode(true);
         firePanopticonComment('godModeOn', { force: true });
+        recordBehavior('god_mode');
         setGodTitleArrangement(h1, true);
         pushTerminalLog("!!! OVERRIDE ACCEPTED !!!");
         playSound(sfx.missionCleared);
@@ -466,6 +474,7 @@ function revealGardenUI() {
     startIdleDissociation();
     startPanopticonIdleComments();
     initPanopticonComments();
+    initBehavioralAnalysis({ firePanopticonComment, pushTerminalLog });
     setTimeout(() => firePanopticonComment('init', { force: true }), 1400);
 
     const term = document.getElementById('terminal-container');
@@ -603,6 +612,7 @@ function handleReroll() {
     playSound(sfx.refresh);
     triggerPanopticonReroll();
     firePanopticonComment('reroll');
+    recordBehavior('reroll');
     randomizeData();
     globalThis.unlockTrophy?.('entropic_reroll');
 }
@@ -670,6 +680,7 @@ function cycleSlot(slotNumber) {
     renderCycleSlot(slotNumber);
     playSound(sfx.collectible);
     firePanopticonComment('dockingSlot');
+    recordBehavior('docking_cycle');
     checkCycleWin();
 }
 
@@ -712,6 +723,7 @@ function checkCycleWin() {
     playSound(sfx.oopsy);
     triggerPanopticonEyeRoll();
     firePanopticonComment('slotFail');
+    recordBehavior('slot_fail');
 
     document.querySelectorAll('.slot').forEach((s) => {
         s.style.animation = 'errorShake 0.4s ease';
@@ -784,6 +796,7 @@ function toggleMode() {
         playSound(sfx.glitch);
         pushTerminalLog("> CORRUPTED MODE ENGAGED");
         firePanopticonComment('corruptOn', { force: true });
+        recordBehavior('corrupt_on');
         globalThis.unlockTrophy?.('corrupted_bloom');
     } else {
         document.body.classList.remove('corrupted');
@@ -791,6 +804,7 @@ function toggleMode() {
         playSound(sfx.it);
         pushTerminalLog("> SAFE MODE RESTORED");
         firePanopticonComment('corruptOff');
+        recordBehavior('corrupt_off');
     }
     randomizeData();
     rebuildTerminalLogPool();
@@ -949,6 +963,7 @@ function openModal(id) {
 
         pushTerminalLog(`> Accessing ${resolvedId.toUpperCase()} protocol...`);
         panopticonCommentForModal(resolvedId);
+        recordBehavior('modal_open', { id: resolvedId });
         if (resolvedId === 'arcade') {
             loadArcadeLevel().catch((err) => {
                 console.error('[Entropy Garden] arcade failed to load', err);
@@ -1099,11 +1114,13 @@ function bindDomEvents() {
                 setPlayPauseLabel(this, true);
                 pushTerminalLog("> AUDIO RESUMED.");
                 firePanopticonComment('playlistPlay');
+                recordBehavior('playlist_toggle');
             } else {
                 track.pause();
                 setPlayPauseLabel(this, false);
                 pushTerminalLog("> AUDIO SUSPENDED.");
                 firePanopticonComment('playlistPause');
+                recordBehavior('playlist_toggle');
             }
         });
     }
@@ -1349,6 +1366,7 @@ function resetIdleTimer() {
                 : lore.idleMessagesSafe;
             const randomMsg = idlePool[Math.floor(Math.random() * idlePool.length)];
             pushTerminalLog(randomMsg);
+            recordBehavior('idle_dissociation');
             
             // A slow, 15-second descent into a blurry void
             document.body.style.transition = 'filter 15s ease-in-out';
@@ -1547,6 +1565,9 @@ globalThis.gardenHooks = {
     resetTimeline,
     resetIdleTimer,
     firePanopticonComment,
+    recordBehavior,
+    printBehaviorReport,
+    getBehaviorSnapshot,
     konamiBlocksPongArming: () => false,
     isKonamiInProgress: () => false,
     isKonamiActivelyEntering: () => false,

@@ -45,17 +45,17 @@ function pickComment(triggerId) {
  * @param {{ text?: string, ttlMs?: number, force?: boolean }} [options]
  */
 export function firePanopticonComment(triggerId, options = {}) {
-    if (!gardenHasStarted || !triggerId) return;
+    if (!gardenHasStarted || !triggerId) return false;
 
     const now = Date.now();
-    if (!options.force && now - lastFireAt < GLOBAL_COOLDOWN_MS) return;
+    if (!options.force && now - lastFireAt < GLOBAL_COOLDOWN_MS) return false;
 
     const text = options.text ?? pickComment(triggerId);
-    if (!text) return;
+    if (!text) return false;
 
     const recent = recentByTrigger.get(triggerId) || [];
-    if (!options.force && recent.includes(text)) return;
-    if (!options.force && text === lastShownText && now - lastShownAt < MIN_REPEAT_GAP_MS) return;
+    if (!options.force && recent.includes(text)) return false;
+    if (!options.force && text === lastShownText && now - lastShownAt < MIN_REPEAT_GAP_MS) return false;
 
     const ttlMs = options.ttlMs ?? (perf.prefersReducedMotion ? 3600 : 4200);
     showPanopticonComment(text, ttlMs);
@@ -64,6 +64,7 @@ export function firePanopticonComment(triggerId, options = {}) {
     lastShownText = text;
     lastShownAt = now;
     recentByTrigger.set(triggerId, [...recent.slice(-5), text]);
+    return true;
 }
 
 function bindHoverComment(el, triggerId, { dismissOnLeave = false, beforeFire = null } = {}) {

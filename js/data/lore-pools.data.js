@@ -806,5 +806,41 @@ globalThis.lorePools = {
             safe: [">_ tapped. mobile shell engaged"],
             gritty: ["pocket terminal. big brother fits in your phone"],
         },
+        behaviorReroll: {
+            safe: ["third reroll. you like unstable timelines"],
+            gritty: ["entropy addict detected. refreshing reality again?"],
+        },
+        behaviorChaos: {
+            safe: ["chaos mode engaged. noted in your file"],
+            gritty: ["corruption toggle logged. enjoy the grit"],
+        },
+        behaviorIdle: {
+            safe: ["you went quiet. i filled the void"],
+            gritty: ["sixty seconds of nothing. dissociation profile updated"],
+        },
+        behaviorOperator: {
+            safe: ["five terminal commands. operator tier unlocked"],
+            gritty: ["keyboard warrior stats climbing. type 'analyze' if you dare"],
+        },
+        behaviorArchivist: {
+            safe: ["four modals opened. archivist behavior pattern"],
+            gritty: ["you read everything. hoarding lore like contraband"],
+        },
+        behaviorWanderer: {
+            safe: ["restless cursor. wandering without destination"],
+            gritty: ["mouse telemetry says you can't sit still"],
+        },
+        behaviorEntropy: {
+            safe: ["reroll count critical. timeline fatigue probable"],
+            gritty: ["stop refreshing. the garden remembers every version"],
+        },
+        behaviorStatue: {
+            safe: ["minimal input detected. statue observer profile"],
+            gritty: ["you stare. i stare back. equilibrium"],
+        },
+        behaviorPeriodic: {
+            safe: ["periodic review complete. session profile stable"],
+            gritty: ["behavioral sweep done. you're still being watched"],
+        },
     },
 };

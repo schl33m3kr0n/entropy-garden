@@ -80,6 +80,7 @@ export function toggleTerminal() {
     playTerminalOpenSound();
     terminalContainer.classList.add('active');
     globalThis.gardenHooks?.firePanopticonComment?.('terminalOpen');
+    globalThis.gardenHooks?.recordBehavior?.('terminal_open');
     setTermInputFocusable(true);
     lastTerminalOpenTime = Date.now();
     setTimeout(() => {
@@ -96,6 +97,7 @@ function openTerminalFromClick(options = {}) {
         lastTerminalOpenTime = Date.now();
     }
     terminalContainer.classList.add('active');
+    if (!wasOpen) globalThis.gardenHooks?.recordBehavior?.('terminal_open');
     setTermInputFocusable(true);
     setTimeout(() => {
         termInput?.focus({ preventScroll: true });
@@ -369,6 +371,7 @@ function runExpressOverride() {
 function processCommand(cmd) {
     // Clean the input to ignore capitals and punctuation
     const cleanCmd = cmd.toLowerCase().replace(/[.,]/g, "").trim();
+    globalThis.gardenHooks?.recordBehavior?.('terminal_command');
 
     if (cmd === 'express') {
         runExpressOverride();
@@ -433,7 +436,7 @@ function processCommand(cmd) {
         playSound(sfx.stfu);
         triggerPanopticonCenterStare();
     }
-    else if(cmd === 'help') pushTerminalLog("AVAILABLE: help, clear, meow, pizza, render, scatter, time, cipher, lexicon, shortcuts");
+    else if(cmd === 'help') pushTerminalLog("AVAILABLE: help, clear, meow, pizza, render, scatter, time, cipher, lexicon, shortcuts, analyze");
     else if(cmd === 'shortcuts') printShortcuts();
     else if(cmd === 'clear') {
         document.getElementById('terminal-output').innerHTML = '';
@@ -476,6 +479,10 @@ function processCommand(cmd) {
     }
     else if(cmd === 'lexicon') {
         printLexicon();
+    }
+    else if (['analyze', 'behavior', 'behaviour', 'profile'].includes(cleanCmd)) {
+        globalThis.gardenHooks?.printBehaviorReport?.();
+        playSound(sfx.it);
     }
     // THE NEW MULTI-STAGE CIPHER COMMAND
     else if(cmd === 'cipher') {
