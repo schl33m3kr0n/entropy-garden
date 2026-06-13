@@ -473,8 +473,12 @@ function revealGardenUI() {
     startGlitchLoop();
     startIdleDissociation();
     startPanopticonIdleComments();
-    initPanopticonComments();
-    initBehavioralAnalysis({ firePanopticonComment, pushTerminalLog });
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            initPanopticonComments();
+            initBehavioralAnalysis({ firePanopticonComment, pushTerminalLog });
+        });
+    });
     setTimeout(() => firePanopticonComment('init', { force: true }), 1400);
 
     const term = document.getElementById('terminal-container');
@@ -492,6 +496,8 @@ function revealGardenUI() {
     const hud = document.getElementById('hud');
     const playlistMenu = document.getElementById('playlist-menu');
     const isIosLayout = document.body.classList.contains('ios-ui');
+
+    scheduleMatrixVisible(isIosLayout);
 
     playSound(sfx.ui);
 
@@ -525,7 +531,7 @@ function revealGardenUI() {
         return;
     }
 
-    setTimeout(() => hud.classList.add('active', 'anim-drop'), 150);
+    setTimeout(() => hud.classList.add('active', 'anim-drop'), HUD_DROP_DELAY_MS);
     setTimeout(() => {
         document.getElementById('mode-btn').classList.add('active');
         document.querySelector('.control-panel').classList.add('active');
@@ -543,6 +549,18 @@ function revealGardenUI() {
 const LOADER_MIN_MS = 4000;
 const LOADER_FADE_HOLD_MS = 500;
 const LOADER_FADE_MAX_MS = 900;
+const HUD_DROP_DELAY_MS = 150;
+const HUD_DROP_ANIM_MS = 1500;
+const MATRIX_VISIBLE_IOS_DELAY_MS = 400;
+
+/** Fade matrix in after HUD intro so canvas filters don't compete with UI animations. */
+function scheduleMatrixVisible(isIosLayout) {
+    if (!canvas) return;
+    const delay = isIosLayout
+        ? MATRIX_VISIBLE_IOS_DELAY_MS
+        : HUD_DROP_DELAY_MS + HUD_DROP_ANIM_MS;
+    setTimeout(() => canvas.classList.add('matrix-visible'), delay);
+}
 
 function startLoader() {
     const loader = document.getElementById('loader');
@@ -577,7 +595,6 @@ if (progress >= 100) {
             setTimeout(() => {
                 loader.classList.add('loader-exiting');
                 loader.style.opacity = '0';
-                canvas.classList.add('matrix-visible');
 
                 let gardenRevealed = false;
                 const finishLoaderFade = () => {
