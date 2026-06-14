@@ -100,7 +100,7 @@ function beginGardenExperience() {
         document.body.classList.remove('garden-ready');
 
         const term = document.getElementById('terminal-container');
-        term?.classList.remove('active', 'reveal-in', 'is-sliver');
+        term?.classList.remove('active', 'reveal-in');
         term?.setAttribute('hidden', '');
         document.getElementById('ios-terminal-toggle')?.setAttribute('hidden', '');
 
@@ -502,13 +502,10 @@ function revealGardenUI() {
     const iosTerminalToggle = document.getElementById('ios-terminal-toggle');
 
     const revealTerminalChrome = () => {
-        iosTerminalToggle?.removeAttribute('hidden');
-        const term = document.getElementById('terminal-container');
-        if (!term) return;
-        term.removeAttribute('hidden');
-        term.classList.add('is-sliver');
-        void term.offsetWidth;
-        requestAnimationFrame(() => term.classList.add('reveal-in'));
+        if (!iosTerminalToggle) return;
+        iosTerminalToggle.removeAttribute('hidden');
+        void iosTerminalToggle.offsetWidth;
+        requestAnimationFrame(() => iosTerminalToggle.classList.add('reveal-in'));
     };
 
     if (isIosLayout) {

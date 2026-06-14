@@ -12,7 +12,7 @@
         if (!term) return false;
 
         term.removeAttribute('hidden');
-        term.classList.add('reveal-in', 'is-sliver', 'active');
+        term.classList.add('reveal-in', 'active');
 
         var toggle = document.getElementById('ios-terminal-toggle');
         if (toggle) toggle.removeAttribute('hidden');

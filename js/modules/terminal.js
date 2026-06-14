@@ -51,15 +51,22 @@ function playTerminalOpenSound() {
 
 function ensureTerminalChromeVisible() {
     if (!terminalContainer) return;
-    terminalContainer.removeAttribute('hidden');
-    terminalContainer.classList.add('reveal-in', 'is-sliver');
     document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
 }
 
-function collapseTerminalToSliver() {
+function hideTerminalPanel() {
     if (!terminalContainer) return;
-    terminalContainer.classList.remove('active');
-    terminalContainer.classList.add('is-sliver', 'reveal-in');
+    terminalContainer.classList.remove('active', 'reveal-in');
+    terminalContainer.setAttribute('hidden', '');
+}
+
+function showTerminalPanel() {
+    if (!terminalContainer) return;
+    terminalContainer.removeAttribute('hidden');
+    terminalContainer.classList.remove('active', 'reveal-in');
+    void terminalContainer.offsetWidth;
+    terminalContainer.classList.add('reveal-in', 'active');
+    document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
 }
 
 export function toggleTerminal() {
@@ -67,7 +74,7 @@ export function toggleTerminal() {
     ensureTerminalChromeVisible();
 
     if (terminalContainer.classList.contains('active')) {
-        collapseTerminalToSliver();
+        hideTerminalPanel();
         setTermInputFocusable(false);
         termInput?.blur();
         if (sfx.burp) playSound(sfx.burp);
@@ -82,7 +89,7 @@ export function toggleTerminal() {
 
     if (document.activeElement) document.activeElement.blur();
     playTerminalOpenSound();
-    terminalContainer.classList.add('active');
+    showTerminalPanel();
     globalThis.gardenHooks?.firePanopticonComment?.('terminalOpen');
     globalThis.gardenHooks?.recordBehavior?.('terminal_open');
     setTermInputFocusable(true);
@@ -100,7 +107,8 @@ function openTerminalFromClick(options = {}) {
         playTerminalOpenSound();
         lastTerminalOpenTime = Date.now();
     }
-    terminalContainer.classList.add('active');
+    if (!wasOpen) showTerminalPanel();
+    else terminalContainer.classList.add('active');
     if (!wasOpen) globalThis.gardenHooks?.recordBehavior?.('terminal_open');
     setTermInputFocusable(true);
     setTimeout(() => {
@@ -554,17 +562,9 @@ function dismissTerminalIfOutside(target) {
     if (!terminalContainer?.classList.contains('active')) return;
     if (shouldIgnoreTerminalOutsideDismiss()) return;
     if (target?.closest?.('#terminal-container, #ios-terminal-toggle')) return;
-    collapseTerminalToSliver();
+    hideTerminalPanel();
     setTermInputFocusable(false);
     termInput?.blur();
-}
-
-function handleTerminalActivate(e) {
-    if (!terminalContainer || gardenBlocksTerminalKeys()) return;
-    if (terminalContainer.classList.contains('active')) return;
-    if (e.type === 'pointerup' && e.pointerType === 'mouse' && e.button !== 0) return;
-    e.stopPropagation();
-    openTerminalFromClick({ playOpenSound: !terminalContainer.classList.contains('active') });
 }
 
 function bindTerminalInteractions() {
@@ -576,7 +576,6 @@ function bindTerminalInteractions() {
 
     if (!terminalInteractionsBound) {
         terminalInteractionsBound = true;
-        terminalContainer.addEventListener('pointerup', handleTerminalActivate);
     }
 
     if (terminalGlobalHandlersBound) return;
