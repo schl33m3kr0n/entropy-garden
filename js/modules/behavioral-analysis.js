@@ -7,7 +7,6 @@ import { resetPanopticonIdleCommentTimer } from '../core/shared.js';
 
 const ANALYSIS_INTERVAL_MS = 240_000;
 const POINTER_SAMPLE_MS = 4000;
-const MILESTONE_COOLDOWN_MS = 90_000;
 
 const metrics = {
     sessionStart: 0,
@@ -29,7 +28,6 @@ const metrics = {
 };
 
 const milestones = new Set();
-let lastInsightAt = 0;
 let lastPointerSampleAt = 0;
 let pointerMovesSinceSample = 0;
 let analysisTimer = null;
@@ -80,28 +78,35 @@ function deriveLabels() {
     return labels;
 }
 
-function emitInsight(triggerId, options = {}) {
+function emitInsight(triggerId, options = {}, attempt = 0) {
     if (!gardenHasStarted || !fireComment) return;
-    const now = Date.now();
-    if (!options.force && now - lastInsightAt < MILESTONE_COOLDOWN_MS) return;
     if (milestones.has(triggerId) && !options.force) return;
 
-    const shown = fireComment(triggerId, { force: !!options.force, ttlMs: options.ttlMs });
-    if (shown) resetPanopticonIdleCommentTimer();
+    const shown = fireComment(triggerId, {
+        force: true,
+        ttlMs: options.ttlMs,
+    });
+    if (!shown) {
+        if (attempt < 4) {
+            setTimeout(() => emitInsight(triggerId, options, attempt + 1), 3200);
+        }
+        return;
+    }
+
+    resetPanopticonIdleCommentTimer();
     milestones.add(triggerId);
-    lastInsightAt = now;
 }
 
 function checkMilestones() {
-    if (metrics.rerolls === 3) emitInsight('behaviorReroll');
-    if (metrics.corruptEngagements === 1) emitInsight('behaviorChaos');
-    if (metrics.idleDissociations === 1) emitInsight('behaviorIdle');
-    if (metrics.terminalCommands === 5) emitInsight('behaviorOperator');
+    if (metrics.rerolls >= 3) emitInsight('behaviorReroll');
+    if (metrics.corruptEngagements >= 1) emitInsight('behaviorChaos');
+    if (metrics.idleDissociations >= 1) emitInsight('behaviorIdle');
+    if (metrics.terminalCommands >= 5) emitInsight('behaviorOperator');
 
     const modalTotal = Object.values(metrics.modalOpens).reduce((a, b) => a + b, 0);
-    if (modalTotal === 4) emitInsight('behaviorArchivist');
+    if (modalTotal >= 4) emitInsight('behaviorArchivist');
 
-    if (sessionMinutes() >= 8 && metrics.pointerBursts >= 6) {
+    if (sessionMinutes() >= 4 && metrics.pointerBursts >= 4) {
         emitInsight('behaviorWanderer');
     }
 }
