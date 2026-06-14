@@ -27,20 +27,6 @@ function restoreTitlePresentation(h1, pondery) {
     h1.classList.toggle('god-title-pondery', pondery);
 }
 
-/** Collapse letter chrome back to plain h1 so the unified title-card gradient returns. */
-function collapseGodTitleChrome(h1) {
-    if (!h1?.classList.contains('god-title-live')) return;
-    clearTitleWidth(h1);
-    h1.textContent = SOURCE;
-    h1.classList.remove('god-title-live', 'god-title-pondery');
-    h1.style.removeProperty('color');
-    h1.style.removeProperty('background');
-    h1.style.removeProperty('-webkit-background-clip');
-    h1.style.removeProperty('background-clip');
-    h1.style.removeProperty('text-shadow');
-    h1.setAttribute('aria-label', SOURCE);
-}
-
 function restoreSourceLetters(chrome) {
     chrome.querySelectorAll('.god-title-letter').forEach((el) => {
         const i = Number(el.dataset.sourceIndex);
@@ -91,13 +77,20 @@ function orderedForArrangement(letters, pondery) {
     return TO_PONDERY.map((sourceIdx) => letters[sourceIdx]);
 }
 
-function lockTitleWidth(h1, chrome) {
-    const rect = chrome.getBoundingClientRect();
-    h1.style.minWidth = `${Math.ceil(rect.width)}px`;
+function measureArrangementWidth(chrome, letters, pondery) {
+    const currentOrder = [...chrome.querySelectorAll('.god-title-letter')];
+    orderedForArrangement(letters, pondery).forEach((el) => chrome.appendChild(el));
+    const width = chrome.getBoundingClientRect().width;
+    currentOrder.forEach((el) => chrome.appendChild(el));
+    return width;
 }
 
-function clearTitleWidth(h1) {
-    h1.style.removeProperty('min-width');
+function lockTitleWidth(h1, chrome, letters) {
+    const width = Math.ceil(Math.max(
+        measureArrangementWidth(chrome, letters, true),
+        measureArrangementWidth(chrome, letters, false),
+    ));
+    h1.style.minWidth = `${width}px`;
 }
 
 function flipReorder(chrome, ordered, token, durationMs = 720) {
@@ -180,26 +173,26 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     const letters = lettersInSourceOrder(chrome);
 
     h1.setAttribute('aria-label', pondery ? TARGET : SOURCE);
-    restoreTitlePresentation(h1, pondery);
+    if (pondery) restoreTitlePresentation(h1, true);
 
     if (titleAnimating) cancelTitleAnimation(chrome);
 
     if (!pondery) restoreSourceLetters(chrome);
 
     const finish = () => {
-        clearTitleWidth(h1);
-        if (!pondery) collapseGodTitleChrome(h1);
+        if (!pondery) restoreTitlePresentation(h1, false);
     };
 
     if (!animate || perf.prefersReducedMotion) {
         applyArrangement(chrome, pondery);
+        lockTitleWidth(h1, chrome, letters);
         finish();
         return Promise.resolve();
     }
 
     const token = titleAnimToken;
     titleAnimating = true;
-    lockTitleWidth(h1, chrome);
+    lockTitleWidth(h1, chrome, letters);
 
     const ordered = orderedForArrangement(letters, pondery);
     return flipReorder(chrome, ordered, token).finally(() => {

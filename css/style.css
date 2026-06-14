@@ -331,56 +331,20 @@ body.ios-ui #loader-text {
 }
 
 /* --- GOD MODE --- */
+h1.god-title-live {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: unset;
+    color: unset;
+}
+
+/* One continuous title gradient on the chrome while letters shuffle (Chowder-style). */
 h1.god-title-live .god-title-chrome {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-wrap: nowrap;
-}
-
-h1.god-title-live .god-title-letter {
-    display: inline-block;
-    will-change: transform;
-}
-
-/* Outside god mode each letter carries the rainbow clip (required once chrome splits the title). */
-body:not(.god-mode) h1.god-title-live .god-title-letter {
-    background: linear-gradient(90deg,
-        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
-        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
-    );
-    background-size: 200% 100%;
-    background-position: var(--rainbow-offset, 0%) 50%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: none;
-}
-
-h1.god-title-live .god-title-letter.is-space {
-    min-width: 0.38em;
-}
-
-body.god-mode h1.god-title-live .god-title-letter {
-    background: linear-gradient(90deg,
-        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
-        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
-    );
-    background-size: 200% 100%;
-    background-position: var(--rainbow-offset, 0%) 50%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-/* Pondery Argent: one continuous rainbow across the full title (same as default h1). */
-body.god-mode h1.god-title-live.god-title-pondery {
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-}
-
-body.god-mode h1.god-title-live.god-title-pondery .god-title-chrome {
     background: linear-gradient(90deg,
         hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
         hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
@@ -393,7 +357,9 @@ body.god-mode h1.god-title-live.god-title-pondery .god-title-chrome {
     color: transparent;
 }
 
-body.god-mode h1.god-title-live.god-title-pondery .god-title-letter {
+h1.god-title-live .god-title-letter {
+    display: inline-block;
+    will-change: transform;
     background: none;
     -webkit-background-clip: unset;
     background-clip: unset;
@@ -402,28 +368,17 @@ body.god-mode h1.god-title-live.god-title-pondery .god-title-letter {
     text-shadow: none;
 }
 
-body.corrupted.god-mode h1.god-title-live .god-title-letter {
+h1.god-title-live .god-title-letter.is-space {
+    min-width: 0.38em;
+}
+
+body.corrupted h1.god-title-live .god-title-chrome {
     background: none;
     -webkit-background-clip: unset;
     background-clip: unset;
     -webkit-text-fill-color: var(--alert-red);
     color: var(--alert-red);
     text-shadow: 0 0 8px rgba(255, 0, 85, 0.35);
-}
-
-body.corrupted.god-mode h1.god-title-live.god-title-pondery .god-title-chrome {
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-    -webkit-text-fill-color: var(--alert-red);
-    color: var(--alert-red);
-    text-shadow: 0 0 8px rgba(255, 0, 85, 0.35);
-}
-
-body.corrupted.god-mode h1.god-title-live.god-title-pondery .god-title-letter {
-    -webkit-text-fill-color: inherit;
-    color: inherit;
-    text-shadow: none;
 }
 
 body.corrupted.god-mode .hud-title-card::after {
@@ -445,17 +400,6 @@ body.corrupted:not(.god-mode) h1.god-title-live {
     background: none;
     -webkit-background-clip: unset;
     background-clip: unset;
-    -webkit-text-fill-color: var(--alert-red);
-    color: var(--alert-red);
-}
-
-body.corrupted:not(.god-mode) h1.god-title-live .god-title-letter {
-    -webkit-text-fill-color: var(--alert-red);
-    color: var(--alert-red);
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-    text-shadow: none;
 }
 
 body.corrupted:not(.god-mode) .hud-title-card::after {
