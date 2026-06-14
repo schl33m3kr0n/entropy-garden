@@ -540,6 +540,7 @@ globalThis.lorePools = {
         "be the reason someone asks themself 'hell can't be that bad, right?'",
         "san francisco: because homelessness is a feature, not a bug",
         "i'm rick james, bitch!",
+        "what are you wearing?",
     ],
     panopticonReturnCommentsSafe: [
         "missed me?",
