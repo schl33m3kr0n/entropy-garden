@@ -384,8 +384,7 @@ export function revealTerminalShell() {
 
     const wasOpen = term.classList.contains('active');
     term.removeAttribute('hidden');
-    term.classList.add('reveal-in', 'active');
-    document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
+    term.classList.add('fab-ready', 'reveal-in', 'active');
 
     if (input) {
         input.tabIndex = 0;

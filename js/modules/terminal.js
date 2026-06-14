@@ -49,29 +49,34 @@ function playTerminalOpenSound() {
     }
 }
 
-function ensureTerminalChromeVisible() {
+function ensureFabShellVisible() {
     if (!terminalContainer) return;
-    document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
+    terminalContainer.removeAttribute('hidden');
+    if (terminalContainer.classList.contains('reveal-in')) {
+        terminalContainer.classList.add('fab-ready');
+        return;
+    }
+    terminalContainer.classList.remove('active');
+    terminalContainer.classList.add('fab-ready');
+    void terminalContainer.offsetWidth;
+    terminalContainer.classList.add('reveal-in');
 }
 
 function hideTerminalPanel() {
     if (!terminalContainer) return;
-    terminalContainer.classList.remove('active', 'reveal-in');
-    terminalContainer.setAttribute('hidden', '');
+    terminalContainer.classList.remove('active');
 }
 
 function showTerminalPanel() {
     if (!terminalContainer) return;
-    terminalContainer.removeAttribute('hidden');
-    terminalContainer.classList.remove('active', 'reveal-in');
+    ensureFabShellVisible();
     void terminalContainer.offsetWidth;
-    terminalContainer.classList.add('reveal-in', 'active');
-    document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
+    terminalContainer.classList.add('active');
 }
 
 export function toggleTerminal() {
     if (!terminalContainer || gardenBlocksTerminalKeys()) return;
-    ensureTerminalChromeVisible();
+    ensureFabShellVisible();
 
     if (terminalContainer.classList.contains('active')) {
         hideTerminalPanel();
@@ -101,7 +106,7 @@ export function toggleTerminal() {
 
 function openTerminalFromClick(options = {}) {
     if (!terminalContainer || gardenBlocksTerminalKeys()) return;
-    ensureTerminalChromeVisible();
+    ensureFabShellVisible();
     const wasOpen = terminalContainer.classList.contains('active');
     if (!wasOpen && options.playOpenSound !== false) {
         playTerminalOpenSound();

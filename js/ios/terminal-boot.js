@@ -5,6 +5,20 @@
 (function () {
     var lastTap = 0;
 
+    function revealFabShell() {
+        if (!document.body.classList.contains('garden-ready')) return false;
+        var term = document.getElementById('terminal-container');
+        if (!term) return false;
+        term.removeAttribute('hidden');
+        term.classList.remove('reveal-in', 'active');
+        term.classList.add('fab-ready');
+        void term.offsetWidth;
+        requestAnimationFrame(function () {
+            term.classList.add('reveal-in');
+        });
+        return true;
+    }
+
     function revealTerminalShell() {
         if (!document.body.classList.contains('garden-ready')) return false;
         var term = document.getElementById('terminal-container');
@@ -12,10 +26,7 @@
         if (!term) return false;
 
         term.removeAttribute('hidden');
-        term.classList.add('reveal-in', 'active');
-
-        var toggle = document.getElementById('ios-terminal-toggle');
-        if (toggle) toggle.removeAttribute('hidden');
+        term.classList.add('fab-ready', 'reveal-in', 'active');
 
         if (input) {
             input.tabIndex = 0;
@@ -87,8 +98,6 @@
     function onGardenReady() {
         bindToggle();
         bindInputSubmit();
-        var toggle = document.getElementById('ios-terminal-toggle');
-        if (toggle) toggle.removeAttribute('hidden');
     }
 
     if (document.readyState === 'loading') {

@@ -177,15 +177,16 @@
     <div id="refresh-hint">[ PRESS R TO REROLL ]</div>
 
     <div id="terminal-container" hidden>
-        <div id="terminal-output"></div>
-        <div id="terminal-input-line">
-            <span>></span><input type="text" id="term-input" tabindex="-1" autocomplete="off" spellcheck="false" />
+        <button type="button" id="ios-terminal-toggle" class="ios-terminal-toggle" aria-label="Open terminal">
+            <span class="ios-terminal-toggle-glyph" aria-hidden="true">&gt;_</span>
+        </button>
+        <div class="terminal-panel">
+            <div id="terminal-output"></div>
+            <div id="terminal-input-line">
+                <span>></span><input type="text" id="term-input" tabindex="-1" autocomplete="off" spellcheck="false" />
+            </div>
         </div>
     </div>
-
-    <button type="button" id="ios-terminal-toggle" class="ios-terminal-toggle" hidden aria-label="Open terminal">
-        <span class="ios-terminal-toggle-glyph" aria-hidden="true">&gt;_</span>
-    </button>
 
     <div id="hud">
         <div class="hud-title-card">

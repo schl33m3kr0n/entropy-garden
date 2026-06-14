@@ -100,9 +100,8 @@ function beginGardenExperience() {
         document.body.classList.remove('garden-ready');
 
         const term = document.getElementById('terminal-container');
-        term?.classList.remove('active', 'reveal-in');
+        term?.classList.remove('active', 'reveal-in', 'fab-ready');
         term?.setAttribute('hidden', '');
-        document.getElementById('ios-terminal-toggle')?.setAttribute('hidden', '');
 
         const initScreen = document.getElementById('init-screen');
         if (initScreen) initScreen.style.display = 'none';
@@ -499,13 +498,14 @@ function revealGardenUI() {
 
     playSound(sfx.ui);
 
-    const iosTerminalToggle = document.getElementById('ios-terminal-toggle');
-
     const revealTerminalChrome = () => {
-        if (!iosTerminalToggle) return;
-        iosTerminalToggle.removeAttribute('hidden');
-        void iosTerminalToggle.offsetWidth;
-        requestAnimationFrame(() => iosTerminalToggle.classList.add('reveal-in'));
+        const term = document.getElementById('terminal-container');
+        if (!term) return;
+        term.removeAttribute('hidden');
+        term.classList.remove('reveal-in', 'active');
+        term.classList.add('fab-ready');
+        void term.offsetWidth;
+        requestAnimationFrame(() => term.classList.add('reveal-in'));
     };
 
     if (isIosLayout) {
@@ -516,7 +516,7 @@ function revealGardenUI() {
             playlistMenu.classList.add('active');
             updatePlaylistUI();
         }
-        setTimeout(revealTerminalChrome, 450);
+        requestAnimationFrame(() => revealTerminalChrome());
         scrollIosHudHome('smooth');
         requestAnimationFrame(() => {
             requestAnimationFrame(() => showIosScrollHints());
@@ -529,7 +529,7 @@ function revealGardenUI() {
         document.getElementById('mode-btn').classList.add('active');
         document.querySelector('.control-panel').classList.add('active');
     }, 450);
-    setTimeout(revealTerminalChrome, 600);
+    setTimeout(revealTerminalChrome, 450);
     setTimeout(() => {
         if (playlistMenu) {
             playlistMenu.classList.add('active');

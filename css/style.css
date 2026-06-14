@@ -935,35 +935,45 @@ body.corrupted #grid-canvas.matrix-visible {
     }
 }
 
-/* --- INTERACTIVE TERMINAL (FAB bootstrap expands into full panel) --- */
+/* --- INTERACTIVE TERMINAL (FAB morphs into panel and back) --- */
 #terminal-container {
+    --terminal-fab-size: 52px;
     position: fixed;
     right: calc(env(safe-area-inset-right) + 10px);
     bottom: calc(env(safe-area-inset-bottom) + 10px);
     left: auto;
-    width: min(350px, calc(100vw - 20px - env(safe-area-inset-right)));
-    height: min(220px, 44dvh);
+    width: var(--terminal-fab-size);
+    height: var(--terminal-fab-size);
     font-family: var(--main-font);
     font-size: 0.75rem;
     color: var(--neon-green);
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 12, 0, 0.92);
     border: 2px solid var(--neon-green);
-    padding: 8px 10px;
-    z-index: 10055;
+    padding: 0;
+    z-index: 10060;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: center;
     text-shadow: 0 0 3px var(--neon-green);
+    box-shadow: 0 0 14px rgba(0, 255, 0, 0.25);
     box-sizing: border-box;
     overflow: hidden;
     border-radius: var(--radius-md);
-    transform-origin: bottom right;
+    transform: translateX(calc(100% + 24px));
     opacity: 0;
     pointer-events: none;
     cursor: default;
+    transition:
+        width 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+        border-radius 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 1.5s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.55s ease,
+        background 0.35s ease,
+        box-shadow 0.35s ease;
 }
 
-/* Hidden until loader finishes (revealGardenUI adds .garden-ready) */
 body.garden-loading #terminal-container,
 body:not(.garden-ready) #terminal-container,
 #terminal-container[hidden] {
@@ -972,71 +982,85 @@ body:not(.garden-ready) #terminal-container,
     pointer-events: none !important;
 }
 
-body.garden-ready #terminal-container:not(.active) {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
+body.garden-ready #terminal-container.fab-ready:not([hidden]) {
+    display: flex !important;
 }
 
-body.garden-ready #terminal-container.active:not([hidden]) {
-    display: flex !important;
+body.garden-ready #terminal-container.fab-ready.reveal-in:not([hidden]) {
+    transform: translateX(0);
+    opacity: 1;
     pointer-events: auto;
 }
 
-@keyframes terminalFabExpand {
-    from {
-        transform: scale(0.148, 0.236);
-        opacity: 0.65;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
+body.garden-ready #terminal-container.fab-ready.active:not([hidden]) {
+    transform: translateX(0);
+    opacity: 1;
+    width: min(350px, calc(100vw - 20px - env(safe-area-inset-right)));
+    height: min(220px, 44dvh);
+    padding: 8px 10px;
+    align-items: stretch;
+    justify-content: flex-end;
+    background: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 18px rgba(0, 255, 0, 0.18);
+    pointer-events: auto;
 }
 
-body.garden-ready .ios-terminal-toggle:not([hidden]) {
+#terminal-container #ios-terminal-toggle {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: fixed;
-    right: calc(env(safe-area-inset-right) + 10px);
-    bottom: calc(env(safe-area-inset-bottom) + 10px);
-    width: 52px;
-    height: 52px;
-    z-index: 10060;
     margin: 0;
     padding: 0;
-    border: 2px solid var(--neon-green);
-    border-radius: var(--radius-md);
-    background: rgba(0, 12, 0, 0.92);
-    color: var(--neon-green);
-    font-family: var(--main-font);
+    border: none;
+    border-radius: inherit;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
     font-size: 0.95rem;
     letter-spacing: 0.05em;
     text-shadow: 0 0 6px var(--neon-green);
-    box-shadow: 0 0 14px rgba(0, 255, 0, 0.25);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     cursor: pointer;
-    transform: translateX(calc(100% + 24px));
-    opacity: 0;
-    transition:
-        transform 1.5s cubic-bezier(0.25, 1, 0.5, 1),
-        opacity 0.6s ease,
-        background 0.3s;
-}
-
-body.garden-ready .ios-terminal-toggle.reveal-in:not([hidden]) {
-    transform: translateX(0);
     opacity: 1;
+    transition: opacity 0.2s ease;
+    z-index: 2;
 }
 
-body.garden-ready .ios-terminal-toggle:not([hidden]) .ios-terminal-toggle-glyph {
+#terminal-container.active #ios-terminal-toggle {
+    opacity: 0;
+    pointer-events: none;
+    transition-delay: 0s;
+}
+
+#terminal-container:not(.active) #ios-terminal-toggle {
+    transition-delay: 0.22s;
+}
+
+#terminal-container #ios-terminal-toggle .ios-terminal-toggle-glyph {
     pointer-events: none;
 }
 
-#terminal-container.active ~ .ios-terminal-toggle:not([hidden]) {
-    opacity: 0.35;
+#terminal-container .terminal-panel {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+
+#terminal-container.active .terminal-panel {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0.14s;
 }
 
 #terminal-container::before {
@@ -1056,12 +1080,6 @@ body.garden-ready .ios-terminal-toggle:not([hidden]) .ios-terminal-toggle-glyph 
 
 .burp-active {
     animation: terminalBurp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-#terminal-container.reveal-in.active {
-    animation: terminalFabExpand 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.9);
 }
 
 #terminal-container.active::before {
@@ -2109,7 +2127,7 @@ body.perf-lite #loader-leaf {
         padding: 28px 24px;
     }
 
-    #terminal-container {
+    #terminal-container.active {
         width: min(350px, 85vw);
     }
 
@@ -3294,8 +3312,13 @@ body.ios-ui .ios-sidebar-tools {
     background: rgba(5, 5, 5, 0.98);
 }
 
-body.ios-ui.garden-ready .ios-terminal-toggle:not([hidden]) {
+body.ios-ui.garden-ready #terminal-container.fab-ready:not([hidden]) {
     border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui.garden-ready #terminal-container.fab-ready.active:not([hidden]) {
+    border-radius: var(--ios-radius-lg);
+    width: min(320px, calc(100vw - 20px - env(safe-area-inset-right)));
 }
 
 body.ios-ui #panopticon-eye {
