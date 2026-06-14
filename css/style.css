@@ -1145,7 +1145,7 @@ body.corrupted #terminal-container {
     transform: translate(-50%, -150px); z-index: 20; 
     text-align: center; width: 100%; pointer-events: none; 
     display: flex; flex-direction: column; align-items: center; 
-    gap: 15px; opacity: 0; 
+    gap: 10px; opacity: 0; 
 }
 
 .hud-title-card {
@@ -1182,7 +1182,7 @@ body.corrupted #terminal-container {
 
 .hud-credit {
     margin: 0;
-    padding: 2px 40px 16px;
+    padding: 0;
     font-family: var(--main-font);
     font-size: 0.78rem;
     font-weight: 500;
@@ -1280,7 +1280,7 @@ h1 {
     font-weight: normal; 
     font-size: 4.5rem; 
     margin: 0; 
-    padding: 22px 40px 2px;
+    padding: 22px 40px 18px;
     transform: translateY(4px);
     text-transform: uppercase; 
     letter-spacing: 6px; 
@@ -1308,7 +1308,7 @@ h1 {
     color: transparent;
 }
 
-/* Title border lives on .hud-title-card so the credit sits inside the same frame. */
+/* Title border lives on .hud-title-card; credit sits below the frame in #hud. */
 
 /* Updated animation to loop seamlessly */
 @keyframes gradientShift { 
@@ -2137,7 +2137,7 @@ body.perf-lite #loader-leaf {
     h1 {
         font-size: 2.75rem;
         letter-spacing: 3px;
-        padding: 18px 24px 8px;
+        padding: 18px 24px 14px;
     }
 
     .modal {
@@ -2916,7 +2916,7 @@ body.ios-ui #hud.active.anim-glitch {
 body.ios-ui #hud h1 {
     font-size: clamp(2rem, 11vw, 3.25rem);
     letter-spacing: 0.12em;
-    padding: 16px 22px 2px;
+    padding: 16px 22px 14px;
     line-height: 1.05;
 }
 
@@ -2927,7 +2927,7 @@ body.ios-ui .hud-title-card::after {
 body.ios-ui .hud-credit {
     font-size: clamp(0.68rem, 2.9vw, 0.78rem);
     letter-spacing: 0.05em;
-    padding: 2px 22px 14px;
+    padding: 0;
 }
 
 /* iOS Konami — Game Boy D-pad + A/B (fixed bottom, HUD reveal) */
