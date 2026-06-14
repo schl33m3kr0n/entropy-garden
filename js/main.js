@@ -245,11 +245,13 @@ function handleDragEnd(e) {
     const clientX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
     const clientY = e.type.includes('mouse') ? e.clientY : e.changedTouches[0].clientY;
 
-    // 2. Get the terminal's current hitbox
-    const termRect = document.getElementById('terminal-container').getBoundingClientRect();
+    // 2. Get the terminal's current hitbox (may be absent if UI not ready)
+    const termEl = document.getElementById('terminal-container');
+    const termRect = termEl ? termEl.getBoundingClientRect() : null;
 
     // 3. Check if the drop coordinates are inside the terminal
     if (
+        termRect &&
         clientX >= termRect.left &&
         clientX <= termRect.right &&
         clientY >= termRect.top &&

@@ -4,19 +4,21 @@
  */
 (function () {
     var lastTap = 0;
+    var bootScriptSrc = (document.currentScript && document.currentScript.src) || '';
 
-    function revealFabShell() {
-        if (!document.body.classList.contains('garden-ready')) return false;
-        var term = document.getElementById('terminal-container');
-        if (!term) return false;
-        term.removeAttribute('hidden');
-        term.classList.remove('reveal-in', 'active');
-        term.classList.add('fab-ready');
-        void term.offsetWidth;
-        requestAnimationFrame(function () {
-            term.classList.add('reveal-in');
-        });
-        return true;
+    /** Resolve js/lazy.js relative to this script so subpath deploys keep working. */
+    function lazyModuleUrl() {
+        try {
+            if (bootScriptSrc) return new URL('../lazy.js', bootScriptSrc).href;
+            return new URL('js/lazy.js', document.baseURI).href;
+        } catch (e) {
+            return 'js/lazy.js';
+        }
+    }
+
+    /** True once terminal.js has loaded and owns input/Enter handling. */
+    function terminalModuleReady() {
+        return typeof globalThis.gardenHooks?.toggleTerminal === 'function';
     }
 
     function revealTerminalShell() {
@@ -41,7 +43,7 @@
         var boot = document.createElement('script');
         boot.type = 'module';
         boot.textContent = [
-            "import { loadTerminal, pushTerminalLog } from '/js/lazy.js';",
+            'import { loadTerminal, pushTerminalLog } from ' + JSON.stringify(lazyModuleUrl()) + ';',
             'loadTerminal().then(function (m) {',
             '  pushTerminalLog("> " + ' + JSON.stringify(line) + ');',
             '  m.processCommand(' + JSON.stringify(line) + ');',
@@ -57,9 +59,12 @@
         if (!input || input.dataset.iosBootCmd) return;
         input.dataset.iosBootCmd = '1';
         input.addEventListener('keydown', function (e) {
-            if (e.key !== 'Enter' && e.keyCode !== 13) {
-                if (typeof globalThis.gardenHooks?.toggleTerminal !== 'function'
-                    && globalThis.EntropyTerminalSfx?.keystroke) {
+            var isEnter = e.key === 'Enter' || e.keyCode === 13;
+            // Once terminal.js is loaded it owns Enter (and keystroke SFX);
+            // bail so a command never runs twice.
+            if (terminalModuleReady()) return;
+            if (!isEnter) {
+                if (globalThis.EntropyTerminalSfx?.keystroke) {
                     globalThis.EntropyTerminalSfx.keystroke();
                 }
                 return;

@@ -379,23 +379,31 @@ export function getTermInput() {
 export function revealTerminalShell() {
     if (!document.body.classList.contains('garden-ready')) return false;
     const term = document.getElementById('terminal-container');
-    const input = document.getElementById('term-input');
     if (!term) return false;
 
     const wasOpen = term.classList.contains('active');
-    term.removeAttribute('hidden');
-    term.classList.add('fab-ready', 'reveal-in', 'active');
 
-    if (input) {
-        input.tabIndex = 0;
-        setTimeout(() => {
-            try {
-                input.focus({ preventScroll: true });
-            } catch {
-                input.focus();
-            }
-        }, 80);
+    // Reuse the canonical DOM/focus logic from the boot script so the two
+    // reveal paths can't drift; fall back only if boot never loaded.
+    const bootReveal = globalThis.EntropyIosTerminalBoot?.revealTerminalShell;
+    if (typeof bootReveal === 'function') {
+        bootReveal();
+    } else {
+        const input = document.getElementById('term-input');
+        term.removeAttribute('hidden');
+        term.classList.add('fab-ready', 'reveal-in', 'active');
+        if (input) {
+            input.tabIndex = 0;
+            setTimeout(() => {
+                try {
+                    input.focus({ preventScroll: true });
+                } catch {
+                    input.focus();
+                }
+            }, 80);
+        }
     }
+
     if (!wasOpen && globalThis.EntropyTerminalSfx?.open) {
         globalThis.EntropyTerminalSfx.open();
     }

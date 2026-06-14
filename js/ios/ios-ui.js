@@ -298,35 +298,6 @@ function onIosViewportChange() {
     resizeCanvas();
 }
 
-function bindIosTerminalToggle() {
-    const btn = document.getElementById('ios-terminal-toggle');
-    if (!btn || btn.dataset.bound || btn.dataset.iosBootBound) return;
-    btn.dataset.bound = '1';
-
-    let lastFabTapAt = 0;
-
-    const onOpenTerminal = (e) => {
-        if (!document.body.classList.contains('garden-ready')) return;
-        const now = Date.now();
-        if (now - lastFabTapAt < 400) return;
-        lastFabTapAt = now;
-        e.preventDefault();
-        e.stopPropagation();
-        if (globalThis.EntropyIosTerminalBoot?.revealTerminalShell) {
-            globalThis.EntropyIosTerminalBoot.revealTerminalShell();
-        }
-        const run = globalThis.gardenHooks?.openTerminal;
-        if (typeof run === 'function') {
-            run().catch(() => {});
-            return;
-        }
-        import('../lazy.js').then(({ openTerminal }) => openTerminal()).catch(() => {});
-    };
-
-    btn.addEventListener('touchend', onOpenTerminal, { passive: false });
-    btn.addEventListener('click', onOpenTerminal);
-}
-
 export function initIosUi() {
 
     if (!perf.isIOS) return;
@@ -345,7 +316,8 @@ export function initIosUi() {
 
     addIosModalRerollButtons();
 
-    bindIosTerminalToggle();
+    // The terminal FAB toggle is bound globally by js/ios/terminal-boot.js on all
+    // platforms; no iOS-specific binding needed here.
 
     import('./ios/ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
 

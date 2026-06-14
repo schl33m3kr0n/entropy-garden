@@ -1063,10 +1063,6 @@ body.garden-ready #terminal-container.fab-ready.active:not([hidden]) {
     transition-delay: 0.14s;
 }
 
-#terminal-container::before {
-    display: none;
-}
-
 /* --- TERMINAL EATING ANIMATION --- */
 @keyframes terminalBurp {
     0% { transform: scale(1); }
@@ -1080,10 +1076,6 @@ body.garden-ready #terminal-container.fab-ready.active:not([hidden]) {
 
 .burp-active {
     animation: terminalBurp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-#terminal-container.active::before {
-    display: none;
 }
 
 #terminal-output { 
@@ -1324,8 +1316,6 @@ h1 {
     100% { background-position: 400% 50%; } 
 }
 
-#reroll-eye { display: none; }
-
 #panopticon-eye.flash-anim,
 .flash-anim { animation: flash 0.3s ease-out; }
 @keyframes flash { 0%, 100% { filter: brightness(1) drop-shadow(0 0 0px var(--neon-green)); } 50% { filter: brightness(2) drop-shadow(0 0 20px #fff); } }
@@ -1516,6 +1506,43 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 
 .modal .bio-header > :not(.pfp-wrapper) {
     width: 100%;
+}
+
+/* --- IDENTITY PORTFOLIO STATEMENT --- */
+.identity-statement {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 255, 0, 0.3);
+    text-align: left;
+}
+
+.identity-statement-title {
+    margin: 0 0 10px;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    color: var(--neon-green);
+    text-shadow: 0 0 6px rgba(0, 255, 0, 0.4);
+}
+
+.identity-statement p {
+    margin: 0 0 10px;
+    line-height: 1.55;
+    color: rgba(220, 255, 220, 0.85);
+}
+
+.identity-statement p:last-child {
+    margin-bottom: 0;
+    color: var(--neon-green);
+}
+
+body.corrupted .identity-statement {
+    border-top-color: rgba(255, 45, 45, 0.4);
+}
+
+body.corrupted .identity-statement-title,
+body.corrupted .identity-statement p:last-child {
+    color: var(--alert-red);
+    text-shadow: 0 0 6px rgba(255, 45, 45, 0.4);
 }
 
 /* --- BIO PROFILE PICTURE --- */
@@ -1769,13 +1796,11 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 
 /* Ritual takes over the full viewport (iOS HUD/terminal sit at ~10004+) */
 body.singularity-active #terminal-container,
-body.singularity-active #ios-terminal-toggle,
 body.singularity-active #playlist-menu,
 body.singularity-active #ios-scroll-shell,
 body.singularity-active #docking-bay,
 body.singularity-active #hud,
 body.singularity-active #panopticon-eye,
-body.singularity-active #reroll-eye,
 body.singularity-active .control-panel,
 body.singularity-active #sidebar-menu,
 body.singularity-active #refresh-hint,

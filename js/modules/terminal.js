@@ -534,10 +534,9 @@ function triggerScatter() {
         f.style.left = (Math.random() * 80 + 10) + '%';
         f.style.top = '-50px';
         document.body.appendChild(f);
-        
-        f.onmousedown = function(e) { startDrag(e, this, true); };
-        f.ontouchstart = function(e) { startDrag(e, this, true); };
-        
+        // Dragging is handled by the delegated pointer handlers in main.js
+        // (handleDragStart listens for .scatter-file), so no inline binding here.
+
         setTimeout(() => { f.style.top = (Math.random() * 80 + 10) + '%'; }, 50 + i * 20);
     }
 }
@@ -566,7 +565,7 @@ function shouldIgnoreTerminalOutsideDismiss() {
 function dismissTerminalIfOutside(target) {
     if (!terminalContainer?.classList.contains('active')) return;
     if (shouldIgnoreTerminalOutsideDismiss()) return;
-    if (target?.closest?.('#terminal-container, #ios-terminal-toggle')) return;
+    if (target?.closest?.('#terminal-container')) return;
     hideTerminalPanel();
     setTermInputFocusable(false);
     termInput?.blur();
@@ -659,7 +658,7 @@ function bindTerminalInteractions() {
             
             // Open the terminal if it's closed so they can actually see the list
             if (!terminalContainer.classList.contains('active')) {
-                terminalContainer.classList.add('active');
+                showTerminalPanel();
                 setTermInputFocusable(true);
                 lastTerminalOpenTime = Date.now();
                 playTerminalOpenSound();
