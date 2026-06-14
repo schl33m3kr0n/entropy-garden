@@ -384,7 +384,7 @@ export function revealTerminalShell() {
 
     const wasOpen = term.classList.contains('active');
     term.removeAttribute('hidden');
-    term.classList.add('reveal-in', 'active');
+    term.classList.add('reveal-in', 'is-sliver', 'active');
     document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
 
     if (input) {

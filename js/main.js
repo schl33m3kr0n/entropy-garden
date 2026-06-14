@@ -503,6 +503,12 @@ function revealGardenUI() {
 
     const revealTerminalChrome = () => {
         iosTerminalToggle?.removeAttribute('hidden');
+        const term = document.getElementById('terminal-container');
+        if (!term) return;
+        term.removeAttribute('hidden');
+        term.classList.add('is-sliver');
+        void term.offsetWidth;
+        requestAnimationFrame(() => term.classList.add('reveal-in'));
     };
 
     if (isIosLayout) {

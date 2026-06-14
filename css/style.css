@@ -935,36 +935,36 @@ body.corrupted #grid-canvas.matrix-visible {
     }
 }
 
-/* --- INTERACTIVE TERMINAL (FAB + centered panel, all platforms) --- */
+/* --- INTERACTIVE TERMINAL (FAB bootstrap + right sliver, expand left) --- */
 #terminal-container {
     position: fixed;
-    left: 50%;
-    right: auto;
-    bottom: calc(env(safe-area-inset-bottom) + 72px);
+    bottom: calc(40px + env(safe-area-inset-bottom));
+    right: 0;
+    left: auto;
     width: min(350px, 92vw);
-    height: min(220px, 44dvh);
+    height: 35px;
     font-family: var(--main-font);
     font-size: 0.75rem;
     color: var(--neon-green);
-    background: rgba(0, 0, 0, 0.9);
-    border: 2px solid var(--neon-green);
-    padding: 8px 10px;
-    z-index: 10055;
+    background: rgba(0, 0, 0, 0.6);
+    border-left: 2px solid var(--neon-green);
+    padding: 5px 10px;
+    z-index: 10004;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     text-shadow: 0 0 3px var(--neon-green);
     box-sizing: border-box;
     overflow: hidden;
-    border-radius: var(--radius-lg);
-    opacity: 1;
-    transform: translateX(-50%);
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    opacity: 0;
+    transform: translateX(100%);
     pointer-events: none;
     transition:
+        transform 1.5s cubic-bezier(0.25, 1, 0.5, 1),
         height 0.4s ease,
         background 0.3s;
-    cursor: default;
-    min-width: 0;
+    cursor: pointer;
 }
 
 /* Hidden until loader finishes (revealGardenUI adds .garden-ready) */
@@ -976,16 +976,36 @@ body:not(.garden-ready) #terminal-container,
     pointer-events: none !important;
 }
 
-/* Closed — FAB only; no docked sliver */
-body.garden-ready #terminal-container:not(.active) {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
+body.garden-ready #terminal-container:not([hidden]) {
+    display: flex;
 }
 
-body.garden-ready #terminal-container.active:not([hidden]) {
-    display: flex !important;
+body.garden-ready #terminal-container.reveal-in {
+    opacity: 1;
     pointer-events: auto;
+}
+
+body.garden-ready #terminal-container.reveal-in.is-sliver:not(.active) {
+    transform: translateX(calc(100% - 15px));
+}
+
+#terminal-container::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    bottom: -50px;
+    left: -150px;
+    right: 0;
+    cursor: pointer;
+}
+
+body.garden-ready #terminal-container.reveal-in:hover:not(.active) {
+    transform: translateX(0);
+    background: rgba(0, 20, 0, 0.8);
+    transition:
+        transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        height 0.4s ease,
+        background 0.3s;
 }
 
 body.garden-ready .ios-terminal-toggle:not([hidden]) {
@@ -1022,10 +1042,6 @@ body.garden-ready .ios-terminal-toggle:not([hidden]) .ios-terminal-toggle-glyph 
     opacity: 0.35;
 }
 
-#terminal-container::before {
-    display: none;
-}
-
 /* --- TERMINAL EATING ANIMATION --- */
 @keyframes terminalBurp {
     0% { transform: scale(1); }
@@ -1042,9 +1058,15 @@ body.garden-ready .ios-terminal-toggle:not([hidden]) .ios-terminal-toggle-glyph 
 }
 
 #terminal-container.reveal-in.active {
+    transform: translateX(0);
+    height: min(220px, 44dvh);
     opacity: 1;
     cursor: default;
     background: rgba(0, 0, 0, 0.9);
+    transition:
+        transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        height 0.4s ease,
+        background 0.3s;
 }
 
 #terminal-container.active::before {
@@ -3279,10 +3301,6 @@ body.ios-ui .ios-sidebar-tools {
 
 body.ios-ui.garden-ready .ios-terminal-toggle:not([hidden]) {
     border-radius: var(--ios-radius-md);
-}
-
-body.ios-ui.garden-ready #terminal-container.active:not([hidden]) {
-    width: min(320px, 92vw);
 }
 
 body.ios-ui #panopticon-eye {

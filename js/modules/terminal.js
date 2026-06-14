@@ -52,8 +52,14 @@ function playTerminalOpenSound() {
 function ensureTerminalChromeVisible() {
     if (!terminalContainer) return;
     terminalContainer.removeAttribute('hidden');
-    terminalContainer.classList.add('reveal-in');
+    terminalContainer.classList.add('reveal-in', 'is-sliver');
     document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
+}
+
+function collapseTerminalToSliver() {
+    if (!terminalContainer) return;
+    terminalContainer.classList.remove('active');
+    terminalContainer.classList.add('is-sliver', 'reveal-in');
 }
 
 export function toggleTerminal() {
@@ -61,7 +67,7 @@ export function toggleTerminal() {
     ensureTerminalChromeVisible();
 
     if (terminalContainer.classList.contains('active')) {
-        terminalContainer.classList.remove('active');
+        collapseTerminalToSliver();
         setTermInputFocusable(false);
         termInput?.blur();
         if (sfx.burp) playSound(sfx.burp);
@@ -548,9 +554,17 @@ function dismissTerminalIfOutside(target) {
     if (!terminalContainer?.classList.contains('active')) return;
     if (shouldIgnoreTerminalOutsideDismiss()) return;
     if (target?.closest?.('#terminal-container, #ios-terminal-toggle')) return;
-    terminalContainer.classList.remove('active');
+    collapseTerminalToSliver();
     setTermInputFocusable(false);
     termInput?.blur();
+}
+
+function handleTerminalActivate(e) {
+    if (!terminalContainer || gardenBlocksTerminalKeys()) return;
+    if (terminalContainer.classList.contains('active')) return;
+    if (e.type === 'pointerup' && e.pointerType === 'mouse' && e.button !== 0) return;
+    e.stopPropagation();
+    openTerminalFromClick({ playOpenSound: !terminalContainer.classList.contains('active') });
 }
 
 function bindTerminalInteractions() {
@@ -562,6 +576,7 @@ function bindTerminalInteractions() {
 
     if (!terminalInteractionsBound) {
         terminalInteractionsBound = true;
+        terminalContainer.addEventListener('pointerup', handleTerminalActivate);
     }
 
     if (terminalGlobalHandlersBound) return;
