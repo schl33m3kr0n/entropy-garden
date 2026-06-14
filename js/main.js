@@ -112,7 +112,7 @@ function beginGardenExperience() {
         prefetchLargeBgmTracks();
         startLoader();
 
-        if (perf.isIOS) loadTerminal();
+        loadTerminal();
 
         ensureMatrix().then((mod) => {
             mod.resizeCanvas();
@@ -481,8 +481,6 @@ function revealGardenUI() {
     });
     setTimeout(() => firePanopticonComment('init', { force: true }), 1400);
 
-    const term = document.getElementById('terminal-container');
-
     bootGameAddons(activateGodMode)
         .then(({ pong }) => {
             pong.notifyGardenReady();
@@ -504,15 +502,7 @@ function revealGardenUI() {
     const iosTerminalToggle = document.getElementById('ios-terminal-toggle');
 
     const revealTerminalChrome = () => {
-        if (isIosLayout) {
-            iosTerminalToggle?.removeAttribute('hidden');
-            return;
-        }
-        if (!term) return;
-        term.removeAttribute('hidden');
-        term.classList.add('is-sliver');
-        void term.offsetWidth;
-        requestAnimationFrame(() => term.classList.add('reveal-in'));
+        iosTerminalToggle?.removeAttribute('hidden');
     };
 
     if (isIosLayout) {

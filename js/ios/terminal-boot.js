@@ -1,14 +1,8 @@
 /**
- * iOS terminal opener — classic script, no ES module graph.
- * Runs even if main.js or terminal.js fail to load.
+ * Terminal FAB bootstrap — classic script, no ES module graph.
+ * Runs on all platforms so the terminal opens from the >_ button even if main.js is slow.
  */
 (function () {
-    var isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel'
-            && navigator.maxTouchPoints > 1
-            && window.matchMedia('(hover: none)').matches);
-    if (!isIOS) return;
-
     var lastTap = 0;
 
     function revealTerminalShell() {
@@ -87,6 +81,7 @@
         if (!btn || btn.dataset.iosBootBound) return;
         btn.dataset.iosBootBound = '1';
         btn.addEventListener('touchend', onTap, { passive: false });
+        btn.addEventListener('click', onTap);
     }
 
     function onGardenReady() {

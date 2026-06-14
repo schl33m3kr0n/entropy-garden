@@ -53,9 +53,7 @@ function ensureTerminalChromeVisible() {
     if (!terminalContainer) return;
     terminalContainer.removeAttribute('hidden');
     terminalContainer.classList.add('reveal-in');
-    if (!document.body.classList.contains('ios-ui')) {
-        terminalContainer.classList.add('is-sliver');
-    }
+    document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
 }
 
 export function toggleTerminal() {
@@ -116,9 +114,6 @@ export function openTerminal() {
     openTerminalFromClick({ playOpenSound: true });
 }
 let lastTerminalOpenTime = 0;
-let lastTerminalActivateAt = 0;
-let terminalPokes = 0;
-let pokeResetTimer;
 
 // --- TERMINAL LOG SYSTEM ---
 const lore = globalThis.lorePools;
@@ -299,6 +294,7 @@ function printLexicon() {
 // --- NEW: THE SHORTCUTS MENU ---
 function printShortcuts() {
     pushTerminalLog("> --- SYSTEM HOTKEYS ---");
+    pushTerminalLog("> [ >_ ]    : Open Terminal");
     pushTerminalLog("> [ ENTER ] : Focus Terminal");
     pushTerminalLog("> [ TAB ]   : Toggle Terminal");
     pushTerminalLog("> [ R ]     : Reroll Garden State");
@@ -544,33 +540,6 @@ function spawnPizza() {
     playSound(sfx.collectible);
 }
 // --- TERMINAL INTERACTION LOGIC ---
-function handleTerminalActivate(e) {
-    if (!terminalContainer || gardenBlocksTerminalKeys()) return;
-    if (e.type === 'pointerup' && e.pointerType === 'mouse' && e.button !== 0) return;
-    const now = Date.now();
-    if (now - lastTerminalActivateAt < 400) return;
-    lastTerminalActivateAt = now;
-    e.stopPropagation();
-
-    terminalPokes++;
-    clearTimeout(pokeResetTimer);
-    pokeResetTimer = setTimeout(() => { terminalPokes = 0; }, 1500);
-
-    if (terminalPokes === 6) {
-        pushTerminalLog('> PLEASE. I AM FRAGILE. STOP POKING.');
-        if (sfx.error) playSound(sfx.error);
-        terminalContainer.style.transition = 'transform 0.1s ease-out';
-        terminalContainer.style.transform = 'translate(-300px, -200px) rotate(-5deg)';
-        setTimeout(() => {
-            terminalContainer.style.transform = '';
-            terminalPokes = 0;
-        }, 3000);
-        return;
-    }
-
-    openTerminalFromClick({ playOpenSound: !terminalContainer.classList.contains('active') });
-}
-
 function shouldIgnoreTerminalOutsideDismiss() {
     return Date.now() - lastTerminalOpenTime < TERMINAL_CLOSE_GUARD_MS;
 }
@@ -593,9 +562,6 @@ function bindTerminalInteractions() {
 
     if (!terminalInteractionsBound) {
         terminalInteractionsBound = true;
-        if (!perf.isIOS && !document.body.classList.contains('ios-ui')) {
-            terminalContainer.addEventListener('pointerup', handleTerminalActivate);
-        }
     }
 
     if (terminalGlobalHandlersBound) return;

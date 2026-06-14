@@ -382,12 +382,10 @@ export function revealTerminalShell() {
     const input = document.getElementById('term-input');
     if (!term) return false;
 
-    const iosLayout = document.body.classList.contains('ios-ui');
     const wasOpen = term.classList.contains('active');
     term.removeAttribute('hidden');
     term.classList.add('reveal-in', 'active');
-    if (!iosLayout) term.classList.add('is-sliver');
-    if (iosLayout) document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
+    document.getElementById('ios-terminal-toggle')?.removeAttribute('hidden');
 
     if (input) {
         input.tabIndex = 0;
