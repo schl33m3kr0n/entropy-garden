@@ -291,11 +291,59 @@ reduced to plastic bags
 that carry plastic forks, plastic cups
 that feed us microplastics for our plastic bodies
 in our plastic mouths, on our plastic faces,
-for a plastic age, in our plastic cages`
+for a plastic age, in our plastic cages`,
+
+`thoughts eternal
+
+though torrential themes tore the tomb
+through time, the tomb threw tests
+there to thence, top then trough
+thunder turns theory to theology
+
+to every sunrise, there are sunsets
+behind gray clouds, light collects
+even in days most dim
+it is our depth who directs
+
+warm skies over shallow waters
+the moon a miracle, a mirror
+of a sun marooned,
+a beacon to a beast subsumed
+
+under shadows enigmatic
+rose and thorn still bloom
+in our stories most erratic
+full of triumphs and gloom
+
+a spirit unbeknownst to man
+but one who appears often
+in the trading of many a hand
+a common thread leads us to soften
+
+the stone a witness to conflict
+the diamond within a cure
+ephemeral, yet it will inflict
+a greed we cannot endure
+
+a mind that is given to caprice
+is a mind of torrent and chaos
+a mind that is given to freeze
+is a mind that rues the loss
+
+the chimera of a thousand forces
+a hydra of many faces
+a cerberus of a thousand corpses
+a trinity in many places
+
+the water in which we swim
+under the moonlight of night
+the fire over which we burn
+reveals our limits in sight`,
+
 ];
 
 export const singularityPoemsGritty = [
-`watch me pee, watch me poo
+`number 2
 
 watch me pee, watch me poo,
 i strain and i strain until i turn blue,
@@ -334,7 +382,37 @@ i strain and i strain until i turn blue,
 watch me pee, watch me poo,
 it's a code red when i go number 2,
 life gets rough, but you know what to do,
-shit everywhere, for the red white and blue.`
+shit everywhere, for the red white and blue.`,
+
+`daily affirmations
+
+i am deserving of the 30% discounts at the vasectomy clinic,
+i am worthy of free costco samples, even if the victim is my stomach,
+i can do anything I want, apart from what the manager meant by “sir, please,”
+these horns, tentacles, and talons into the world of life I release,
+
+i am my own best friend, though intimacy is too intimidating,
+i am everyone’s ally, as long as our paths aren’t too grating,
+i am a flower, and unfortunately the bees know it too well,
+my body is a temple, so who keeps putting graffiti in my well?
+
+i have a choice in my life, and god is having second thoughts,
+i am restrained and disciplined, gifts my dominatrix brought,
+what doesn’t kill me makes me stronger, but there were lots of close calls,
+i cultivate my own garden, but only when the police car stalls,
+
+the sky is the definitive limit, just try asking icarus,
+today is a new day with inertia most vigorous,
+practice makes perfect, unless perfection was the symptom,
+i focus on the good things in life, especially if they’re rotund,
+
+i contain multitudes… of bad ideas and cholesterol,
+when life gives you lemons, say thank you—inflation’s abysmal,
+my voice matters most in the middle of a symphony,
+i am grateful for all i have… borrowed indefinitely,
+
+i can see my goals clearly, which is why i doubt my choices,
+i am intelligent, even if the door makes judgmental noises`,
 ];
 
 export function buildSingularityPoemPool(isCorrupted) {
