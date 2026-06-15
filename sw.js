@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v116';
+const CACHE_VERSION = 'entropy-garden-v117';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -36,6 +36,7 @@ const PRECACHE_URLS = [
     'assets/icons/storage.svg',
     'assets/icons/vault.svg',
     'assets/img/vault/sun-poster.webp',
+    'assets/img/vault/ahoy.jpg',
 ];
 
 function isAudioRequest(pathname) {

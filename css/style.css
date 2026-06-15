@@ -1760,6 +1760,17 @@ body.corrupted .identity-statement p:last-child {
     object-fit: contain; /* Ensures the whole image fits on screen */
 }
 
+#lightbox-overlay img.lightbox-content {
+    max-width: min(98vw, 1600px);
+    max-height: 94vh;
+    width: auto;
+    height: auto;
+}
+
+#lightbox-overlay.active img.lightbox-content {
+    transform: scale(1);
+}
+
 #lightbox-overlay.active .lightbox-content {
     transform: scale(1); /* Gives it a slight "pop in" effect */
 }
