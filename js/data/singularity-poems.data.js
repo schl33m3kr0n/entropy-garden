@@ -206,7 +206,7 @@ this blood resists all ablutions
 
 as we chase butterflies of paper and plastic
 the soul cracks and bends out of proportion
-can’t escape sharp knives from the gaze of the basilisk
+can’t escape sharp eyes of the basilisk
 or we end up mangled bodies in contortion`,
 
 `the middle path
@@ -262,12 +262,12 @@ only to be drawn into the maws of babylon
 their gifts used for profit and alienation
 
 an entropy most potent it brought tears to the demiurge
-who looks upon civilization, no, society, no, a scourge
-out of embers and ashes and swords and clashes, no resolutions ever emerge
-save the crowns and temples whose riches compound, double, triple, converge
+who looks upon civilization no society no a scourge
+out of embers and ashes and swords and clashes no resolutions ever emerge
+save the crowns and temples whose riches compound double triple converge
 
 with our eyes to the spying eyes in the walls and skies
-heaven, limbo, and hell can't compartmentalize
+heaven limbo and hell can't compartmentalize
 between truth and fiction are fogged lines
 only the most provocative ever get recognized
 
@@ -283,31 +283,31 @@ CEOs collecting your benjamin
 
 the beast of an expansive inner intuition without bounds
 chained to the ball of the bastion that speaks dollars and pounds
-the system a machination of mutated replication, 
+the system a machination of mutated replication 
 relaying in perpetual motion the four same old sounds
 
 earth's remains from an age forgotten 
 reduced to plastic bags 
-that carry plastic forks, plastic cups
+that carry plastic forks plastic cups
 that feed us microplastics for our plastic bodies
-in our plastic mouths, on our plastic faces,
-for a plastic age, in our plastic cages`,
+in our plastic mouths on our plastic faces
+for a plastic age in our plastic cages`,
 
 `thoughts eternal
 
 though torrential themes tore the tomb
-through time, the tomb threw tests
-there to thence, top then trough
+through time the tomb threw tests
+there to thence top then trough
 thunder turns theory to theology
 
-to every sunrise, there are sunsets
-behind gray clouds, light collects
+to every sunrise there are sunsets
+behind gray clouds light collects
 even in days most dim
 it is our depth who directs
 
 warm skies over shallow waters
-the moon a miracle, a mirror
-of a sun marooned,
+the moon a miracle a mirror
+of a sun marooned
 a beacon to a beast subsumed
 
 under shadows enigmatic
@@ -322,7 +322,7 @@ a common thread leads us to soften
 
 the stone a witness to conflict
 the diamond within a cure
-ephemeral, yet it will inflict
+ephemeral yet it will inflict
 a greed we cannot endure
 
 a mind that is given to caprice
@@ -345,51 +345,51 @@ reveals our limits in sight`,
 export const singularityPoemsGritty = [
 `number 2
 
-watch me pee, watch me poo,
-i strain and i strain until i turn blue,
-watch me pee, watch me poo,
-it's a code red when i go number 2,
-no good sir, i don't have the flu,
+watch me pee watch me poo
+i strain and i strain until i turn blue
+watch me pee watch me poo
+it's a code red when i go number 2
+no good sir i don't have the flu
 just a bad case of doo doo on you.
 
-i poopy poop until i scoop out my fruit loops,
-i poopy poop like i'm ballin' shooting hoops, 
-i need a couple loofahs to clean up all my poop,
-skibidi bipidi, poopy poop poop.
+i poopy poop until i scoop out my fruit loops
+i poopy poop like i'm ballin' shooting hoops 
+i need a couple loofahs to clean up all my poop
+skibidi bipidi poopy poop poop.
 
-when i find myself in times of gloom and doom,
+when i find myself in times of gloom and doom
 i go to the loo and my ass goes boom boom.
-people say sometimes i'm obsessed with the doo doo,
+people say sometimes i'm obsessed with the doo doo
 but what's life really if you can't do do you.
 
-i'm a man who feels every doo doo like it's new,
-i feel an ecstasy reserved only for a few,
-forgot to wipe, it's turning into glue,
+i'm a man who feels every doo doo like it's new
+i feel an ecstasy reserved only for a few
+forgot to wipe it's turning into glue
 that's a statement that i wish wasn't true.
 
-i'm a silly little baka, when i unleash the caca,
-i pray for anyone, who must sit behind my rocker,
-it starts as a fart, and then a little sputter,
-heaven send a savior, for this brick of brown butter.
+i'm a silly little baka when i unleash the caca
+i pray for anyone who must sit behind my rocker
+it starts as a fart and then a little sputter
+heaven send a savior for this brick of brown butter.
 
-i'll crap on the lawn, i'll crap in the coupe,
-i'm the scat man, i can crap on a loop,
-when shit hits the fan, it's me but we all knew,
-a-e, i-o-u talk shit and i'll doo doo on you.
+i'll crap on the lawn i'll crap in the coupe
+i'm the scat man i can crap on a loop
+when shit hits the fan it's me but we all knew
+a-e-i-o-u talk shit and i'll doo doo on you.
 
-watch me pee, watch me poo,
-i strain and i strain until i turn blue,
-watch me pee, watch me poo,
-it's a code red when i go number 2,
-life gets rough, but you know what to do,
-shit everywhere, for the red white and blue.`,
+watch me pee watch me poo
+i strain and i strain until i turn blue
+watch me pee watch me poo
+it's a code red when i go number 2
+life gets rough but you know what to do
+shit everywhere for the red white and blue.`,
 
 `daily affirmations
 
 i am deserving of the 30% discounts at the vasectomy clinic
 i am worthy of free costco samples even if the victim is my stomach
 i can do anything I want apart from what the manager meant by “sir, please”
-these horns, tentacles, and talons into the world of life I release
+these horns tentacles and talons into the world of life I release
 
 i am my own best friend though intimacy is too intimidating
 i am everyone’s ally as long as our paths aren’t too grating
