@@ -90,7 +90,23 @@ function lockTitleWidth(h1, chrome, letters) {
         measureArrangementWidth(chrome, letters, true),
         measureArrangementWidth(chrome, letters, false),
     ));
-    h1.style.minWidth = `${width}px`;
+    if (width > 0) {
+        h1.style.minWidth = `${width}px`;
+    } else {
+        h1.style.removeProperty('min-width');
+    }
+}
+
+function restorePlainTitle(h1) {
+    if (!h1) return;
+    h1.textContent = SOURCE;
+    h1.classList.remove('god-title-live', 'god-title-pondery');
+    h1.style.removeProperty('min-width');
+    h1.setAttribute('aria-label', SOURCE);
+}
+
+function shouldAnimateTitle(animate) {
+    return animate && !perf.prefersReducedMotion && !perf.isIOS;
 }
 
 function flipReorder(chrome, ordered, token, durationMs = 720) {
@@ -164,8 +180,14 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
 
     const existingChrome = h1.querySelector('.god-title-chrome');
     if (!pondery && !existingChrome) {
-        h1.textContent = SOURCE;
-        restoreTitlePresentation(h1, false);
+        restorePlainTitle(h1);
+        return Promise.resolve();
+    }
+
+    // iOS WebKit often paints parent background-clip:text as invisible — restore plain h1 on exit.
+    if (!pondery && perf.isIOS && existingChrome) {
+        if (titleAnimating) cancelTitleAnimation(existingChrome);
+        restorePlainTitle(h1);
         return Promise.resolve();
     }
 
@@ -183,7 +205,7 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
         if (!pondery) restoreTitlePresentation(h1, false);
     };
 
-    if (!animate || perf.prefersReducedMotion) {
+    if (!shouldAnimateTitle(animate)) {
         applyArrangement(chrome, pondery);
         lockTitleWidth(h1, chrome, letters);
         finish();

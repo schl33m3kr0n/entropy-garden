@@ -169,15 +169,14 @@ function activateGodMode() {
 
     // CHECK IF ALREADY ACTIVE
     if (body.classList.contains('god-mode')) {
+        body.classList.remove('god-mode');
         setPanopticonGodMode(false);
         firePanopticonComment('godModeOff');
         recordBehavior('god_mode');
         globalThis.EntropyCipherHint?.onGodModeOff?.();
         pushTerminalLog("> SYSTEM OVERRIDE TERMINATED. RETURNING TO NORMALCY.");
         playSound(sfx.glitch);
-        setGodTitleArrangement(h1, false).then(() => {
-            body.classList.remove('god-mode');
-        });
+        setGodTitleArrangement(h1, false);
     }
     // IF NOT ACTIVE, TURN IT ON
     else {
