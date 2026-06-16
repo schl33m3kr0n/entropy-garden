@@ -784,6 +784,10 @@ globalThis.lorePools = {
             safe: ["arcade online. insert coin. insert soul"],
             gritty: ["games? in my panopticon? it's more likely than you think"],
         },
+        modalCards: {
+            safe: ["cards of chaos deployed. strategize or perish"],
+            gritty: ["52 cards. infinite regret. shuffle anyway"],
+        },
         modalTrophies: {
             safe: ["trophy case opened. flex responsibly"],
             gritty: ["achievements: proof you can't look away"],

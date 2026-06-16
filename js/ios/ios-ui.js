@@ -161,7 +161,7 @@ function relocateControlsToSidebar() {
 
 
 
-const IOS_MODALS_WITHOUT_REROLL = new Set(['modal-arcade', 'modal-vault', 'modal-trophies', 'modal-poems']);
+const IOS_MODALS_WITHOUT_REROLL = new Set(['modal-arcade', 'modal-cards', 'modal-vault', 'modal-trophies', 'modal-poems']);
 
 function addIosModalRerollButtons() {
 

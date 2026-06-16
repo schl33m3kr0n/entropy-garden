@@ -2436,6 +2436,246 @@ body.ios-ui #arcade-screen {
     text-shadow: 0 0 5px var(--cyan);
 }
 
+/* --- CARDS OF CHAOS --- */
+.coc-modal-scroll {
+    max-height: min(72vh, 640px);
+    padding-right: 4px;
+}
+
+.coc-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.coc-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.coc-tab {
+    font-family: var(--main-font);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(0, 255, 0, 0.35);
+    background: rgba(0, 0, 0, 0.45);
+    color: var(--neon-green);
+    cursor: pointer;
+}
+
+.coc-tab.is-active {
+    background: rgba(0, 255, 0, 0.15);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.25);
+}
+
+.coc-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px 16px;
+}
+
+.coc-status {
+    margin: 0;
+    font-family: var(--main-font);
+    color: var(--cyan);
+    letter-spacing: 0.06em;
+}
+
+.coc-totals {
+    display: flex;
+    gap: 16px;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.coc-totals strong {
+    color: var(--neon-green);
+}
+
+.coc-table {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 12px 0;
+}
+
+.coc-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.coc-label {
+    min-width: 3rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(0, 255, 0, 0.65);
+}
+
+.coc-hand {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1;
+}
+
+.coc-deck-pile {
+    min-width: 52px;
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(0, 255, 0, 0.35);
+    border-radius: var(--radius-sm);
+    font-family: var(--main-font);
+    color: var(--neon-green);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.coc-card {
+    position: relative;
+    width: 52px;
+    height: 72px;
+    padding: 6px 4px;
+    border-radius: 6px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    cursor: default;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.coc-card.is-selectable {
+    cursor: pointer;
+    border-color: rgba(0, 255, 0, 0.35);
+}
+
+.coc-card.is-selectable:hover {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.25);
+}
+
+.coc-card.is-selected {
+    border-color: var(--cyan);
+    box-shadow: 0 0 14px rgba(0, 255, 255, 0.35);
+    transform: translateY(-4px);
+}
+
+.coc-card.is-back {
+    background: repeating-linear-gradient(
+        45deg,
+        #111,
+        #111 6px,
+        #1f1f1f 6px,
+        #1f1f1f 12px
+    );
+}
+
+.coc-card-back {
+    font-size: 1.4rem;
+    color: var(--neon-green);
+    opacity: 0.7;
+}
+
+.coc-shape {
+    width: 22px;
+    height: 22px;
+}
+
+.coc-rank {
+    font-family: var(--main-font);
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--coc-accent, var(--neon-green));
+}
+
+.coc-special {
+    position: absolute;
+    inset: 18px 8px 8px;
+    pointer-events: none;
+}
+
+.coc-cube {
+    background: linear-gradient(135deg, #fff 50%, #111 50%);
+    clip-path: polygon(30% 0%, 70% 0%, 100% 35%, 70% 100%, 30% 100%, 0% 35%);
+    opacity: 0.85;
+}
+
+.coc-sierpinski {
+    background:
+        linear-gradient(135deg, transparent 50%, var(--neon-green) 50%) top left / 50% 50% no-repeat,
+        linear-gradient(225deg, transparent 50%, var(--neon-green) 50%) top right / 50% 50% no-repeat,
+        linear-gradient(315deg, transparent 50%, var(--neon-green) 50%) bottom right / 50% 50% no-repeat,
+        linear-gradient(45deg, transparent 50%, var(--neon-green) 50%) bottom left / 50% 50% no-repeat;
+    opacity: 0.75;
+}
+
+.coc-hint {
+    margin: 0;
+    font-size: 0.78rem;
+    color: rgba(200, 200, 200, 0.75);
+    letter-spacing: 0.04em;
+}
+
+.coc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.coc-btn-primary {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+
+.coc-log {
+    max-height: 120px;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: #aaa;
+}
+
+.coc-log p {
+    margin: 0 0 4px;
+}
+
+.coc-rules-block h3 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    color: var(--neon-green);
+    font-family: var(--main-font);
+}
+
+.coc-rules-block p {
+    margin: 0 0 16px;
+    line-height: 1.55;
+    font-size: 0.88rem;
+    color: #ccc;
+}
+
+body.corrupted .coc-tab.is-active,
+body.corrupted .coc-status,
+body.corrupted .coc-totals strong {
+    color: var(--alert-red);
+}
+
+body.corrupted .coc-tab {
+    border-color: rgba(255, 0, 85, 0.35);
+    color: var(--alert-red);
+}
+
 /* --- UI ICONS (Server-Safe Filter Version) --- */
 .ui-icon {
     width: 24px;

@@ -7,6 +7,7 @@ let terminalMod;
 let singularityMod;
 let matrixMod;
 let arcadeMod;
+let cardsMod;
 let gameAddonsPromise = null;
 let konamiOnComplete = null;
 
@@ -14,6 +15,7 @@ let terminalPromise;
 let singularityPromise;
 let matrixPromise;
 let arcadePromise;
+let cardsPromise;
 
 const terminalQueue = [];
 
@@ -86,6 +88,16 @@ export function loadArcade() {
         });
     }
     return arcadePromise;
+}
+
+export function loadCards() {
+    if (!cardsPromise) {
+        cardsPromise = import('./modules/cards-of-chaos.js').then((mod) => {
+            cardsMod = mod;
+            return mod;
+        });
+    }
+    return cardsPromise;
 }
 
 export function rebuildTerminalLogPool() {
@@ -365,6 +377,11 @@ export function bootGameAddons(onKonamiComplete) {
 export async function loadArcadeLevel() {
     const mod = await loadArcade();
     mod.loadArcadeLevel();
+}
+
+export async function initCardsOfChaos() {
+    const mod = await loadCards();
+    mod.initCardsOfChaos();
 }
 
 export function getTerminalContainer() {

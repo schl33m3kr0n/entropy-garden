@@ -104,6 +104,10 @@
                 <div class="ui-icon" style="background-image: url('assets/icons/joystick.svg');"></div>
                 <span class="sidebar-text">// ARCADE</span>
             </li>
+            <li onclick="openModal('cards')">
+                <div class="ui-icon" style="background-image: url('assets/icons/cards.svg');"></div>
+                <span class="sidebar-text">// CARDS OF CHAOS</span>
+            </li>
             <li id="ios-poems-item" class="ios-only-sidebar-item" hidden onclick="openModal('poems')">
                 <div class="ui-icon" style="background-image: url('assets/icons/feather.svg');"></div>
                 <span class="sidebar-text">// POEMS</span>
@@ -327,6 +331,16 @@
         </div>
     </div>
 
+    <div id="modal-cards" class="modal wide">
+        <div class="modal-content">
+            <span class="close-btn modal-close">X</span>
+            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/cards.svg');"></div>// CARDS OF CHAOS</h2>
+            <div class="scrollable-content coc-modal-scroll">
+                <div id="cards-game-container"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-poems" class="modal wide ios-poems-modal">
         <div class="modal-content">
             <span class="close-btn modal-close">X</span>
@@ -350,7 +364,7 @@
             <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/ouroboros.svg');"></div>// TROPHIES</h2>
             <div class="scrollable-content trophy-case-scroll">
                 <p class="trophy-case-intro">> Recovered anomalies from the garden substrate. Locked entries remain classified until you trigger them in the wild.</p>
-                <p id="trophy-count" class="trophy-count">0 / 14</p>
+                <p id="trophy-count" class="trophy-count">0 / 15</p>
                 <div id="trophy-grid" class="trophy-grid" role="list"></div>
             </div>
         </div>

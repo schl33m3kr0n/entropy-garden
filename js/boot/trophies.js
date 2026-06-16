@@ -17,6 +17,7 @@
         { id: 'entropic_reroll', title: 'Entropic Reroll', desc: 'Identity string re-shuffled.' },
         { id: 'corrupted_bloom', title: 'Corrupted Bloom', desc: 'Safe mode abandoned.' },
         { id: 'arcade_clear', title: 'Cabinet Cleared', desc: 'All sequences accepted.' },
+        { id: 'cards_chaos', title: 'Chaos Dealer', desc: 'Four rounds of Cards of Chaos conquered.' },
         { id: 'feline_freq', title: 'Meow!', desc: 'Panopticon narrowed to cat eye.' },
         { id: 'genesis_gate', title: 'Genesis Gate', desc: 'Vault iframe opened the prequel.' },
         { id: 'vault_sun', title: 'Solar Uncapped', desc: 'The sun played in the vault.' },

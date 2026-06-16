@@ -63,6 +63,7 @@ import {
     resizeCanvas,
     setMatrixNeedsRedraw,
     loadArcadeLevel,
+    initCardsOfChaos,
     loadTerminal,
     getTerminalContainer,
     getTermInput,
@@ -918,7 +919,7 @@ function ensureMediaSrc(el) {
 // --- MODAL SYSTEM ---
 let topZIndex = 20000;
 
-const MODALS_WITHOUT_REROLL_HINT = new Set(['vault', 'arcade', 'trophies', 'poems']);
+const MODALS_WITHOUT_REROLL_HINT = new Set(['vault', 'arcade', 'cards', 'trophies', 'poems']);
 
 function modalSkipsRerollHint(modalEl) {
     if (!modalEl?.id) return false;
@@ -979,6 +980,13 @@ function openModal(id) {
             loadArcadeLevel().catch((err) => {
                 console.error('[Entropy Garden] arcade failed to load', err);
                 pushTerminalLog('> ARCADE MODULE OFFLINE.');
+            });
+        }
+
+        if (resolvedId === 'cards') {
+            initCardsOfChaos().catch((err) => {
+                console.error('[Entropy Garden] cards of chaos failed to load', err);
+                pushTerminalLog('> CARDS OF CHAOS OFFLINE.');
             });
         }
 

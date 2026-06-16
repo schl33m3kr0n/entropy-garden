@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v118';
+const CACHE_VERSION = 'entropy-garden-v119';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -15,6 +15,7 @@ const PRECACHE_URLS = [
     'js/core/environment.js',
     'js/core/sw-register.js',
     'js/core/god-title.js',
+    'js/data/cards-of-chaos.data.js',
     'js/core/canvas-resize.js',
     'js/data/lore-pools.data.js',
     'js/data/cipher-glyphs.data.js',
@@ -35,6 +36,7 @@ const PRECACHE_URLS = [
     'assets/icons/stats.svg',
     'assets/icons/storage.svg',
     'assets/icons/vault.svg',
+    'assets/icons/cards.svg',
     'assets/img/vault/sun-poster.webp',
     'assets/img/vault/ahoy.jpg',
 ];
