@@ -207,30 +207,16 @@ export function sierpinskiFaceSvg(accentVar = '--die-accent') {
     </svg>`;
 }
 
-/** Solid icosahedron (d20) for hex suit cards. */
+/** Solid hexagon for hex suit (d20) cards. */
 export function icosahedronShapeSvg(color = '#3399ff') {
     const cx = 12;
     const cy = 12;
     const r = 10;
     const v = regularHexagonVertices(cx, cy, r);
-    const [top, ur, lr, bottom, ll, ul] = v;
-    const halfBase = ((r * 2) / Math.sqrt(3)) / 2;
-    const triBL = [cx - halfBase, cy];
-    const triBR = [cx + halfBase, cy];
-    const faces = [
-        [top, triBL, triBR],
-        [top, ul, triBL],
-        [top, triBR, ur],
-        [triBL, ul, ll],
-        [triBR, ur, lr],
-        [triBL, triBR, bottom],
-        [triBL, ll, bottom],
-        [triBR, lr, bottom],
-    ];
 
-    const polys = faces.map((face) => `<polygon fill="${color}" points="${svgPoints(face)}"/>`).join('');
-
-    return `<svg viewBox="0 0 24 24" class="coc-shape coc-shape-icosahedron" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">${polys}</svg>`;
+    return `<svg viewBox="0 0 24 24" class="coc-shape coc-shape-icosahedron" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <polygon fill="${color}" points="${svgPoints(v)}"/>
+    </svg>`;
 }
 
 /** Isometric cube-corner badge for the d20 die corner — solid fill tints via CSS accent var. */
