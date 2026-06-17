@@ -13,6 +13,7 @@ import {
     rollDie,
     dieMedian,
     isSpecialFace,
+    SPECIAL_FACE_ART,
 } from '../data/cards-of-chaos.data.js';
 
 const HAND_RANK = {
@@ -28,9 +29,18 @@ const HAND_RANK = {
     HIGH_CARD: 0,
 };
 
+const SWAP_ANIM_MS = 520;
+const DIE_SPIN_MS = 580;
+const DIE_REVEAL_MS = 720;
+const DIE_BETWEEN_MS = 420;
+
 let rootEl;
 let bound = false;
 let game = null;
+
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function shuffle(arr) {
     const a = [...arr];
@@ -43,6 +53,10 @@ function shuffle(arr) {
 
 function cloneCard(card) {
     return { ...card };
+}
+
+function deckTop(state) {
+    return state.deck.length ? state.deck[state.deck.length - 1] : null;
 }
 
 function evaluateFixedFive(cards) {
@@ -228,7 +242,21 @@ function evaluateHand(cards) {
     };
 }
 
-function rollHandScore(handEval) {
+function makeRoll(sides, suitId, role = 'primary') {
+    const value = rollDie(sides);
+    return {
+        sides,
+        suitId,
+        value,
+        role,
+        label: SUITS[suitId]?.dieLabel || `d${sides}`,
+        kept: null,
+        revealed: false,
+        spinning: false,
+    };
+}
+
+function buildScoreResolution(handEval) {
     const { type, suit, meta, wildUsed, wildSuit } = handEval;
     const rolls = [];
     let value = 0;
@@ -236,96 +264,128 @@ function rollHandScore(handEval) {
 
     switch (type) {
         case 'ROYAL_FLUSH': {
-            const r1 = rollDie(20);
-            const r2 = rollDie(20);
+            const r1 = makeRoll(20, 'hex');
+            const r2 = makeRoll(20, 'hex');
             rolls.push(r1, r2);
-            value = Math.max(r1, r2);
-            note = `d20×2 → ${r1}, ${r2}`;
+            r1.kept = r1.value >= r2.value;
+            r2.kept = r2.value > r1.value;
+            value = Math.max(r1.value, r2.value);
+            note = `d20×2 → ${r1.value}, ${r2.value}`;
             break;
         }
         case 'STRAIGHT_FLUSH': {
-            const sides = dieSidesForSuit(suit);
-            value = rollDie(sides);
-            rolls.push(value);
-            note = `${SUITS[suit].dieLabel} → ${value}`;
+            const r = makeRoll(dieSidesForSuit(suit), suit);
+            rolls.push(r);
+            r.kept = true;
+            value = r.value;
+            note = `${SUITS[suit].dieLabel} → ${r.value}`;
             break;
         }
         case 'FOUR_KIND': {
-            const sides = dieSidesForSuit(suit);
-            const r = rollDie(sides);
+            const r = makeRoll(dieSidesForSuit(suit), suit);
             rolls.push(r);
-            value = r + 2;
-            note = `${SUITS[suit].dieLabel} ${r} +2`;
+            r.kept = true;
+            value = r.value + 2;
+            note = `${SUITS[suit].dieLabel} ${r.value} +2`;
             break;
         }
         case 'FULL_HOUSE': {
-            const r1 = rollDie(dieSidesForSuit(meta.tripleSuit));
-            const r2 = rollDie(dieSidesForSuit(meta.pairSuit));
+            const r1 = makeRoll(dieSidesForSuit(meta.tripleSuit), meta.tripleSuit);
+            const r2 = makeRoll(dieSidesForSuit(meta.pairSuit), meta.pairSuit);
             rolls.push(r1, r2);
-            value = r1 + r2;
-            note = `${SUITS[meta.tripleSuit].dieLabel}+${SUITS[meta.pairSuit].dieLabel} → ${r1}+${r2}`;
+            r1.kept = true;
+            r2.kept = true;
+            value = r1.value + r2.value;
+            note = `${SUITS[meta.tripleSuit].dieLabel}+${SUITS[meta.pairSuit].dieLabel} → ${r1.value}+${r2.value}`;
             break;
         }
         case 'FLUSH': {
-            const sides = dieSidesForSuit(suit);
-            const r1 = rollDie(sides);
-            const r2 = rollDie(sides);
+            const r1 = makeRoll(dieSidesForSuit(suit), suit);
+            const r2 = makeRoll(dieSidesForSuit(suit), suit);
             rolls.push(r1, r2);
-            value = Math.min(r1, r2);
-            note = `${SUITS[suit].dieLabel}×2 low → ${r1}, ${r2}`;
+            const low = Math.min(r1.value, r2.value);
+            r1.kept = r1.value === low;
+            r2.kept = r2.value === low;
+            if (r1.value === r2.value) {
+                r1.kept = true;
+                r2.kept = true;
+            }
+            value = low;
+            note = `${SUITS[suit].dieLabel}×2 low → ${r1.value}, ${r2.value}`;
             break;
         }
         case 'STRAIGHT': {
-            value = rollDie(8);
-            rolls.push(value);
-            note = `d8 → ${value}`;
+            const r = makeRoll(8, 'dia');
+            rolls.push(r);
+            r.kept = true;
+            value = r.value;
+            note = `d8 → ${r.value}`;
             break;
         }
         case 'THREE_KIND': {
-            value = rollDie(dieSidesForSuit(suit));
-            rolls.push(value);
-            note = `${SUITS[suit].dieLabel} → ${value}`;
+            const r = makeRoll(dieSidesForSuit(suit), suit);
+            rolls.push(r);
+            r.kept = true;
+            value = r.value;
+            note = `${SUITS[suit].dieLabel} → ${r.value}`;
             break;
         }
         case 'TWO_PAIR': {
-            const r1 = rollDie(dieSidesForSuit(meta.highPairSuit));
-            const r2 = rollDie(dieSidesForSuit(meta.lowPairSuit));
+            const r1 = makeRoll(dieSidesForSuit(meta.highPairSuit), meta.highPairSuit);
+            const r2 = makeRoll(dieSidesForSuit(meta.lowPairSuit), meta.lowPairSuit);
             rolls.push(r1, r2);
-            value = Math.max(r1, r2);
+            r1.kept = r1.value >= r2.value;
+            r2.kept = r2.value > r1.value;
+            if (r1.value === r2.value) {
+                r1.kept = true;
+                r2.kept = true;
+            }
+            value = Math.max(r1.value, r2.value);
             note = `max(${SUITS[meta.highPairSuit].dieLabel}, ${SUITS[meta.lowPairSuit].dieLabel}) → ${value}`;
             break;
         }
         case 'ONE_PAIR': {
-            const r = rollDie(dieSidesForSuit(suit));
+            const r = makeRoll(dieSidesForSuit(suit), suit);
             rolls.push(r);
-            value = Math.ceil(r / 2);
-            note = `${SUITS[suit].dieLabel} ${r} ÷2↑ → ${value}`;
+            r.kept = true;
+            value = Math.ceil(r.value / 2);
+            note = `${SUITS[suit].dieLabel} ${r.value} ÷2↑ → ${value}`;
             break;
         }
         default: {
-            value = rollDie(4);
-            rolls.push(value);
-            note = `d4 → ${value}`;
+            const r = makeRoll(4, 'tri');
+            rolls.push(r);
+            r.kept = true;
+            value = r.value;
+            note = `d4 → ${r.value}`;
         }
     }
 
     if (wildUsed) {
         const wildDieSuit = wildSuit || suit;
         const sides = dieSidesForSuit(wildDieSuit);
-        const wr = rollDie(sides);
+        const wr = makeRoll(sides, wildDieSuit, 'wild');
         rolls.push(wr);
         const med = dieMedian(sides);
-        if (wr <= Math.floor(med)) {
-            note += ` · wild ${wr} ≤ median → 0`;
+        wr.wildMedian = med;
+        if (wr.value <= Math.floor(med)) {
+            wr.kept = false;
+            wr.wildFail = true;
+            note += ` · wild ${wr.value} ≤ median → 0`;
             value = 0;
         } else {
+            wr.kept = true;
             const doubled = value * 2;
-            note += ` · wild ${wr} > median → ×2 (${value}→${doubled})`;
+            note += ` · wild ${wr.value} > median → ×2 (${value}→${doubled})`;
             value = doubled;
+        }
+    } else {
+        for (const r of rolls) {
+            if (r.kept === null) r.kept = true;
         }
     }
 
-    return { value, rolls, note };
+    return { finalValue: value, note, rolls, handLabel: handEval.label };
 }
 
 function shapeSvg(suitId, variant) {
@@ -350,20 +410,59 @@ function shapeSvg(suitId, variant) {
     return `<svg viewBox="0 0 24 24" class="coc-shape" aria-hidden="true"><polygon points="12,2 18,8 20,16 14,22 10,22 4,16 6,8" fill="${s.color}"/></svg>`;
 }
 
+function dieFaceMarkup(roll, showValue) {
+    const special = (roll.suitId === 'sq' && roll.value === 6) ? 'cube'
+        : (roll.suitId === 'pent' && roll.value === 9) ? 'sierpinski' : null;
+    if (special && showValue) {
+        const cls = special === 'cube' ? 'coc-die-art coc-cube-art' : 'coc-die-art coc-sierpinski-art';
+        return `<img class="${cls}" src="${SPECIAL_FACE_ART[special]}" alt="" aria-hidden="true">`;
+    }
+    return `<span class="coc-die-value">${showValue ? roll.value : '?'}</span>`;
+}
+
+function renderDieEl(roll) {
+    const el = document.createElement('div');
+    el.className = 'coc-die';
+    if (roll.spinning) el.classList.add('is-spinning');
+    if (roll.revealed) el.classList.add('is-revealed');
+    if (roll.kept === true) el.classList.add('is-kept');
+    if (roll.kept === false) el.classList.add('is-dropped');
+    if (roll.role === 'wild') el.classList.add('is-wild');
+
+    const accent = SUITS[roll.suitId]?.color || '#ccc';
+    const showValue = roll.revealed && !roll.spinning;
+
+    el.innerHTML = `
+        <div class="coc-die-body" style="--die-accent: ${accent}">
+            ${dieFaceMarkup(roll, showValue)}
+            ${shapeSvg(roll.suitId)}
+        </div>
+        <span class="coc-die-tag">${roll.label}${roll.role === 'wild' ? ' · wild' : ''}</span>
+    `;
+    return el;
+}
+
 function specialFaceMarkup(card) {
     const special = isSpecialFace(card);
-    if (special === 'cube') return '<span class="coc-special coc-cube" aria-hidden="true"></span>';
-    if (special === 'sierpinski') return '<span class="coc-special coc-sierpinski" aria-hidden="true"></span>';
+    if (special === 'cube') {
+        return `<img class="coc-special-art coc-cube-art" src="${SPECIAL_FACE_ART.cube}" alt="" decoding="async" aria-hidden="true">`;
+    }
+    if (special === 'sierpinski') {
+        return `<img class="coc-special-art coc-sierpinski-art" src="${SPECIAL_FACE_ART.sierpinski}" alt="" decoding="async" aria-hidden="true">`;
+    }
     return '';
 }
 
-function renderCardEl(card, { faceDown = false, selectable = false, selected = false, onClick } = {}) {
+function renderCardEl(card, { faceDown = false, selectable = false, selected = false, swapAnim = null, onClick } = {}) {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'coc-card';
     if (faceDown) el.classList.add('is-back');
     if (selectable) el.classList.add('is-selectable');
     if (selected) el.classList.add('is-selected');
+    if (swapAnim === 'out') el.classList.add('is-swap-out');
+    if (swapAnim === 'in') el.classList.add('is-swap-in');
+    if (swapAnim === 'target') el.classList.add('is-swap-target');
     el.dataset.uid = card.uid;
 
     if (faceDown) {
@@ -372,7 +471,9 @@ function renderCardEl(card, { faceDown = false, selectable = false, selected = f
         return el;
     }
 
-    const rankLabel = card.suit === 'wild' ? '★' : String(card.rank);
+    const special = isSpecialFace(card);
+    if (special) el.classList.add('has-special-face');
+    const rankLabel = card.suit === 'wild' ? '★' : (special ? '' : String(card.rank));
     el.innerHTML = `
         ${shapeSvg(card.suit, card.variant)}
         <span class="coc-rank">${rankLabel}</span>
@@ -391,7 +492,7 @@ function cpuSwapDecision(hand, deck) {
     let worstScore = Infinity;
     for (let i = 0; i < hand.length; i++) {
         const trial = [...hand];
-        trial[i] = deck[0];
+        trial[i] = deck[deck.length - 1];
         const ev = evaluateHand(trial);
         const score = ev.rank * 100 + ev.topRank;
         if (score < worstScore) {
@@ -400,13 +501,39 @@ function cpuSwapDecision(hand, deck) {
         }
     }
     const trial = [...hand];
-    trial[worstIdx] = deck[0];
+    trial[worstIdx] = deck[deck.length - 1];
     const after = evaluateHand(trial);
     if (after.rank > evalBefore.rank
         || (after.rank === evalBefore.rank && after.topRank > evalBefore.topRank)) {
         return worstIdx;
     }
     return Math.random() < 0.35 ? worstIdx : -1;
+}
+
+function planCpuSwaps(state) {
+    const deck = [...state.deck];
+    const hand = state.cpuHand.map(cloneCard);
+    const planned = [];
+    let swapsLeft = MAX_SWAPS;
+
+    while (swapsLeft > 0 && deck.length) {
+        const idx = cpuSwapDecision(hand, deck);
+        if (idx < 0) break;
+        const drawn = deck.pop();
+        const out = hand[idx];
+        planned.push({ handIdx: idx, out: cloneCard(out), in: cloneCard(drawn) });
+        hand[idx] = drawn;
+        deck.unshift(out);
+        swapsLeft--;
+    }
+    return planned;
+}
+
+function applyCpuSwap(state, handIdx) {
+    const drawn = state.deck.pop();
+    const out = state.cpuHand[handIdx];
+    state.cpuHand[handIdx] = drawn;
+    state.deck.unshift(out);
 }
 
 function newGameState() {
@@ -422,6 +549,11 @@ function newGameState() {
         selectedIdx: null,
         log: ['> Deal the chaos. Three swaps per round.'],
         suddenDeath: false,
+        busy: false,
+        cpuHighlightIdx: null,
+        cpuSwapAnim: null,
+        cpuSwapCount: 0,
+        diceAnim: null,
     };
 }
 
@@ -436,40 +568,120 @@ function dealRound(state) {
     state.phase = 'swap';
     state.selectedIdx = null;
     state.suddenDeath = false;
+    state.busy = false;
+    state.cpuHighlightIdx = null;
+    state.cpuSwapAnim = null;
+    state.diceAnim = null;
     state.log.unshift(`> Round ${state.round} — ${MAX_SWAPS} swaps remaining.`);
 }
 
-function cpuPerformSwaps(state) {
-    let swaps = MAX_SWAPS;
-    while (swaps > 0 && state.deck.length) {
-        const idx = cpuSwapDecision(state.cpuHand, state.deck);
-        if (idx < 0) break;
-        const drawn = state.deck.pop();
-        const discarded = state.cpuHand[idx];
-        state.cpuHand[idx] = drawn;
-        state.deck.unshift(discarded);
-        swaps--;
+async function animateDiceRolls(sideLabel, resolution) {
+    const rolls = resolution.rolls.map((r) => ({ ...r, revealed: false, spinning: false }));
+    game.diceAnim = {
+        sideLabel,
+        handLabel: resolution.handLabel,
+        rolls,
+        finalValue: resolution.finalValue,
+        note: resolution.note,
+        done: false,
+    };
+    renderGame();
+
+    for (let i = 0; i < rolls.length; i++) {
+        rolls[i].spinning = true;
+        game.diceAnim.activeIdx = i;
+        renderGame();
+        playSound(sfx.loading);
+        await delay(DIE_SPIN_MS);
+
+        rolls[i].spinning = false;
+        rolls[i].revealed = true;
+        renderGame();
+        playSound(sfx.click);
+        await delay(DIE_REVEAL_MS);
+
+        if (i < rolls.length - 1) await delay(DIE_BETWEEN_MS);
     }
+
+    game.diceAnim.done = true;
+    renderGame();
+    await delay(900);
 }
 
-function resolveRound(state) {
-    cpuPerformSwaps(state);
+async function animateCpuSwaps(state) {
+    const planned = planCpuSwaps(state);
+    state.phase = 'cpu-swapping';
+    state.log.unshift(`> CPU swapping${planned.length ? ` (${planned.length})` : ''}…`);
+    renderGame();
+
+    if (!planned.length) {
+        await delay(400);
+        return;
+    }
+
+    for (let i = 0; i < planned.length; i++) {
+        const { handIdx } = planned[i];
+        state.cpuHighlightIdx = handIdx;
+        state.cpuSwapAnim = 'target';
+        state.cpuSwapCount = i + 1;
+        renderGame();
+        await delay(320);
+
+        state.cpuSwapAnim = 'out';
+        renderGame();
+        playSound(sfx.click);
+        await delay(SWAP_ANIM_MS);
+
+        applyCpuSwap(state, handIdx);
+        state.cpuSwapAnim = 'in';
+        renderGame();
+        playSound(sfx.collectible);
+        await delay(SWAP_ANIM_MS);
+
+        state.log.unshift(`> CPU swapped slot ${handIdx + 1} for ${cardKey(state.cpuHand[handIdx])}.`);
+    }
+
+    state.cpuHighlightIdx = null;
+    state.cpuSwapAnim = null;
+    renderGame();
+    await delay(350);
+}
+
+async function beginRevealSequence(state) {
+    if (state.busy) return;
+    state.busy = true;
+    state.selectedIdx = null;
+
+    await animateCpuSwaps(state);
+
+    const showHands = true;
+    state.phase = 'dice-roll';
+    state.showCpuHand = showHands;
+    renderGame();
+
     const pEval = evaluateHand(state.playerHand);
     const cEval = evaluateHand(state.cpuHand);
-    const pScore = rollHandScore(pEval);
-    const cScore = rollHandScore(cEval);
-    state.playerTotal += pScore.value;
-    state.cpuTotal += cScore.value;
+    const pRes = buildScoreResolution(pEval);
+    const cRes = buildScoreResolution(cEval);
+
+    await animateDiceRolls('You', { ...pRes, handLabel: pEval.label });
+    await animateDiceRolls('CPU', { ...cRes, handLabel: cEval.label });
+
+    state.playerTotal += pRes.finalValue;
+    state.cpuTotal += cRes.finalValue;
     state.phase = 'reveal';
+    state.diceAnim = null;
     state.lastReveal = {
-        player: { eval: pEval, score: pScore },
-        cpu: { eval: cEval, score: cScore },
+        player: { eval: pEval, score: pRes },
+        cpu: { eval: cEval, score: cRes },
     };
     state.log.unshift(
-        `> You: ${pEval.label} → ${pScore.value} (${pScore.note})`,
-        `> CPU: ${cEval.label} → ${cScore.value} (${cScore.note})`,
+        `> You: ${pEval.label} → ${pRes.finalValue} (${pRes.note})`,
+        `> CPU: ${cEval.label} → ${cRes.finalValue} (${cRes.note})`,
     );
     playSound(sfx.collectible);
+    state.busy = false;
+    renderGame();
 }
 
 function finishRound(state) {
@@ -490,23 +702,49 @@ function finishRound(state) {
     dealRound(state);
 }
 
-function suddenDeathRoll(state) {
-    const p = rollDie(20);
-    const c = rollDie(20);
-    state.lastReveal = { suddenDeath: { player: p, cpu: c } };
-    if (p === c) {
-        state.log.unshift(`> Sudden death tie (${p}). Roll again.`);
+async function suddenDeathRoll(state) {
+    if (state.busy) return;
+    state.busy = true;
+
+    const pRoll = makeRoll(20, 'hex');
+    const cRoll = makeRoll(20, 'hex');
+    pRoll.kept = true;
+    cRoll.kept = true;
+
+    await animateDiceRolls('You — sudden death', {
+        handLabel: 'Sudden death d20',
+        rolls: [pRoll],
+        finalValue: pRoll.value,
+        note: `d20 → ${pRoll.value}`,
+    });
+    await animateDiceRolls('CPU — sudden death', {
+        handLabel: 'Sudden death d20',
+        rolls: [cRoll],
+        finalValue: cRoll.value,
+        note: `d20 → ${cRoll.value}`,
+    });
+
+    state.lastReveal = { suddenDeath: { player: pRoll.value, cpu: cRoll.value } };
+    if (pRoll.value === cRoll.value) {
+        state.log.unshift(`> Sudden death tie (${pRoll.value}). Roll again.`);
+        state.busy = false;
+        state.diceAnim = null;
+        renderGame();
         return;
     }
+
     state.phase = 'game-over';
     state.suddenDeath = false;
-    const win = p > c;
-    state.log.unshift(`> Sudden death: You ${p} — CPU ${c}. ${win ? 'You win.' : 'CPU wins.'}`);
+    state.diceAnim = null;
+    const win = pRoll.value > cRoll.value;
+    state.log.unshift(`> Sudden death: You ${pRoll.value} — CPU ${cRoll.value}. ${win ? 'You win.' : 'CPU wins.'}`);
     if (win) globalThis.unlockTrophy?.('cards_chaos');
+    state.busy = false;
+    renderGame();
 }
 
 function swapPlayerCard(state, handIdx) {
-    if (state.phase !== 'swap' || state.swapsLeft <= 0 || !state.deck.length) return;
+    if (state.phase !== 'swap' || state.busy || state.swapsLeft <= 0 || !state.deck.length) return;
     const drawn = state.deck.pop();
     const out = state.playerHand[handIdx];
     state.playerHand[handIdx] = drawn;
@@ -515,13 +753,49 @@ function swapPlayerCard(state, handIdx) {
     state.selectedIdx = null;
     state.log.unshift(`> Swapped ${cardKey(out)} for ${cardKey(drawn)}. ${state.swapsLeft} swaps left.`);
     playSound(sfx.click);
-    if (state.swapsLeft === 0) resolveRound(state);
+    renderGame();
+    if (state.swapsLeft === 0) beginRevealSequence(state);
 }
 
 function renderRules(panel) {
     panel.innerHTML = RULES_SECTIONS.map(
         (s) => `<section class="coc-rules-block"><h3>${s.title}</h3><p>${s.body.replace(/\n/g, '<br>')}</p></section>`,
     ).join('');
+}
+
+function renderDiceArena() {
+    const arena = rootEl?.querySelector('#coc-dice-arena');
+    if (!arena) return;
+
+    const anim = game?.diceAnim;
+    if (!anim || (game.phase !== 'dice-roll' && !anim.done)) {
+        arena.hidden = true;
+        arena.innerHTML = '';
+        return;
+    }
+
+    arena.hidden = false;
+    const diceRow = document.createElement('div');
+    diceRow.className = 'coc-dice-row';
+    for (const roll of anim.rolls) {
+        diceRow.appendChild(renderDieEl(roll));
+    }
+
+    arena.innerHTML = '';
+    const head = document.createElement('div');
+    head.className = 'coc-dice-head';
+    head.innerHTML = `
+        <span class="coc-dice-side">${anim.sideLabel}</span>
+        <span class="coc-dice-hand">${anim.handLabel}</span>
+    `;
+    arena.append(head, diceRow);
+
+    if (anim.done) {
+        const foot = document.createElement('p');
+        foot.className = 'coc-dice-result';
+        foot.textContent = `Round score: ${anim.finalValue} · ${anim.note}`;
+        arena.appendChild(foot);
+    }
 }
 
 function renderGame() {
@@ -531,17 +805,22 @@ function renderGame() {
     const playerHandEl = rootEl.querySelector('#coc-player-hand');
     const cpuHandEl = rootEl.querySelector('#coc-cpu-hand');
     const deckEl = rootEl.querySelector('#coc-deck-count');
+    const deckTopEl = rootEl.querySelector('#coc-deck-top');
     const logEl = rootEl.querySelector('#coc-log');
     const actionsEl = rootEl.querySelector('#coc-actions');
     const totalsEl = rootEl.querySelector('#coc-totals');
 
-    statusEl.textContent = game.suddenDeath
+    const phaseLabel = {
+        'cpu-swapping': `Round ${game.round} — CPU swapping (${game.cpuSwapCount || 0}/${MAX_SWAPS})`,
+        'dice-roll': `Round ${game.round} — rolling dice`,
+        reveal: `Round ${game.round} — revealed`,
+        'game-over': 'Game over',
+        'sudden-death': 'Sudden death — roll d20',
+    };
+
+    statusEl.textContent = game.suddenDeath && game.phase !== 'dice-roll'
         ? 'Sudden death — roll d20'
-        : game.phase === 'game-over'
-            ? 'Game over'
-            : game.phase === 'reveal'
-                ? `Round ${game.round} — revealed`
-                : `Round ${game.round} of ${ROUND_COUNT} · ${game.swapsLeft} swaps left`;
+        : phaseLabel[game.phase] || `Round ${game.round} of ${ROUND_COUNT} · ${game.swapsLeft} swaps left`;
 
     totalsEl.innerHTML = `
         <span>You: <strong>${game.playerTotal}</strong></span>
@@ -550,17 +829,28 @@ function renderGame() {
 
     deckEl.textContent = String(game.deck.length);
 
+    if (deckTopEl) {
+        deckTopEl.innerHTML = '';
+        const top = deckTop(game);
+        const showTop = game.phase === 'cpu-swapping' && top;
+        if (showTop) {
+            deckTopEl.appendChild(renderCardEl(top, { faceDown: false }));
+            deckTopEl.hidden = false;
+        } else {
+            deckTopEl.hidden = true;
+        }
+    }
+
     playerHandEl.innerHTML = '';
+    const canSwap = game.phase === 'swap' && !game.busy && game.swapsLeft > 0 && game.deck.length > 0;
     game.playerHand.forEach((card, idx) => {
-        const selectable = game.phase === 'swap' && game.swapsLeft > 0 && game.deck.length > 0;
         playerHandEl.appendChild(renderCardEl(card, {
-            selectable,
+            selectable: canSwap,
             selected: game.selectedIdx === idx,
-            onClick: selectable
+            onClick: canSwap
                 ? () => {
                     if (game.selectedIdx === idx) {
                         swapPlayerCard(game, idx);
-                        renderGame();
                     } else {
                         game.selectedIdx = idx;
                         renderGame();
@@ -571,12 +861,22 @@ function renderGame() {
     });
 
     cpuHandEl.innerHTML = '';
-    const showCpu = game.phase === 'reveal' || game.phase === 'game-over' || game.phase === 'sudden-death';
-    game.cpuHand.forEach((card) => {
-        cpuHandEl.appendChild(renderCardEl(card, { faceDown: !showCpu }));
+    const cpuFaceUp = game.phase === 'cpu-swapping' || game.phase === 'dice-roll' || game.phase === 'reveal'
+        || game.phase === 'game-over' || game.phase === 'sudden-death';
+    game.cpuHand.forEach((card, idx) => {
+        let swapAnim = null;
+        if (game.phase === 'cpu-swapping' && idx === game.cpuHighlightIdx) {
+            swapAnim = game.cpuSwapAnim || 'target';
+        }
+        cpuHandEl.appendChild(renderCardEl(card, {
+            faceDown: !cpuFaceUp,
+            swapAnim,
+        }));
     });
 
-    logEl.innerHTML = game.log.slice(0, 8).map((line) => `<p>${line}</p>`).join('');
+    renderDiceArena();
+
+    logEl.innerHTML = game.log.slice(0, 10).map((line) => `<p>${line}</p>`).join('');
 
     actionsEl.innerHTML = '';
     const mkBtn = (label, fn, primary = false) => {
@@ -584,35 +884,27 @@ function renderGame() {
         b.type = 'button';
         b.className = `singularity-btn${primary ? ' coc-btn-primary' : ''}`;
         b.textContent = label;
+        b.disabled = !!game.busy;
         b.addEventListener('click', fn);
         return b;
     };
 
-    if (game.phase === 'swap' && game.swapsLeft > 0) {
-        actionsEl.appendChild(mkBtn('Reveal early', () => {
-            resolveRound(game);
-            renderGame();
-        }));
+    if (game.phase === 'swap' && game.swapsLeft > 0 && !game.busy) {
+        actionsEl.appendChild(mkBtn('Reveal early', () => beginRevealSequence(game)));
         if (game.selectedIdx !== null) {
-            actionsEl.appendChild(mkBtn('Swap selected', () => {
-                swapPlayerCard(game, game.selectedIdx);
-                renderGame();
-            }, true));
+            actionsEl.appendChild(mkBtn('Swap selected', () => swapPlayerCard(game, game.selectedIdx), true));
         }
     }
-    if (game.phase === 'reveal') {
+    if (game.phase === 'reveal' && !game.busy) {
         actionsEl.appendChild(mkBtn('Next round', () => {
             finishRound(game);
             renderGame();
         }, true));
     }
-    if (game.phase === 'sudden-death') {
-        actionsEl.appendChild(mkBtn('Roll d20', () => {
-            suddenDeathRoll(game);
-            renderGame();
-        }, true));
+    if (game.phase === 'sudden-death' && !game.busy) {
+        actionsEl.appendChild(mkBtn('Roll d20', () => suddenDeathRoll(game), true));
     }
-    if (game.phase === 'game-over') {
+    if (game.phase === 'game-over' && !game.busy) {
         actionsEl.appendChild(mkBtn('New game', () => {
             game = newGameState();
             dealRound(game);
@@ -640,13 +932,17 @@ function buildShell(container) {
                     </div>
                     <div class="coc-row coc-row-deck">
                         <span class="coc-label">Deck</span>
-                        <div class="coc-deck-pile"><span id="coc-deck-count">0</span></div>
+                        <div class="coc-deck-stack">
+                            <div id="coc-deck-top" class="coc-deck-top" hidden></div>
+                            <div class="coc-deck-pile"><span id="coc-deck-count">0</span></div>
+                        </div>
                     </div>
                     <div class="coc-row coc-row-player">
                         <span class="coc-label">You</span>
                         <div id="coc-player-hand" class="coc-hand"></div>
                     </div>
                 </div>
+                <div id="coc-dice-arena" class="coc-dice-arena" hidden></div>
                 <p class="coc-hint">Tap a card twice to swap it with the deck top. Max ${MAX_SWAPS} swaps, then reveal.</p>
                 <div id="coc-actions" class="coc-actions"></div>
                 <div id="coc-log" class="coc-log scrollable-content"></div>

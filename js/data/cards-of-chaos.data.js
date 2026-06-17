@@ -155,3 +155,8 @@ export function isSpecialFace(card) {
     if (card.suit === 'pent' && card.rank === 9) return 'sierpinski';
     return null;
 }
+
+export const SPECIAL_FACE_ART = {
+    cube: 'assets/img/cards/d6-face-6-cube.png',
+    sierpinski: 'assets/img/cards/d12-face-9-sierpinski.png',
+};

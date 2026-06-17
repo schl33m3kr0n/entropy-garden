@@ -132,7 +132,7 @@ function relocateControlsToSidebar() {
     const sidebar = document.getElementById('sidebar-menu');
 
     const modeBtn = document.getElementById('mode-btn');
-
+    const panopticonMuteBtn = document.getElementById('panopticon-mute-btn');
     const playlist = document.getElementById('playlist-menu');
 
     if (!sidebar || !modeBtn || !playlist) return;
@@ -153,7 +153,11 @@ function relocateControlsToSidebar() {
 
 
 
-    tools.append(modeBtn, playlist);
+    if (panopticonMuteBtn) {
+        tools.append(modeBtn, panopticonMuteBtn, playlist);
+    } else {
+        tools.append(modeBtn, playlist);
+    }
 
     playlist.style.display = 'block';
 

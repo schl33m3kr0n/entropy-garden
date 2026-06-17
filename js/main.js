@@ -30,6 +30,8 @@ import {
     getBgmTrackTitle,
     applyTrackTitleMarquee,
     panopticonEl,
+    togglePanopticonMuted,
+    syncPanopticonMuteButton,
 } from './core/shared.js';
 import {
     time,
@@ -513,6 +515,7 @@ function revealGardenUI() {
     if (isIosLayout) {
         hud?.classList.add('active');
         document.getElementById('mode-btn')?.classList.add('active');
+        document.getElementById('panopticon-mute-btn')?.classList.add('active');
         document.querySelector('.control-panel')?.classList.add('active');
         if (playlistMenu) {
             playlistMenu.classList.add('active');
@@ -529,6 +532,7 @@ function revealGardenUI() {
     setTimeout(() => hud.classList.add('active', 'anim-drop'), HUD_DROP_DELAY_MS);
     setTimeout(() => {
         document.getElementById('mode-btn').classList.add('active');
+        document.getElementById('panopticon-mute-btn')?.classList.add('active');
         document.querySelector('.control-panel').classList.add('active');
     }, 450);
     setTimeout(revealTerminalChrome, 450);
@@ -794,6 +798,13 @@ function resetTimeline() {
 
 
 // --- CORRUPTED MODE TOGGLE ---
+function togglePanopticonMuteSetting() {
+    const muted = togglePanopticonMuted();
+    playSound(sfx.click);
+    pushTerminalLog(muted ? '> PANOPTICON COMMENT SFX MUTED.' : '> PANOPTICON COMMENT SFX ENABLED.');
+    recordBehavior('panopticon_mute', { muted });
+}
+
 function toggleMode() {
     const btn = document.getElementById('mode-btn');
     toggleIsCorrupted();
@@ -1161,6 +1172,11 @@ function bindDomEvents() {
     const modeBtn = document.getElementById('mode-btn');
     if (modeBtn) {
         modeBtn.addEventListener('click', toggleMode);
+    }
+    syncPanopticonMuteButton();
+    const panopticonMuteBtn = document.getElementById('panopticon-mute-btn');
+    if (panopticonMuteBtn) {
+        panopticonMuteBtn.addEventListener('click', togglePanopticonMuteSetting);
     }
     /* next-poem / reset-timeline: bound in singularity.js (iOS touchend-safe) */
 

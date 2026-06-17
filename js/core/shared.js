@@ -861,7 +861,52 @@ function bindPanopticonCommentViewportSync() {
     });
 }
 
+const PANOPTICON_MUTE_KEY = 'entropy-garden-panopticon-muted-v1';
+let panopticonMuted = false;
+
+function loadPanopticonMutePref() {
+    try {
+        panopticonMuted = localStorage.getItem(PANOPTICON_MUTE_KEY) === '1';
+    } catch {
+        panopticonMuted = false;
+    }
+}
+
+export function isPanopticonMuted() {
+    return panopticonMuted;
+}
+
+export function syncPanopticonMuteButton() {
+    const btn = document.getElementById('panopticon-mute-btn');
+    if (!btn) return;
+    btn.textContent = panopticonMuted ? 'EYE MUTED' : 'EYE SFX';
+    btn.setAttribute('aria-pressed', panopticonMuted ? 'true' : 'false');
+    btn.classList.toggle('is-muted', panopticonMuted);
+}
+
+export function setPanopticonMuted(muted) {
+    panopticonMuted = !!muted;
+    try {
+        localStorage.setItem(PANOPTICON_MUTE_KEY, panopticonMuted ? '1' : '0');
+    } catch {
+        /* private mode */
+    }
+    document.body?.classList.toggle('panopticon-muted', panopticonMuted);
+    syncPanopticonMuteButton();
+}
+
+export function togglePanopticonMuted() {
+    setPanopticonMuted(!panopticonMuted);
+    return panopticonMuted;
+}
+
+loadPanopticonMutePref();
+if (document.body) {
+    document.body.classList.toggle('panopticon-muted', panopticonMuted);
+}
+
 function playPanopticonCommentSfx() {
+    if (panopticonMuted) return;
     playSoundOverlap(isPanopticonGodModeCommentary() ? sfx.echo : sfx.blip);
 }
 
