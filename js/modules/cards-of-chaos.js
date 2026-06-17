@@ -12,10 +12,10 @@ import {
     dieSidesForSuit,
     rollDie,
     dieMedian,
-    isSpecialFace,
     hexWedgeFaceSvg,
     sierpinskiFaceSvg,
     icosaCornerSvg,
+    icosahedronShapeSvg,
     isDieSixFace,
     isDieNineFace,
 } from '../data/cards-of-chaos.data.js';
@@ -411,7 +411,10 @@ function shapeSvg(suitId, variant) {
     if (suitId === 'pent') {
         return `<svg viewBox="0 0 24 24" class="coc-shape" aria-hidden="true"><polygon points="12,2 22,9 18,21 6,21 2,9" fill="${s.color}"/></svg>`;
     }
-    return `<svg viewBox="0 0 24 24" class="coc-shape" aria-hidden="true"><polygon points="12,2 18,8 20,16 14,22 10,22 4,16 6,8" fill="${s.color}"/></svg>`;
+    if (suitId === 'hex') {
+        return icosahedronShapeSvg(s.color);
+    }
+    return '';
 }
 
 function dieCornerShapeSvg(suitId) {
@@ -454,15 +457,19 @@ function renderDieEl(roll) {
     return el;
 }
 
-function specialFaceMarkup(card) {
-    const special = isSpecialFace(card);
-    if (special === 'hexWedge') {
-        return `<span class="coc-special-art coc-hex-wedge-art">${hexWedgeFaceSvg('--coc-accent')}</span>`;
-    }
-    if (special === 'sierpinski') {
-        return `<span class="coc-special-art coc-sierpinski-art">${sierpinskiFaceSvg('--coc-accent')}</span>`;
-    }
-    return '';
+function cardFaceHtml(card) {
+    const rankLabel = card.suit === 'wild' ? '' : String(card.rank);
+    const wideRank = rankLabel.length > 1 ? ' is-wide' : '';
+    const centerShape = shapeSvg(card.suit, card.variant);
+    return `
+        <span class="coc-card-corner coc-card-corner-tl">
+            <span class="coc-rank${wideRank}">${rankLabel}</span>
+        </span>
+        <span class="coc-card-center">${centerShape}</span>
+        <span class="coc-card-corner coc-card-corner-br">
+            <span class="coc-rank${wideRank}">${rankLabel}</span>
+        </span>
+    `;
 }
 
 function renderCardEl(card, { faceDown = false, selectable = false, selected = false, swapAnim = null, onClick } = {}) {
@@ -483,14 +490,7 @@ function renderCardEl(card, { faceDown = false, selectable = false, selected = f
         return el;
     }
 
-    const special = isSpecialFace(card);
-    if (special) el.classList.add('has-special-face');
-    const rankLabel = card.suit === 'wild' ? '★' : (special ? '' : String(card.rank));
-    el.innerHTML = `
-        ${shapeSvg(card.suit, card.variant)}
-        <span class="coc-rank">${rankLabel}</span>
-        ${specialFaceMarkup(card)}
-    `;
+    el.innerHTML = cardFaceHtml(card);
     el.style.setProperty('--coc-accent', SUITS[card.suit]?.accent || '#ccc');
 
     if (onClick) el.addEventListener('click', () => onClick(card, el));

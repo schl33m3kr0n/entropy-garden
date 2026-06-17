@@ -83,10 +83,11 @@ export const RULES_SECTIONS = [
         title: 'The Deck (52 cards)',
         body: `• 2 Wild cards (⚫ / ⚪ circles) — substitute any rank or suit when completing a hand
 • 4 Triangles (🔴 d4) — ranks 1–4
-• 6 Squares (🟢 d6) — ranks 1–6; face 6 shows a hex wedge
+• 6 Squares (🟢 d6) — ranks 1–6
 • 8 Diamonds (🟡 d8) — ranks 1–8
-• 12 Pentagons (🟠 d12) — ranks 1–12; face 9 shows a Sierpiński triangle
-• 20 Hexagons (🔵 d20) — ranks 1–20; face 9 shows a Sierpiński triangle`,
+• 12 Pentagons (🟠 d12) — ranks 1–12
+• 20 Hexagons (🔵 d20) — ranks 1–20
+• Dice rolls of 6 and 9 show special face art when revealed`,
     },
     {
         title: 'Wild Card Risk',
@@ -150,12 +151,6 @@ export function dieMedian(sides) {
     return (sides + 1) / 2;
 }
 
-export function isSpecialFace(card) {
-    if (card.suit === 'sq' && card.rank === 6) return 'hexWedge';
-    if ((card.suit === 'pent' || card.suit === 'hex') && card.rank === 9) return 'sierpinski';
-    return null;
-}
-
 export function isDieSixFace(roll) {
     return roll.value === 6;
 }
@@ -210,6 +205,32 @@ export function sierpinskiFaceSvg(accentVar = '--die-accent') {
         <polygon fill="${c}" points="${svgPoints([bl, midLeft, midBottom])}"/>
         <polygon fill="${c}" points="${svgPoints([br, midBottom, midRight])}"/>
     </svg>`;
+}
+
+/** Solid icosahedron (d20) for hex suit cards. */
+export function icosahedronShapeSvg(color = '#3399ff') {
+    const cx = 12;
+    const cy = 12;
+    const r = 10;
+    const v = regularHexagonVertices(cx, cy, r);
+    const [top, ur, lr, bottom, ll, ul] = v;
+    const halfBase = ((r * 2) / Math.sqrt(3)) / 2;
+    const triBL = [cx - halfBase, cy];
+    const triBR = [cx + halfBase, cy];
+    const faces = [
+        [top, triBL, triBR],
+        [top, ul, triBL],
+        [top, triBR, ur],
+        [triBL, ul, ll],
+        [triBR, ur, lr],
+        [triBL, triBR, bottom],
+        [triBL, ll, bottom],
+        [triBR, lr, bottom],
+    ];
+
+    const polys = faces.map((face) => `<polygon fill="${color}" points="${svgPoints(face)}"/>`).join('');
+
+    return `<svg viewBox="0 0 24 24" class="coc-shape coc-shape-icosahedron" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">${polys}</svg>`;
 }
 
 /** Isometric cube-corner badge for the d20 die corner — solid fill tints via CSS accent var. */

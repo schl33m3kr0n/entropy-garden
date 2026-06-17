@@ -2769,17 +2769,63 @@ body.ios-ui #arcade-screen {
     position: relative;
     width: 52px;
     height: 72px;
-    padding: 6px 4px;
+    padding: 0;
     border-radius: 6px;
     border: 2px solid rgba(255, 255, 255, 0.15);
     background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
     color: #eee;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
     cursor: default;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.coc-card-corner {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.coc-card-corner-tl {
+    top: 5px;
+    left: 6px;
+}
+
+.coc-card-corner-br {
+    bottom: 5px;
+    right: 6px;
+    transform: rotate(180deg);
+}
+
+.coc-card-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.coc-card-center .coc-shape {
+    width: 28px;
+    height: 28px;
+}
+
+.coc-card-center .coc-shape-icosahedron {
+    width: 30px;
+    height: 30px;
+}
+
+.coc-card-corner .coc-rank {
+    font-size: 0.72rem;
+}
+
+.coc-card-corner .coc-rank.is-wide {
+    font-size: 0.58rem;
+    letter-spacing: -0.04em;
 }
 
 .coc-card.is-selectable {
@@ -2809,6 +2855,10 @@ body.ios-ui #arcade-screen {
 }
 
 .coc-card-back {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     font-size: 1.4rem;
     color: var(--neon-green);
     opacity: 0.7;
