@@ -83,10 +83,10 @@ export const RULES_SECTIONS = [
         title: 'The Deck (52 cards)',
         body: `• 2 Wild cards (⚫ / ⚪ circles) — substitute any rank or suit when completing a hand
 • 4 Triangles (🔴 d4) — ranks 1–4
-• 6 Squares (🟢 d6) — ranks 1–6; face 6 shows an isometric cube
+• 6 Squares (🟢 d6) — ranks 1–6; face 6 shows a hex wedge
 • 8 Diamonds (🟡 d8) — ranks 1–8
-• 12 Pentagons (🟠 d12) — ranks 1–12; face 9 shows a Sierpiński triangle (stage 1)
-• 20 Hexagons (🔵 d20) — ranks 1–20`,
+• 12 Pentagons (🟠 d12) — ranks 1–12; face 9 shows a Sierpiński triangle
+• 20 Hexagons (🔵 d20) — ranks 1–20; face 9 shows a Sierpiński triangle`,
     },
     {
         title: 'Wild Card Risk',
@@ -151,12 +151,76 @@ export function dieMedian(sides) {
 }
 
 export function isSpecialFace(card) {
-    if (card.suit === 'sq' && card.rank === 6) return 'cube';
-    if (card.suit === 'pent' && card.rank === 9) return 'sierpinski';
+    if (card.suit === 'sq' && card.rank === 6) return 'hexWedge';
+    if ((card.suit === 'pent' || card.suit === 'hex') && card.rank === 9) return 'sierpinski';
     return null;
 }
 
-export const SPECIAL_FACE_ART = {
-    cube: 'assets/img/cards/d6-face-6-cube.png',
-    sierpinski: 'assets/img/cards/d12-face-9-sierpinski.png',
-};
+export function isDieSixFace(roll) {
+    return roll.value === 6;
+}
+
+export function isDieNineFace(roll) {
+    return roll.value === 9;
+}
+
+/** Regular hexagon vertices (pointy-top), center (cx,cy), circumradius r. */
+function regularHexagonVertices(cx, cy, r) {
+    return Array.from({ length: 6 }, (_, i) => {
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+    });
+}
+
+function svgPoints(vertices) {
+    return vertices.map(([x, y]) => `${x.toFixed(3)},${y.toFixed(3)}`).join(' ');
+}
+
+/** Recolorable hex wedge art — used for face 6 on dice and sq-6 cards. */
+export function hexWedgeFaceSvg(accentVar = '--die-accent') {
+    const c = `var(${accentVar}, #33dd66)`;
+    const cx = 100;
+    const cy = 100;
+    const r = 90;
+    const v = regularHexagonVertices(cx, cy, r);
+    const [top, ur, lr, bottom, ll, ul] = v;
+    const center = [cx, cy];
+
+    return `<svg class="coc-hex-wedge-art" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <polygon fill="${c}" points="${svgPoints([ul, top, center])}"/>
+        <polygon fill="${c}" points="${svgPoints([ur, lr, center])}"/>
+        <polygon fill="${c}" points="${svgPoints([bottom, ll, center])}"/>
+        <polygon fill="none" stroke="${c}" stroke-width="4" stroke-linejoin="round" points="${svgPoints(v)}"/>
+    </svg>`;
+}
+
+/** Recolorable Sierpiński stage-1 triangle — used for face 9 on d12/d20 and pent/hex-9 cards. */
+export function sierpinskiFaceSvg(accentVar = '--die-accent') {
+    const c = `var(${accentVar}, #ff8822)`;
+    const top = [100, 20];
+    const bl = [28, 172];
+    const br = [172, 172];
+    const midLeft = [(top[0] + bl[0]) / 2, (top[1] + bl[1]) / 2];
+    const midRight = [(top[0] + br[0]) / 2, (top[1] + br[1]) / 2];
+    const midBottom = [(bl[0] + br[0]) / 2, (bl[1] + br[1]) / 2];
+
+    return `<svg class="coc-sierpinski-art" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <polygon fill="none" stroke="${c}" stroke-width="4" stroke-linejoin="round" points="${svgPoints([top, bl, br])}"/>
+        <polygon fill="${c}" points="${svgPoints([top, midLeft, midRight])}"/>
+        <polygon fill="${c}" points="${svgPoints([bl, midLeft, midBottom])}"/>
+        <polygon fill="${c}" points="${svgPoints([br, midBottom, midRight])}"/>
+    </svg>`;
+}
+
+/** Isometric cube-corner badge for the d20 die corner — solid fill tints via CSS accent var. */
+export function icosaCornerSvg(accentVar = '--die-accent') {
+    const c = `var(${accentVar}, #3399ff)`;
+    const cx = 12;
+    const cy = 12;
+    const r = 10;
+    const v = regularHexagonVertices(cx, cy, r);
+
+    return `<svg viewBox="0 0 24 24" class="coc-shape coc-shape-icosa-corner" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <polygon fill="${c}" points="${svgPoints(v)}"/>
+    </svg>`;
+}

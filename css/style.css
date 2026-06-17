@@ -2672,6 +2672,10 @@ body.ios-ui #arcade-screen {
     opacity: 0.55;
 }
 
+.coc-die-body .coc-shape-icosa-corner {
+    opacity: 0.9;
+}
+
 .coc-die-value {
     font-family: var(--main-font);
     font-size: 1.35rem;
@@ -2684,6 +2688,28 @@ body.ios-ui #arcade-screen {
     height: 34px;
     object-fit: contain;
     pointer-events: none;
+}
+
+.coc-die-art.coc-hex-wedge-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coc-die-art.coc-hex-wedge-art .coc-hex-wedge-art {
+    width: 100%;
+    height: 100%;
+}
+
+.coc-die-art.coc-sierpinski-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.coc-die-art.coc-sierpinski-art .coc-sierpinski-art {
+    width: 100%;
+    height: 100%;
 }
 
 .coc-die-art.coc-cube-art {
@@ -2822,13 +2848,17 @@ body.ios-ui #arcade-screen {
     width: 40px;
     height: 40px;
     transform: translate(-50%, -50%);
-    object-fit: contain;
     pointer-events: none;
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.55));
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.coc-special-art.coc-cube-art {
-    transform: translate(-50%, -50%) rotate(30deg);
+.coc-special-art.coc-hex-wedge-art .coc-hex-wedge-art,
+.coc-special-art.coc-sierpinski-art .coc-sierpinski-art {
+    width: 100%;
+    height: 100%;
 }
 
 .coc-special-art.coc-sierpinski-art {

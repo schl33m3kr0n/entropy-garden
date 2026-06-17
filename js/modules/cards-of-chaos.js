@@ -13,7 +13,11 @@ import {
     rollDie,
     dieMedian,
     isSpecialFace,
-    SPECIAL_FACE_ART,
+    hexWedgeFaceSvg,
+    sierpinskiFaceSvg,
+    icosaCornerSvg,
+    isDieSixFace,
+    isDieNineFace,
 } from '../data/cards-of-chaos.data.js';
 
 const HAND_RANK = {
@@ -410,14 +414,22 @@ function shapeSvg(suitId, variant) {
     return `<svg viewBox="0 0 24 24" class="coc-shape" aria-hidden="true"><polygon points="12,2 18,8 20,16 14,22 10,22 4,16 6,8" fill="${s.color}"/></svg>`;
 }
 
-function dieFaceMarkup(roll, showValue) {
-    const special = (roll.suitId === 'sq' && roll.value === 6) ? 'cube'
-        : (roll.suitId === 'pent' && roll.value === 9) ? 'sierpinski' : null;
-    if (special && showValue) {
-        const cls = special === 'cube' ? 'coc-die-art coc-cube-art' : 'coc-die-art coc-sierpinski-art';
-        return `<img class="${cls}" src="${SPECIAL_FACE_ART[special]}" alt="" aria-hidden="true">`;
+function dieCornerShapeSvg(suitId) {
+    if (suitId === 'hex') {
+        return icosaCornerSvg('--die-accent');
     }
-    return `<span class="coc-die-value">${showValue ? roll.value : '?'}</span>`;
+    return shapeSvg(suitId);
+}
+
+function dieFaceMarkup(roll, showValue) {
+    if (!showValue) return `<span class="coc-die-value">?</span>`;
+    if (isDieSixFace(roll)) {
+        return `<span class="coc-die-art coc-hex-wedge-art">${hexWedgeFaceSvg('--die-accent')}</span>`;
+    }
+    if (isDieNineFace(roll)) {
+        return `<span class="coc-die-art coc-sierpinski-art">${sierpinskiFaceSvg('--die-accent')}</span>`;
+    }
+    return `<span class="coc-die-value">${roll.value}</span>`;
 }
 
 function renderDieEl(roll) {
@@ -435,7 +447,7 @@ function renderDieEl(roll) {
     el.innerHTML = `
         <div class="coc-die-body" style="--die-accent: ${accent}">
             ${dieFaceMarkup(roll, showValue)}
-            ${shapeSvg(roll.suitId)}
+            ${dieCornerShapeSvg(roll.suitId)}
         </div>
         <span class="coc-die-tag">${roll.label}${roll.role === 'wild' ? ' · wild' : ''}</span>
     `;
@@ -444,11 +456,11 @@ function renderDieEl(roll) {
 
 function specialFaceMarkup(card) {
     const special = isSpecialFace(card);
-    if (special === 'cube') {
-        return `<img class="coc-special-art coc-cube-art" src="${SPECIAL_FACE_ART.cube}" alt="" decoding="async" aria-hidden="true">`;
+    if (special === 'hexWedge') {
+        return `<span class="coc-special-art coc-hex-wedge-art">${hexWedgeFaceSvg('--coc-accent')}</span>`;
     }
     if (special === 'sierpinski') {
-        return `<img class="coc-special-art coc-sierpinski-art" src="${SPECIAL_FACE_ART.sierpinski}" alt="" decoding="async" aria-hidden="true">`;
+        return `<span class="coc-special-art coc-sierpinski-art">${sierpinskiFaceSvg('--coc-accent')}</span>`;
     }
     return '';
 }
