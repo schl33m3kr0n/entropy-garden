@@ -17,7 +17,7 @@ export const CIPHER_MATH_DECORATIVE =
 
 /** Decorative reference marks. */
 export const DECORATIVE_CIPHER_CHARS =
-    "※⁂⁜⊙⊛⟠❀❖✡";
+    "※⁂⁜⊙⊛⟠❀❖✡ॐ☪☦☯☧☫☮☭☥✞☨☸⛧⛩";
 
 // ─── Numerals (multi-script) ──────────────────────────────────────────────────
 
