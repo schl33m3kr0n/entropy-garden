@@ -1247,6 +1247,33 @@ lightboxOverlay.addEventListener('click', (e) => {
 const hamburger = document.getElementById('hamburger-icon');
 const sidebar = document.getElementById('sidebar-menu');
 
+function resetSidebarText(textEl, label) {
+    textEl.classList.remove('is-scrolling');
+    textEl.classList.add('is-static');
+    textEl.style.removeProperty('--marquee-duration');
+    textEl.style.removeProperty('--marquee-offset');
+    textEl.innerHTML = `<div class="track-title-scroll"><span class="track-title-content">// ${label}</span></div>`;
+}
+
+function initSidebarMarquees() {
+    document.querySelectorAll('#sidebar-menu .sidebar-text').forEach((textEl) => {
+        const label = (textEl.dataset.sidebarLabel || textEl.textContent.trim()).replace(/^\/\/\s*/, '');
+        textEl.dataset.sidebarLabel = label;
+        textEl.classList.add('track-title-marquee', 'is-static');
+        resetSidebarText(textEl, label);
+
+        const li = textEl.closest('li');
+        if (!li) return;
+
+        li.addEventListener('mouseenter', () => {
+            window.setTimeout(() => applyTrackTitleMarquee(textEl, label), 280);
+        });
+        li.addEventListener('mouseleave', () => resetSidebarText(textEl, label));
+    });
+}
+
+initSidebarMarquees();
+
 // --- Update the Sidebar Logic in script.js ---
 hamburger.addEventListener('click', () => {
     sidebar.classList.toggle('active');
