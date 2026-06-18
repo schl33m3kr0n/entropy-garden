@@ -2228,6 +2228,10 @@ body.perf-lite #loader-leaf {
         width: min(700px, 96vw);
     }
 
+    #modal-cards.modal.wide {
+        width: min(880px, 98vw);
+    }
+
     .modal-content {
         padding: 28px 24px;
     }
@@ -2475,6 +2479,26 @@ body.ios-ui #arcade-screen {
 }
 
 /* --- CARDS OF CHAOS --- */
+#modal-cards.modal.wide {
+    width: min(880px, 98vw);
+}
+
+#modal-cards .modal-content {
+    max-height: min(96vh, 980px);
+    overflow-y: auto;
+}
+
+#modal-cards .coc-modal-scroll {
+    max-height: none;
+    overflow: visible;
+    overflow-y: visible;
+}
+
+#modal-cards #coc-rules-body {
+    max-height: min(58vh, 520px);
+    overflow-y: auto;
+}
+
 #cards-game-container {
     display: flex;
     justify-content: center;
@@ -2482,7 +2506,6 @@ body.ios-ui #arcade-screen {
 }
 
 .coc-modal-scroll {
-    max-height: min(72vh, 640px);
     padding-right: 4px;
     display: flex;
     justify-content: center;
@@ -2568,11 +2591,11 @@ body.ios-ui #arcade-screen {
 }
 
 .coc-layout--players-3 {
-    width: min(100%, 560px);
+    width: min(100%, 600px);
 }
 
 .coc-layout--players-4 {
-    width: min(100%, 680px);
+    width: min(100%, 720px);
 }
 
 .coc-layout--players-3 .coc-space-hint-slot,
@@ -4759,6 +4782,10 @@ body.ios-ui .modal,
 body.ios-ui .modal.wide {
     border-radius: var(--ios-radius-lg);
     overflow: hidden;
+}
+
+body.ios-ui #modal-cards.modal.wide {
+    width: min(880px, 98vw);
 }
 
 body.ios-ui .modal h2 {
