@@ -130,7 +130,40 @@ function renderTouchPrimary(slotEl, action) {
     slotEl.hidden = false;
 }
 
+function ensureSpaceHint() {
+    let hintEl = rootEl?.querySelector('#coc-space-hint');
+    if (!hintEl && rootEl) {
+        hintEl = document.createElement('div');
+        hintEl.id = 'coc-space-hint';
+        hintEl.className = 'coc-space-hint';
+        hintEl.hidden = true;
+        hintEl.setAttribute('aria-live', 'polite');
+    }
+    return hintEl;
+}
+
+function mountSpaceHint() {
+    const hintEl = ensureSpaceHint();
+    if (!hintEl || !game) return;
+
+    const isBottom = game.playerCount === 2;
+    hintEl.classList.toggle('coc-space-hint--bottom', isBottom);
+    hintEl.classList.toggle('coc-space-hint--seat', !isBottom);
+
+    if (isBottom) {
+        const slot = rootEl?.querySelector('#coc-space-hint-slot');
+        if (slot && hintEl.parentElement !== slot) slot.appendChild(hintEl);
+        return;
+    }
+
+    const inner = rootEl?.querySelector('.coc-seat[data-seat="south"] .coc-seat-inner');
+    if (inner && hintEl.parentElement !== inner) {
+        inner.insertBefore(hintEl, inner.firstChild);
+    }
+}
+
 function renderSpaceHint() {
+    mountSpaceHint();
     const hintEl = rootEl?.querySelector('#coc-space-hint');
     if (!hintEl) return;
     const action = getCocPrimaryAction();
@@ -274,18 +307,21 @@ function cloneCard(card) {
     return { ...card };
 }
 
-function opponentLabel(playerCount, index) {
-    if (playerCount === 2 && index === 1) return 'CPU';
-    return `CPU ${index}`;
+function playerLabel(playerIndex) {
+    return `P${playerIndex + 1}`;
+}
+
+function playerCountOptionLabel(count) {
+    return `${count}P`;
 }
 
 function makePlayers(playerCount) {
-    const players = [{ id: 'you', name: 'You', isHuman: true, hand: [], total: 0 }];
-    for (let i = 1; i < playerCount; i++) {
+    const players = [];
+    for (let i = 0; i < playerCount; i++) {
         players.push({
-            id: `cpu-${i}`,
-            name: opponentLabel(playerCount, i),
-            isHuman: false,
+            id: i === 0 ? 'you' : `cpu-${i}`,
+            name: playerLabel(i),
+            isHuman: i === 0,
             hand: [],
             total: 0,
         });
@@ -1126,7 +1162,8 @@ function renderPlayerPick(container) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = `coc-player-btn${game.pendingPlayerCount === n ? ' is-active' : ''}`;
-        btn.textContent = `${n} players`;
+        btn.textContent = playerCountOptionLabel(n);
+        btn.setAttribute('aria-label', `${n} players`);
         btn.addEventListener('click', () => {
             if (game.pendingPlayerCount === n) return;
             game.pendingPlayerCount = n;
@@ -1442,7 +1479,7 @@ function buildShell(container) {
                         <div id="coc-dice-overlay" class="coc-dice-overlay" hidden></div>
                     </div>
                 </div>
-                <div id="coc-space-hint" class="coc-space-hint" hidden aria-live="polite"></div>
+                <div id="coc-space-hint-slot" class="coc-space-hint-slot"></div>
                 <div id="coc-actions" class="coc-actions"></div>
             </div>
             <div class="coc-panel coc-panel-rules" data-panel="rules" hidden>
