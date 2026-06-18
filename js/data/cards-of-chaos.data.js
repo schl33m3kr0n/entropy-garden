@@ -3,6 +3,8 @@
 export const ROUND_COUNT = 4;
 export const MAX_SWAPS = 3;
 export const HAND_SIZE = 5;
+export const MIN_PLAYERS = 2;
+export const MAX_PLAYERS = 4;
 
 export const SUITS = {
     wild: {
@@ -77,7 +79,9 @@ export const HAND_LABELS = {
 export const RULES_SECTIONS = [
     {
         title: 'Overview',
-        body: `Cards of Chaos is a two-player strategy card game. Build the strongest five-card poker hand over four rounds. Each round allows up to three swaps before a forced reveal. Highest total score after four rounds wins; ties break with a sudden-death d20 roll.`,
+        body: `Cards of Chaos is a strategy card game for 2–4 players (you plus CPU opponents). Build the strongest five-card poker hand over four rounds. Each round allows up to three swaps before reveal. You may reveal early and forfeit unused swaps. After you reveal, each opponent swaps (up to three improving moves), then every hand is scored with dice. Highest total after four rounds wins; ties break with sudden-death d20 rolls.
+
+The 52-card deck supports up to four five-card hands (20 cards dealt, 32 remain in the deck for swaps).`,
     },
     {
         title: 'The Deck (52 cards)',
@@ -134,6 +138,7 @@ export function buildDeck() {
 }
 
 export function cardKey(card) {
+    if (!card?.suit) return '?';
     if (card.suit === 'wild') return `wild-${card.variant || 'x'}`;
     return `${card.suit}-${card.rank}`;
 }

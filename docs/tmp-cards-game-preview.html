@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cards of Chaos — game preview (temp)</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 24px;
+            background: #050505;
+            color: #cfcfcf;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .preview-shell {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 1.1rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #0f0;
+        }
+
+        .preview-meta {
+            margin: 0 0 18px;
+            font-size: 0.78rem;
+            color: #888;
+        }
+
+        .preview-game {
+            border: 1px solid rgba(0, 255, 0, 0.25);
+            border-radius: 8px;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.55);
+            box-shadow: 0 0 24px rgba(0, 255, 0, 0.08);
+        }
+
+        #cards-game-container {
+            min-height: 420px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-shell">
+        <h1>Cards of Chaos — playable preview</h1>
+        <p class="preview-meta">
+            Temporary standalone preview · from repo root run
+            <code>python3 -m http.server 8765</code>
+            then open <code>/docs/tmp-cards-game-preview.html</code>
+        </p>
+        <div class="preview-game">
+            <div id="cards-game-container"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        globalThis.unlockTrophy = (id) => console.log('[trophy unlocked]', id);
+
+        import { initCardsOfChaos } from '../js/modules/cards-of-chaos.js';
+
+        initCardsOfChaos();
+    </script>
+</body>
+</html>
