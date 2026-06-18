@@ -42,9 +42,6 @@ const DIE_BETWEEN_MS = 420;
 const ANNOUNCE_IN_MS = 680;
 const ANNOUNCE_HOLD_MS = 1500;
 const ANNOUNCE_OUT_MS = 520;
-const SWAP_FLASH_IN_MS = 380;
-const SWAP_FLASH_HOLD_MS = 820;
-const SWAP_FLASH_OUT_MS = 360;
 
 /** Seat names for CPU opponents by total player count (human is always south). */
 const OPPONENT_SEATS = {
@@ -142,28 +139,7 @@ function ensureSpaceHint() {
     return hintEl;
 }
 
-function mountSpaceHint() {
-    const hintEl = ensureSpaceHint();
-    if (!hintEl || !game) return;
-
-    const isBottom = game.playerCount === 2;
-    hintEl.classList.toggle('coc-space-hint--bottom', isBottom);
-    hintEl.classList.toggle('coc-space-hint--seat', !isBottom);
-
-    if (isBottom) {
-        const slot = rootEl?.querySelector('#coc-space-hint-slot');
-        if (slot && hintEl.parentElement !== slot) slot.appendChild(hintEl);
-        return;
-    }
-
-    const inner = rootEl?.querySelector('.coc-seat[data-seat="south"] .coc-seat-inner');
-    if (inner && hintEl.parentElement !== inner) {
-        inner.insertBefore(hintEl, inner.firstChild);
-    }
-}
-
-function renderSpaceHint() {
-    mountSpaceHint();
+function updateSpaceHint() {
     const hintEl = rootEl?.querySelector('#coc-space-hint');
     if (!hintEl) return;
     const action = getCocPrimaryAction();
@@ -180,6 +156,49 @@ function renderSpaceHint() {
         <span class="coc-space-key" aria-hidden="true">space</span>
         <span class="coc-space-label">${action.label}</span>
     `;
+}
+
+function mountSpaceHint() {
+    const hintEl = ensureSpaceHint();
+    if (!hintEl || !game) return;
+
+    const isBottom = game.playerCount === 2;
+    hintEl.classList.toggle('coc-space-hint--bottom', isBottom);
+    hintEl.classList.toggle('coc-space-hint--seat', !isBottom);
+
+    if (isBottom) {
+        const slot = rootEl?.querySelector('#coc-space-hint-slot');
+        if (slot && hintEl.parentElement !== slot) slot.appendChild(hintEl);
+        return;
+    }
+
+    if (game.phase === 'game-over') return;
+
+    const slot = rootEl?.querySelector('#coc-south-prompt-slot');
+    if (slot && hintEl.parentElement !== slot) slot.appendChild(hintEl);
+}
+
+function renderSpaceHint() {
+    mountSpaceHint();
+    updateSpaceHint();
+}
+
+function renderSouthPrompt(mkBtn, onNewGame) {
+    const slot = rootEl?.querySelector('#coc-south-prompt-slot');
+    if (!slot || !game || game.playerCount === 2) return;
+
+    if (game.phase === 'game-over' && !game.busy) {
+        slot.innerHTML = '';
+        slot.appendChild(mkBtn('New game', onNewGame, true));
+        return;
+    }
+
+    if (slot.querySelector('.singularity-btn')) {
+        slot.innerHTML = '';
+    }
+
+    mountSpaceHint();
+    updateSpaceHint();
 }
 
 function renderPrimaryControls() {
@@ -201,7 +220,7 @@ function renderPrimaryControls() {
                 slot2p.hidden = true;
             }
         }
-        renderSpaceHint();
+        if (game.playerCount === 2) renderSpaceHint();
         return;
     }
 
@@ -213,7 +232,7 @@ function renderPrimaryControls() {
         slotCorner.innerHTML = '';
         slotCorner.hidden = true;
     }
-    renderSpaceHint();
+    if (game.playerCount === 2) renderSpaceHint();
 }
 
 function delay(ms) {
@@ -242,21 +261,6 @@ async function showAnnouncement(text, subtext = '') {
     renderGame();
     await delay(ANNOUNCE_OUT_MS);
     game.announcement = null;
-    renderGame();
-}
-
-async function pulseSwapFlash(text, subtext = '') {
-    if (!game) return;
-    game.swapFlash = { text, subtext, phase: 'in' };
-    renderGame();
-    await delay(SWAP_FLASH_IN_MS);
-    game.swapFlash.phase = 'hold';
-    renderGame();
-    await delay(SWAP_FLASH_HOLD_MS);
-    game.swapFlash.phase = 'out';
-    renderGame();
-    await delay(SWAP_FLASH_OUT_MS);
-    game.swapFlash = null;
     renderGame();
 }
 
@@ -863,7 +867,6 @@ function newGameState(playerCount = MIN_PLAYERS) {
         cpuSwapCount: 0,
         diceAnim: null,
         announcement: null,
-        swapFlash: null,
         revealedOpponents: [],
         cpuSwapPreview: null,
     };
@@ -988,7 +991,6 @@ async function animateCpuSwaps(state) {
             renderGame();
 
             state.log.unshift(`> ${player.name} swapped slot ${handIdx + 1} for ${cardKey(player.hand[handIdx])}.`);
-            await pulseSwapFlash(player.name, `Swap ${swapNum} / ${MAX_SWAPS}`);
         }
 
         if (swapNum === 0) {
@@ -1139,7 +1141,6 @@ function swapPlayerCard(state, handIdx) {
     state.log.unshift(`> Swapped ${cardKey(out)} for ${cardKey(drawn)}. ${state.swapsLeft} swaps left.`);
     playSound(sfx.click);
     renderGame();
-    void pulseSwapFlash(`Swap ${swapNum} / ${MAX_SWAPS}`, state.swapsLeft ? `${state.swapsLeft} left` : 'Revealing…');
     if (state.swapsLeft === 0) beginRevealSequence(state);
 }
 
@@ -1240,26 +1241,17 @@ function renderPlayerSeat(seatName, player, playerIndex, {
     });
 
     handWrap.appendChild(handEl);
-    inner.append(label, handWrap);
-    seatEl.appendChild(inner);
-}
 
-function renderSwapFlash() {
-    const el = rootEl?.querySelector('#coc-swap-flash');
-    if (!el) return;
-    const flash = game?.swapFlash;
-    if (!flash) {
-        el.hidden = true;
-        el.innerHTML = '';
-        el.className = 'coc-swap-flash';
-        return;
+    if (seatName === 'south' && game && game.playerCount >= 3) {
+        const promptSlot = document.createElement('div');
+        promptSlot.id = 'coc-south-prompt-slot';
+        promptSlot.className = 'coc-south-prompt-slot';
+        inner.append(promptSlot, label, handWrap);
+    } else {
+        inner.append(label, handWrap);
     }
-    el.hidden = false;
-    el.className = `coc-swap-flash is-${flash.phase}`;
-    el.innerHTML = `
-        <span class="coc-swap-flash-title">${flash.text}</span>
-        ${flash.subtext ? `<span class="coc-swap-flash-sub">${flash.subtext}</span>` : ''}
-    `;
+
+    seatEl.appendChild(inner);
 }
 
 function renderAnnouncement() {
@@ -1402,8 +1394,37 @@ function renderGame() {
 
     renderDiceArena();
     renderAnnouncement();
-    renderSwapFlash();
+
+    actionsEl.innerHTML = '';
+    const mkBtn = (label, fn, primary = false) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = `singularity-btn${primary ? ' coc-btn-primary' : ''}`;
+        b.textContent = label;
+        b.disabled = !!game.busy;
+        b.addEventListener('click', fn);
+        return b;
+    };
+
+    const startNewGame = () => {
+        game = newGameState(game.pendingPlayerCount);
+        dealRound(game);
+        renderGame();
+        void announceRoundStart(game);
+    };
+
+    if (game.phase === 'swap' && !game.busy && game.selectedIdx !== null) {
+        actionsEl.appendChild(mkBtn('Swap selected', () => swapPlayerCard(game, game.selectedIdx)));
+    }
+    if (game.phase === 'sudden-death' && !game.busy) {
+        actionsEl.appendChild(mkBtn('Roll d20', () => suddenDeathRoll(game), true));
+    }
+    if (game.phase === 'game-over' && !game.busy && game.playerCount === 2) {
+        actionsEl.appendChild(mkBtn('New game', startNewGame, true));
+    }
+
     renderPrimaryControls();
+    renderSouthPrompt(mkBtn, startNewGame);
 
     if (logPanelEl) {
         logPanelEl.innerHTML = game.log.map((line) => `<p>${line}</p>`).join('');
@@ -1418,44 +1439,20 @@ function renderGame() {
             playerPickEl.innerHTML = '';
         }
     }
-
-    actionsEl.innerHTML = '';
-    const mkBtn = (label, fn, primary = false) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = `singularity-btn${primary ? ' coc-btn-primary' : ''}`;
-        b.textContent = label;
-        b.disabled = !!game.busy;
-        b.addEventListener('click', fn);
-        return b;
-    };
-
-    if (game.phase === 'swap' && !game.busy && game.selectedIdx !== null) {
-        actionsEl.appendChild(mkBtn('Swap selected', () => swapPlayerCard(game, game.selectedIdx)));
-    }
-    if (game.phase === 'sudden-death' && !game.busy) {
-        actionsEl.appendChild(mkBtn('Roll d20', () => suddenDeathRoll(game), true));
-    }
-    if (game.phase === 'game-over' && !game.busy) {
-        actionsEl.appendChild(mkBtn('New game', () => {
-            game = newGameState(game.pendingPlayerCount);
-            dealRound(game);
-            renderGame();
-            void announceRoundStart(game);
-        }, true));
-    }
 }
 
 function buildShell(container) {
     container.innerHTML = `
         <div class="coc-layout">
-            <nav class="coc-tabs" role="tablist">
-                <button type="button" class="coc-tab is-active" data-tab="play" role="tab">Play</button>
-                <button type="button" class="coc-tab" data-tab="rules" role="tab">Rules</button>
-                <button type="button" class="coc-tab" data-tab="log" role="tab">Log</button>
-            </nav>
+            <div class="coc-tab-row">
+                <nav class="coc-tabs" role="tablist">
+                    <button type="button" class="coc-tab is-active" data-tab="play" role="tab">Play</button>
+                    <button type="button" class="coc-tab" data-tab="rules" role="tab">Rules</button>
+                    <button type="button" class="coc-tab" data-tab="log" role="tab">Log</button>
+                </nav>
+                <div id="coc-player-pick" class="coc-player-pick-wrap" hidden></div>
+            </div>
             <div class="coc-panel coc-panel-play is-active" data-panel="play">
-                <div id="coc-player-pick" class="coc-player-pick-wrap"></div>
                 <div id="coc-table" class="coc-table coc-table--players-2">
                     <div class="coc-table-surface">
                         <div class="coc-seat" data-seat="north" hidden></div>
@@ -1472,7 +1469,6 @@ function buildShell(container) {
                                 </div>
                                 <div id="coc-touch-primary-2p" class="coc-touch-primary-slot" hidden></div>
                             </div>
-                            <div id="coc-swap-flash" class="coc-swap-flash" hidden></div>
                         </div>
                         <div id="coc-touch-primary-corner" class="coc-touch-primary-slot coc-touch-primary-slot--corner" hidden></div>
                         <div id="coc-announce" class="coc-announce" hidden></div>
