@@ -828,6 +828,10 @@ async function animateCpuSwaps(state) {
             playSound(sfx.collectible);
             await delay(SWAP_ANIM_MS);
 
+            state.cpuHighlightIdx = null;
+            state.cpuSwapAnim = null;
+            renderGame();
+
             state.log.unshift(`> ${player.name} swapped slot ${handIdx + 1} for ${cardKey(player.hand[handIdx])}.`);
             await pulseSwapFlash(player.name, `Swap ${swapNum} / ${MAX_SWAPS}`);
         }
@@ -1144,38 +1148,47 @@ function scoreResultHtml(anim) {
 }
 
 function renderDiceArena() {
-    const arena = rootEl?.querySelector('#coc-dice-arena');
-    if (!arena) return;
+    const overlay = rootEl?.querySelector('#coc-dice-overlay');
+    if (!overlay) return;
 
     const anim = game?.diceAnim;
     if (!anim || (game.phase !== 'dice-roll' && !anim.done)) {
-        arena.hidden = true;
-        arena.innerHTML = '';
+        overlay.hidden = true;
+        overlay.classList.remove('is-visible');
+        overlay.innerHTML = '';
         return;
     }
 
-    arena.hidden = false;
-    const diceRow = document.createElement('div');
-    diceRow.className = 'coc-dice-row';
-    for (const roll of anim.rolls) {
-        diceRow.appendChild(renderDieEl(roll));
-    }
+    overlay.hidden = false;
+    overlay.classList.add('is-visible');
 
-    arena.innerHTML = '';
+    const card = document.createElement('div');
+    card.className = 'coc-dice-card';
+
     const head = document.createElement('div');
     head.className = 'coc-dice-head';
     head.innerHTML = `
         <span class="coc-dice-side">${anim.sideLabel}</span>
         <span class="coc-dice-hand">${anim.handLabel}</span>
     `;
-    arena.append(head, diceRow);
+
+    const diceRow = document.createElement('div');
+    diceRow.className = 'coc-dice-row';
+    for (const roll of anim.rolls) {
+        diceRow.appendChild(renderDieEl(roll));
+    }
+
+    card.append(head, diceRow);
 
     if (anim.done) {
         const foot = document.createElement('p');
         foot.className = 'coc-dice-result';
         foot.innerHTML = scoreResultHtml(anim);
-        arena.appendChild(foot);
+        card.appendChild(foot);
     }
+
+    overlay.innerHTML = '';
+    overlay.appendChild(card);
 }
 
 function renderGame() {
@@ -1312,9 +1325,9 @@ function buildShell(container) {
                             <div id="coc-swap-flash" class="coc-swap-flash" hidden></div>
                         </div>
                         <div id="coc-announce" class="coc-announce" hidden></div>
+                        <div id="coc-dice-overlay" class="coc-dice-overlay" hidden></div>
                     </div>
                 </div>
-                <div id="coc-dice-arena" class="coc-dice-arena" hidden></div>
                 <div id="coc-actions" class="coc-actions"></div>
             </div>
             <div class="coc-panel coc-panel-rules" data-panel="rules" hidden>
