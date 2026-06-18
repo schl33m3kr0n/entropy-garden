@@ -1,4 +1,4 @@
-import { sfx, playSound } from '../core/shared.js';
+import { sfx, playSound, perf } from '../core/shared.js';
 import {
     ROUND_COUNT,
     MAX_SWAPS,
@@ -62,7 +62,126 @@ const TABLE_METRICS = {
 
 let rootEl;
 let bound = false;
+let keyboardBound = false;
 let game = null;
+
+function cocTouchPrimary() {
+    return perf.isIOS || document.body.classList.contains('ios-ui');
+}
+
+function cocKeyboardActive() {
+    if (!rootEl?.isConnected || !game) return false;
+    const modal = document.getElementById('modal-cards');
+    if (!modal) return true;
+    return getComputedStyle(modal).display !== 'none';
+}
+
+function isCoCTypingTarget(el) {
+    if (!el) return false;
+    const tag = el.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+    if (el.isContentEditable) return true;
+    return !!el.closest?.('.terminal-container');
+}
+
+function onCoCKeydown(e) {
+    if (e.code !== 'Space' && e.key !== ' ') return;
+    if (!cocKeyboardActive() || cocTouchPrimary()) return;
+    if (isCoCTypingTarget(e.target)) return;
+    const action = getCocPrimaryAction();
+    if (!action) return;
+    e.preventDefault();
+    e.stopPropagation();
+    action.fn();
+}
+
+function getCocPrimaryAction(state = game) {
+    if (!state || state.busy) return null;
+    if (state.phase === 'swap') {
+        return {
+            label: state.swapsLeft > 0 ? 'Reveal early' : 'Reveal',
+            fn: () => revealEarly(state),
+        };
+    }
+    if (state.phase === 'reveal') {
+        return { label: 'Next round', fn: () => finishRound(state) };
+    }
+    return null;
+}
+
+function bindCoCKeyboard() {
+    if (keyboardBound) return;
+    keyboardBound = true;
+    document.addEventListener('keydown', onCoCKeydown, true);
+}
+
+function renderTouchPrimary(slotEl, action) {
+    if (!slotEl) return;
+    slotEl.innerHTML = '';
+    slotEl.hidden = !action;
+    if (!action) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'singularity-btn coc-btn-primary coc-touch-primary-btn';
+    btn.textContent = action.label;
+    btn.disabled = !!game?.busy;
+    btn.addEventListener('click', action.fn);
+    slotEl.appendChild(btn);
+    slotEl.hidden = false;
+}
+
+function renderSpaceHint() {
+    const hintEl = rootEl?.querySelector('#coc-space-hint');
+    if (!hintEl) return;
+    const action = getCocPrimaryAction();
+    const show = !cocTouchPrimary() && action && cocKeyboardActive();
+    if (!show) {
+        hintEl.hidden = true;
+        hintEl.classList.remove('is-visible');
+        hintEl.innerHTML = '';
+        return;
+    }
+    hintEl.hidden = false;
+    hintEl.classList.add('is-visible');
+    hintEl.innerHTML = `
+        <span class="coc-space-key" aria-hidden="true">space</span>
+        <span class="coc-space-label">${action.label}</span>
+    `;
+}
+
+function renderPrimaryControls() {
+    const action = getCocPrimaryAction();
+    const slot2p = rootEl?.querySelector('#coc-touch-primary-2p');
+    const slotCorner = rootEl?.querySelector('#coc-touch-primary-corner');
+
+    if (cocTouchPrimary()) {
+        if (game.playerCount === 2) {
+            renderTouchPrimary(slot2p, action);
+            if (slotCorner) {
+                slotCorner.innerHTML = '';
+                slotCorner.hidden = true;
+            }
+        } else {
+            renderTouchPrimary(slotCorner, action);
+            if (slot2p) {
+                slot2p.innerHTML = '';
+                slot2p.hidden = true;
+            }
+        }
+        renderSpaceHint();
+        return;
+    }
+
+    if (slot2p) {
+        slot2p.innerHTML = '';
+        slot2p.hidden = true;
+    }
+    if (slotCorner) {
+        slotCorner.innerHTML = '';
+        slotCorner.hidden = true;
+    }
+    renderSpaceHint();
+}
 
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -1247,6 +1366,7 @@ function renderGame() {
     renderDiceArena();
     renderAnnouncement();
     renderSwapFlash();
+    renderPrimaryControls();
 
     if (logPanelEl) {
         logPanelEl.innerHTML = game.log.map((line) => `<p>${line}</p>`).join('');
@@ -1273,20 +1393,8 @@ function renderGame() {
         return b;
     };
 
-    if (game.phase === 'swap' && !game.busy) {
-        if (game.swapsLeft > 0) {
-            actionsEl.appendChild(mkBtn('Reveal early', () => revealEarly(game), true));
-            if (game.selectedIdx !== null) {
-                actionsEl.appendChild(mkBtn('Swap selected', () => swapPlayerCard(game, game.selectedIdx)));
-            }
-        } else {
-            actionsEl.appendChild(mkBtn('Reveal', () => revealEarly(game), true));
-        }
-    }
-    if (game.phase === 'reveal' && !game.busy) {
-        actionsEl.appendChild(mkBtn('Next round', () => {
-            finishRound(game);
-        }, true));
+    if (game.phase === 'swap' && !game.busy && game.selectedIdx !== null) {
+        actionsEl.appendChild(mkBtn('Swap selected', () => swapPlayerCard(game, game.selectedIdx)));
     }
     if (game.phase === 'sudden-death' && !game.busy) {
         actionsEl.appendChild(mkBtn('Roll d20', () => suddenDeathRoll(game), true));
@@ -1320,14 +1428,21 @@ function buildShell(container) {
                         <div class="coc-seat" data-seat="east" hidden></div>
                         <div class="coc-seat" data-seat="south" hidden></div>
                         <div class="coc-table-center">
-                            <span class="coc-seat-label">Deck</span>
-                            <div class="coc-deck-pile"><span id="coc-deck-count">0</span></div>
+                            <div class="coc-deck-row">
+                                <div class="coc-deck-cluster">
+                                    <span class="coc-seat-label">Deck</span>
+                                    <div class="coc-deck-pile"><span id="coc-deck-count">0</span></div>
+                                </div>
+                                <div id="coc-touch-primary-2p" class="coc-touch-primary-slot" hidden></div>
+                            </div>
                             <div id="coc-swap-flash" class="coc-swap-flash" hidden></div>
                         </div>
+                        <div id="coc-touch-primary-corner" class="coc-touch-primary-slot coc-touch-primary-slot--corner" hidden></div>
                         <div id="coc-announce" class="coc-announce" hidden></div>
                         <div id="coc-dice-overlay" class="coc-dice-overlay" hidden></div>
                     </div>
                 </div>
+                <div id="coc-space-hint" class="coc-space-hint" hidden aria-live="polite"></div>
                 <div id="coc-actions" class="coc-actions"></div>
             </div>
             <div class="coc-panel coc-panel-rules" data-panel="rules" hidden>
@@ -1362,6 +1477,7 @@ export function initCardsOfChaos() {
         buildShell(rootEl);
         bound = true;
     }
+    bindCoCKeyboard();
 
     game = newGameState();
     dealRound(game);

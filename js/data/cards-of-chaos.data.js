@@ -197,14 +197,25 @@ export function hexWedgeFaceSvg(accentVar = '--die-accent') {
 /** Recolorable Sierpiński stage-1 triangle — used for face 9 on d12/d20 and pent/hex-9 cards. */
 export function sierpinskiFaceSvg(accentVar = '--die-accent') {
     const c = `var(${accentVar}, #ff8822)`;
-    const top = [100, 20];
-    const bl = [28, 172];
-    const br = [172, 172];
+    const cx = 100;
+    const by = 178;
+    const side = 164;
+    const height = (side * Math.sqrt(3)) / 2;
+    const ty = by - height;
+    const half = side / 2;
+    const top = [cx, ty];
+    const bl = [cx - half, by];
+    const br = [cx + half, by];
     const midLeft = [(top[0] + bl[0]) / 2, (top[1] + bl[1]) / 2];
     const midRight = [(top[0] + br[0]) / 2, (top[1] + br[1]) / 2];
     const midBottom = [(bl[0] + br[0]) / 2, (bl[1] + br[1]) / 2];
+    const pad = 6;
+    const vbX = cx - half - pad;
+    const vbY = ty - pad;
+    const vbW = side + pad * 2;
+    const vbH = height + pad * 2;
 
-    return `<svg class="coc-sierpinski-art" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    return `<svg class="coc-sierpinski-art" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" preserveAspectRatio="xMidYMid slice" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
         <polygon fill="none" stroke="${c}" stroke-width="4" stroke-linejoin="round" points="${svgPoints([top, bl, br])}"/>
         <polygon fill="${c}" points="${svgPoints([top, midLeft, midRight])}"/>
         <polygon fill="${c}" points="${svgPoints([bl, midLeft, midBottom])}"/>

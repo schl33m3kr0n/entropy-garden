@@ -2877,6 +2877,7 @@ body.ios-ui #arcade-screen {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 
 .coc-die-art.coc-sierpinski-art .coc-sierpinski-art {
@@ -3214,6 +3215,7 @@ body.ios-ui #arcade-screen {
 .coc-special-art.coc-sierpinski-art {
     width: 36px;
     height: 36px;
+    overflow: hidden;
 }
 
 .coc-cube {
@@ -3289,6 +3291,88 @@ body.ios-ui #arcade-screen {
 @keyframes cocSwapFlashOut {
     0% { opacity: 1; transform: translate(-50%, 0); }
     100% { opacity: 0; transform: translate(-50%, 6px); }
+}
+
+.coc-deck-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coc-deck-cluster {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.coc-touch-primary-slot {
+    flex-shrink: 0;
+}
+
+.coc-touch-primary-slot--corner {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    z-index: 5;
+}
+
+.coc-touch-primary-btn {
+    font-size: 0.72rem;
+    padding: 7px 10px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.coc-space-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 4px 0 0;
+    min-height: 28px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.coc-space-hint.is-visible {
+    animation: cocSpaceHintIn 520ms ease-out forwards;
+}
+
+.coc-space-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.4em;
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 255, 255, 0.45);
+    background: rgba(0, 0, 0, 0.65);
+    font-family: var(--main-font);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    box-shadow: 0 2px 0 rgba(0, 255, 255, 0.25);
+}
+
+.coc-space-label {
+    font-family: var(--main-font);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(200, 255, 200, 0.85);
+}
+
+@keyframes cocSpaceHintIn {
+    0% {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .coc-actions {
