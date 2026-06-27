@@ -1,9 +1,9 @@
 /** Vault — raycast checkered sphere; starburst + eyes are HTML overlays. */
 
-const CHECKS = 8;
-const TILT_X = 0.28;
-const SPIN_SPEED = 0.55;
-const SPHERE_SCALE = 0.31;
+const CHECKS = 12;
+const TILT_X = 0.33;
+const SPIN_SPEED = 0.50;
+const SPHERE_SCALE = 0.23;
 const MAX_RENDER_PX = 720;
 
 const activeCanvases = new Set();
@@ -30,6 +30,26 @@ function rotatePoint([x, y, z], rotX, rotY) {
     return [nx, ny, nz];
 }
 
+function rotatePointInverse([x, y, z], rotX, rotY) {
+    let nx = x;
+    let ny = y;
+    let nz = z;
+
+    const cx = Math.cos(-rotX);
+    const sx = Math.sin(-rotX);
+    let ty = ny * cx - nz * sx;
+    let tz = ny * sx + nz * cx;
+    ny = ty;
+    nz = tz;
+
+    const cy = Math.cos(-rotY);
+    const sy = Math.sin(-rotY);
+    const tx = nx * cy - nz * sy;
+    tz = nx * sy + nz * cy;
+
+    return [tx, ny, tz];
+}
+
 function normalize([x, y, z]) {
     const len = Math.hypot(x, y, z) || 1;
     return [x / len, y / len, z / len];
@@ -48,8 +68,8 @@ function checkerShade(lat, lon) {
 function castSpherePixel(dx, dy, radius, focal, rotY) {
     const rd = normalize([dx, dy, focal]);
     const ro = [0, 0, -focal];
-    const roL = rotatePoint(ro, -TILT_X, -rotY);
-    const rdL = rotatePoint(rd, -TILT_X, -rotY);
+    const roL = rotatePointInverse(ro, TILT_X, rotY);
+    const rdL = rotatePointInverse(rd, TILT_X, rotY);
 
     const b = 2 * dot(roL, rdL);
     const c = dot(roL, roL) - radius * radius;
@@ -57,16 +77,23 @@ function castSpherePixel(dx, dy, radius, focal, rotY) {
     if (disc < 0) return null;
 
     const sqrtDisc = Math.sqrt(disc);
-    let t = (-b - sqrtDisc) * 0.5;
-    if (t < 0) t = (-b + sqrtDisc) * 0.5;
-    if (t < 0) return null;
+    const tNear = (-b - sqrtDisc) * 0.5;
+    const tFar = (-b + sqrtDisc) * 0.5;
+
+    let t = null;
+    for (const cand of [tNear, tFar]) {
+        if (cand >= 0) {
+            t = cand;
+            break;
+        }
+    }
+    if (t == null) return null;
 
     const px = roL[0] + rdL[0] * t;
     const py = roL[1] + rdL[1] * t;
     const pz = roL[2] + rdL[2] * t;
     const nLocal = normalize([px, py, pz]);
     const nWorld = rotatePoint(nLocal, TILT_X, rotY);
-    if (nWorld[2] <= 0) return null;
 
     const lat = Math.asin(Math.max(-1, Math.min(1, nLocal[1])));
     const lon = Math.atan2(nLocal[0], nLocal[2]);
@@ -82,9 +109,9 @@ function shadePixel(hit, light) {
 
 function drawSphereFrame(ctx, w, h, rotY) {
     const cx = w * 0.5;
-    const cy = h * 0.52;
+    const cy = h * 0.50;
     const radius = Math.min(w, h) * SPHERE_SCALE;
-    const focal = Math.max(w, h) * 2.2;
+    const focal = Math.max(w, h) * 1.5;
     const light = normalize([0.35, 0.55, 0.75]);
 
     ctx.clearRect(0, 0, w, h);
