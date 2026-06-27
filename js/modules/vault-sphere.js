@@ -3,7 +3,7 @@
 const CHECKS = 8;
 const TILT_X = 0.28;
 const SPIN_SPEED = 0.55;
-const SPHERE_SCALE = 0.26;
+const SPHERE_SCALE = 0.31;
 const MAX_RENDER_PX = 720;
 
 const activeCanvases = new Set();
