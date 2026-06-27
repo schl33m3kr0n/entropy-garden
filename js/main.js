@@ -1274,7 +1274,11 @@ function openVaultSphereLightbox(sourceItem) {
 
     const wrapper = document.createElement('div');
     wrapper.className = 'lightbox-content vault-sphere-lightbox';
-    wrapper.appendChild(scene.cloneNode(true));
+    const clone = scene.cloneNode(true);
+    clone.querySelectorAll('.vault-sphere-canvas').forEach((canvas) => {
+        delete canvas.dataset.bound;
+    });
+    wrapper.appendChild(clone);
     lightboxOverlay.appendChild(wrapper);
     lightboxOverlay.classList.add('active');
 
@@ -1285,7 +1289,9 @@ function openVaultSphereLightbox(sourceItem) {
             const sourceCanvas = sourceItem.querySelector('.vault-sphere-canvas');
             const sourceState = sourceCanvas?._vaultSphereState;
             requestAnimationFrame(() => {
-                mod.initVaultSphere(canvas, sourceState?.rotY ?? 0);
+                requestAnimationFrame(() => {
+                    mod.initVaultSphere(canvas, sourceState?.rotY ?? 0);
+                });
             });
         })
         .catch((err) => console.error('[Entropy Garden] vault sphere lightbox failed to load', err));

@@ -1722,7 +1722,7 @@ body.corrupted .identity-statement p:last-child {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14%;
+    gap: 6%;
     z-index: 2;
     pointer-events: none;
 }
@@ -1744,24 +1744,14 @@ body.corrupted .identity-statement p:last-child {
 
 .vault-sphere-eye--light .vault-sphere-eye-sclera {
     fill: #fff;
-    stroke: #000;
-    stroke-width: 0.35;
 }
 
 .vault-sphere-eye-iris {
-    fill: url(#vault-chroma-iris);
+    fill: url(#panopticon-rainbow);
 }
 
 .vault-sphere-eye-pupil {
     fill: #0a0a0a;
-}
-
-.vault-sphere-defs {
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-    pointer-events: none;
 }
 
 @keyframes vault-sphere-starburst {
