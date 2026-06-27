@@ -1634,28 +1634,31 @@ body.corrupted .identity-statement p:last-child {
 }
 
 /* --- VAULT GRID --- */
-/* Assuming your vault is a 2-column grid */
 .vault-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 40px;
   padding: 40px;
+  justify-items: center;
+  align-items: start;
 }
 
-/* The Magic Rule: Center the last item ONLY if the total is odd */
+/* Center the last item when the row count is odd */
 .vault-grid > .vault-item:last-child:nth-child(odd) {
-  grid-column: 1 / -1; /* Spans across all columns */
-  justify-self: center; /* Centers the item horizontally */
-  width: 50%; /* Prevents the carousel from stretching to fill the whole row */
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 100%;
 }
-.vault-item { 
+
+.vault-item {
     position: relative;
-    background: rgba(0,25,0,0.3); 
-    border: 1px solid var(--neon-green); 
-    height: 180px; /* Made it a bit taller to show off the art */
-    overflow: hidden; /* Keeps the images locked inside the box */
+    width: fit-content;
+    max-width: 100%;
+    background: rgba(0,25,0,0.3);
+    border: 1px solid var(--neon-green);
+    overflow: hidden;
     border-radius: var(--radius-md);
-    transition: all 0.3s; 
+    transition: all 0.3s;
     cursor: pointer;
 }
 
@@ -1664,17 +1667,64 @@ body.corrupted .identity-statement p:last-child {
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
 }
 
-/* This styles the actual images and videos inside the grid */
+/* Media keeps its aspect ratio; the frame shrink-wraps and centers in the cell */
 .vault-media {
-    position: absolute;
-    inset: 0;
     display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: min(360px, 52vh);
+    object-fit: contain;
+    object-position: center;
+    vertical-align: middle;
+    filter: grayscale(80%) contrast(1.2) brightness(0.8);
+    transition: filter 0.4s ease;
+}
+
+.vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun)) {
     width: 100%;
-    height: 100%;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.vault-media.vault-media--sun:is(video) {
+    width: 100%;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    aspect-ratio: 541 / 675;
     object-fit: cover;
     object-position: center;
-    filter: grayscale(80%) contrast(1.2) brightness(0.8); /* Gives it a raw, muted terminal look */
-    transition: filter 0.4s ease;
+}
+
+.vault-item:has(> .vault-media--sun) {
+    width: min(100%, 320px);
+}
+
+.vault-media.vault-media--contain:is(video) {
+    width: 100%;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
+
+.vault-item:has(> .vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun))) {
+    width: min(100%, 360px);
+}
+
+.vault-item:has(> .vault-media--contain) {
+    width: min(100%, 320px);
+}
+
+.vault-media--contain {
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    background: #fff;
 }
 
 /* Reveals the full, bright, psychedelic color when you hover over it! */
@@ -1692,14 +1742,9 @@ body.corrupted .identity-statement p:last-child {
 
 .vault-item.carousel-container {
     position: relative;
-    height: 180px;
-    min-height: 180px;
+    width: min(100%, 320px);
+    aspect-ratio: 1 / 1;
     padding: 0;
-}
-
-.vault-media--contain {
-    object-fit: contain;
-    background: #fff;
 }
 
 #lightbox-overlay .lightbox-content.vault-media--contain,
@@ -2290,7 +2335,11 @@ body.perf-lite #loader-leaf {
     }
 
     .vault-grid > .vault-item:last-child:nth-child(odd) {
-        width: 100%;
+        max-width: 100%;
+    }
+
+    .vault-item.carousel-container {
+        width: min(100%, 280px);
     }
 }
 
@@ -3771,7 +3820,12 @@ body.chromatic-active {
 
 /* 1. Prevent the thumbnail from stealing the click so the Lightbox can open */
 .vault-item iframe.genesis-iframe {
-    pointer-events: none; 
+    pointer-events: none;
+    display: block;
+    width: min(280px, 100%);
+    aspect-ratio: 5 / 4;
+    height: auto;
+    border: 0;
 }
 
 /* 2. When opened in the Lightbox, target the NEW class the JS creates */
