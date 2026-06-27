@@ -1673,100 +1673,19 @@ body.corrupted .identity-statement p:last-child {
     padding: 0;
 }
 
-.vault-item-sphere {
-    cursor: pointer;
+.vault-media--contain {
+    object-fit: contain;
     background: #fff;
 }
 
-.vault-item-sphere:hover {
-    box-shadow: 0 0 18px rgba(0, 255, 0, 0.35);
-}
-
-.vault-sphere-scene {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    perspective: 520px;
+#lightbox-overlay .lightbox-content.vault-media--contain,
+#lightbox-overlay img.lightbox-content[src$=".gif"] {
+    object-fit: contain;
     background: #fff;
-}
-
-.vault-sphere-starburst {
-    position: absolute;
-    width: 89%;
-    height: 89%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 1;
-    animation: vault-sphere-starburst 15s linear infinite;
-    pointer-events: none;
-    z-index: 0;
-    overflow: visible;
-}
-
-.vault-sphere-starburst polygon {
-    fill: #000;
-}
-
-.vault-sphere-canvas {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    display: block;
-    background: transparent;
-    opacity: 0;
-}
-
-.vault-sphere-canvas--ready {
-    opacity: 1;
-}
-
-.vault-sphere-eyes {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4%;
-    z-index: 2;
-    pointer-events: none;
-}
-
-.vault-sphere-eye {
-    width: 15%;
-    height: auto;
-    flex-shrink: 0;
-    overflow: visible;
-}
-
-.vault-sphere-eye-sclera {
-    stroke: none;
-}
-
-.vault-sphere-eye--dark .vault-sphere-eye-sclera {
-    fill: #000;
-}
-
-.vault-sphere-eye--light .vault-sphere-eye-sclera {
-    fill: #fff;
-}
-
-.vault-sphere-eye-iris {
-    fill: url(#panopticon-rainbow);
-}
-
-.vault-sphere-eye-pupil {
-    fill: #0a0a0a;
-}
-
-@keyframes vault-sphere-starburst {
-    from { transform: translate(-50%, -50%) rotate(0deg); }
-    to { transform: translate(-50%, -50%) rotate(360deg); }
+    width: min(88vw, 88vh);
+    height: min(88vw, 88vh);
+    max-width: 900px;
+    max-height: 900px;
 }
 
 .carousel-stage {
@@ -1900,23 +1819,6 @@ body.corrupted .identity-statement p:last-child {
 
 #lightbox-overlay.active .lightbox-content {
     transform: scale(1); /* Gives it a slight "pop in" effect */
-}
-
-#lightbox-overlay .vault-sphere-lightbox {
-    position: relative;
-    width: min(88vw, 88vh);
-    height: min(88vw, 88vh);
-    max-width: 900px;
-    max-height: 900px;
-    aspect-ratio: 1;
-    padding: 0;
-    overflow: hidden;
-    background: #fff;
-}
-
-#lightbox-overlay .vault-sphere-lightbox .vault-sphere-scene {
-    position: absolute;
-    inset: 0;
 }
 
 /* --- BOSS KEY FAKE MAYA CRASH --- */

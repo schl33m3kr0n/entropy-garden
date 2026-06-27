@@ -882,9 +882,6 @@ function activateVaultMedia() {
         }
     });
     primeManifoldCarousel();
-    import('./modules/vault-sphere.js')
-        .then((mod) => mod.initVaultSpheres())
-        .catch((err) => console.error('[Entropy Garden] vault sphere failed to load', err));
 }
 
 function primeManifoldCarousel() {
@@ -1229,11 +1226,6 @@ document.querySelectorAll('.vault-item').forEach(item => {
     item.addEventListener('click', (e) => {
         if (e.target.closest('.carousel-btn') || e.target.closest('.carousel-slide')) return;
 
-        if (item.classList.contains('vault-item-sphere')) {
-            openVaultSphereLightbox(item);
-            return;
-        }
-
         const media = item.querySelector('.vault-media');
         if (!media) return;
 
@@ -1254,6 +1246,9 @@ document.querySelectorAll('.vault-item').forEach(item => {
         } else {
             const clone = media.cloneNode(true);
             clone.className = 'lightbox-content';
+            if (clone.tagName === 'IMG' && media.classList.contains('vault-media--contain')) {
+                clone.classList.add('vault-media--contain');
+            }
             if (clone.tagName === 'VIDEO') clone.controls = true;
             if (clone.tagName === 'IMG') ensureMediaSrc(clone);
             lightboxOverlay.appendChild(clone);
@@ -1263,45 +1258,7 @@ document.querySelectorAll('.vault-item').forEach(item => {
     });
 });
 
-function openVaultSphereLightbox(sourceItem) {
-    const scene = sourceItem?.querySelector('.vault-sphere-scene');
-    if (!scene) return;
-
-    playSound(sfx.oneUp);
-
-    lightboxOverlay.innerHTML = '';
-    lightboxOverlay.appendChild(lightboxCloseBtn);
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'lightbox-content vault-sphere-lightbox';
-    const clone = scene.cloneNode(true);
-    clone.querySelectorAll('.vault-sphere-canvas').forEach((canvas) => {
-        delete canvas.dataset.bound;
-        canvas.classList.remove('vault-sphere-canvas--ready');
-    });
-    wrapper.appendChild(clone);
-    lightboxOverlay.appendChild(wrapper);
-    lightboxOverlay.classList.add('active');
-
-    import('./modules/vault-sphere.js')
-        .then((mod) => {
-            const canvas = wrapper.querySelector('.vault-sphere-canvas');
-            if (!canvas) return;
-            const sourceCanvas = sourceItem.querySelector('.vault-sphere-canvas');
-            const sourceState = sourceCanvas?._vaultSphereState;
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    mod.initVaultSphere(canvas, sourceState?.rotY ?? 0);
-                });
-            });
-        })
-        .catch((err) => console.error('[Entropy Garden] vault sphere lightbox failed to load', err));
-}
-
 function closeVaultLightbox() {
-    import('./modules/vault-sphere.js')
-        .then((mod) => mod.stopVaultSpheresIn(lightboxOverlay))
-        .catch(() => {});
     lightboxOverlay.classList.remove('active');
     playSound(sfx.exit);
     setTimeout(() => { lightboxOverlay.innerHTML = ''; }, 300);
