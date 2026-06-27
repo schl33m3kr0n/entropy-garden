@@ -1077,7 +1077,7 @@ function onModalDragStart(e) {
 
     const modal = handle.closest('.modal');
     if (!modal || modal.style.display === 'none') return;
-    if (e.target.closest('.close-btn') || e.target.closest('.modal-close')) return;
+    if (e.target.closest('.lightbox-close') || e.target.closest('.modal-close')) return;
 
     e.preventDefault();
 
@@ -1215,12 +1215,11 @@ const lightboxOverlay = document.createElement('div');
 lightboxOverlay.id = 'lightbox-overlay';
 document.body.appendChild(lightboxOverlay);
 
-// 1. Create the reusable close button in memory
-const lightboxCloseBtn = document.createElement('span');
-lightboxCloseBtn.className = 'close-btn'; 
-lightboxCloseBtn.innerText = 'X';
-// Force it to stay locked to the screen, above everything else
-lightboxCloseBtn.style.cssText = 'position: fixed; top: 30px; right: 40px; z-index: 1000000; color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green);';
+const lightboxCloseBtn = document.createElement('button');
+lightboxCloseBtn.type = 'button';
+lightboxCloseBtn.className = 'lightbox-close';
+lightboxCloseBtn.setAttribute('aria-label', 'Close');
+lightboxCloseBtn.innerHTML = '&times;';
 
 document.querySelectorAll('.vault-item').forEach(item => {
     item.addEventListener('click', (e) => {

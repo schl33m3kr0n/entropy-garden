@@ -211,7 +211,7 @@
     </div>
 
     <div id="modal-identity" class="modal">
-        <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/identity.svg');"></div>// IDENTITY</h2>
+        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/identity.svg');"></div>// IDENTITY</h2>
             <div class="scrollable-content">
                <div class="bio-header" style="border-bottom: none; padding-bottom: 0;">
                     <div class="pfp-wrapper">
@@ -238,25 +238,25 @@
     </div>
     
     <div id="modal-stats" class="modal">
-        <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/stats.svg');"></div>// STATS</h2>
+        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/stats.svg');"></div>// STATS</h2>
             <div class="scrollable-content"><ul id="stats-list"></ul></div>
         </div>
     </div>
 
     <div id="modal-about" class="modal">
-        <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/about.svg');"></div>// BIO DUMP</h2>
+        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/about.svg');"></div>// BIO DUMP</h2>
             <div id="bio-container" class="scrollable-content"></div>
         </div>
     </div>
 
     <div id="modal-projects" class="modal">
-         <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/storage.svg');"></div>// REPOSITORY</h2>
+         <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/storage.svg');"></div>// REPOSITORY</h2>
             <div class="scrollable-content"><ul id="project-list"></ul></div>
         </div>
     </div>
 
     <div id="modal-vault" class="modal wide">
-         <div class="modal-content"><span class="close-btn modal-close">X</span><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/vault.svg');"></div>// THE VAULT</h2>
+         <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/vault.svg');"></div>// THE VAULT</h2>
            <div class="scrollable-content vault-grid">
                 <div class="vault-item">
                     <img data-src="assets/img/vault/geometry-art.webp" data-fallback="assets/img/vault/geometry-art.jpg" alt="serpentine" class="vault-media">
@@ -309,7 +309,7 @@
     </div>
 </div> <div id="modal-signal" class="modal">
      <div class="modal-content">
-        <span class="close-btn modal-close">X</span>
+        <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
             <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/signal.svg');"></div>// LIVE FEED</h2>
             <div class="scrollable-content">
                 <p>Audio: <span id="val-audio" class="data-value">...</span></p>
@@ -321,7 +321,7 @@
 
 <div id="modal-arcade" class="modal wide">
         <div class="modal-content">
-            <span class="close-btn modal-close">X</span>
+            <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
             <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/joystick.svg');"></div>// ARCADE CABINET</h2>
             <div class="scrollable-content" style="text-align: center; margin-top: 10px;">
                 <div id="arcade-game-container">
@@ -338,7 +338,7 @@
 
     <div id="modal-cards" class="modal wide">
         <div class="modal-content">
-            <span class="close-btn modal-close">X</span>
+            <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
             <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/cards.svg');"></div>// CARDS OF CHAOS</h2>
             <div class="scrollable-content coc-modal-scroll">
                 <div id="cards-game-container"></div>
@@ -348,7 +348,7 @@
 
     <div id="modal-poems" class="modal wide ios-poems-modal">
         <div class="modal-content">
-            <span class="close-btn modal-close">X</span>
+            <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
             <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/feather.svg');"></div>// POEMS</h2>
             <div class="ios-poems-layout">
                 <nav id="ios-poem-list" class="ios-poem-list scrollable-content" aria-label="Poem list"></nav>
@@ -365,7 +365,7 @@
 
     <div id="modal-trophies" class="modal wide">
         <div class="modal-content">
-            <span class="close-btn modal-close">X</span>
+            <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
             <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/ouroboros.svg');"></div>// TROPHIES</h2>
             <div class="scrollable-content trophy-case-scroll">
                 <p class="trophy-case-intro">> Recovered anomalies from the garden substrate. Locked entries remain classified until you trigger them in the wild.</p>
@@ -382,7 +382,7 @@
   <button class="lightbox-btn lb-prev">&#10094;</button>
   
   <div class="lightbox-image-wrapper">
-    <button class="lightbox-close">&times;</button>
+    <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
     <img id="lightbox-img" src="" alt="Expanded View">
   </div>
   

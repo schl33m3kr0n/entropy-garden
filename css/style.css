@@ -1508,8 +1508,32 @@ body.corrupted .scrollable-content::-webkit-scrollbar-thumb { background: var(--
 .modal li { margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
 .stat-row { display: flex; justify-content: space-between; }
 .stat-val { color: var(--neon-green); font-weight: bold; text-align: right; max-width: 60%; }
-.close-btn { position: absolute; top: 25px; right: 25px; cursor: pointer; color: #555; font-weight: bold; font-size: 1.5rem; z-index: 10; }
-.close-btn:hover { color: var(--neon-green); }
+.lightbox-close {
+    position: fixed;
+    top: 30px;
+    right: 40px;
+    color: var(--neon-green);
+    font-size: 32px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1000000;
+    line-height: 1;
+    padding: 0;
+    transition: all 0.2s;
+}
+.modal-content > .lightbox-close {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    z-index: 10;
+}
+.lightbox-close:hover {
+    color: #fff;
+    background: none;
+    box-shadow: none;
+}
 a.social-link { color: var(--neon-green); text-decoration: none; border-bottom: 1px dotted var(--neon-green); transition: color 0.3s; cursor: pointer; }
 a.social-link:hover { color: #fff; border-bottom-style: solid; }
 .project-title { color: var(--neon-green); font-weight: bold; display: block; }
@@ -3801,31 +3825,6 @@ body.chromatic-active {
       display: block; /* Removes weird spacing under the image */
     }
 
-/* The updated close button pinned to the top right of the SCREEN */
-    .lightbox-close {
-      position: fixed;
-      top: 30px;
-      right: 40px;
-      color: var(--neon-green);
-      font-size: 32px;
-      font-weight: bold;
-      background: none;
-      border: none;
-      cursor: pointer;
-      z-index: 1000000;
-      line-height: 1;
-      padding: 0;
-      text-shadow: 0 0 10px var(--neon-green);
-      transition: all 0.2s;
-    }
-
-    .lightbox-close:hover {
-      color: #fff;
-      text-shadow: 0 0 20px var(--neon-green);
-      background: none;
-      box-shadow: none;
-    }
-
    .lightbox-btn {
       position: absolute;
       top: 50%;
@@ -4653,7 +4652,7 @@ body.ios-ui .playlist-btn,
 body.ios-ui .singularity-btn,
 body.ios-ui .arcade-btn,
 body.ios-ui .carousel-btn,
-body.ios-ui .close-btn,
+body.ios-ui .lightbox-close,
 body.ios-ui .lightbox-btn {
     border-radius: var(--ios-radius-md);
 }
