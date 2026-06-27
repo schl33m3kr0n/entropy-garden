@@ -26,6 +26,7 @@ import {
     playNextTrack,
     resetBgmToStart,
     prefetchLargeBgmTracks,
+    bufferBgmTrack,
     getBgmTrack,
     getBgmTrackTitle,
     applyTrackTitleMarquee,
@@ -90,6 +91,8 @@ import {
 } from './modules/behavioral-analysis.js';
 
 // Bind init immediately so a later module error cannot block the gatekeeper.
+let loaderBootGate = Promise.resolve();
+
 function prefetchGardenBoot() {
     warmSound(sfx.collectible);
     warmSound(sfx.loading);
@@ -112,11 +115,8 @@ function beginGardenExperience() {
         setGardenHasStarted(true);
         updatePanopticonVisibility();
         prefetchLargeBgmTracks();
-        startLoader();
 
-        loadTerminal();
-
-        ensureMatrix().then((mod) => {
+        const matrixBoot = ensureMatrix().then((mod) => {
             mod.resizeCanvas();
             mod.startGardenLoop();
             updatePanopticonVisibility();
@@ -125,11 +125,24 @@ function beginGardenExperience() {
             }
         }).catch((err) => console.error('[Entropy Garden] matrix failed to load', err));
 
-        registerServiceWorkerAfterInit();
-
-        bootGameAddons(activateGodMode).catch((err) => {
+        const addonsBoot = bootGameAddons(activateGodMode).catch((err) => {
             console.error('[Entropy Garden] game addons prefetch failed', err);
         });
+
+        const terminalBoot = loadTerminal().catch((err) => {
+            console.error('[Entropy Garden] terminal failed to load', err);
+        });
+
+        const bgmBoot = bufferBgmTrack(currentTrackIndex).catch(() => {});
+
+        loaderBootGate = Promise.race([
+            Promise.all([matrixBoot, addonsBoot, terminalBoot, bgmBoot]),
+            new Promise((resolve) => setTimeout(resolve, LOADER_BOOT_MAX_MS)),
+        ]);
+
+        startLoader();
+
+        registerServiceWorkerAfterInit();
 
         panopticonEl?.addEventListener('pointerdown', () => {
             bootGameAddons(activateGodMode).catch(() => {});
@@ -545,7 +558,8 @@ function revealGardenUI() {
     }, 750);
 }
 
-const LOADER_MIN_MS = 4000;
+const LOADER_MIN_MS = 6000;
+const LOADER_BOOT_MAX_MS = 14000;
 const LOADER_FADE_HOLD_MS = 500;
 const LOADER_FADE_MAX_MS = 900;
 const HUD_DROP_DELAY_MS = 150;
@@ -573,16 +587,22 @@ function startLoader() {
         playSound(sfx.loading);
     }, 3000); 
     
-    let progress = 0; 
+    let progress = 0;
     let startTime = Date.now();
-    let tickCounter = 0; // Keeps track of time to stabilize the text
-    
+    let tickCounter = 0;
+    let bootReady = false;
+
+    loaderBootGate.then(() => {
+        bootReady = true;
+    });
+
     const interval = setInterval(() => {
-        progress += Math.random() * 5 + 1.5; 
-        tickCounter++; 
-        
-        if (progress >= 99 && (Date.now() - startTime) < LOADER_MIN_MS) { progress = 99; }
-        
+        progress += Math.random() * 3.5 + 1;
+        tickCounter++;
+
+        const minElapsed = (Date.now() - startTime) >= LOADER_MIN_MS;
+        if (progress >= 99 && (!minElapsed || !bootReady)) { progress = 99; }
+
 if (progress >= 100) {
             progress = 100; 
             text.innerText = "SYSTEM READY."; 
