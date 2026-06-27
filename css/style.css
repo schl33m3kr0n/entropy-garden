@@ -1707,68 +1707,15 @@ body.corrupted .identity-statement p:last-child {
     opacity: 0.9;
     animation: vault-sphere-rays 18s linear infinite;
     pointer-events: none;
+    z-index: 0;
 }
 
-.vault-sphere-orbit {
+.vault-sphere-canvas {
     position: relative;
-    width: 62%;
-    aspect-ratio: 1;
-    transform-style: preserve-3d;
-    animation: vault-sphere-spin 11s linear infinite;
-}
-
-.vault-sphere-body {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: url('../assets/img/vault/checkered-sphere.png') center/cover no-repeat;
-    box-shadow:
-        inset -10px -14px 28px rgba(0, 0, 0, 0.48),
-        inset 8px 10px 22px rgba(255, 255, 255, 0.14),
-        0 10px 24px rgba(0, 0, 0, 0.55);
-}
-
-.vault-sphere-eyes {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14%;
-    transform: translateZ(2px);
-}
-
-.vault-sphere-eye {
-    width: 24%;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 3px;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
-}
-
-.vault-sphere-eye--on-white {
-    background: #fff;
-}
-
-.vault-sphere-eye--on-white svg {
-    width: 74%;
-    fill: #000;
-}
-
-.vault-sphere-eye--on-black {
-    background: #000;
-}
-
-.vault-sphere-eye--on-black svg {
-    width: 74%;
-    fill: #fff;
-}
-
-@keyframes vault-sphere-spin {
-    from { transform: rotateY(0deg) rotateX(14deg); }
-    to { transform: rotateY(360deg) rotateX(14deg); }
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 @keyframes vault-sphere-rays {

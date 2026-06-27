@@ -882,6 +882,9 @@ function activateVaultMedia() {
         }
     });
     primeManifoldCarousel();
+    import('./modules/vault-sphere.js')
+        .then((mod) => mod.initVaultSpheres())
+        .catch((err) => console.error('[Entropy Garden] vault sphere failed to load', err));
 }
 
 function primeManifoldCarousel() {
