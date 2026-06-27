@@ -1228,6 +1228,12 @@ lightboxCloseBtn.style.cssText = 'position: fixed; top: 30px; right: 40px; z-ind
 document.querySelectorAll('.vault-item').forEach(item => {
     item.addEventListener('click', (e) => {
         if (e.target.closest('.carousel-btn') || e.target.closest('.carousel-slide')) return;
+
+        if (item.classList.contains('vault-item-sphere')) {
+            openVaultSphereLightbox(item);
+            return;
+        }
+
         const media = item.querySelector('.vault-media');
         if (!media) return;
 
@@ -1257,12 +1263,42 @@ document.querySelectorAll('.vault-item').forEach(item => {
     });
 });
 
+function openVaultSphereLightbox(sourceItem) {
+    const scene = sourceItem?.querySelector('.vault-sphere-scene');
+    if (!scene) return;
+
+    playSound(sfx.oneUp);
+
+    lightboxOverlay.innerHTML = '';
+    lightboxOverlay.appendChild(lightboxCloseBtn);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'lightbox-content vault-sphere-lightbox';
+    wrapper.appendChild(scene.cloneNode(true));
+    lightboxOverlay.appendChild(wrapper);
+    lightboxOverlay.classList.add('active');
+
+    import('./modules/vault-sphere.js')
+        .then((mod) => {
+            const canvas = wrapper.querySelector('.vault-sphere-canvas');
+            if (canvas) mod.initVaultSphere(canvas);
+        })
+        .catch((err) => console.error('[Entropy Garden] vault sphere lightbox failed to load', err));
+}
+
+function closeVaultLightbox() {
+    import('./modules/vault-sphere.js')
+        .then((mod) => mod.stopVaultSpheresIn(lightboxOverlay))
+        .catch(() => {});
+    lightboxOverlay.classList.remove('active');
+    playSound(sfx.exit);
+    setTimeout(() => { lightboxOverlay.innerHTML = ''; }, 300);
+}
+
 // 3. Update the click listener to close if you click the background OR the new 'X'
 lightboxOverlay.addEventListener('click', (e) => {
     if (e.target === lightboxOverlay || e.target === lightboxCloseBtn) {
-        lightboxOverlay.classList.remove('active');
-        playSound(sfx.exit); 
-        setTimeout(() => { lightboxOverlay.innerHTML = ''; }, 300); 
+        closeVaultLightbox();
     }
 });
 

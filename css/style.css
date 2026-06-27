@@ -1674,7 +1674,7 @@ body.corrupted .identity-statement p:last-child {
 }
 
 .vault-item-sphere {
-    cursor: default;
+    cursor: pointer;
     background: radial-gradient(circle at 50% 42%, rgba(40, 40, 40, 0.55) 0%, rgba(0, 0, 0, 0.92) 72%);
 }
 
@@ -1692,20 +1692,16 @@ body.corrupted .identity-statement p:last-child {
     perspective: 520px;
 }
 
-.vault-sphere-rays {
+.vault-sphere-starburst {
     position: absolute;
     width: 240%;
     height: 240%;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    background: repeating-conic-gradient(
-        from 0deg,
-        #000 0deg 9deg,
-        transparent 9deg 18deg
-    );
-    opacity: 0.9;
-    animation: vault-sphere-rays 18s linear infinite;
+    object-fit: contain;
+    opacity: 0.92;
+    animation: vault-sphere-starburst 18s linear infinite;
     pointer-events: none;
     z-index: 0;
 }
@@ -1718,7 +1714,32 @@ body.corrupted .identity-statement p:last-child {
     display: block;
 }
 
-@keyframes vault-sphere-rays {
+.vault-sphere-eyes {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.vault-sphere-eye {
+    width: 15%;
+    height: auto;
+    flex-shrink: 0;
+}
+
+.vault-sphere-eye--black {
+    fill: #000;
+}
+
+.vault-sphere-eye--white {
+    fill: #fff;
+}
+
+@keyframes vault-sphere-starburst {
     from { transform: translate(-50%, -50%) rotate(0deg); }
     to { transform: translate(-50%, -50%) rotate(360deg); }
 }
@@ -1854,6 +1875,23 @@ body.corrupted .identity-statement p:last-child {
 
 #lightbox-overlay.active .lightbox-content {
     transform: scale(1); /* Gives it a slight "pop in" effect */
+}
+
+#lightbox-overlay .vault-sphere-lightbox {
+    position: relative;
+    width: min(88vw, 88vh);
+    height: min(88vw, 88vh);
+    max-width: 900px;
+    max-height: 900px;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 42%, rgba(40, 40, 40, 0.55) 0%, rgba(0, 0, 0, 0.92) 72%);
+}
+
+#lightbox-overlay .vault-sphere-lightbox .vault-sphere-scene {
+    position: absolute;
+    inset: 0;
 }
 
 /* --- BOSS KEY FAKE MAYA CRASH --- */

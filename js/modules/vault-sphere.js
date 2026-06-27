@@ -1,14 +1,10 @@
-/** Vault — software-rendered 3D checkered sphere with icon eyes. */
+/** Vault — software-rendered 3D checkered sphere; starburst + eyes are HTML overlays. */
 
 const LAT_STEPS = 22;
 const LON_STEPS = 32;
 const CHECKS = 8;
 const TILT_X = 0.28;
 const SPIN_SPEED = 0.55;
-
-const EYE_LAT = 0.22;
-const EYE_LON = 0.32;
-const EYE_SPHERE_R = 0.17;
 
 const activeCanvases = new Set();
 
@@ -53,30 +49,6 @@ function checkerShade(lat, lon) {
 function shadeColor(base, intensity) {
     const v = Math.round(base * intensity);
     return `rgb(${v}, ${v}, ${v})`;
-}
-
-function drawEyeIcon(ctx, x, y, size, fill, bg) {
-    const half = size * 0.5;
-    ctx.fillStyle = bg;
-    ctx.fillRect(x - half, y - half, size, size);
-
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(size / 24, size / 24);
-    ctx.translate(-12, -12);
-    ctx.fillStyle = fill;
-    ctx.beginPath();
-    ctx.moveTo(12, 4.5);
-    ctx.bezierCurveTo(7, 4.5, 2.7, 7.8, 1, 12);
-    ctx.bezierCurveTo(2.7, 16.2, 7, 19.5, 12, 19.5);
-    ctx.bezierCurveTo(17, 19.5, 21.3, 16.2, 23, 12);
-    ctx.bezierCurveTo(21.3, 7.8, 17, 4.5, 12, 4.5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(12, 12, 4.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
 }
 
 function buildMesh(radius) {
@@ -160,24 +132,6 @@ function drawSphereFrame(ctx, w, h, rotY) {
         ctx.closePath();
         ctx.fill();
     }
-
-    const eyes = [
-        { lon: -EYE_LON },
-        { lon: EYE_LON },
-    ];
-
-    for (const eye of eyes) {
-        const p = rotatePoint(spherePoint(EYE_LAT, eye.lon, radius * 1.01), TILT_X, rotY);
-        if (p[2] <= 0) continue;
-        const s = focal / (focal + p[2]);
-        const sx = cx + p[0] * s;
-        const sy = cy + p[1] * s;
-        const eyeSize = radius * EYE_SPHERE_R * s * 2.2;
-        const onWhite = checkerShade(EYE_LAT, eye.lon) === 1;
-        const bg = onWhite ? '#fff' : '#000';
-        const fill = onWhite ? '#000' : '#fff';
-        drawEyeIcon(ctx, sx, sy, eyeSize, fill, bg);
-    }
 }
 
 function normalize([x, y, z]) {
@@ -213,6 +167,13 @@ function animate(canvas, state) {
     state.raf = requestAnimationFrame(() => animate(canvas, state));
 }
 
+function shouldAnimate(canvas) {
+    const lightbox = canvas.closest('#lightbox-overlay');
+    if (lightbox) return lightbox.classList.contains('active');
+    const modal = document.getElementById('modal-vault');
+    return Boolean(modal && getComputedStyle(modal).display !== 'none');
+}
+
 function startLoop(canvas) {
     if (activeCanvases.has(canvas)) return;
     activeCanvases.add(canvas);
@@ -228,18 +189,18 @@ function stopLoop(canvas) {
     canvas._vaultSphereState = null;
 }
 
+export function stopVaultSpheresIn(root) {
+    if (!root) return;
+    root.querySelectorAll('.vault-sphere-canvas').forEach(stopLoop);
+}
+
 export function initVaultSphere(canvas) {
     if (!canvas || canvas.dataset.bound) return;
     canvas.dataset.bound = '1';
 
-    const modal = document.getElementById('modal-vault');
-
     const maybeStart = () => {
-        if (modal && getComputedStyle(modal).display === 'none') {
-            stopLoop(canvas);
-            return;
-        }
-        startLoop(canvas);
+        if (shouldAnimate(canvas)) startLoop(canvas);
+        else stopLoop(canvas);
     };
 
     maybeStart();
@@ -249,9 +210,11 @@ export function initVaultSphere(canvas) {
     });
     ro.observe(canvas);
 
-    if (modal) {
+    const visibilityRoot = canvas.closest('#lightbox-overlay') || document.getElementById('modal-vault');
+    if (visibilityRoot) {
         const obs = new MutationObserver(maybeStart);
-        obs.observe(modal, { attributes: true, attributeFilter: ['style'] });
+        const attrFilter = visibilityRoot.id === 'lightbox-overlay' ? ['class'] : ['style'];
+        obs.observe(visibilityRoot, { attributes: true, attributeFilter: attrFilter });
     }
 }
 
