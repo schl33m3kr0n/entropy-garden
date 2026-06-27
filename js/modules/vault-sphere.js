@@ -96,8 +96,7 @@ function drawSphereFrame(ctx, w, h, rotY) {
     const light = normalize([0.35, 0.55, 0.75]);
     const mesh = getMesh(radius);
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, w, h);
+    ctx.clearRect(0, 0, w, h);
 
     const faces = [];
     for (const quad of mesh) {

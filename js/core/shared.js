@@ -1458,7 +1458,7 @@ function beginPanopticonLand(displayAngle, gazeX, gazeY) {
     angularVelocity = 0;
 }
 
-function syncPanopticonRainbow() {
+export function syncPanopticonRainbow() {
     if (!panopticonRainbowGradEl) return;
     const offset = parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue('--rainbow-offset')

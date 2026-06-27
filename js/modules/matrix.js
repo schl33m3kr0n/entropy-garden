@@ -3,6 +3,7 @@ import {
     ctx,
     perf,
     animatePanopticon,
+    syncPanopticonRainbow,
     usesIosCipherGlyphs,
     usesLiteCipherWheelPaint,
     panopticonEl,
@@ -578,6 +579,7 @@ function animate() {
     addTime(timeStep);
     if (!perf.liteGfx) {
         document.documentElement.style.setProperty('--rainbow-offset', `${(time * 0.5) % 200}%`);
+        syncPanopticonRainbow();
         if (!perf.prefersReducedMotion && !isCorrupted) {
             document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);
         }
