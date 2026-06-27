@@ -1281,7 +1281,12 @@ function openVaultSphereLightbox(sourceItem) {
     import('./modules/vault-sphere.js')
         .then((mod) => {
             const canvas = wrapper.querySelector('.vault-sphere-canvas');
-            if (canvas) mod.initVaultSphere(canvas);
+            if (!canvas) return;
+            const sourceCanvas = sourceItem.querySelector('.vault-sphere-canvas');
+            const sourceState = sourceCanvas?._vaultSphereState;
+            requestAnimationFrame(() => {
+                mod.initVaultSphere(canvas, sourceState?.rotY ?? 0);
+            });
         })
         .catch((err) => console.error('[Entropy Garden] vault sphere lightbox failed to load', err));
 }

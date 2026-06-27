@@ -1675,7 +1675,7 @@ body.corrupted .identity-statement p:last-child {
 
 .vault-item-sphere {
     cursor: pointer;
-    background: radial-gradient(circle at 50% 42%, rgba(40, 40, 40, 0.55) 0%, rgba(0, 0, 0, 0.92) 72%);
+    background: #fff;
 }
 
 .vault-item-sphere:hover {
@@ -1690,6 +1690,7 @@ body.corrupted .identity-statement p:last-child {
     justify-content: center;
     overflow: hidden;
     perspective: 520px;
+    background: #fff;
 }
 
 .vault-sphere-starburst {
@@ -1712,6 +1713,7 @@ body.corrupted .identity-statement p:last-child {
     width: 100%;
     height: 100%;
     display: block;
+    background: #fff;
 }
 
 .vault-sphere-eyes {
@@ -1729,14 +1731,37 @@ body.corrupted .identity-statement p:last-child {
     width: 15%;
     height: auto;
     flex-shrink: 0;
+    overflow: visible;
 }
 
-.vault-sphere-eye--black {
+.vault-sphere-eye-sclera {
+    stroke: none;
+}
+
+.vault-sphere-eye--dark .vault-sphere-eye-sclera {
     fill: #000;
 }
 
-.vault-sphere-eye--white {
+.vault-sphere-eye--light .vault-sphere-eye-sclera {
     fill: #fff;
+    stroke: #000;
+    stroke-width: 0.35;
+}
+
+.vault-sphere-eye-iris {
+    fill: url(#vault-chroma-iris);
+}
+
+.vault-sphere-eye-pupil {
+    fill: #0a0a0a;
+}
+
+.vault-sphere-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 @keyframes vault-sphere-starburst {
@@ -1886,7 +1911,7 @@ body.corrupted .identity-statement p:last-child {
     aspect-ratio: 1;
     padding: 0;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 42%, rgba(40, 40, 40, 0.55) 0%, rgba(0, 0, 0, 0.92) 72%);
+    background: #fff;
 }
 
 #lightbox-overlay .vault-sphere-lightbox .vault-sphere-scene {

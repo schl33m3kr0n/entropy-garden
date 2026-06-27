@@ -46,9 +46,12 @@ function checkerShade(lat, lon) {
     return dark ? 0 : 1;
 }
 
-function shadeColor(base, intensity) {
-    const v = Math.round(base * intensity);
-    return `rgb(${v}, ${v}, ${v})`;
+function faceFill(shade, intensity) {
+    if (shade) {
+        const v = Math.round(255 * (0.92 + 0.08 * intensity));
+        return `rgb(${v}, ${v}, ${v})`;
+    }
+    return '#000000';
 }
 
 function buildMesh(radius) {
@@ -93,7 +96,8 @@ function drawSphereFrame(ctx, w, h, rotY) {
     const light = normalize([0.35, 0.55, 0.75]);
     const mesh = getMesh(radius);
 
-    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
 
     const faces = [];
     for (const quad of mesh) {
@@ -122,8 +126,7 @@ function drawSphereFrame(ctx, w, h, rotY) {
     faces.sort((a, b) => a.avgZ - b.avgZ);
 
     for (const face of faces) {
-        const base = face.shade ? 255 : 18;
-        ctx.fillStyle = shadeColor(base, face.intensity);
+        ctx.fillStyle = faceFill(face.shade, face.intensity);
         ctx.beginPath();
         ctx.moveTo(face.projected[0][0], face.projected[0][1]);
         for (let i = 1; i < face.projected.length; i++) {
@@ -177,9 +180,10 @@ function shouldAnimate(canvas) {
 function startLoop(canvas) {
     if (activeCanvases.has(canvas)) return;
     activeCanvases.add(canvas);
-    const state = { rotY: 0, raf: 0, lastFrame: 0 };
-    canvas._vaultSphereState = state;
-    animate(canvas, state);
+    if (!canvas._vaultSphereState) {
+        canvas._vaultSphereState = { rotY: 0, raf: 0, lastFrame: 0 };
+    }
+    animate(canvas, canvas._vaultSphereState);
 }
 
 function stopLoop(canvas) {
@@ -194,7 +198,7 @@ export function stopVaultSpheresIn(root) {
     root.querySelectorAll('.vault-sphere-canvas').forEach(stopLoop);
 }
 
-export function initVaultSphere(canvas) {
+export function initVaultSphere(canvas, initialRotY = 0) {
     if (!canvas || canvas.dataset.bound) return;
     canvas.dataset.bound = '1';
 
@@ -203,7 +207,13 @@ export function initVaultSphere(canvas) {
         else stopLoop(canvas);
     };
 
-    maybeStart();
+    const state = { rotY: initialRotY, raf: 0, lastFrame: 0 };
+    canvas._vaultSphereState = state;
+
+    requestAnimationFrame(() => {
+        resizeCanvas(canvas);
+        maybeStart();
+    });
 
     const ro = new ResizeObserver(() => {
         resizeCanvas(canvas);
