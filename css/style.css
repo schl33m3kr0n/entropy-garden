@@ -1695,8 +1695,8 @@ body.corrupted .identity-statement p:last-child {
 
 .vault-sphere-starburst {
     position: absolute;
-    width: 240%;
-    height: 240%;
+    width: 88%;
+    height: 88%;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -1715,6 +1715,11 @@ body.corrupted .identity-statement p:last-child {
     height: 100%;
     display: block;
     background: transparent;
+    opacity: 0;
+}
+
+.vault-sphere-canvas--ready {
+    opacity: 1;
 }
 
 .vault-sphere-eyes {

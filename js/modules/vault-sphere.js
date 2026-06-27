@@ -157,15 +157,31 @@ function resizeCanvas(canvas) {
     return { w, h };
 }
 
+function paintCanvas(canvas, rotY) {
+    const { w, h } = resizeCanvas(canvas);
+    if (w < 4 || h < 4) return false;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return false;
+    drawSphereFrame(ctx, w, h, rotY);
+    canvas.classList.add('vault-sphere-canvas--ready');
+    return true;
+}
+
+function warmMeshForCanvas(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const radius = Math.round(Math.min(rect.width, rect.height) * dpr * 0.34);
+    if (radius > 0) getMesh(radius);
+}
+
 function animate(canvas, state) {
     if (!activeCanvases.has(canvas)) return;
     const now = performance.now();
     const dt = state.lastFrame ? Math.min((now - state.lastFrame) / 1000, 0.05) : 0;
     state.lastFrame = now;
-    resizeCanvas(canvas);
-    const ctx = canvas.getContext('2d');
     state.rotY += SPIN_SPEED * dt;
-    drawSphereFrame(ctx, canvas.width, canvas.height, state.rotY);
+    paintCanvas(canvas, state.rotY);
     state.raf = requestAnimationFrame(() => animate(canvas, state));
 }
 
@@ -178,18 +194,28 @@ function shouldAnimate(canvas) {
 
 function startLoop(canvas) {
     if (activeCanvases.has(canvas)) return;
-    activeCanvases.add(canvas);
     if (!canvas._vaultSphereState) {
         canvas._vaultSphereState = { rotY: 0, raf: 0, lastFrame: 0 };
     }
-    animate(canvas, canvas._vaultSphereState);
+    const state = canvas._vaultSphereState;
+    warmMeshForCanvas(canvas);
+    if (!paintCanvas(canvas, state.rotY)) {
+        requestAnimationFrame(() => startLoop(canvas));
+        return;
+    }
+    activeCanvases.add(canvas);
+    state.lastFrame = performance.now();
+    state.raf = requestAnimationFrame(() => animate(canvas, state));
 }
 
 function stopLoop(canvas) {
     activeCanvases.delete(canvas);
     const state = canvas._vaultSphereState;
     if (state?.raf) cancelAnimationFrame(state.raf);
-    canvas._vaultSphereState = null;
+    if (state) {
+        state.raf = 0;
+        state.lastFrame = 0;
+    }
 }
 
 export function stopVaultSpheresIn(root) {
@@ -201,21 +227,27 @@ export function initVaultSphere(canvas, initialRotY = 0) {
     if (!canvas || canvas.dataset.bound) return;
     canvas.dataset.bound = '1';
 
+    const state = { rotY: initialRotY, raf: 0, lastFrame: 0 };
+    canvas._vaultSphereState = state;
+
     const maybeStart = () => {
         if (shouldAnimate(canvas)) startLoop(canvas);
         else stopLoop(canvas);
     };
 
-    const state = { rotY: initialRotY, raf: 0, lastFrame: 0 };
-    canvas._vaultSphereState = state;
+    warmMeshForCanvas(canvas);
 
     requestAnimationFrame(() => {
-        resizeCanvas(canvas);
+        warmMeshForCanvas(canvas);
+        paintCanvas(canvas, state.rotY);
         maybeStart();
     });
 
     const ro = new ResizeObserver(() => {
-        resizeCanvas(canvas);
+        warmMeshForCanvas(canvas);
+        if (canvas._vaultSphereState) {
+            paintCanvas(canvas, canvas._vaultSphereState.rotY);
+        }
     });
     ro.observe(canvas);
 
@@ -228,5 +260,8 @@ export function initVaultSphere(canvas, initialRotY = 0) {
 }
 
 export function initVaultSpheres() {
-    document.querySelectorAll('.vault-sphere-canvas').forEach(initVaultSphere);
+    document.querySelectorAll('.vault-sphere-canvas').forEach((canvas) => {
+        warmMeshForCanvas(canvas);
+        initVaultSphere(canvas);
+    });
 }

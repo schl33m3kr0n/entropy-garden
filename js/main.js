@@ -1277,6 +1277,7 @@ function openVaultSphereLightbox(sourceItem) {
     const clone = scene.cloneNode(true);
     clone.querySelectorAll('.vault-sphere-canvas').forEach((canvas) => {
         delete canvas.dataset.bound;
+        canvas.classList.remove('vault-sphere-canvas--ready');
     });
     wrapper.appendChild(clone);
     lightboxOverlay.appendChild(wrapper);
