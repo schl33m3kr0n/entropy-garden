@@ -1413,9 +1413,6 @@ function renderGame() {
         void announceRoundStart(game);
     };
 
-    if (game.phase === 'swap' && !game.busy && game.selectedIdx !== null) {
-        actionsEl.appendChild(mkBtn('Swap selected', () => swapPlayerCard(game, game.selectedIdx)));
-    }
     if (game.phase === 'sudden-death' && !game.busy) {
         actionsEl.appendChild(mkBtn('Roll d20', () => suddenDeathRoll(game), true));
     }

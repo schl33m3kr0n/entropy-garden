@@ -1673,6 +1673,109 @@ body.corrupted .identity-statement p:last-child {
     padding: 0;
 }
 
+.vault-item-sphere {
+    cursor: default;
+    background: radial-gradient(circle at 50% 42%, rgba(40, 40, 40, 0.55) 0%, rgba(0, 0, 0, 0.92) 72%);
+}
+
+.vault-item-sphere:hover {
+    box-shadow: 0 0 18px rgba(0, 255, 0, 0.35);
+}
+
+.vault-sphere-scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    perspective: 520px;
+}
+
+.vault-sphere-rays {
+    position: absolute;
+    width: 240%;
+    height: 240%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: repeating-conic-gradient(
+        from 0deg,
+        #000 0deg 9deg,
+        transparent 9deg 18deg
+    );
+    opacity: 0.9;
+    animation: vault-sphere-rays 18s linear infinite;
+    pointer-events: none;
+}
+
+.vault-sphere-orbit {
+    position: relative;
+    width: 62%;
+    aspect-ratio: 1;
+    transform-style: preserve-3d;
+    animation: vault-sphere-spin 11s linear infinite;
+}
+
+.vault-sphere-body {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: url('../assets/img/vault/checkered-sphere.png') center/cover no-repeat;
+    box-shadow:
+        inset -10px -14px 28px rgba(0, 0, 0, 0.48),
+        inset 8px 10px 22px rgba(255, 255, 255, 0.14),
+        0 10px 24px rgba(0, 0, 0, 0.55);
+}
+
+.vault-sphere-eyes {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14%;
+    transform: translateZ(2px);
+}
+
+.vault-sphere-eye {
+    width: 24%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.vault-sphere-eye--on-white {
+    background: #fff;
+}
+
+.vault-sphere-eye--on-white svg {
+    width: 74%;
+    fill: #000;
+}
+
+.vault-sphere-eye--on-black {
+    background: #000;
+}
+
+.vault-sphere-eye--on-black svg {
+    width: 74%;
+    fill: #fff;
+}
+
+@keyframes vault-sphere-spin {
+    from { transform: rotateY(0deg) rotateX(14deg); }
+    to { transform: rotateY(360deg) rotateX(14deg); }
+}
+
+@keyframes vault-sphere-rays {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
 .carousel-stage {
     position: absolute;
     inset: 0;
