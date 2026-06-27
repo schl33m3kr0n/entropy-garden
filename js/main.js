@@ -1246,10 +1246,14 @@ document.querySelectorAll('.vault-item').forEach(item => {
         } else {
             const clone = media.cloneNode(true);
             clone.className = 'lightbox-content';
-            if (clone.tagName === 'IMG' && media.classList.contains('vault-media--contain')) {
+            if (media.classList.contains('vault-media--contain')) {
                 clone.classList.add('vault-media--contain');
             }
-            if (clone.tagName === 'VIDEO') clone.controls = true;
+            if (clone.tagName === 'VIDEO') {
+                clone.controls = true;
+                ensureMediaSrc(clone);
+                clone.play().catch(() => {});
+            }
             if (clone.tagName === 'IMG') ensureMediaSrc(clone);
             lightboxOverlay.appendChild(clone);
         }

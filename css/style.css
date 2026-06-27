@@ -1679,7 +1679,7 @@ body.corrupted .identity-statement p:last-child {
 }
 
 #lightbox-overlay .lightbox-content.vault-media--contain,
-#lightbox-overlay img.lightbox-content[src$=".gif"] {
+#lightbox-overlay video.lightbox-content.vault-media--contain {
     object-fit: contain;
     background: #fff;
     width: min(88vw, 88vh);
