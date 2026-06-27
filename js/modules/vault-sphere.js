@@ -1,21 +1,12 @@
-/** Vault — software-rendered 3D checkered sphere; starburst + eyes are HTML overlays. */
+/** Vault — raycast checkered sphere; starburst + eyes are HTML overlays. */
 
-const LAT_STEPS = 22;
-const LON_STEPS = 32;
 const CHECKS = 8;
 const TILT_X = 0.28;
 const SPIN_SPEED = 0.55;
+const SPHERE_SCALE = 0.26;
+const MAX_RENDER_PX = 720;
 
 const activeCanvases = new Set();
-
-function spherePoint(lat, lon, r) {
-    const cl = Math.cos(lat);
-    return [
-        r * cl * Math.sin(lon),
-        r * Math.sin(lat),
-        r * cl * Math.cos(lon),
-    ];
-}
 
 function rotatePoint([x, y, z], rotX, rotY) {
     let nx = x;
@@ -39,103 +30,6 @@ function rotatePoint([x, y, z], rotX, rotY) {
     return [nx, ny, nz];
 }
 
-function checkerShade(lat, lon) {
-    const u = ((lon / Math.PI) + 1) * 0.5;
-    const v = (lat / Math.PI) + 0.5;
-    const dark = (Math.floor(u * CHECKS) + Math.floor(v * CHECKS)) % 2 === 0;
-    return dark ? 0 : 1;
-}
-
-function faceFill(shade, intensity) {
-    if (shade) {
-        const v = Math.round(255 * (0.92 + 0.08 * intensity));
-        return `rgb(${v}, ${v}, ${v})`;
-    }
-    return '#000000';
-}
-
-function buildMesh(radius) {
-    const quads = [];
-    for (let i = 0; i < LAT_STEPS; i++) {
-        const lat0 = -Math.PI / 2 + (i / LAT_STEPS) * Math.PI;
-        const lat1 = -Math.PI / 2 + ((i + 1) / LAT_STEPS) * Math.PI;
-        for (let j = 0; j < LON_STEPS; j++) {
-            const lon0 = (j / LON_STEPS) * Math.PI * 2;
-            const lon1 = ((j + 1) / LON_STEPS) * Math.PI * 2;
-            const midLat = (lat0 + lat1) * 0.5;
-            const midLon = (lon0 + lon1) * 0.5;
-            quads.push({
-                corners: [
-                    spherePoint(lat0, lon0, radius),
-                    spherePoint(lat0, lon1, radius),
-                    spherePoint(lat1, lon1, radius),
-                    spherePoint(lat1, lon0, radius),
-                ],
-                midLat,
-                midLon,
-            });
-        }
-    }
-    return quads;
-}
-
-function getMesh(radius) {
-    const key = Math.round(radius);
-    if (getMesh.cacheKey !== key) {
-        getMesh.cacheKey = key;
-        getMesh.cache = buildMesh(radius);
-    }
-    return getMesh.cache;
-}
-
-function drawSphereFrame(ctx, w, h, rotY) {
-    const cx = w * 0.5;
-    const cy = h * 0.52;
-    const radius = Math.min(w, h) * 0.34;
-    const focal = Math.max(w, h) * 2.2;
-    const light = normalize([0.35, 0.55, 0.75]);
-    const mesh = getMesh(radius);
-
-    ctx.clearRect(0, 0, w, h);
-
-    const faces = [];
-    for (const quad of mesh) {
-        const rotated = quad.corners.map((p) => rotatePoint(p, TILT_X, rotY));
-        const avgZ = rotated.reduce((sum, p) => sum + p[2], 0) / 4;
-        const nx = Math.cos(quad.midLat) * Math.sin(quad.midLon);
-        const ny = Math.sin(quad.midLat);
-        const nz = Math.cos(quad.midLat) * Math.cos(quad.midLon);
-        const rn = rotatePoint([nx, ny, nz], TILT_X, rotY);
-        const facing = rn[2] > 0.02;
-        if (!facing) continue;
-
-        const projected = rotated.map(([x, y, z]) => {
-            const s = focal / (focal + z);
-            return [cx + x * s, cy + y * s, z];
-        });
-
-        faces.push({
-            avgZ,
-            projected,
-            shade: checkerShade(quad.midLat, quad.midLon),
-            intensity: 0.32 + 0.68 * Math.max(0, dot(rn, light)),
-        });
-    }
-
-    faces.sort((a, b) => a.avgZ - b.avgZ);
-
-    for (const face of faces) {
-        ctx.fillStyle = faceFill(face.shade, face.intensity);
-        ctx.beginPath();
-        ctx.moveTo(face.projected[0][0], face.projected[0][1]);
-        for (let i = 1; i < face.projected.length; i++) {
-            ctx.lineTo(face.projected[i][0], face.projected[i][1]);
-        }
-        ctx.closePath();
-        ctx.fill();
-    }
-}
-
 function normalize([x, y, z]) {
     const len = Math.hypot(x, y, z) || 1;
     return [x / len, y / len, z / len];
@@ -143,6 +37,120 @@ function normalize([x, y, z]) {
 
 function dot(a, b) {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+function checkerShade(lat, lon) {
+    const u = ((lon / Math.PI) + 1) * 0.5;
+    const v = (lat / Math.PI) + 0.5;
+    return (Math.floor(u * CHECKS) + Math.floor(v * CHECKS)) % 2 === 0 ? 0 : 1;
+}
+
+function castSpherePixel(dx, dy, radius, focal, rotY) {
+    const rd = normalize([dx, dy, focal]);
+    const ro = [0, 0, -focal];
+    const roL = rotatePoint(ro, -TILT_X, -rotY);
+    const rdL = rotatePoint(rd, -TILT_X, -rotY);
+
+    const b = 2 * dot(roL, rdL);
+    const c = dot(roL, roL) - radius * radius;
+    const disc = b * b - 4 * c;
+    if (disc < 0) return null;
+
+    const sqrtDisc = Math.sqrt(disc);
+    let t = (-b - sqrtDisc) * 0.5;
+    if (t < 0) t = (-b + sqrtDisc) * 0.5;
+    if (t < 0) return null;
+
+    const px = roL[0] + rdL[0] * t;
+    const py = roL[1] + rdL[1] * t;
+    const pz = roL[2] + rdL[2] * t;
+    const nLocal = normalize([px, py, pz]);
+    const nWorld = rotatePoint(nLocal, TILT_X, rotY);
+    if (nWorld[2] <= 0) return null;
+
+    const lat = Math.asin(Math.max(-1, Math.min(1, nLocal[1])));
+    const lon = Math.atan2(nLocal[0], nLocal[2]);
+    return { lat, lon, normal: nWorld };
+}
+
+function shadePixel(hit, light) {
+    if (checkerShade(hit.lat, hit.lon)) return [255, 255, 255];
+    const lit = Math.max(0, dot(hit.normal, light));
+    const v = Math.round(10 + 32 * lit);
+    return [v, v, v];
+}
+
+function drawSphereFrame(ctx, w, h, rotY) {
+    const cx = w * 0.5;
+    const cy = h * 0.52;
+    const radius = Math.min(w, h) * SPHERE_SCALE;
+    const focal = Math.max(w, h) * 2.2;
+    const light = normalize([0.35, 0.55, 0.75]);
+
+    ctx.clearRect(0, 0, w, h);
+
+    const yMin = Math.max(0, Math.floor(cy - radius - 1));
+    const yMax = Math.min(h - 1, Math.ceil(cy + radius + 1));
+    const xMin = Math.max(0, Math.floor(cx - radius - 1));
+    const xMax = Math.min(w - 1, Math.ceil(cx + radius + 1));
+    const iw = xMax - xMin + 1;
+    const ih = yMax - yMin + 1;
+    if (iw < 1 || ih < 1) return;
+
+    const img = ctx.createImageData(iw, ih);
+    const data = img.data;
+
+    for (let py = yMin; py <= yMax; py++) {
+        const dy = py - cy;
+        for (let px = xMin; px <= xMax; px++) {
+            const dx = px - cx;
+            const hit = castSpherePixel(dx, dy, radius, focal, rotY);
+            if (!hit) continue;
+
+            const rgb = shadePixel(hit, light);
+            const idx = ((py - yMin) * iw + (px - xMin)) * 4;
+            data[idx] = rgb[0];
+            data[idx + 1] = rgb[1];
+            data[idx + 2] = rgb[2];
+            data[idx + 3] = 255;
+        }
+    }
+
+    ctx.putImageData(img, xMin, yMin);
+}
+
+function renderScale(w, h) {
+    const maxDim = Math.max(w, h);
+    if (maxDim <= MAX_RENDER_PX) return 1;
+    return MAX_RENDER_PX / maxDim;
+}
+
+function paintCanvas(canvas, rotY) {
+    const { w, h } = resizeCanvas(canvas);
+    if (w < 4 || h < 4) return false;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return false;
+
+    const scale = renderScale(w, h);
+    if (scale >= 0.999) {
+        drawSphereFrame(ctx, w, h, rotY);
+    } else {
+        const rw = Math.max(4, Math.floor(w * scale));
+        const rh = Math.max(4, Math.floor(h * scale));
+        if (!paintCanvas._buffer || paintCanvas._buffer.width !== rw || paintCanvas._buffer.height !== rh) {
+            paintCanvas._buffer = document.createElement('canvas');
+            paintCanvas._buffer.width = rw;
+            paintCanvas._buffer.height = rh;
+        }
+        const bctx = paintCanvas._buffer.getContext('2d');
+        drawSphereFrame(bctx, rw, rh, rotY);
+        ctx.clearRect(0, 0, w, h);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(paintCanvas._buffer, 0, 0, w, h);
+    }
+
+    canvas.classList.add('vault-sphere-canvas--ready');
+    return true;
 }
 
 function resizeCanvas(canvas) {
@@ -155,24 +163,6 @@ function resizeCanvas(canvas) {
         canvas.height = h;
     }
     return { w, h };
-}
-
-function paintCanvas(canvas, rotY) {
-    const { w, h } = resizeCanvas(canvas);
-    if (w < 4 || h < 4) return false;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return false;
-    drawSphereFrame(ctx, w, h, rotY);
-    canvas.classList.add('vault-sphere-canvas--ready');
-    return true;
-}
-
-function warmMeshForCanvas(canvas) {
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width < 1 || rect.height < 1) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const radius = Math.round(Math.min(rect.width, rect.height) * dpr * 0.34);
-    if (radius > 0) getMesh(radius);
 }
 
 function animate(canvas, state) {
@@ -198,7 +188,6 @@ function startLoop(canvas) {
         canvas._vaultSphereState = { rotY: 0, raf: 0, lastFrame: 0 };
     }
     const state = canvas._vaultSphereState;
-    warmMeshForCanvas(canvas);
     if (!paintCanvas(canvas, state.rotY)) {
         requestAnimationFrame(() => startLoop(canvas));
         return;
@@ -235,16 +224,12 @@ export function initVaultSphere(canvas, initialRotY = 0) {
         else stopLoop(canvas);
     };
 
-    warmMeshForCanvas(canvas);
-
     requestAnimationFrame(() => {
-        warmMeshForCanvas(canvas);
         paintCanvas(canvas, state.rotY);
         maybeStart();
     });
 
     const ro = new ResizeObserver(() => {
-        warmMeshForCanvas(canvas);
         if (canvas._vaultSphereState) {
             paintCanvas(canvas, canvas._vaultSphereState.rotY);
         }
@@ -260,8 +245,5 @@ export function initVaultSphere(canvas, initialRotY = 0) {
 }
 
 export function initVaultSpheres() {
-    document.querySelectorAll('.vault-sphere-canvas').forEach((canvas) => {
-        warmMeshForCanvas(canvas);
-        initVaultSphere(canvas);
-    });
+    document.querySelectorAll('.vault-sphere-canvas').forEach(initVaultSphere);
 }
