@@ -5,6 +5,7 @@
 import {
     showPanopticonComment,
     hidePanopticonComment,
+    commentTtlMs,
     perf,
 } from '../core/shared.js';
 import { isCorrupted, gardenHasStarted } from '../core/state.js';
@@ -57,7 +58,7 @@ export function firePanopticonComment(triggerId, options = {}) {
     if (!options.force && recent.includes(text)) return false;
     if (!options.force && text === lastShownText && now - lastShownAt < MIN_REPEAT_GAP_MS) return false;
 
-    const ttlMs = options.ttlMs ?? (perf.prefersReducedMotion ? 3600 : 4200);
+    const ttlMs = options.ttlMs ?? commentTtlMs(text, { reducedMotion: perf.prefersReducedMotion });
     showPanopticonComment(text, ttlMs);
 
     lastFireAt = now;

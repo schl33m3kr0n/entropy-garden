@@ -12,6 +12,7 @@ import {
     syncPanopticonCodeSequenceComments,
     isApril420,
     isIosTabletScreen,
+    commentTtlMs,
 } from '../core/shared.js';
 import { isCorrupted, isSingularityActive } from '../core/state.js';
 import { resizeCanvas } from '../core/canvas-resize.js';
@@ -348,6 +349,7 @@ let pongGazeY = 0;
 let commentTimeout = null;
 let serveCountdownTimer = null;
 let reserviceTimer = null;
+let sixSevenResumeHandler = null;
 let ballHeld = false;
 
 function pickFrom(pool) {
@@ -465,15 +467,22 @@ function scoreComment(scoringSide, diffBefore, hitsThisRally = 0) {
         : pickPongComment(PONG_COMMENT_RIGHT_LEAD, PONG_COMMENT_RIGHT_LEAD_CORRUPTED);
 }
 
-function showPongComment(text, { persist = false, ttlMs = 3400 } = {}) {
+function showPongComment(text, { persist = false, ttlMs } = {}) {
     if (!commentEl || !text) return;
     commentEl.textContent = text;
     commentEl.classList.add('visible');
     clearTimeout(commentTimeout);
     if (!persist) {
+        const duration = ttlMs ?? commentTtlMs(text, {
+            minMs: 2000,
+            maxMs: 9000,
+            baseMs: 1400,
+            msPerChar: 44,
+            reducedMotion: perf.prefersReducedMotion,
+        });
         commentTimeout = setTimeout(() => {
             commentEl?.classList.remove('visible');
-        }, ttlMs);
+        }, duration);
     }
 }
 
@@ -489,11 +498,26 @@ function clearServeCountdown() {
     if (!reserviceTimer) ballHeld = false;
 }
 
+function clearSixSevenHold() {
+    if (sixSevenResumeHandler && sfx.sixSeven) {
+        sfx.sixSeven.removeEventListener('ended', sixSevenResumeHandler);
+    }
+    sixSevenResumeHandler = null;
+    sixSevenUntil = 0;
+}
+
 function clearReserviceDelay() {
     clearTimeout(reserviceTimer);
     reserviceTimer = null;
     pendingReserviceTowardLeft = null;
+    clearSixSevenHold();
     if (!serveCountdownTimer) ballHeld = false;
+}
+
+function soundDurationMs(sound, fallbackMs) {
+    const duration = sound?.duration;
+    if (!Number.isFinite(duration) || duration <= 0) return fallbackMs;
+    return Math.max(fallbackMs, Math.round(duration * 1000));
 }
 
 function enableEyeMoveAnim() {
@@ -1133,12 +1157,11 @@ function scorePoint(side) {
     dropScoreboard();
     showPongComment(scoreComment(side, diffBefore, hitsThisRally));
     if (isSixSevenScore()) {
-        sixSevenUntil = performance.now() + SIX_SEVEN_DANCE_MS;
-        playSound(sfx.sixSeven);
+        scheduleSixSevenReservice(side === 'left');
     } else {
         playSound(sfx.gameStart);
+        scheduleReservice(side === 'left');
     }
-    scheduleReservice(side === 'left');
 }
 
 function scheduleReservice(towardLeft) {
@@ -1155,6 +1178,56 @@ function scheduleReservice(towardLeft) {
         ballHeld = false;
         serveBall(towardLeft);
     }, RESERVE_AFTER_MISS_MS);
+}
+
+function scheduleSixSevenReservice(towardLeft) {
+    clearReserviceDelay();
+    pendingReserviceTowardLeft = towardLeft;
+    ballHeld = true;
+    ball.vx = 0;
+    ball.vy = 0;
+    parkBallForCountdown();
+    syncBallEl();
+
+    const sound = sfx.sixSeven;
+    let finished = false;
+    let armed = false;
+
+    const resumePlay = () => {
+        if (finished || !active) return;
+        finished = true;
+        clearTimeout(reserviceTimer);
+        reserviceTimer = null;
+        clearSixSevenHold();
+        pendingReserviceTowardLeft = null;
+        ballHeld = false;
+        serveBall(towardLeft);
+    };
+
+    const armHold = (holdMs) => {
+        if (armed) return;
+        armed = true;
+        sixSevenUntil = performance.now() + holdMs;
+        reserviceTimer = setTimeout(resumePlay, holdMs);
+        if (!sound) return;
+        sixSevenResumeHandler = resumePlay;
+        sound.addEventListener('ended', sixSevenResumeHandler, { once: true });
+    };
+
+    if (sound) {
+        playSound(sound);
+        if (Number.isFinite(sound.duration) && sound.duration > 0) {
+            armHold(soundDurationMs(sound, SIX_SEVEN_DANCE_MS));
+            return;
+        }
+        const onDuration = () => armHold(soundDurationMs(sound, SIX_SEVEN_DANCE_MS));
+        sound.addEventListener('loadedmetadata', onDuration, { once: true });
+        sound.addEventListener('durationchange', onDuration, { once: true });
+        setTimeout(onDuration, 120);
+        return;
+    }
+
+    armHold(SIX_SEVEN_DANCE_MS);
 }
 
 function collideWall() {

@@ -590,6 +590,20 @@ export function pickMany(safe, gritty, count) {
     return getLoreDrawer(safe, gritty)(count);
 }
 
+/** Display time scaled to comment length (~12 chars/sec at default rate). */
+export function commentTtlMs(text, {
+    minMs = 2400,
+    maxMs = 14000,
+    baseMs = 1600,
+    msPerChar = 48,
+    reducedMotion = false,
+} = {}) {
+    const len = String(text ?? '').trim().length;
+    let ms = baseMs + len * msPerChar;
+    if (reducedMotion) ms *= 1.12;
+    return Math.round(Math.min(maxMs, Math.max(minMs, ms)));
+}
+
 export const canvas = document.getElementById('grid-canvas');
 export const ctx = canvas?.getContext('2d') ?? null;
 
@@ -910,7 +924,7 @@ function playPanopticonCommentSfx() {
     playSoundOverlap(isPanopticonGodModeCommentary() ? sfx.echo : sfx.blip);
 }
 
-function showPanopticonIdleComment(text, ttlMs = 4400) {
+function showPanopticonIdleComment(text, ttlMs) {
     if (!panopticonCommentEl || !text || !canShowPanopticonIdleComment()) return;
 
     clearIosPanopticonCommentInlinePosition();
@@ -924,11 +938,12 @@ function showPanopticonIdleComment(text, ttlMs = 4400) {
         positionPanopticonComment();
     });
 
+    const duration = ttlMs ?? commentTtlMs(text, { reducedMotion: perf.prefersReducedMotion });
     clearTimeout(panopticonCommentTimeout);
-    panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), ttlMs);
+    panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), duration);
 }
 
-export function showPanopticonComment(text, ttlMs = 4400) {
+export function showPanopticonComment(text, ttlMs) {
     if (!panopticonCommentEl || !text || !canShowPanopticonComment()) return;
 
     clearIosPanopticonCommentInlinePosition();
@@ -939,8 +954,9 @@ export function showPanopticonComment(text, ttlMs = 4400) {
     positionPanopticonComment();
     panopticonCommentEl.setAttribute('aria-hidden', 'false');
 
+    const duration = ttlMs ?? commentTtlMs(text, { reducedMotion: perf.prefersReducedMotion });
     clearTimeout(panopticonCommentTimeout);
-    panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), ttlMs);
+    panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), duration);
 }
 
 const PANOPTICON_COMMENT_FADE_MS = 450;
