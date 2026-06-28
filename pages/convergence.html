@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Convergence Field</title>
+  <style>
+    :root {
+      --black: #000000;
+      --red: #e53a33;
+      --blue: #0f669b;
+      --yellow: #f0c800;
+      --bg: #ffffff;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #efefef;
+      overflow: hidden;
+    }
+
+    svg {
+      width: min(92vw, 720px);
+      height: auto;
+      display: block;
+      background: var(--bg);
+    }
+
+    line, polyline, rect, circle, path {
+      shape-rendering: geometricPrecision;
+    }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg" aria-label="Convergence field diagram">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+        <polygon points="0 0, 10 5, 0 10" fill="var(--black)" />
+      </marker>
+    </defs>
+
+    <!-- shared outer frame: left column + right square -->
+    <rect x="4" y="4" width="236" height="472" fill="var(--bg)" stroke="var(--black)" stroke-width="10" />
+    <rect x="240" y="4" width="476" height="472" fill="var(--bg)" stroke="var(--black)" stroke-width="10" />
+
+    <!-- ── LEFT PANEL ── -->
+    <g id="left-panel">
+      <rect x="24" y="24" width="196" height="432" fill="none" stroke="var(--red)" stroke-width="2.5" />
+
+      <path d="M 36 36 A 12 12 0 0 1 48 24" fill="none" stroke="var(--red)" stroke-width="2.5" />
+      <path d="M 208 24 A 12 12 0 0 1 220 36" fill="none" stroke="var(--red)" stroke-width="2.5" />
+      <path d="M 220 456 A 12 12 0 0 1 208 468" fill="none" stroke="var(--red)" stroke-width="2.5" />
+      <path d="M 48 468 A 12 12 0 0 1 36 456" fill="none" stroke="var(--red)" stroke-width="2.5" />
+
+      <line x1="24" y1="240" x2="220" y2="240" stroke="var(--red)" stroke-width="2" />
+      <line x1="68" y1="24" x2="68" y2="456" stroke="var(--red)" stroke-width="2" />
+
+      <text x="40" y="52" fill="var(--red)" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="bold">1</text>
+      <text x="196" y="430" fill="var(--red)" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="bold" transform="rotate(180 214 418)">1</text>
+      <text x="40" y="252" fill="var(--red)" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="bold">0</text>
+      <text x="196" y="252" fill="var(--red)" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="bold">0</text>
+
+      <g transform="translate(240, 240)">
+        <path d="M 0 -70 A 70 70 0 0 1 0 70" fill="none" stroke="var(--black)" stroke-width="3" />
+        <path d="M 0 -58 A 58 58 0 0 1 0 58" fill="none" stroke="var(--red)" stroke-width="2.5" />
+        <path d="M 0 -46 A 46 46 0 0 1 0 46" fill="none" stroke="var(--black)" stroke-width="2.5" />
+        <path d="M 0 -34 A 34 34 0 0 1 0 34" fill="none" stroke="var(--red)" stroke-width="2" />
+        <path d="M 0 -22 A 22 22 0 0 1 0 22" fill="none" stroke="var(--black)" stroke-width="2" />
+        <path d="M 0 -10 A 10 10 0 0 1 0 10" fill="none" stroke="var(--red)" stroke-width="1.5" />
+      </g>
+
+      <line x1="240" y1="170" x2="84" y2="210" stroke="var(--black)" stroke-width="3.5" />
+      <line x1="240" y1="330" x2="84" y2="270" stroke="var(--black)" stroke-width="3.5" />
+    </g>
+
+    <!-- ── RIGHT PANEL ── -->
+    <g id="right-panel">
+      <line x1="518" y1="4" x2="518" y2="476" stroke="var(--black)" stroke-width="2.5" />
+      <line x1="240" y1="240" x2="716" y2="240" stroke="var(--black)" stroke-width="2.5" />
+
+      <line x1="418" y1="44" x2="418" y2="436" stroke="var(--black)" stroke-width="4" />
+      <line x1="578" y1="44" x2="578" y2="436" stroke="var(--black)" stroke-width="4" />
+
+      <g transform="translate(518, 240)">
+        <circle r="155" fill="none" stroke="var(--red)" stroke-width="2.5" />
+        <circle r="140" fill="none" stroke="var(--red)" stroke-width="2" />
+        <circle r="125" fill="none" stroke="var(--red)" stroke-width="2" />
+        <circle r="108" fill="none" stroke="var(--yellow)" stroke-width="2.5" />
+        <circle r="94" fill="none" stroke="var(--yellow)" stroke-width="2" />
+        <circle r="80" fill="none" stroke="var(--yellow)" stroke-width="2" />
+        <circle r="66" fill="none" stroke="var(--blue)" stroke-width="2.5" />
+        <circle r="52" fill="none" stroke="var(--blue)" stroke-width="2" />
+        <circle r="38" fill="none" stroke="var(--blue)" stroke-width="2" />
+        <circle r="10" fill="var(--yellow)" stroke="var(--black)" stroke-width="2" />
+      </g>
+
+      <line x1="518" y1="24" x2="518" y2="114" stroke="var(--black)" stroke-width="4" marker-end="url(#arrowhead)" />
+      <line x1="518" y1="456" x2="518" y2="354" stroke="var(--black)" stroke-width="4" marker-end="url(#arrowhead)" />
+      <line x1="256" y1="240" x2="354" y2="240" stroke="var(--black)" stroke-width="4" marker-end="url(#arrowhead)" />
+      <line x1="696" y1="240" x2="606" y2="240" stroke="var(--black)" stroke-width="4" marker-end="url(#arrowhead)" />
+    </g>
+  </svg>
+</body>
+</html>

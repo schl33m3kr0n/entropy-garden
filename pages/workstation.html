@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graphic Workstation — Entropy Garden</title>
+  <link rel="stylesheet" href="workstation.css" />
+</head>
+<body>
+  <header class="ws-header">
+    <div class="ws-brand">
+      <span class="ws-mark">◫</span>
+      <div>
+        <h1>Graphic Workstation</h1>
+        <p>SVG vector lab — straight geometry, live export</p>
+      </div>
+    </div>
+    <div class="ws-header-actions">
+      <button type="button" id="btn-new" class="ws-btn">New</button>
+      <button type="button" id="btn-load-convergence" class="ws-btn">Load Convergence</button>
+      <label class="ws-btn ws-btn-file">
+        Import SVG
+        <input type="file" id="file-import" accept=".svg,image/svg+xml" hidden />
+      </label>
+      <button type="button" id="btn-copy-svg" class="ws-btn ws-btn-primary">Copy SVG</button>
+      <button type="button" id="btn-download" class="ws-btn">Download</button>
+    </div>
+  </header>
+
+  <main class="ws-main">
+    <aside class="ws-panel ws-tools" aria-label="Tools">
+      <h2>Tools</h2>
+      <div class="ws-tool-grid" role="toolbar" aria-label="Drawing tools">
+        <button type="button" class="ws-tool is-active" data-tool="select" title="Select (V)">Select</button>
+        <button type="button" class="ws-tool" data-tool="rect" title="Rectangle (R)">Rect</button>
+        <button type="button" class="ws-tool" data-tool="ellipse" title="Ellipse (E)">Ellipse</button>
+        <button type="button" class="ws-tool" data-tool="line" title="Line (L)">Line</button>
+        <button type="button" class="ws-tool" data-tool="text" title="Text (T)">Text</button>
+      </div>
+      <label class="ws-toggle">
+        <input type="checkbox" id="snap-grid" checked />
+        Snap to grid
+      </label>
+      <label class="ws-toggle">
+        <input type="checkbox" id="show-grid" checked />
+        Show grid
+      </label>
+      <button type="button" id="btn-delete" class="ws-btn ws-btn-danger ws-full">Delete selection</button>
+      <button type="button" id="btn-undo" class="ws-btn ws-full">Undo</button>
+      <p class="ws-hint">Drag to draw · Shift keeps squares/circles · Del removes · ⌘Z undo</p>
+    </aside>
+
+    <section class="ws-canvas-wrap" aria-label="Artboard">
+      <svg id="artboard" viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e0e0e0" stroke-width="0.75" />
+          </pattern>
+          <marker id="ws-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <polygon points="0 0, 8 4, 0 8" fill="#111" />
+          </marker>
+        </defs>
+        <rect id="grid-bg" width="100%" height="100%" fill="url(#grid-pattern)" />
+        <rect id="artboard-bg" width="100%" height="100%" fill="#ffffff" />
+        <g id="content"></g>
+        <g id="preview"></g>
+        <g id="selection"></g>
+      </svg>
+    </section>
+
+    <aside class="ws-panel ws-inspector" aria-label="Inspector">
+      <h2>Properties</h2>
+      <p id="selection-label" class="ws-selection-label">Nothing selected</p>
+      <div class="ws-field">
+        <label for="prop-fill">Fill</label>
+        <input type="color" id="prop-fill" value="#ffffff" />
+        <label class="ws-check"><input type="checkbox" id="prop-fill-none" /> none</label>
+      </div>
+      <div class="ws-field">
+        <label for="prop-stroke">Stroke</label>
+        <input type="color" id="prop-stroke" value="#000000" />
+        <label class="ws-check"><input type="checkbox" id="prop-stroke-none" /> none</label>
+      </div>
+      <div class="ws-field">
+        <label for="prop-stroke-width">Stroke width</label>
+        <input type="number" id="prop-stroke-width" min="0" max="40" step="0.5" value="2" />
+      </div>
+      <div class="ws-field-row">
+        <div class="ws-field">
+          <label for="prop-x">X</label>
+          <input type="number" id="prop-x" step="1" />
+        </div>
+        <div class="ws-field">
+          <label for="prop-y">Y</label>
+          <input type="number" id="prop-y" step="1" />
+        </div>
+      </div>
+      <div class="ws-field-row">
+        <div class="ws-field">
+          <label for="prop-w">W</label>
+          <input type="number" id="prop-w" step="1" />
+        </div>
+        <div class="ws-field">
+          <label for="prop-h">H</label>
+          <input type="number" id="prop-h" step="1" />
+        </div>
+      </div>
+      <div class="ws-field" id="text-field" hidden>
+        <label for="prop-text">Text</label>
+        <input type="text" id="prop-text" />
+      </div>
+      <div class="ws-field">
+        <label for="prop-font-size">Font size</label>
+        <input type="number" id="prop-font-size" min="8" max="120" step="1" value="24" />
+      </div>
+
+      <h2>Layers</h2>
+      <ul id="layer-list" class="ws-layers"></ul>
+    </aside>
+  </main>
+
+  <footer class="ws-footer">
+    <label for="svg-output">SVG markup</label>
+    <textarea id="svg-output" spellcheck="false" aria-label="Exported SVG markup"></textarea>
+  </footer>
+
+  <script src="workstation.js"></script>
+</body>
+</html>
