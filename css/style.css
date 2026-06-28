@@ -1660,19 +1660,9 @@ body.corrupted .identity-statement p:last-child {
 
 /* --- VAULT GRID --- */
 .vault-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: minmax(min-content, auto);
-  gap: 40px 40px;
+  columns: 2;
+  column-gap: 40px;
   padding: 40px;
-  align-items: start;
-}
-
-/* Center the last item when the row count is odd */
-.vault-grid > .vault-item:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-  justify-self: center;
-  max-width: min(100%, 320px);
 }
 
 .vault-item {
@@ -1681,6 +1671,8 @@ body.corrupted .identity-statement p:last-child {
     display: flex;
     justify-content: center;
     align-items: center;
+    break-inside: avoid;
+    margin-bottom: 40px;
     background: rgba(0,25,0,0.3);
     border: 1px solid var(--neon-green);
     overflow: hidden;
@@ -1723,30 +1715,6 @@ body.corrupted .identity-statement p:last-child {
 .vault-media--landscape {
     aspect-ratio: 16 / 9;
     max-height: none;
-}
-
-.vault-item--stack {
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-    padding: 0;
-    gap: 0;
-}
-
-.vault-item--stack > .vault-media {
-    flex: 0 0 auto;
-}
-
-.vault-item--stack .carousel-container {
-    position: relative;
-    width: 100%;
-    max-width: none;
-    justify-self: stretch;
-    aspect-ratio: 1 / 1;
-    padding: 0;
-    border: 0;
-    border-top: 1px solid rgba(0, 255, 0, 0.35);
-    border-radius: 0;
 }
 
 .vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun)) {
@@ -1798,8 +1766,7 @@ body.corrupted .identity-statement p:last-child {
 
 .vault-item.carousel-container {
     position: relative;
-    width: min(100%, 320px);
-    justify-self: center;
+    width: 100%;
     aspect-ratio: 1 / 1;
     padding: 0;
 }
@@ -2397,17 +2364,17 @@ body.perf-lite #loader-leaf {
     }
 
     .vault-grid {
-        grid-template-columns: 1fr;
-        gap: 32px;
+        columns: 1;
+        column-gap: 0;
         padding: 20px;
     }
 
-    .vault-grid > .vault-item:last-child:nth-child(odd) {
-        max-width: min(100%, 280px);
+    .vault-item {
+        margin-bottom: 32px;
     }
 
     .vault-item.carousel-container {
-        width: min(100%, 280px);
+        width: 100%;
     }
 }
 
