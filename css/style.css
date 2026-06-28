@@ -1638,7 +1638,7 @@ body.corrupted .identity-statement p:last-child {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-auto-rows: minmax(min-content, auto);
-  gap: 56px 40px;
+  gap: 40px 40px;
   padding: 40px;
   align-items: start;
 }
@@ -1678,9 +1678,30 @@ body.corrupted .identity-statement p:last-child {
     max-height: min(360px, 52vh);
     object-fit: contain;
     object-position: center;
-    vertical-align: middle;
     filter: grayscale(80%) contrast(1.2) brightness(0.8);
     transition: filter 0.4s ease;
+}
+
+.vault-media--col-fill {
+    width: 100%;
+    max-width: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.vault-item iframe.genesis-iframe.vault-media--col-fill {
+    width: 100%;
+    max-width: 100%;
+    object-fit: initial;
+}
+
+.vault-media--landscape {
+    aspect-ratio: 16 / 9;
+    max-height: none;
+}
+
+.vault-item--follow-tight {
+    margin-top: -16px;
 }
 
 .vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun)) {
@@ -3824,7 +3845,8 @@ body.chromatic-active {
 .vault-item iframe.genesis-iframe {
     pointer-events: none;
     display: block;
-    width: min(280px, 100%);
+    width: 100%;
+    max-width: 100%;
     aspect-ratio: 5 / 4;
     height: auto;
     border: 0;
