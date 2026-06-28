@@ -529,7 +529,7 @@ globalThis.lorePools = {
         "that’s it, i’m going to cause a mild disturbance in your community",
         "per my last psychic transmission, your chakra will be processed in several business incarnations",
         "your hair follicles look intriguing. may i take a sample?",
-        "is your refrigerator running? mine’s walking",
+        "is your refrigerator running? mine has to use a walker",
         "if the oracle was right, i'm going to disney world",
         "to whoever owns the red chevy impala, your car is being towed",
         "why does your search history include an entry for ‘how to construct a space ship hotel out of a tree that 100% displaces its current inhabitants in 5 easy steps’?",
