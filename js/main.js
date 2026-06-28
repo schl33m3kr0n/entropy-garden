@@ -1245,9 +1245,9 @@ document.querySelectorAll('.vault-item').forEach(item => {
         } else {
             const clone = media.cloneNode(true);
             clone.className = 'lightbox-content';
-            if (media.classList.contains('vault-media--contain')) {
-                clone.classList.add('vault-media--contain');
-            }
+            media.classList.forEach((cls) => {
+                if (cls.startsWith('vault-media--')) clone.classList.add(cls);
+            });
             if (clone.tagName === 'VIDEO') {
                 clone.controls = true;
                 ensureMediaSrc(clone);

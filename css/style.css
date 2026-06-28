@@ -1637,9 +1637,9 @@ body.corrupted .identity-statement p:last-child {
 .vault-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 40px;
+  grid-auto-rows: minmax(min-content, auto);
+  gap: 56px 40px;
   padding: 40px;
-  justify-items: center;
   align-items: start;
 }
 
@@ -1647,18 +1647,20 @@ body.corrupted .identity-statement p:last-child {
 .vault-grid > .vault-item:last-child:nth-child(odd) {
   grid-column: 1 / -1;
   justify-self: center;
-  max-width: 100%;
+  max-width: min(100%, 320px);
 }
 
 .vault-item {
     position: relative;
-    width: fit-content;
-    max-width: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: rgba(0,25,0,0.3);
     border: 1px solid var(--neon-green);
     overflow: hidden;
     border-radius: var(--radius-md);
-    transition: all 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
     cursor: pointer;
 }
 
@@ -1682,47 +1684,35 @@ body.corrupted .identity-statement p:last-child {
 }
 
 .vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun)) {
-    width: 100%;
+    width: min(100%, 360px);
     height: auto;
-    max-width: none;
+    max-width: 360px;
     max-height: none;
     aspect-ratio: 16 / 9;
     object-fit: cover;
 }
 
 .vault-media.vault-media--sun:is(video) {
-    width: 100%;
+    width: min(100%, 320px);
     height: auto;
-    max-width: none;
+    max-width: 320px;
     max-height: none;
     aspect-ratio: 541 / 675;
     object-fit: cover;
     object-position: center;
 }
 
-.vault-item:has(> .vault-media--sun) {
-    width: min(100%, 320px);
-}
-
 .vault-media.vault-media--contain:is(video) {
-    width: 100%;
+    width: min(100%, 320px);
     height: auto;
-    max-width: none;
+    max-width: 320px;
     max-height: none;
     aspect-ratio: 1 / 1;
     object-fit: contain;
-}
-
-.vault-item:has(> .vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun))) {
-    width: min(100%, 360px);
-}
-
-.vault-item:has(> .vault-media--contain) {
-    width: min(100%, 320px);
+    background: #fff;
 }
 
 .vault-media--contain {
-    aspect-ratio: 1 / 1;
     object-fit: contain;
     background: #fff;
 }
@@ -1743,6 +1733,7 @@ body.corrupted .identity-statement p:last-child {
 .vault-item.carousel-container {
     position: relative;
     width: min(100%, 320px);
+    justify-self: center;
     aspect-ratio: 1 / 1;
     padding: 0;
 }
@@ -1755,6 +1746,17 @@ body.corrupted .identity-statement p:last-child {
     height: min(88vw, 88vh);
     max-width: 900px;
     max-height: 900px;
+}
+
+#lightbox-overlay video.lightbox-content.vault-media--sun {
+    width: min(90vw, calc(90vh * 541 / 675), 720px);
+    height: auto;
+    max-width: 720px;
+    max-height: 90vh;
+    aspect-ratio: 541 / 675;
+    object-fit: cover;
+    object-position: center;
+    background: #000;
 }
 
 .carousel-stage {
@@ -2330,12 +2332,12 @@ body.perf-lite #loader-leaf {
 
     .vault-grid {
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 32px;
         padding: 20px;
     }
 
     .vault-grid > .vault-item:last-child:nth-child(odd) {
-        max-width: 100%;
+        max-width: min(100%, 280px);
     }
 
     .vault-item.carousel-container {
@@ -4925,6 +4927,10 @@ body.ios-ui .ios-modal-reroll {
     width: 100%;
     min-width: 0;
     padding: 14px 18px;
+}
+
+#modal-vault .scrollable-content {
+    max-height: min(72vh, 900px);
 }
 
 #modal-vault #refresh-hint,
