@@ -1489,6 +1489,31 @@ body.corrupted .scrollable-content::-webkit-scrollbar-thumb { background: var(--
     60% { opacity: 0; transform: translateX(-50%) scale(0.95); }
     100% { opacity: 0; transform: translateX(-50%) scale(0.95); visibility: hidden; }
 }
+.terminal-insult-flash {
+    position: fixed;
+    top: 16%;
+    left: 50%;
+    z-index: 1000001;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: terminalInsultFlash 1.35s ease forwards;
+}
+.terminal-insult-flash-icon {
+    width: 72px;
+    height: 72px;
+    display: block;
+    object-fit: contain;
+}
+@keyframes terminalInsultFlash {
+    0% { opacity: 0; transform: translateX(-50%) scale(0.65); }
+    10% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    20% { opacity: 0.12; transform: translateX(-50%) scale(1); }
+    30% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    40% { opacity: 0.12; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    60% { opacity: 0; transform: translateX(-50%) scale(0.95); }
+    100% { opacity: 0; transform: translateX(-50%) scale(0.95); visibility: hidden; }
+}
 .trophy-title {
     font-family: var(--main-font);
     font-size: 0.72rem;

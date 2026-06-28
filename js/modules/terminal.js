@@ -151,6 +151,28 @@ export function rebuildTerminalLogPool() {
     drawTerminalLog = createBag(activeTerminalPool());
 }
 
+const TERMINAL_INSULT_FLASH_URL = 'assets/img/terminal-insult.png';
+let terminalInsultFlashEl = null;
+
+function triggerTerminalInsultFlash() {
+    if (terminalInsultFlashEl) {
+        terminalInsultFlashEl.remove();
+        terminalInsultFlashEl = null;
+    }
+    const el = document.createElement('div');
+    el.className = 'terminal-insult-flash';
+    el.innerHTML = `<img class="terminal-insult-flash-icon" src="${TERMINAL_INSULT_FLASH_URL}" alt="" width="72" height="72" decoding="async" aria-hidden="true">`;
+    document.body.appendChild(el);
+    terminalInsultFlashEl = el;
+
+    const done = () => {
+        el.remove();
+        if (terminalInsultFlashEl === el) terminalInsultFlashEl = null;
+    };
+    el.addEventListener('animationend', done, { once: true });
+    setTimeout(done, 1600);
+}
+
 /** How long after Enter to keep following output (covers delayed cipher/log lines). */
 const TERMINAL_SCROLL_PIN_MS = 12000;
 
@@ -450,6 +472,7 @@ function processCommand(cmd) {
         pushTerminalLog("> shut up. 🖕");
         playSound(sfx.stfu);
         triggerPanopticonCenterStare();
+        triggerTerminalInsultFlash();
     }
     else if(cmd === 'help') pushTerminalLog("AVAILABLE: help, clear, meow, pizza, render, scatter, time, cipher, lexicon, shortcuts, analyze");
     else if(cmd === 'shortcuts') printShortcuts();
