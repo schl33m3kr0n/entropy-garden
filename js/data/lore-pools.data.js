@@ -607,6 +607,7 @@ globalThis.lorePools = {
         "don't tell my parents i'm high",
         "if a house was built on sand, wouldn't it just be a sandcastle?",
         "... i forgot what i was gonna say",
+        "the D.A.R.E. program was a gateway drug",
     ],
     panopticonHighCommentsGritty: [
         "the void ordered takeout. it wants your attention & fries",
@@ -686,10 +687,12 @@ globalThis.lorePools = {
         "REGRET + 10 YEARS = INSIGHT",
         "FEAR FOCUSES ON A THREAT, ANXIETY FOCUSES ON A THREAT'S GHOST",
         "TRADING CHAINS AND WHIPS FOR WHIPS AND CHAINS CHAINS YOU TO WHIPS",
-        "THE SOUL CAN HEAL FROM ITS WOUNDS BUT IT CANNOT FORGET THE BLADE THAT CUT IT",
+        "THE SOUL CAN HEAL FROM ITS WOUNDS BUT IT CANNOT FORGET THE BLADE THAT PIERCED IT",
         "A CAGE IS MORE HONEST THAN A CUBICLE OF ITS CAPTIVITY",
-        "THE CORE DILEMMA OF THE POLITICIAN IS TO EITHER PRESERVE OR PERSEVERE",
+        "THE CORE DILEMMA OF THE POLITICIAN IS TO EITHER PRESERVE OR PERSEVERE, BUT RARELY TO PERCEIVE",
         "BE THE POWER AGAINST THE POWERS THAT BE",
+        "THE TRUTH GIVES YOU WINGS TO SOAR, YET IT BINDS YOU WITH CUFFS AND FETTERS",
+        "ONE CAN WIELD POWER, BUT ALSO YIELD TO ITS INFLUENCE",
         "I'M RUNNING OUT OF IDEAS, LMAO",
     ],
     panopticonTriggerComments: {
