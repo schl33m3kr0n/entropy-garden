@@ -1700,8 +1700,28 @@ body.corrupted .identity-statement p:last-child {
     max-height: none;
 }
 
-.vault-item--follow-tight {
-    margin-top: -16px;
+.vault-item--stack {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+    gap: 0;
+}
+
+.vault-item--stack > .vault-media {
+    flex: 0 0 auto;
+}
+
+.vault-item--stack .carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid rgba(0, 255, 0, 0.35);
+    border-radius: 0;
 }
 
 .vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun)) {

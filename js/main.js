@@ -1506,8 +1506,9 @@ function measureCarouselSlideWidth() {
   const stage = wrapper?.closest('.carousel-stage')
     || document.querySelector('#modal-vault .carousel-stage')
     || document.querySelector('.carousel-stage');
-  const carouselItem = wrapper?.closest('.vault-item.carousel-container')
-    || document.querySelector('.vault-item.carousel-container');
+  const carouselItem = wrapper?.closest('.carousel-container')
+    || document.querySelector('#modal-vault .carousel-container')
+    || document.querySelector('.carousel-container');
   const widths = [
     wrapper?.clientWidth,
     stage?.clientWidth,
