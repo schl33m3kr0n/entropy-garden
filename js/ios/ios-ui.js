@@ -119,9 +119,8 @@ function relocateControlsToSidebar() {
 
     const modeBtn = document.getElementById('mode-btn');
     const panopticonMuteBtn = document.getElementById('panopticon-mute-btn');
-    const playlist = document.getElementById('playlist-menu');
 
-    if (!sidebar || !modeBtn || !playlist) return;
+    if (!sidebar || !modeBtn) return;
 
 
 
@@ -139,13 +138,8 @@ function relocateControlsToSidebar() {
 
 
 
-    if (panopticonMuteBtn) {
-        tools.append(modeBtn, panopticonMuteBtn, playlist);
-    } else {
-        tools.append(modeBtn, playlist);
-    }
-
-    playlist.style.display = 'block';
+    tools.replaceChildren(modeBtn);
+    if (panopticonMuteBtn) tools.append(panopticonMuteBtn);
 
 }
 

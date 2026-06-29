@@ -534,6 +534,7 @@ function revealGardenUI() {
         document.querySelector('.control-panel')?.classList.add('active');
         if (playlistMenu) {
             playlistMenu.classList.add('active');
+            playlistMenu.style.display = 'block';
             updatePlaylistUI();
         }
         requestAnimationFrame(() => revealTerminalChrome());
