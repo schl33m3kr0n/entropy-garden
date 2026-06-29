@@ -4584,7 +4584,7 @@ body.ios-ui #playlist-menu {
     bottom: calc(env(safe-area-inset-bottom) + 12px);
     left: calc(env(safe-area-inset-left) + 12px);
     right: auto;
-    z-index: 10012;
+    z-index: 10020;
     opacity: 0;
     pointer-events: none;
     width: min(200px, calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)));
@@ -4594,6 +4594,20 @@ body.ios-ui #playlist-menu {
     border-top: none;
     padding: 10px;
     transition: opacity 0.8s ease;
+}
+
+/* iPhone — playlist lives at the bottom of the sidebar tools stack */
+body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu {
+    position: static;
+    bottom: auto;
+    left: auto;
+    z-index: auto;
+    width: 100%;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-left: none;
+    border-top: 1px solid rgba(0, 255, 0, 0.25);
+    background: transparent;
 }
 
 body.ios-ui #playlist-header {
@@ -4904,6 +4918,12 @@ body.ios-ui .control-panel {
 body.ios-ui #playlist-menu {
     border-radius: var(--ios-radius-md);
     border: 1px solid rgba(0, 255, 0, 0.25);
+}
+
+body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu {
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid rgba(0, 255, 0, 0.25);
 }
 
 body.ios-ui #track-title {

@@ -119,6 +119,7 @@ function relocateControlsToSidebar() {
 
     const modeBtn = document.getElementById('mode-btn');
     const panopticonMuteBtn = document.getElementById('panopticon-mute-btn');
+    const playlist = document.getElementById('playlist-menu');
 
     if (!sidebar || !modeBtn) return;
 
@@ -140,6 +141,11 @@ function relocateControlsToSidebar() {
 
     tools.replaceChildren(modeBtn);
     if (panopticonMuteBtn) tools.append(panopticonMuteBtn);
+
+    if (playlist && !isIosTabletScreen()) {
+        tools.append(playlist);
+        playlist.style.display = 'block';
+    }
 
 }
 
