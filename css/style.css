@@ -3814,7 +3814,7 @@ body:not(.ios-ui) #playlist-menu.active {
 }
 
 .playlist-icon--prev {
-    background-image: url('../assets/icons/skip-back.svg');
+    background-image: url('../assets/icons/skip.svg');
 }
 
 .playlist-icon--play {
@@ -3826,7 +3826,8 @@ body:not(.ios-ui) #playlist-menu.active {
 }
 
 .playlist-icon--next {
-    background-image: url('../assets/icons/skip-forward.svg');
+    background-image: url('../assets/icons/skip.svg');
+    transform: scaleX(-1);
 }
 
 body.corrupted .playlist-icon {
