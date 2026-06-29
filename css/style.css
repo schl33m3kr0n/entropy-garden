@@ -3667,7 +3667,52 @@ body.ios-ui.corrupted .ui-icon {
     /* CHANGE THIS: Use opacity instead of display:none for smoother reveals */
     opacity: 0; 
     pointer-events: none;
-    transition: opacity 1s ease;
+    transition: opacity 1s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+#playlist-menu:hover {
+    background: var(--neon-green);
+    border-left-color: #000;
+}
+
+#playlist-menu:hover #playlist-header,
+#playlist-menu:hover #track-title,
+#playlist-menu:hover .track-title-content {
+    color: #000;
+}
+
+#playlist-menu:hover .ui-btn {
+    border-color: #000;
+    color: #000;
+    background: transparent;
+}
+
+#playlist-menu:hover .ui-btn:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#playlist-menu .ui-btn:hover .playlist-icon,
+#playlist-menu:hover .playlist-icon {
+    filter: brightness(0);
+}
+
+body.corrupted #playlist-menu:hover {
+    background: var(--alert-red);
+}
+
+body.corrupted #playlist-menu:hover #playlist-header,
+body.corrupted #playlist-menu:hover #track-title,
+body.corrupted #playlist-menu:hover .track-title-content {
+    color: #000;
+}
+
+body.corrupted #playlist-menu:hover {
+    border-left-color: #000;
+}
+
+body.corrupted #playlist-menu .ui-btn:hover .playlist-icon,
+body.corrupted #playlist-menu:hover .playlist-icon {
+    filter: brightness(0);
 }
 
 body:not(.ios-ui) #playlist-menu {
@@ -4572,6 +4617,17 @@ body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu {
     border-left: none;
     border-top: 1px solid rgba(0, 255, 0, 0.25);
     background: transparent;
+    transition: opacity 0.8s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu:hover {
+    background: var(--neon-green);
+    border-top-color: #000;
+}
+
+body.ios-ui.corrupted:not(.ios-tablet) .ios-sidebar-tools #playlist-menu:hover {
+    background: var(--alert-red);
+    border-top-color: #000;
 }
 
 body.ios-ui #playlist-header {
