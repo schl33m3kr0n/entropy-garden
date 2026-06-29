@@ -689,7 +689,10 @@ function randomizeData() {
     const statsPool = isCorrupted && lore.statsGritty.length
         ? lore.statsSafe.concat(lore.statsGritty)
         : lore.statsSafe;
-    shuffle([...statsPool]).forEach(stat => {
+    shuffle([
+        ...statsPool,
+        { label: "Soul", val: pickOne(lore.soulStatValues) },
+    ]).forEach(stat => {
         const li = document.createElement('li'); 
         li.className = "stat-row"; 
         li.innerHTML = `<span class="stat-label">${stat.label}</span><span class="stat-val">${stat.val}</span>`; 

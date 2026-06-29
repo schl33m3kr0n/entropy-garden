@@ -119,6 +119,17 @@ globalThis.lorePools = {
         { label: "Spinal Alignment", val: "Question Mark" },
         { label: "Microwave Quality", val: "Janky eBay Special" },
     ],
+    soulStatValues: [
+        "lost",
+        "deep",
+        "unconquerable",
+        "hypothetical",
+        "astrally projecting @3am in a wendy's bathroom",
+        "one of many",
+        "corrupted to an acceptable degree",
+        "pissing off the guru",
+        "repentant for the las vegas trip",
+    ],
     statsGritty: [
         { label: "Sanity", val: "404 Not Found" },
         { label: "Friendly Fire Dmg", val: "Court Martialed" },
