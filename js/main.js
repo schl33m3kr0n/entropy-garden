@@ -664,15 +664,6 @@ function randomizeData() {
 
     const frags = pickMany(lore.bioFragmentsSafe, lore.bioFragmentsGritty, 4);
 
-    const identityFrags = document.getElementById('identity-fragments');
-    if (identityFrags) {
-        identityFrags.innerHTML = `
-            <h3 class="identity-fragments-title">// BIO FRAGMENTS</h3>
-            <p class="bio-p">${frags[0]} ${frags[1]}</p>
-            <p class="bio-p">${frags[2]} ${frags[3]}</p>
-        `;
-    }
-
     document.getElementById('bio-container').innerHTML = `
         <div class="bio-header">
             <div class="pfp-wrapper">

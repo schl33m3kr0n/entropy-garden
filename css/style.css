@@ -1588,35 +1588,6 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     width: 100%;
 }
 
-/* --- IDENTITY BIO FRAGMENTS --- */
-.identity-fragments {
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(0, 255, 0, 0.3);
-    text-align: left;
-}
-
-.identity-fragments-title {
-    margin: 0 0 10px;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-    color: var(--neon-green);
-    text-shadow: 0 0 6px rgba(0, 255, 0, 0.4);
-}
-
-.identity-fragments .bio-p:last-child {
-    margin-bottom: 0;
-}
-
-body.corrupted .identity-fragments {
-    border-top-color: rgba(255, 45, 45, 0.4);
-}
-
-body.corrupted .identity-fragments-title {
-    color: var(--alert-red);
-    text-shadow: 0 0 6px rgba(255, 45, 45, 0.4);
-}
-
 /* --- BIO PROFILE PICTURE --- */
 .pfp-wrapper {
     width: 100px;
