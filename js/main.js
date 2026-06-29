@@ -1,5 +1,5 @@
 // Entropy Garden — main entry (lazy-loads terminal, matrix, singularity, arcade)
-import { setPlayPauseIcon, syncPlayPauseIcon } from './playlist-icons.js';
+import { bindPlaylistPlayPause, isPlayPauseShowingPlaying } from './playlist-icons.js';
 import {
     sfx,
     playSound,
@@ -23,6 +23,7 @@ import {
     updatePanopticonVisibility,
     currentTrackIndex,
     playCurrentBgmTrack,
+    pauseCurrentBgmTrack,
     playPrevTrack,
     playNextTrack,
     resetBgmToStart,
@@ -1148,23 +1149,23 @@ function bindDomEvents() {
     // 2. PLAY/PAUSE LOGIC 
     const playPauseBtn = document.getElementById('play-pause-btn');
     if (playPauseBtn) {
-        syncPlayPauseIcon(playPauseBtn, getBgmTrack(currentTrackIndex));
+        const playPauseUi = bindPlaylistPlayPause(playPauseBtn, () => getBgmTrack(currentTrackIndex));
+        globalThis.markPlaylistPlayingIntent = () => playPauseUi?.markPlayingIntent();
+        globalThis.markPlaylistPausedIntent = () => playPauseUi?.markPausedIntent();
 
         playPauseBtn.addEventListener('click', function() {
-            const track = getBgmTrack(currentTrackIndex);
-            if (track.paused) {
-                playCurrentBgmTrack();
-                setPlayPauseIcon(this, true);
-                pushTerminalLog("> AUDIO RESUMED.");
-                firePanopticonComment('playlistPlay');
-                recordBehavior('playlist_toggle');
-            } else {
-                track.pause();
-                setPlayPauseIcon(this, false);
+            if (isPlayPauseShowingPlaying(this)) {
+                pauseCurrentBgmTrack();
                 pushTerminalLog("> AUDIO SUSPENDED.");
                 firePanopticonComment('playlistPause');
                 recordBehavior('playlist_toggle');
+                return;
             }
+
+            playCurrentBgmTrack();
+            pushTerminalLog("> AUDIO RESUMED.");
+            firePanopticonComment('playlistPlay');
+            recordBehavior('playlist_toggle');
         });
     }
     

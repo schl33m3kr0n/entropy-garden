@@ -500,6 +500,15 @@ export function playCurrentBgmTrack() {
     if (typeof globalThis.updatePlaylistUI === 'function') {
         globalThis.updatePlaylistUI();
     }
+    globalThis.markPlaylistPlayingIntent?.();
+}
+
+/** Pause current track and cancel any in-flight async play attempt. */
+export function pauseCurrentBgmTrack() {
+    nextBgmPlayGeneration();
+    const track = getBgmTrack(currentTrackIndex);
+    track.pause();
+    globalThis.markPlaylistPausedIntent?.();
 }
 
 export function playSound(sound) {
