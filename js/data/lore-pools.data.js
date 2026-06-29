@@ -568,7 +568,7 @@ globalThis.lorePools = {
         "reality got too serious?",
         "you can't be this bored, right?",
         "ugh, they're back again. lemme call you back",
-        "i was doomscrolling while you were gone",
+        "i was doomscrolling while you were gone. y'know, like, reading the scroll of doom?",
         "did you at least bring snacks this time?",
         "i knew you'd come back... eventually...",
     ],
