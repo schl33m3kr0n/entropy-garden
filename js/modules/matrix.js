@@ -60,14 +60,39 @@ function randomChar() {
     return pickCipherChar(usesIosCipherGlyphs());
 }
 
+function randomIosGlyphColor() {
+    if (isCorrupted) {
+        return `rgba(255, 0, 85, ${0.42 + Math.random() * 0.38})`;
+    }
+    const hue = Math.floor(Math.random() * 360);
+    return `hsla(${hue}, 95%, ${52 + Math.random() * 12}%, ${0.5 + Math.random() * 0.32})`;
+}
+
+function initWheelGlyphColors(wheel) {
+    if (!usesIosCipherGlyphs()) return;
+    wheel.glyphColors = Array.from({ length: wheel.charCount }, randomIosGlyphColor);
+}
+
+function refreshWheelGlyphColor(wheel, index) {
+    if (!usesIosCipherGlyphs()) return;
+    if (!wheel.glyphColors) {
+        wheel.glyphColors = Array.from({ length: wheel.charCount }, randomIosGlyphColor);
+        return;
+    }
+    wheel.glyphColors[index] = randomIosGlyphColor();
+}
+
 function repairWheelGlyph(wheel, index) {
     if (!isEmptyWheelGlyph(wheel.glyphs[index])) return;
     wheel.glyphs[index] = randomChar();
+    refreshWheelGlyphColor(wheel, index);
 }
 
 function fillEmptyWheelGlyphs() {
     if (!wheels.length) return;
-    populateEmptyWheelGlyphs(wheels, randomChar, cipherWheelFont());
+    populateEmptyWheelGlyphs(wheels, randomChar, cipherWheelFont(), {
+        onAssign: (wheel, index) => refreshWheelGlyphColor(wheel, index),
+    });
 }
 
 function cipherWheelFont() {
@@ -97,10 +122,11 @@ function buildWheels() {
             Math.floor(circumference / cellSize)
         );
 
-        wheels.push({
+        const wheel = {
             charRadius,
             charCount,
             glyphs: Array.from({ length: charCount }, () => randomChar()),
+            glyphColors: null,
             angle: Math.random() * Math.PI * 2,
             cycleCounter: 0,
             cycleEvery: (perf.isMobile ? 14 : 8) + ringIndex * 2,
@@ -111,7 +137,9 @@ function buildWheels() {
             burstUntil: 0,
             direction: ringIndex % 2 === 0 ? 1 : -1,
             ringIndex,
-        });
+        };
+        initWheelGlyphColors(wheel);
+        wheels.push(wheel);
 
         charRadius += charBand + channel;
         ringIndex++;
@@ -132,6 +160,7 @@ function cycleGlyphs(wheel) {
     for (let s = 0; s < swaps; s++) {
         const idx = Math.floor(Math.random() * wheel.charCount);
         wheel.glyphs[idx] = randomChar();
+        refreshWheelGlyphColor(wheel, idx);
         repairWheelGlyph(wheel, idx);
     }
 }
@@ -272,9 +301,12 @@ function drawCipherWheels(cx, cy) {
 
     drawChannelRings(cx, cy);
 
-    ctx.fillStyle = usesLiteCipherWheelPaint()
-        ? (isCorrupted ? 'rgba(255, 0, 85, 0.24)' : 'rgba(0, 255, 0, 0.24)')
-        : wheelConicGradient(cx, cy, 0.24);
+    const perGlyphIosColors = usesIosCipherGlyphs();
+    if (!perGlyphIosColors) {
+        ctx.fillStyle = usesLiteCipherWheelPaint()
+            ? (isCorrupted ? 'rgba(255, 0, 85, 0.24)' : 'rgba(0, 255, 0, 0.24)')
+            : wheelConicGradient(cx, cy, 0.24);
+    }
 
     const fastGlyphs = perf.liteGfx && !perf.prefersReducedMotion;
 
@@ -290,6 +322,10 @@ function drawCipherWheels(cx, cy) {
 
             if (x < -cellSize || x > viewW + cellSize || y < -cellSize || y > viewH + cellSize) {
                 continue;
+            }
+
+            if (perGlyphIosColors) {
+                ctx.fillStyle = wheel.glyphColors?.[i] ?? randomIosGlyphColor();
             }
 
             if (fastGlyphs) {
@@ -654,6 +690,9 @@ function refreshCipherEntropyRingHint() {
         hint.clearFromWheels(wheels, randomChar, perf);
     }
     fillEmptyWheelGlyphs();
+    if (usesIosCipherGlyphs()) {
+        for (const wheel of wheels) initWheelGlyphColors(wheel);
+    }
     setNeedsFullRedraw(true);
 }
 

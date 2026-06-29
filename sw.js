@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v182';
+const CACHE_VERSION = 'entropy-garden-v183';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -22,6 +22,7 @@ const PRECACHE_URLS = [
     'js/cipher/vigenere.js',
     'js/cipher/entropy-hint.js',
     'js/cipher/wheel-fill.js',
+    'js/playlist-icons.js',
     'js/boot/trophies.js',
     'js/boot/file-protocol-guard.js',
     'js/ios/ios-ui.js',
@@ -37,6 +38,10 @@ const PRECACHE_URLS = [
     'assets/icons/storage.svg',
     'assets/icons/vault.svg',
     'assets/icons/cards.svg',
+    'assets/icons/play.svg',
+    'assets/icons/pause.svg',
+    'assets/icons/skip-back.svg',
+    'assets/icons/skip-forward.svg',
     'assets/img/vault/sun-poster.webp',
     'assets/img/vault/ahoy.jpg',
 ];

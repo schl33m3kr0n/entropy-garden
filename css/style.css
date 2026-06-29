@@ -3794,11 +3794,43 @@ body:not(.ios-ui) #playlist-menu.active {
 }
 
 #playlist-controls .ui-btn {
-    font-size: 1rem; /* Increases the size of the symbols */
+    font-size: 1rem;
     padding: 2px 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.playlist-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
+    transition: filter 0.3s ease;
+}
+
+.playlist-icon--prev {
+    background-image: url('../assets/icons/skip-back.svg');
+}
+
+.playlist-icon--play {
+    background-image: url('../assets/icons/play.svg');
+}
+
+.playlist-icon--pause {
+    background-image: url('../assets/icons/pause.svg');
+}
+
+.playlist-icon--next {
+    background-image: url('../assets/icons/skip-forward.svg');
+}
+
+body.corrupted .playlist-icon {
+    filter: brightness(0) saturate(100%) invert(26%) sepia(100%) saturate(7450%) hue-rotate(323deg) brightness(102%) contrast(101%);
 }
 
 #playlist-menu .ui-btn {
@@ -4577,8 +4609,7 @@ body.ios-ui.garden-ready #playlist-menu.active {
 
 body.ios-ui #playlist-controls .ui-btn {
     flex: 1;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
+    padding: 6px 8px;
 }
 
 body.ios-ui #sidebar-menu {

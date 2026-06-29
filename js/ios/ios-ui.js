@@ -1,4 +1,4 @@
-// iOS layout: vertical HUD rail, sidebar tools, playlist text labels.
+// iOS layout: vertical HUD rail, sidebar tools, playlist SVG icons.
 
 import { perf, isIosTabletScreen } from '../core/shared.js';
 
@@ -40,20 +40,6 @@ function scrollRailHome(behavior = 'instant') {
     const top = main.offsetTop;
 
     shell.scrollTo({ top, behavior });
-
-}
-
-
-
-function swapPlaylistGlyphs() {
-
-    document.querySelectorAll('.playlist-btn').forEach((btn) => {
-
-        const label = btn.dataset.label;
-
-        if (label) btn.textContent = label;
-
-    });
 
 }
 
@@ -315,8 +301,6 @@ export function initIosUi() {
     buildScrollShell();
 
     relocateControlsToSidebar();
-
-    swapPlaylistGlyphs();
 
     addIosModalRerollButtons();
 

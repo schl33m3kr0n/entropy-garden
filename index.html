@@ -64,11 +64,15 @@
         </div>
     </div>
     <div id="playlist-controls">
-        <button type="button" tabindex="-1" onclick="playPrevTrack()" class="ui-btn playlist-btn" data-label="PREV">&#9198;</button>
-        
-        <button type="button" tabindex="-1" id="play-pause-btn" class="ui-btn playlist-btn" data-label="PAUSE" data-play-label="PLAY">&#10074;&#10074;</button>
-        
-        <button type="button" tabindex="-1" onclick="playNextTrack()" class="ui-btn playlist-btn" data-label="NEXT">&#9197;</button>
+        <button type="button" tabindex="-1" onclick="playPrevTrack()" class="ui-btn playlist-btn" aria-label="Previous track">
+            <span class="playlist-icon playlist-icon--prev" aria-hidden="true"></span>
+        </button>
+        <button type="button" tabindex="-1" id="play-pause-btn" class="ui-btn playlist-btn" aria-label="Pause">
+            <span class="playlist-icon playlist-icon--pause" aria-hidden="true"></span>
+        </button>
+        <button type="button" tabindex="-1" onclick="playNextTrack()" class="ui-btn playlist-btn" aria-label="Next track">
+            <span class="playlist-icon playlist-icon--next" aria-hidden="true"></span>
+        </button>
     </div>
 </div>
 

@@ -1,4 +1,5 @@
 // Entropy Garden — main entry (lazy-loads terminal, matrix, singularity, arcade)
+import { setPlayPauseIcon, syncPlayPauseIcon } from './playlist-icons.js';
 import {
     sfx,
     playSound,
@@ -1147,27 +1148,19 @@ function bindDomEvents() {
     // 2. PLAY/PAUSE LOGIC 
     const playPauseBtn = document.getElementById('play-pause-btn');
     if (playPauseBtn) {
-        const setPlayPauseLabel = (btn, playing) => {
-            if (perf.isIOS) {
-                btn.textContent = playing
-                    ? (btn.dataset.label || 'PAUSE')
-                    : (btn.dataset.playLabel || 'PLAY');
-                return;
-            }
-            btn.innerHTML = playing ? '&#10074;&#10074;' : '&#9658;';
-        };
+        syncPlayPauseIcon(playPauseBtn, getBgmTrack(currentTrackIndex));
 
         playPauseBtn.addEventListener('click', function() {
             const track = getBgmTrack(currentTrackIndex);
             if (track.paused) {
                 playCurrentBgmTrack();
-                setPlayPauseLabel(this, true);
+                setPlayPauseIcon(this, true);
                 pushTerminalLog("> AUDIO RESUMED.");
                 firePanopticonComment('playlistPlay');
                 recordBehavior('playlist_toggle');
             } else {
                 track.pause();
-                setPlayPauseLabel(this, false);
+                setPlayPauseIcon(this, false);
                 pushTerminalLog("> AUDIO SUSPENDED.");
                 firePanopticonComment('playlistPause');
                 recordBehavior('playlist_toggle');
