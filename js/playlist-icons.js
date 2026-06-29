@@ -37,18 +37,23 @@ export function bindPlaylistPlayPause(btn, getTrack) {
         syncPlayPauseIcon(btn, getTrack());
     };
 
+    const isActiveTrack = (track) => track && getTrack() === track;
+
     const bindTrack = (track) => {
         if (!track || track === boundTrack) return;
         boundTrack = track;
         track.addEventListener('playing', () => {
-            if (pauseIntent) return;
+            if (!isActiveTrack(track)) return;
+            pauseIntent = false;
             setPlayPauseIcon(btn, true);
         });
         track.addEventListener('pause', () => {
+            if (!isActiveTrack(track)) return;
             pauseIntent = true;
             setPlayPauseIcon(btn, false);
         });
         track.addEventListener('ended', () => {
+            if (!isActiveTrack(track)) return;
             pauseIntent = true;
             setPlayPauseIcon(btn, false);
         });
