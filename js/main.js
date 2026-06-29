@@ -663,8 +663,16 @@ function randomizeData() {
     document.getElementById('val-mood').innerText = pickOne(lore.vibesMoodSafe, lore.vibesMoodGritty);
 
     const frags = pickMany(lore.bioFragmentsSafe, lore.bioFragmentsGritty, 4);
-    
-    // THE FIX: Added the innerHTML command and the opening backtick (`):
+
+    const identityFrags = document.getElementById('identity-fragments');
+    if (identityFrags) {
+        identityFrags.innerHTML = `
+            <h3 class="identity-fragments-title">// BIO FRAGMENTS</h3>
+            <p class="bio-p">${frags[0]} ${frags[1]}</p>
+            <p class="bio-p">${frags[2]} ${frags[3]}</p>
+        `;
+    }
+
     document.getElementById('bio-container').innerHTML = `
         <div class="bio-header">
             <div class="pfp-wrapper">

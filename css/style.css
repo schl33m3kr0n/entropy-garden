@@ -1588,15 +1588,15 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     width: 100%;
 }
 
-/* --- IDENTITY PORTFOLIO STATEMENT --- */
-.identity-statement {
+/* --- IDENTITY BIO FRAGMENTS --- */
+.identity-fragments {
     margin-top: 20px;
     padding-top: 16px;
     border-top: 1px solid rgba(0, 255, 0, 0.3);
     text-align: left;
 }
 
-.identity-statement-title {
+.identity-fragments-title {
     margin: 0 0 10px;
     font-size: 0.85rem;
     letter-spacing: 1px;
@@ -1604,23 +1604,15 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     text-shadow: 0 0 6px rgba(0, 255, 0, 0.4);
 }
 
-.identity-statement p {
-    margin: 0 0 10px;
-    line-height: 1.55;
-    color: rgba(220, 255, 220, 0.85);
-}
-
-.identity-statement p:last-child {
+.identity-fragments .bio-p:last-child {
     margin-bottom: 0;
-    color: var(--neon-green);
 }
 
-body.corrupted .identity-statement {
+body.corrupted .identity-fragments {
     border-top-color: rgba(255, 45, 45, 0.4);
 }
 
-body.corrupted .identity-statement-title,
-body.corrupted .identity-statement p:last-child {
+body.corrupted .identity-fragments-title {
     color: var(--alert-red);
     text-shadow: 0 0 6px rgba(255, 45, 45, 0.4);
 }
