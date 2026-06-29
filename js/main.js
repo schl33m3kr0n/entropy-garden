@@ -685,8 +685,11 @@ function randomizeData() {
     });
     
     const sList = document.getElementById('stats-list'); 
-    sList.innerHTML = ''; 
-    pickMany(lore.statsSafe, lore.statsGritty, 4).forEach(stat => {
+    sList.innerHTML = '';
+    const statsPool = isCorrupted && lore.statsGritty.length
+        ? lore.statsSafe.concat(lore.statsGritty)
+        : lore.statsSafe;
+    shuffle([...statsPool]).forEach(stat => {
         const li = document.createElement('li'); 
         li.className = "stat-row"; 
         li.innerHTML = `<span class="stat-label">${stat.label}</span><span class="stat-val">${stat.val}</span>`; 
