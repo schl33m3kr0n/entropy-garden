@@ -238,69 +238,6 @@ function drawChannelRings(cx, cy) {
     }
 }
 
-function godModeTriangleRadius() {
-    if (wheels[0] && wheels[1]) {
-        return (wheels[0].charRadius + wheels[1].charRadius) * 0.5;
-    }
-    const r0 = cellSize * (perf.isMobile ? 2 : 2.2);
-    const band = cellSize * (perf.isMobile ? 1.15 : 1.25);
-    const channel = cellSize * (perf.isMobile ? 0.5 : 0.65);
-    return (r0 + r0 + band + channel) * 0.5;
-}
-
-function shouldDrawGodModeTriangle() {
-    if (!document.body.classList.contains('god-mode') || !panopticonEl) return false;
-    return panopticonEl.classList.contains('god-active')
-        || panopticonEl.classList.contains('god-rainbow');
-}
-
-function godTriangleRainbowStroke(cx, cy, radius) {
-    const offset = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--rainbow-offset')
-    ) || 0;
-    const cycle = (offset / 2) % 100;
-    const span = radius * 1.6;
-    const shift = (cycle / 100) * span * 2;
-    const x0 = cx - span + shift;
-    const x1 = cx + span + shift;
-    const g = ctx.createLinearGradient(x0, cy, x1, cy);
-    if (isCorrupted) {
-        g.addColorStop(0, 'rgba(255, 0, 85, 0.95)');
-        g.addColorStop(1, 'rgba(255, 0, 85, 0.95)');
-        return g;
-    }
-    const hues = [0, 60, 120, 180, 240, 300, 360];
-    for (let i = 0; i < hues.length; i++) {
-        g.addColorStop(i / (hues.length - 1), `hsl(${hues[i]}, 100%, 50%)`);
-    }
-    return g;
-}
-
-/** Equilateral triangle on the first cipher channel ring (god mode). */
-function drawGodModeTriangle(cx, cy) {
-    if (!shouldDrawGodModeTriangle() || visibleRingCount < 1) return;
-
-    const radius = godModeTriangleRadius();
-    const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
-
-    ctx.beginPath();
-    for (let i = 0; i < 3; i++) {
-        const x = cx + Math.cos(angles[i]) * radius;
-        const y = cy + Math.sin(angles[i]) * radius;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.lineWidth = Math.max(2.5, fontSize * 0.1, cellSize * 0.09);
-    ctx.strokeStyle = usesLiteCipherWheelPaint()
-        ? (isCorrupted ? 'rgba(255, 0, 85, 0.9)' : 'rgba(0, 255, 0, 0.88)')
-        : godTriangleRainbowStroke(cx, cy, radius);
-    ctx.stroke();
-}
-
 function drawCipherWheels(cx, cy) {
     ctx.clearRect(0, 0, viewW, viewH);
     ctx.font = cipherWheelFont();
@@ -348,8 +285,6 @@ function drawCipherWheels(cx, cy) {
     if (fastGlyphs) {
         ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     }
-
-    drawGodModeTriangle(cx, cy);
 
     setNeedsFullRedraw(false);
 }

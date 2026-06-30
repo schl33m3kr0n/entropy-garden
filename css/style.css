@@ -449,6 +449,31 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
     fill: url(#panopticon-rainbow);
 }
 
+.panopticon-god-triangle {
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.85s ease;
+}
+
+body.god-mode #panopticon-eye.god-active .panopticon-god-triangle {
+    opacity: 1;
+    stroke: url(#panopticon-rainbow);
+}
+
+body.corrupted.god-mode #panopticon-eye.god-active .panopticon-god-triangle {
+    stroke: var(--alert-red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .panopticon-god-triangle {
+        transition-duration: 0.2s;
+    }
+}
+
 .panopticon-god-pupil {
     display: none;
     font-family: "Apple Symbols", Menlo, "PingFang SC", sans-serif;
@@ -5653,6 +5678,11 @@ body.pong-playing:not(.ios-ui) #ios-pong-comment {
 #panopticon-eye.pong-active .panopticon-iris-mid,
 #panopticon-eye.pong-active .panopticon-pupil,
 #panopticon-eye.pong-active .panopticon-god-pupil {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+#panopticon-eye.pong-active .panopticon-god-triangle {
     opacity: 0;
     transition: opacity 0.35s ease;
 }
