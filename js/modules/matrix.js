@@ -254,17 +254,19 @@ function shouldDrawGodModeTriangle() {
         || panopticonEl.classList.contains('god-rainbow');
 }
 
-function godTriangleChromaGradient(cx, cy) {
-    const g = ctx.createConicGradient(-Math.PI * 0.5, cx, cy);
+function godTriangleRadialGradient(cx, cy, radius) {
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
     if (isCorrupted) {
-        g.addColorStop(0, 'rgba(255, 0, 85, 0.95)');
-        g.addColorStop(1, 'rgba(255, 0, 85, 0.95)');
+        g.addColorStop(0, 'rgba(255, 0, 85, 0.34)');
+        g.addColorStop(0.5, 'rgba(255, 0, 85, 0.16)');
+        g.addColorStop(1, 'rgba(255, 0, 85, 0.04)');
         return g;
     }
-    const hues = [0, 60, 120, 180, 240, 300, 360];
-    for (let i = 0; i < hues.length; i++) {
-        g.addColorStop(i / (hues.length - 1), `hsla(${hues[i]}, 100%, 55%, 0.92)`);
-    }
+    g.addColorStop(0, 'rgba(255, 51, 85, 0.32)');
+    g.addColorStop(0.28, 'rgba(51, 255, 153, 0.24)');
+    g.addColorStop(0.52, 'rgba(51, 153, 255, 0.22)');
+    g.addColorStop(0.76, 'rgba(204, 102, 255, 0.2)');
+    g.addColorStop(1, 'rgba(255, 204, 51, 0.08)');
     return g;
 }
 
@@ -284,13 +286,10 @@ function drawGodModeTriangle(cx, cy) {
     }
     ctx.closePath();
 
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.lineWidth = Math.max(3, fontSize * 0.12, cellSize * 0.11);
-    ctx.strokeStyle = usesLiteCipherWheelPaint()
-        ? (isCorrupted ? 'rgba(255, 0, 85, 0.9)' : 'rgba(0, 255, 0, 0.88)')
-        : godTriangleChromaGradient(cx, cy);
-    ctx.stroke();
+    ctx.fillStyle = usesLiteCipherWheelPaint()
+        ? (isCorrupted ? 'rgba(255, 0, 85, 0.12)' : 'rgba(0, 255, 0, 0.12)')
+        : godTriangleRadialGradient(cx, cy, radius);
+    ctx.fill();
 }
 
 function drawCipherWheels(cx, cy) {
@@ -300,6 +299,7 @@ function drawCipherWheels(cx, cy) {
     ctx.textBaseline = 'middle';
 
     drawChannelRings(cx, cy);
+    drawGodModeTriangle(cx, cy);
 
     const perGlyphIosColors = usesIosCipherGlyphs();
     if (!perGlyphIosColors) {
@@ -340,8 +340,6 @@ function drawCipherWheels(cx, cy) {
     if (fastGlyphs) {
         ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     }
-
-    drawGodModeTriangle(cx, cy);
 
     setNeedsFullRedraw(false);
 }

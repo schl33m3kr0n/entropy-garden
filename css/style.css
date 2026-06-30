@@ -445,8 +445,14 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
     stroke: url(#panopticon-rainbow);
 }
 
+#panopticon-eye.god-rainbow .panopticon-iris-outer,
+#panopticon-eye.god-rainbow .panopticon-iris-mid {
+    fill: url(#panopticon-chroma-radial);
+    opacity: 1;
+}
+
 #panopticon-eye.god-rainbow .panopticon-god-pupil {
-    fill: url(#panopticon-rainbow);
+    fill: url(#panopticon-chroma-radial);
 }
 
 .panopticon-god-pupil {
