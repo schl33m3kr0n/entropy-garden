@@ -238,6 +238,39 @@ function drawChannelRings(cx, cy) {
     }
 }
 
+function godModeTriangleRadiusPx() {
+    if (wheels[0] && wheels[1]) {
+        return (wheels[0].charRadius + wheels[1].charRadius) * 0.5;
+    }
+    const r0 = cellSize * (perf.isMobile ? 2 : 2.2);
+    const band = cellSize * (perf.isMobile ? 1.15 : 1.25);
+    const channel = cellSize * (perf.isMobile ? 0.5 : 0.65);
+    return (r0 + r0 + band + channel) * 0.5;
+}
+
+let godTriangleEl = null;
+
+/** Match SVG triangle size to the inner cipher channel ring (same as the old canvas draw). */
+function syncPanopticonGodTriangleSize() {
+    if (!panopticonEl) return;
+    godTriangleEl ??= document.getElementById('panopticon-god-triangle');
+    if (!godTriangleEl) return;
+
+    const eyeW = panopticonEl.getBoundingClientRect().width;
+    if (eyeW <= 0) return;
+
+    const r = (godModeTriangleRadiusPx() * 100) / eyeW;
+    const cx = 50;
+    const cy = 50;
+    const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
+    const points = angles.map((a) => {
+        const x = cx + Math.cos(a) * r;
+        const y = cy + Math.sin(a) * r;
+        return `${x.toFixed(2)},${y.toFixed(2)}`;
+    }).join(' ');
+    godTriangleEl.setAttribute('points', points);
+}
+
 function drawCipherWheels(cx, cy) {
     ctx.clearRect(0, 0, viewW, viewH);
     ctx.font = cipherWheelFont();
@@ -285,6 +318,8 @@ function drawCipherWheels(cx, cy) {
     if (fastGlyphs) {
         ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     }
+
+    syncPanopticonGodTriangleSize();
 
     setNeedsFullRedraw(false);
 }
