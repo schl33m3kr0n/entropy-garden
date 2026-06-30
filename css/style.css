@@ -452,7 +452,7 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
 }
 
 #panopticon-eye.god-rainbow .panopticon-god-pupil {
-    fill: url(#panopticon-chroma-radial);
+    fill: url(#panopticon-rainbow);
 }
 
 .panopticon-god-pupil {
