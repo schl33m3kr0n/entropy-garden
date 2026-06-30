@@ -1074,6 +1074,30 @@ body.garden-ready #terminal-container.fab-ready.active:not([hidden]) {
     pointer-events: none;
 }
 
+body.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover {
+    background: var(--neon-green);
+    color: #000;
+    text-shadow: none;
+    box-shadow: 0 0 18px rgba(0, 255, 0, 0.35);
+}
+
+body.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover #ios-terminal-toggle {
+    color: #000;
+    text-shadow: none;
+}
+
+body.corrupted.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover {
+    background: var(--alert-red);
+    color: #000;
+    text-shadow: none;
+    box-shadow: 0 0 18px rgba(255, 45, 45, 0.35);
+}
+
+body.corrupted.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover #ios-terminal-toggle {
+    color: #000;
+    text-shadow: none;
+}
+
 #terminal-container .terminal-panel {
     position: relative;
     z-index: 1;
