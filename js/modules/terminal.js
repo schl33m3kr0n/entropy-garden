@@ -576,7 +576,7 @@ function spawnPizza() {
     newPizza.id = 'art-pizza-clone-' + id;
     newPizza.style.top = '-100px'; 
     newPizza.style.left = (Math.random() * 80 + 10) + '%'; 
-    newPizza.style.zIndex = '10010';
+    newPizza.style.zIndex = '10070';
     newPizza.style.transition = 'transform 0.1s';
     newPizza.innerHTML = `<svg viewBox="0 0 100 100"><path d="M50 10 L85 85 L15 85 Z" fill="none"/><circle cx="50" cy="40" r="4" fill="none"/><circle cx="65" cy="65" r="4" fill="none"/><circle cx="35" cy="65" r="4" fill="none"/></svg>`;
     document.body.appendChild(newPizza);

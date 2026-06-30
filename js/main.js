@@ -236,7 +236,7 @@ function handleDragStart(e) {
     dragOffsetY = clientY - rect.top;
     
     draggedElement.style.position = 'absolute';
-    draggedElement.style.zIndex = draggedElement.id.includes('pizza') ? 10050 : 1000;
+    draggedElement.style.zIndex = 10080;
     
     document.addEventListener('mousemove', handleDragMove);
     document.addEventListener('touchmove', handleDragMove, { passive: false });
@@ -295,7 +295,7 @@ function handleDragEnd(e) {
         }
     } else {
         // If dropped anywhere else, just put it down normally
-        draggedElement.style.zIndex = draggedElement.id.includes('pizza') ? 10010 : 10;
+        draggedElement.style.zIndex = 10070;
     }
 
     draggedElement = null;
