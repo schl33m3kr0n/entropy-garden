@@ -454,16 +454,23 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
     inset: 0;
     width: 100%;
     height: 100%;
+    /* Stack: cipher canvas (10) < triangle (11) < panopticon eye (12) */
     z-index: 11;
     pointer-events: none;
     overflow: visible;
     opacity: 0;
-    transition: opacity 0.85s ease;
+    visibility: hidden;
+    transition: opacity 0.85s ease, visibility 0.85s ease;
 }
 
-body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-active)) .god-mode-triangle-layer,
-body.god-mode #panopticon-eye.god-active:not(.pong-active) ~ .god-mode-triangle-layer {
+.god-mode-triangle-layer.god-triangle-visible {
     opacity: 1;
+    visibility: visible;
+}
+
+body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-active)) .god-mode-triangle-layer.god-triangle-visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 .panopticon-god-triangle {
@@ -474,13 +481,14 @@ body.god-mode #panopticon-eye.god-active:not(.pong-active) ~ .god-mode-triangle-
     pointer-events: none;
 }
 
-body.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle,
-body.god-mode #panopticon-eye.god-active ~ .god-mode-triangle-layer .panopticon-god-triangle {
+.god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
+body.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
+    stroke: var(--neon-green);
     stroke: url(#god-mode-rainbow);
 }
 
-body.corrupted.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle,
-body.corrupted.god-mode #panopticon-eye.god-active ~ .god-mode-triangle-layer .panopticon-god-triangle {
+body.corrupted.god-mode .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
+body.corrupted.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
     stroke: var(--alert-red);
 }
 
@@ -4098,13 +4106,18 @@ body.ios-ui.ios-keyboard-open #ios-scroll-shell {
 }
 
 body.ios-ui #grid-canvas,
+body.ios-ui #god-mode-triangle-layer,
 body.ios-ui #panopticon-eye {
     pointer-events: none;
 }
 
-body.ios-ui #grid-canvas {
+body.ios-ui #grid-canvas,
+body.ios-ui #god-mode-triangle-layer {
     position: fixed;
     transform: translate(var(--ios-vv-offset-x, 0px), var(--ios-vv-offset-y, 0px));
+}
+
+body.ios-ui #grid-canvas {
     contain: strict;
 }
 
@@ -5698,10 +5711,10 @@ body.pong-playing:not(.ios-ui) #ios-pong-comment {
     transition: opacity 0.35s ease;
 }
 
-body:has(#panopticon-eye.pong-active) .god-mode-triangle-layer,
-#panopticon-eye.pong-active ~ .god-mode-triangle-layer {
-    opacity: 0;
-    transition: opacity 0.35s ease;
+body:has(#panopticon-eye.pong-active) .god-mode-triangle-layer {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
 }
 
 #panopticon-eye.pong-active .panopticon-socket-fill,

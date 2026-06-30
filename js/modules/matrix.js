@@ -238,16 +238,23 @@ function drawChannelRings(cx, cy) {
     }
 }
 
-/** Lid path spans x=8..92 in the eye SVG viewBox (100×100). */
+/** Almond lid bounds in the eye SVG viewBox (100×100): x 8–92, y 12–88. */
 const PANOPTICON_LID_WIDTH_RATIO = 0.84;
-/** Slightly larger than the lid so the eye sits inside the stroke with clearance. */
-const GOD_TRIANGLE_LID_PADDING = 1.14;
+const PANOPTICON_LID_HEIGHT_RATIO = 0.76;
+/** Margin so the eye (plus drop-shadow) sits inside the stroke. */
+const GOD_TRIANGLE_EYE_CLEARANCE = 1.26;
 
-function godModeTriangleRadiusPx() {
+function godModeTriangleRadiusPx(strokeW = 0) {
     const eyeSize = panopticonEl?.getBoundingClientRect().width ?? 0;
     if (eyeSize > 0) {
-        const lidWidthPx = eyeSize * PANOPTICON_LID_WIDTH_RATIO;
-        return (lidWidthPx / Math.SQRT3) * GOD_TRIANGLE_LID_PADDING;
+        const eyeWidthPx = eyeSize * PANOPTICON_LID_WIDTH_RATIO;
+        const eyeHeightPx = eyeSize * PANOPTICON_LID_HEIGHT_RATIO;
+        const clearance = GOD_TRIANGLE_EYE_CLEARANCE;
+
+        // Equilateral triangle: horizontal span = R√3, vertical span = 1.5R.
+        const rFromWidth = (eyeWidthPx * clearance) / Math.SQRT3;
+        const rFromHeight = (eyeHeightPx * clearance) / 1.5;
+        return Math.max(rFromWidth, rFromHeight) + strokeW * 0.5;
     }
 
     const r0 = cellSize * (perf.isMobile ? 2 : 2.2);
@@ -263,14 +270,17 @@ let godTriangleLayerEl = null;
 function syncPanopticonGodTriangleSize() {
     godTriangleLayerEl ??= document.getElementById('god-mode-triangle-layer');
     godTriangleEl ??= document.getElementById('panopticon-god-triangle');
-    if (!godTriangleLayerEl || !godTriangleEl || !Number.isFinite(viewW) || !Number.isFinite(viewH) || viewW <= 0 || viewH <= 0) return;
+    const syncW = Number.isFinite(viewW) && viewW > 0 ? viewW : window.innerWidth;
+    const syncH = Number.isFinite(viewH) && viewH > 0 ? viewH : window.innerHeight;
+    if (!godTriangleLayerEl || !godTriangleEl || !Number.isFinite(syncW) || !Number.isFinite(syncH) || syncW <= 0 || syncH <= 0) return;
 
-    godTriangleLayerEl.setAttribute('viewBox', `0 0 ${viewW} ${viewH}`);
+    godTriangleLayerEl.setAttribute('viewBox', `0 0 ${syncW} ${syncH}`);
 
-    const r = godModeTriangleRadiusPx();
+    const strokeW = Math.max(2.5, fontSize * 0.1, cellSize * 0.09);
+    const r = godModeTriangleRadiusPx(strokeW);
     if (!Number.isFinite(r) || r <= 0) return;
-    const cx = viewW * 0.5;
-    const cy = viewH * 0.5;
+    const cx = syncW * 0.5;
+    const cy = syncH * 0.5;
     const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
     const points = angles.map((a) => {
         const x = cx + Math.cos(a) * r;
@@ -278,8 +288,6 @@ function syncPanopticonGodTriangleSize() {
         return `${x.toFixed(2)},${y.toFixed(2)}`;
     }).join(' ');
     godTriangleEl.setAttribute('points', points);
-
-    const strokeW = Math.max(2.5, fontSize * 0.1, cellSize * 0.09);
     godTriangleEl.setAttribute('stroke-width', String(strokeW));
 }
 
@@ -692,6 +700,7 @@ function refreshCipherEntropyRingHint() {
 }
 
 globalThis.refreshCipherEntropyRingHint = refreshCipherEntropyRingHint;
+globalThis.syncPanopticonGodTriangleSize = syncPanopticonGodTriangleSize;
 
 export {
     resizeCanvas,

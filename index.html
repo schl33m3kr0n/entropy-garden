@@ -132,6 +132,21 @@
 
     <canvas id="grid-canvas"></canvas>
 
+    <svg id="god-mode-triangle-layer" class="god-mode-triangle-layer" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+            <linearGradient id="god-mode-rainbow" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse" spreadMethod="repeat">
+                <stop offset="0%" stop-color="hsl(0, 100%, 50%)" />
+                <stop offset="17%" stop-color="hsl(60, 100%, 50%)" />
+                <stop offset="33%" stop-color="hsl(120, 100%, 50%)" />
+                <stop offset="50%" stop-color="hsl(180, 100%, 50%)" />
+                <stop offset="67%" stop-color="hsl(240, 100%, 50%)" />
+                <stop offset="83%" stop-color="hsl(300, 100%, 50%)" />
+                <stop offset="100%" stop-color="hsl(0, 100%, 50%)" />
+            </linearGradient>
+        </defs>
+        <polygon id="panopticon-god-triangle" class="panopticon-god-triangle" points="0,0 0,0 0,0" />
+    </svg>
+
     <div id="panopticon-eye" aria-hidden="true">
         <div class="panopticon-inner">
             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -181,21 +196,6 @@
             </svg>
         </div>
     </div>
-
-    <svg id="god-mode-triangle-layer" class="god-mode-triangle-layer" aria-hidden="true">
-        <defs>
-            <linearGradient id="god-mode-rainbow" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse" spreadMethod="repeat">
-                <stop offset="0%" stop-color="hsl(0, 100%, 50%)" />
-                <stop offset="17%" stop-color="hsl(60, 100%, 50%)" />
-                <stop offset="33%" stop-color="hsl(120, 100%, 50%)" />
-                <stop offset="50%" stop-color="hsl(180, 100%, 50%)" />
-                <stop offset="67%" stop-color="hsl(240, 100%, 50%)" />
-                <stop offset="83%" stop-color="hsl(300, 100%, 50%)" />
-                <stop offset="100%" stop-color="hsl(0, 100%, 50%)" />
-            </linearGradient>
-        </defs>
-        <polygon id="panopticon-god-triangle" class="panopticon-god-triangle" points="0,0 0,0 0,0" />
-    </svg>
 
     <div id="panopticon-comment" aria-live="polite" aria-hidden="true"></div>
 
