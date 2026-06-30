@@ -461,7 +461,8 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
     transition: opacity 0.85s ease;
 }
 
-body.god-mode #panopticon-eye.god-active ~ .god-mode-triangle-layer {
+body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-active)) .god-mode-triangle-layer,
+body.god-mode #panopticon-eye.god-active:not(.pong-active) ~ .god-mode-triangle-layer {
     opacity: 1;
 }
 
@@ -473,10 +474,12 @@ body.god-mode #panopticon-eye.god-active ~ .god-mode-triangle-layer {
     pointer-events: none;
 }
 
+body.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle,
 body.god-mode #panopticon-eye.god-active ~ .god-mode-triangle-layer .panopticon-god-triangle {
-    stroke: url(#panopticon-rainbow);
+    stroke: url(#god-mode-rainbow);
 }
 
+body.corrupted.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle,
 body.corrupted.god-mode #panopticon-eye.god-active ~ .god-mode-triangle-layer .panopticon-god-triangle {
     stroke: var(--alert-red);
 }
@@ -5695,6 +5698,7 @@ body.pong-playing:not(.ios-ui) #ios-pong-comment {
     transition: opacity 0.35s ease;
 }
 
+body:has(#panopticon-eye.pong-active) .god-mode-triangle-layer,
 #panopticon-eye.pong-active ~ .god-mode-triangle-layer {
     opacity: 0;
     transition: opacity 0.35s ease;

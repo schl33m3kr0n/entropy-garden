@@ -716,6 +716,7 @@ export const panopticonGodPupilEl = document.getElementById('panopticon-god-pupi
 export const panopticonLidEl = document.getElementById('panopticon-lid');
 export const panopticonClipPathEl = document.getElementById('panopticon-clip-path');
 export const panopticonRainbowGradEl = document.getElementById('panopticon-rainbow');
+export const godModeRainbowGradEl = document.getElementById('god-mode-rainbow');
 
 /** One glyph per icosphere face (same set as singularity 3D). */
 export const ICO_SYMBOLS = [
@@ -1484,12 +1485,17 @@ function beginPanopticonLand(displayAngle, gazeX, gazeY) {
 }
 
 export function syncPanopticonRainbow() {
-    if (!panopticonRainbowGradEl) return;
     const offset = parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue('--rainbow-offset')
     ) || 0;
     const cycle = (offset / 2) % 100;
-    panopticonRainbowGradEl.setAttribute('gradientTransform', `translate(${-cycle}, 0)`);
+    const transform = `translate(${-cycle}, 0)`;
+    if (panopticonRainbowGradEl) {
+        panopticonRainbowGradEl.setAttribute('gradientTransform', transform);
+    }
+    if (godModeRainbowGradEl) {
+        godModeRainbowGradEl.setAttribute('gradientTransform', transform);
+    }
 }
 
 function panopticonLidPath(shut) {
@@ -1636,6 +1642,7 @@ function enablePanopticonGodPupil() {
         panopticonGodPupilEl.textContent = drawGodSymbol();
         panopticonGodPupilEl.style.display = 'block';
     }
+    document.dispatchEvent(new CustomEvent('panopticon-god-active'));
 }
 
 export function setPanopticonGodMode(active) {

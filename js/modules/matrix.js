@@ -238,10 +238,18 @@ function drawChannelRings(cx, cy) {
     }
 }
 
+/** Lid path spans x=8..92 in the eye SVG viewBox (100×100). */
+const PANOPTICON_LID_WIDTH_RATIO = 0.84;
+/** Slightly larger than the lid so the eye sits inside the stroke with clearance. */
+const GOD_TRIANGLE_LID_PADDING = 1.14;
+
 function godModeTriangleRadiusPx() {
-    if (wheels[0] && wheels[1]) {
-        return (wheels[0].charRadius + wheels[1].charRadius) * 0.5;
+    const eyeSize = panopticonEl?.getBoundingClientRect().width ?? 0;
+    if (eyeSize > 0) {
+        const lidWidthPx = eyeSize * PANOPTICON_LID_WIDTH_RATIO;
+        return (lidWidthPx / Math.SQRT3) * GOD_TRIANGLE_LID_PADDING;
     }
+
     const r0 = cellSize * (perf.isMobile ? 2 : 2.2);
     const band = cellSize * (perf.isMobile ? 1.15 : 1.25);
     const channel = cellSize * (perf.isMobile ? 0.5 : 0.65);
@@ -251,15 +259,16 @@ function godModeTriangleRadiusPx() {
 let godTriangleEl = null;
 let godTriangleLayerEl = null;
 
-/** Fixed at viewport center; same pixel radius as the old canvas cipher-ring triangle. */
+/** Fixed at viewport center; width tracks the panopticon lid, scaled up for eye clearance. */
 function syncPanopticonGodTriangleSize() {
     godTriangleLayerEl ??= document.getElementById('god-mode-triangle-layer');
     godTriangleEl ??= document.getElementById('panopticon-god-triangle');
-    if (!godTriangleLayerEl || !godTriangleEl || viewW <= 0 || viewH <= 0) return;
+    if (!godTriangleLayerEl || !godTriangleEl || !Number.isFinite(viewW) || !Number.isFinite(viewH) || viewW <= 0 || viewH <= 0) return;
 
     godTriangleLayerEl.setAttribute('viewBox', `0 0 ${viewW} ${viewH}`);
 
     const r = godModeTriangleRadiusPx();
+    if (!Number.isFinite(r) || r <= 0) return;
     const cx = viewW * 0.5;
     const cy = viewH * 0.5;
     const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
@@ -464,6 +473,7 @@ function resizeCanvas() {
     setCanvasMetrics(dpr, fs, cs, Math.ceil(viewW / cs), Math.ceil(viewH / cs));
 
     wheelGradientCache.key = '';
+    syncPanopticonGodTriangleSize();
 
     // DPR changes on browser zoom — resize backing store only; keep ring state/center.
     if (!sizeChanged && wheels.length > 0) {
@@ -626,6 +636,10 @@ document.addEventListener('focusout', (e) => {
         applyIosKeyboardCompensation();
         scheduleResizeCanvas();
     }, 120);
+});
+
+document.addEventListener('panopticon-god-active', () => {
+    syncPanopticonGodTriangleSize();
 });
 
 document.addEventListener('visibilitychange', () => {
