@@ -22,7 +22,7 @@ globalThis.lorePools = {
         "Nashville (because Jesus saves & reinvests)",
         "Nashville (the Disney World for bachelorettes)",
         "Tennessee (because Dollywood is closer than Disney World)",
-        "Tennessee (we rejoined the Union first)!",
+        "Tennessee (we rejoined the Union first!)",
         "Nashville (why travel to Greece when we have the Parthenon right here?)",
         "Nashville (for Floridians tired of Florida)",
         "Nashville (because Southern Gothic is still a thing)",
