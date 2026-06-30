@@ -1527,16 +1527,53 @@ body.corrupted .scrollable-content::-webkit-scrollbar-thumb { background: var(--
     height: 32px;
     display: block;
     flex-shrink: 0;
-    object-fit: contain;
-    object-position: center center;
 }
-.trophy-mystery {
-    font-family: var(--main-font);
-    font-size: 1.75rem;
-    line-height: 32px;
-    height: 32px;
-    color: #555;
-    letter-spacing: 0;
+
+.trophy-unlock-flash-icon {
+    width: 56px;
+    height: 56px;
+    display: block;
+}
+
+/* Theme-colored icons (mask + --neon-green; follows corrupted mode) */
+.theme-icon {
+    background-color: var(--neon-green);
+    background-image: none;
+    filter: none;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    transition: background-color 0.3s ease;
+}
+
+.theme-icon--trophy {
+    mask-image: url('../assets/icons/trophy.svg');
+    -webkit-mask-image: url('../assets/icons/trophy.svg');
+}
+
+.ui-icon.theme-icon,
+body.corrupted .ui-icon.theme-icon,
+body.ios-ui.corrupted .ui-icon.theme-icon {
+    filter: none;
+}
+
+#sidebar-menu li:hover .theme-icon {
+    filter: none !important;
+    background-color: #000;
+}
+
+@keyframes trophyUnlockFlash {
+    0% { opacity: 0; transform: translateX(-50%) scale(0.65); }
+    10% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    20% { opacity: 0.12; transform: translateX(-50%) scale(1); }
+    30% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    40% { opacity: 0.12; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+    60% { opacity: 0; transform: translateX(-50%) scale(0.95); }
+    100% { opacity: 0; transform: translateX(-50%) scale(0.95); visibility: hidden; }
 }
 .trophy-unlock-flash {
     position: fixed;
@@ -1547,21 +1584,14 @@ body.corrupted .scrollable-content::-webkit-scrollbar-thumb { background: var(--
     transform: translateX(-50%);
     animation: trophyUnlockFlash 1.35s ease forwards;
 }
-.trophy-unlock-flash-icon {
-    width: 56px;
-    height: 56px;
-    display: block;
-    object-fit: contain;
-}
-@keyframes trophyUnlockFlash {
-    0% { opacity: 0; transform: translateX(-50%) scale(0.65); }
-    10% { opacity: 1; transform: translateX(-50%) scale(1.12); }
-    20% { opacity: 0.12; transform: translateX(-50%) scale(1); }
-    30% { opacity: 1; transform: translateX(-50%) scale(1.12); }
-    40% { opacity: 0.12; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.12); }
-    60% { opacity: 0; transform: translateX(-50%) scale(0.95); }
-    100% { opacity: 0; transform: translateX(-50%) scale(0.95); visibility: hidden; }
+
+.trophy-mystery {
+    font-family: var(--main-font);
+    font-size: 1.75rem;
+    line-height: 32px;
+    height: 32px;
+    color: #555;
+    letter-spacing: 0;
 }
 .terminal-insult-flash {
     position: fixed;

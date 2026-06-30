@@ -3,7 +3,6 @@
  */
 (function (global) {
     const STORAGE_KEY = 'entropy-garden-trophies-v1';
-    const TROPHY_ICON_URL = 'assets/icons/trophy.svg';
 
     const TROPHY_DEFS = [
         { id: 'panopticon_pong', title: 'Socket League', desc: 'The eye learned to rally.' },
@@ -52,7 +51,7 @@
     }
 
     function trophyIconMarkup(className) {
-        return `<img class="${className}" src="${TROPHY_ICON_URL}" alt="" width="32" height="32" decoding="async" aria-hidden="true">`;
+        return `<span class="${className} theme-icon theme-icon--trophy" aria-hidden="true"></span>`;
     }
 
     function notifyUnlock(def) {
@@ -68,7 +67,7 @@
         }
         const el = document.createElement('div');
         el.className = 'trophy-unlock-flash';
-        el.innerHTML = `<img class="trophy-unlock-flash-icon" src="${TROPHY_ICON_URL}" alt="" width="56" height="56" decoding="async" aria-hidden="true">`;
+        el.innerHTML = `<span class="trophy-unlock-flash-icon theme-icon theme-icon--trophy" aria-hidden="true"></span>`;
         document.body.appendChild(el);
         flashEl = el;
 
