@@ -724,6 +724,12 @@ export const ICO_SYMBOLS = [
     '☥', '♁', '∴', '△', '⊕', 'ψ', '✖', '☸', '⚖', '∞',
 ];
 
+/** Rotating pupil glyphs during panopticon god mode (desktop). */
+const GOD_MODE_SYMBOLS = [
+    '⛦', '⚛︎', '☯︎', '❖', '◉', '⧊', '☉', '⛬', '⛢', '☧',
+    '☥', '♁', '𖣂', '🜲', '🜁', '𖤓', '✖', '☸', '⚖', '∞',
+];
+
 const ICO_SYMBOL_FALLBACKS = {
     '⛦': '◆',
     '⚛︎': '◎',
@@ -741,6 +747,10 @@ const ICO_SYMBOL_FALLBACKS = {
     '△': '△',
     '⊕': '⊕',
     'ψ': 'ψ',
+    '𖣂': '◈',
+    '🜲': '⚗',
+    '🜁': '⎔',
+    '𖤓': '▣',
     '✖': '✕',
     '☸': '✦',
     '⚖': '⚖',
@@ -771,6 +781,11 @@ export function getIcoSymbolsForPlatform() {
             : ICO_SYMBOLS.slice();
     }
     return icoSymbolsForPlatform;
+}
+
+function getGodModeSymbolsForPlatform() {
+    const pool = perf.isMobile ? ICO_SYMBOLS : GOD_MODE_SYMBOLS;
+    return perf.isIOS ? pool.map(resolveIcoSymbol) : pool.slice();
 }
 
 const PANOPTICON_GOD_CLOSE_MS = 480;
@@ -1225,7 +1240,7 @@ let godSymbolBag = null;
 let godSymbolTick = 0;
 
 function resetGodSymbolBag() {
-    godSymbolBag = createBag(getIcoSymbolsForPlatform());
+    godSymbolBag = createBag(getGodModeSymbolsForPlatform());
 }
 
 function drawGodSymbol() {
