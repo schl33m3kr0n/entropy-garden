@@ -132,6 +132,10 @@
 
     <canvas id="grid-canvas"></canvas>
 
+    <svg id="god-mode-triangle-layer" class="god-mode-triangle-layer" aria-hidden="true">
+        <polygon id="panopticon-god-triangle" class="panopticon-god-triangle" points="0,0 0,0 0,0" />
+    </svg>
+
     <div id="panopticon-eye" aria-hidden="true">
         <div class="panopticon-inner">
             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -168,7 +172,6 @@
                     <g id="panopticon-gaze">
                         <circle class="panopticon-iris-outer" cx="50" cy="50" r="26" />
                         <circle class="panopticon-iris-mid" cx="50" cy="50" r="16" />
-                        <polygon id="panopticon-god-triangle" class="panopticon-god-triangle" points="50,28 69.05,61 30.95,61" />
                         <circle class="panopticon-pupil" cx="50" cy="50" r="7" />
                         <text id="panopticon-god-pupil" class="panopticon-god-pupil" x="50" y="50">⛦</text>
                     </g>

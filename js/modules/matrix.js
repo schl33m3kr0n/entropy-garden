@@ -249,19 +249,19 @@ function godModeTriangleRadiusPx() {
 }
 
 let godTriangleEl = null;
+let godTriangleLayerEl = null;
 
-/** Match SVG triangle size to the inner cipher channel ring (same as the old canvas draw). */
+/** Fixed at viewport center; same pixel radius as the old canvas cipher-ring triangle. */
 function syncPanopticonGodTriangleSize() {
-    if (!panopticonEl) return;
+    godTriangleLayerEl ??= document.getElementById('god-mode-triangle-layer');
     godTriangleEl ??= document.getElementById('panopticon-god-triangle');
-    if (!godTriangleEl) return;
+    if (!godTriangleLayerEl || !godTriangleEl || viewW <= 0 || viewH <= 0) return;
 
-    const eyeW = panopticonEl.getBoundingClientRect().width;
-    if (eyeW <= 0) return;
+    godTriangleLayerEl.setAttribute('viewBox', `0 0 ${viewW} ${viewH}`);
 
-    const r = (godModeTriangleRadiusPx() * 100) / eyeW;
-    const cx = 50;
-    const cy = 50;
+    const r = godModeTriangleRadiusPx();
+    const cx = viewW * 0.5;
+    const cy = viewH * 0.5;
     const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
     const points = angles.map((a) => {
         const x = cx + Math.cos(a) * r;
@@ -269,6 +269,9 @@ function syncPanopticonGodTriangleSize() {
         return `${x.toFixed(2)},${y.toFixed(2)}`;
     }).join(' ');
     godTriangleEl.setAttribute('points', points);
+
+    const strokeW = Math.max(2.5, fontSize * 0.1, cellSize * 0.09);
+    godTriangleEl.setAttribute('stroke-width', String(strokeW));
 }
 
 function drawCipherWheels(cx, cy) {
