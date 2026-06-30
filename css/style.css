@@ -466,6 +466,7 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
 .god-mode-triangle-layer.god-triangle-visible {
     opacity: 1;
     visibility: visible;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.4));
 }
 
 body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-active)) .god-mode-triangle-layer.god-triangle-visible {
@@ -483,7 +484,7 @@ body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-acti
 
 .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
 body.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
-    stroke: var(--neon-green);
+    stroke: #00ff00;
     stroke: url(#god-mode-rainbow);
 }
 

@@ -7,6 +7,7 @@ import {
     usesIosCipherGlyphs,
     usesLiteCipherWheelPaint,
     panopticonEl,
+    syncGodModeTriangleSize,
 } from '../core/shared.js';
 import {
     isEmptyWheelGlyph,
@@ -238,59 +239,6 @@ function drawChannelRings(cx, cy) {
     }
 }
 
-/** Almond lid bounds in the eye SVG viewBox (100×100): x 8–92, y 12–88. */
-const PANOPTICON_LID_WIDTH_RATIO = 0.84;
-const PANOPTICON_LID_HEIGHT_RATIO = 0.76;
-/** Margin so the eye (plus drop-shadow) sits inside the stroke. */
-const GOD_TRIANGLE_EYE_CLEARANCE = 1.26;
-
-function godModeTriangleRadiusPx(strokeW = 0) {
-    const eyeSize = panopticonEl?.getBoundingClientRect().width ?? 0;
-    if (eyeSize > 0) {
-        const eyeWidthPx = eyeSize * PANOPTICON_LID_WIDTH_RATIO;
-        const eyeHeightPx = eyeSize * PANOPTICON_LID_HEIGHT_RATIO;
-        const clearance = GOD_TRIANGLE_EYE_CLEARANCE;
-
-        // Equilateral triangle: horizontal span = R√3, vertical span = 1.5R.
-        const rFromWidth = (eyeWidthPx * clearance) / Math.SQRT3;
-        const rFromHeight = (eyeHeightPx * clearance) / 1.5;
-        return Math.max(rFromWidth, rFromHeight) + strokeW * 0.5;
-    }
-
-    const r0 = cellSize * (perf.isMobile ? 2 : 2.2);
-    const band = cellSize * (perf.isMobile ? 1.15 : 1.25);
-    const channel = cellSize * (perf.isMobile ? 0.5 : 0.65);
-    return (r0 + r0 + band + channel) * 0.5;
-}
-
-let godTriangleEl = null;
-let godTriangleLayerEl = null;
-
-/** Fixed at viewport center; width tracks the panopticon lid, scaled up for eye clearance. */
-function syncPanopticonGodTriangleSize() {
-    godTriangleLayerEl ??= document.getElementById('god-mode-triangle-layer');
-    godTriangleEl ??= document.getElementById('panopticon-god-triangle');
-    const syncW = Number.isFinite(viewW) && viewW > 0 ? viewW : window.innerWidth;
-    const syncH = Number.isFinite(viewH) && viewH > 0 ? viewH : window.innerHeight;
-    if (!godTriangleLayerEl || !godTriangleEl || !Number.isFinite(syncW) || !Number.isFinite(syncH) || syncW <= 0 || syncH <= 0) return;
-
-    godTriangleLayerEl.setAttribute('viewBox', `0 0 ${syncW} ${syncH}`);
-
-    const strokeW = Math.max(2.5, fontSize * 0.1, cellSize * 0.09);
-    const r = godModeTriangleRadiusPx(strokeW);
-    if (!Number.isFinite(r) || r <= 0) return;
-    const cx = syncW * 0.5;
-    const cy = syncH * 0.5;
-    const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
-    const points = angles.map((a) => {
-        const x = cx + Math.cos(a) * r;
-        const y = cy + Math.sin(a) * r;
-        return `${x.toFixed(2)},${y.toFixed(2)}`;
-    }).join(' ');
-    godTriangleEl.setAttribute('points', points);
-    godTriangleEl.setAttribute('stroke-width', String(strokeW));
-}
-
 function drawCipherWheels(cx, cy) {
     ctx.clearRect(0, 0, viewW, viewH);
     ctx.font = cipherWheelFont();
@@ -339,7 +287,7 @@ function drawCipherWheels(cx, cy) {
         ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     }
 
-    syncPanopticonGodTriangleSize();
+    syncGodModeTriangleSize();
 
     setNeedsFullRedraw(false);
 }
@@ -481,7 +429,7 @@ function resizeCanvas() {
     setCanvasMetrics(dpr, fs, cs, Math.ceil(viewW / cs), Math.ceil(viewH / cs));
 
     wheelGradientCache.key = '';
-    syncPanopticonGodTriangleSize();
+    syncGodModeTriangleSize();
 
     // DPR changes on browser zoom — resize backing store only; keep ring state/center.
     if (!sizeChanged && wheels.length > 0) {
@@ -647,7 +595,7 @@ document.addEventListener('focusout', (e) => {
 });
 
 document.addEventListener('panopticon-god-active', () => {
-    syncPanopticonGodTriangleSize();
+    syncGodModeTriangleSize();
 });
 
 document.addEventListener('visibilitychange', () => {
@@ -700,7 +648,6 @@ function refreshCipherEntropyRingHint() {
 }
 
 globalThis.refreshCipherEntropyRingHint = refreshCipherEntropyRingHint;
-globalThis.syncPanopticonGodTriangleSize = syncPanopticonGodTriangleSize;
 
 export {
     resizeCanvas,

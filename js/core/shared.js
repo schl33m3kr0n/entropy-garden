@@ -6,6 +6,8 @@ import {
     isCorrupted,
     isSingularityActive,
     getCipherStage,
+    fontSize,
+    cellSize,
 } from './state.js';
 import {
     FULL_MATRIX_CHARS,
@@ -717,7 +719,153 @@ export const panopticonLidEl = document.getElementById('panopticon-lid');
 export const panopticonClipPathEl = document.getElementById('panopticon-clip-path');
 export const panopticonRainbowGradEl = document.getElementById('panopticon-rainbow');
 export const godModeRainbowGradEl = document.getElementById('god-mode-rainbow');
-export const godTriangleLayerEl = document.getElementById('god-mode-triangle-layer');
+
+/** Almond lid bounds in the eye SVG viewBox (100×100): x 8–92, y 12–88. */
+const PANOPTICON_LID_WIDTH_RATIO = 0.84;
+const PANOPTICON_LID_HEIGHT_RATIO = 0.76;
+const GOD_TRIANGLE_EYE_CLEARANCE = 1.26;
+
+function getGodTriangleLayerEl() {
+    return document.getElementById('god-mode-triangle-layer');
+}
+
+function getGodTriangleEl() {
+    return document.getElementById('panopticon-god-triangle');
+}
+
+function ensureGodTriangleLayer() {
+    let layer = getGodTriangleLayerEl();
+    if (layer) return layer;
+
+    const canvas = document.getElementById('grid-canvas');
+    const eye = document.getElementById('panopticon-eye');
+    if (!canvas || !eye) return null;
+
+    layer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    layer.id = 'god-mode-triangle-layer';
+    layer.classList.add('god-mode-triangle-layer');
+    layer.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    layer.setAttribute('width', '100%');
+    layer.setAttribute('height', '100%');
+    layer.setAttribute('aria-hidden', 'true');
+
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    grad.id = 'god-mode-rainbow';
+    grad.setAttribute('x1', '0');
+    grad.setAttribute('y1', '0');
+    grad.setAttribute('x2', '100');
+    grad.setAttribute('y2', '0');
+    grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+    grad.setAttribute('spreadMethod', 'repeat');
+    const stops = [
+        ['0%', 'hsl(0, 100%, 50%)'],
+        ['17%', 'hsl(60, 100%, 50%)'],
+        ['33%', 'hsl(120, 100%, 50%)'],
+        ['50%', 'hsl(180, 100%, 50%)'],
+        ['67%', 'hsl(240, 100%, 50%)'],
+        ['83%', 'hsl(300, 100%, 50%)'],
+        ['100%', 'hsl(0, 100%, 50%)'],
+    ];
+    for (const [offset, color] of stops) {
+        const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop.setAttribute('offset', offset);
+        stop.setAttribute('stop-color', color);
+        grad.appendChild(stop);
+    }
+    defs.appendChild(grad);
+    layer.appendChild(defs);
+
+    const tri = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    tri.id = 'panopticon-god-triangle';
+    tri.classList.add('panopticon-god-triangle');
+    tri.setAttribute('points', '0,0 0,0 0,0');
+    layer.appendChild(tri);
+
+    eye.parentNode?.insertBefore(layer, eye);
+    return layer;
+}
+
+export function syncGodModeTriangleSize() {
+    ensureGodTriangleLayer();
+    const layer = getGodTriangleLayerEl();
+    const tri = getGodTriangleEl();
+    if (!layer || !tri) return;
+
+    const syncW = window.innerWidth;
+    const syncH = window.innerHeight;
+    if (!Number.isFinite(syncW) || !Number.isFinite(syncH) || syncW <= 0 || syncH <= 0) return;
+
+    layer.setAttribute('viewBox', `0 0 ${syncW} ${syncH}`);
+    layer.setAttribute('width', '100%');
+    layer.setAttribute('height', '100%');
+
+    if (godModeRainbowGradEl || document.getElementById('god-mode-rainbow')) {
+        (document.getElementById('god-mode-rainbow') ?? godModeRainbowGradEl)
+            ?.setAttribute('x2', String(syncW));
+    }
+
+    const fs = Number(fontSize) || 16;
+    const cs = Number(cellSize) || 16;
+    const strokeW = Math.max(2.5, fs * 0.1, cs * 0.09);
+    const eyeEl = document.getElementById('panopticon-eye');
+    const eyeSize = eyeEl?.getBoundingClientRect().width ?? 0;
+    let r;
+    if (eyeSize > 0) {
+        const eyeWidthPx = eyeSize * PANOPTICON_LID_WIDTH_RATIO;
+        const eyeHeightPx = eyeSize * PANOPTICON_LID_HEIGHT_RATIO;
+        const clearance = GOD_TRIANGLE_EYE_CLEARANCE;
+        const rFromWidth = (eyeWidthPx * clearance) / Math.SQRT3;
+        const rFromHeight = (eyeHeightPx * clearance) / 1.5;
+        r = Math.max(rFromWidth, rFromHeight) + strokeW * 0.5;
+    } else {
+        r = Math.min(syncW, syncH) * 0.09;
+    }
+
+    if (!Number.isFinite(r) || r <= 0) return;
+
+    const cx = syncW * 0.5;
+    const cy = syncH * 0.5;
+    const angles = [-Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6];
+    const points = angles.map((a) => {
+        const x = cx + Math.cos(a) * r;
+        const y = cy + Math.sin(a) * r;
+        return `${x.toFixed(2)},${y.toFixed(2)}`;
+    }).join(' ');
+
+    tri.setAttribute('points', points);
+    tri.setAttribute('stroke-width', String(strokeW));
+    tri.setAttribute('fill', 'none');
+    tri.setAttribute(
+        'stroke',
+        isCorrupted && document.body.classList.contains('god-mode') ? '#ff0055' : '#00ff00'
+    );
+}
+
+function showGodModeTriangle() {
+    ensureGodTriangleLayer();
+    const layer = getGodTriangleLayerEl();
+    if (!layer) return;
+    layer.classList.add('god-triangle-visible');
+    layer.setAttribute('aria-hidden', 'false');
+    syncGodModeTriangleSize();
+}
+
+function hideGodModeTriangle() {
+    const layer = getGodTriangleLayerEl();
+    if (!layer) return;
+    layer.classList.remove('god-triangle-visible');
+    layer.setAttribute('aria-hidden', 'true');
+}
+
+window.addEventListener('resize', () => {
+    if (getGodTriangleLayerEl()?.classList.contains('god-triangle-visible')) {
+        syncGodModeTriangleSize();
+    }
+}, { passive: true });
+
+globalThis.syncGodModeTriangleSize = syncGodModeTriangleSize;
+globalThis.syncPanopticonGodTriangleSize = syncGodModeTriangleSize;
 
 /** One glyph per icosphere face (same set as singularity 3D). */
 export const ICO_SYMBOLS = [
@@ -1509,8 +1657,9 @@ export function syncPanopticonRainbow() {
     if (panopticonRainbowGradEl) {
         panopticonRainbowGradEl.setAttribute('gradientTransform', transform);
     }
-    if (godModeRainbowGradEl) {
-        godModeRainbowGradEl.setAttribute('gradientTransform', transform);
+    const godRainbow = document.getElementById('god-mode-rainbow') ?? godModeRainbowGradEl;
+    if (godRainbow) {
+        godRainbow.setAttribute('gradientTransform', transform);
     }
 }
 
@@ -1642,8 +1791,7 @@ function applyPanopticonLidShut(shut) {
 
 function resetPanopticonGodStyling() {
     panopticonEl?.classList.remove('god-active', 'god-rainbow');
-    godTriangleLayerEl?.classList.remove('god-triangle-visible');
-    godTriangleLayerEl?.setAttribute('aria-hidden', 'true');
+    hideGodModeTriangle();
     if (panopticonPupilEl) panopticonPupilEl.style.display = '';
     if (panopticonGodPupilEl) panopticonGodPupilEl.style.display = 'none';
 }
@@ -1655,8 +1803,7 @@ function resetPanopticonNormalPupil() {
 
 function enablePanopticonGodPupil() {
     panopticonEl?.classList.add('god-active', 'god-rainbow');
-    godTriangleLayerEl?.classList.add('god-triangle-visible');
-    godTriangleLayerEl?.setAttribute('aria-hidden', 'false');
+    showGodModeTriangle();
     if (panopticonPupilEl) panopticonPupilEl.style.display = 'none';
     if (panopticonGodPupilEl) {
         panopticonGodPupilEl.textContent = drawGodSymbol();
@@ -1664,8 +1811,8 @@ function enablePanopticonGodPupil() {
     }
     document.dispatchEvent(new CustomEvent('panopticon-god-active'));
     requestAnimationFrame(() => {
-        globalThis.syncPanopticonGodTriangleSize?.();
-        requestAnimationFrame(() => globalThis.syncPanopticonGodTriangleSize?.());
+        syncGodModeTriangleSize();
+        requestAnimationFrame(syncGodModeTriangleSize);
     });
 }
 
@@ -1747,6 +1894,7 @@ function animatePanopticonGodEye(now) {
     if (godEyeSequence === 'open' && panopticonGodActive) {
         applyPanopticonLidShut(0);
         syncPanopticonRainbow();
+        syncGodModeTriangleSize();
 
         if (now - godSymbolTick >= (perf.prefersReducedMotion ? 380 : PANOPTICON_GOD_SYMBOL_MS)) {
             if (panopticonGodPupilEl) {
