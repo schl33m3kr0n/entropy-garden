@@ -548,7 +548,7 @@ globalThis.lorePools = {
         "is your refrigerator running? mine has to use a walker",
         "if the oracle was right, i'm going to disney world",
         "to whoever owns the red chevy impala, your car is being towed",
-        "why does your search history include an entry for ‘how to build a treehouse hotel that 100% displaces its current inhabitants in 5 easy steps’?",
+        "i checked your search history. 'how to build a mall on sacred grounds in 5 easy steps' is... intriguing",
     ],
     panopticonIdleCommentsGritty: [
         "your attention has been harvested successfully",
