@@ -3967,8 +3967,8 @@ body:not(.ios-ui) #playlist-menu.active {
 }
 
 .playlist-icon--prev {
-    mask-image: url('../assets/icons/skip-back.svg');
-    -webkit-mask-image: url('../assets/icons/skip-back.svg');
+    mask-image: url('../assets/icons/skip.png');
+    -webkit-mask-image: url('../assets/icons/skip.png');
 }
 
 .playlist-icon--play {
@@ -3982,8 +3982,9 @@ body:not(.ios-ui) #playlist-menu.active {
 }
 
 .playlist-icon--next {
-    mask-image: url('../assets/icons/skip-forward.svg');
-    -webkit-mask-image: url('../assets/icons/skip-forward.svg');
+    mask-image: url('../assets/icons/skip.png');
+    -webkit-mask-image: url('../assets/icons/skip.png');
+    transform: scaleX(-1);
 }
 
 body.corrupted .playlist-icon {
