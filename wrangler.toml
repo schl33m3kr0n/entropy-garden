@@ -1,0 +1,4 @@
+# Cloudflare Pages — keep build output in sync with scripts/deploy/cloudflare.sh
+name = "entropy-garden-8r2"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-07-03"

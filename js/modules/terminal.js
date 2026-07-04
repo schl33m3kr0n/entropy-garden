@@ -350,7 +350,7 @@ function triggerCipherReward() {
     if (!term) return;
 
     setIsCipherSolved(true);
-    import('../ios-poems.js').then((m) => m.syncIosPoemsSidebar?.()).catch(() => {});
+    import('../ios/ios-poems.js').then((m) => m.syncIosPoemsSidebar?.()).catch(() => {});
 
     // Turn terminal Cyan for the hack effect
     term.style.borderColor = 'var(--cyan)';
@@ -391,7 +391,7 @@ function runExpressOverride() {
     termInput?.blur();
 
     if (perf.isIOS || document.body.classList.contains('ios-ui')) {
-        import('../ios-poems.js')
+        import('../ios/ios-poems.js')
             .then((m) => {
                 m.unlockIosPoems?.();
                 triggerSingularity();
