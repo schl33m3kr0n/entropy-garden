@@ -7,8 +7,6 @@ import {
     poemTitleFromText,
 } from '../data/singularity-poems.data.js';
 
-const IOS_POEM_TITLE_SLOTS = 3;
-
 let currentIndex = 0;
 let uiBound = false;
 
@@ -49,7 +47,7 @@ function scrollPoemReaderToTop() {
     reader.scrollTop = 0;
 }
 
-/** Three title buttons: previous, current, next poem in the corpus. */
+/** Full scrollable title list for the singularity poem corpus. */
 function renderPoemList() {
     const list = document.getElementById('ios-poem-list');
     if (!list) return;
@@ -61,21 +59,19 @@ function renderPoemList() {
     }
 
     list.innerHTML = '';
-    const half = Math.floor(IOS_POEM_TITLE_SLOTS / 2);
-    for (let offset = -half; offset <= half; offset += 1) {
-        const i = ((currentIndex + offset) % pool.length + pool.length) % pool.length;
+    pool.forEach((poem, i) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'ios-poem-list-item';
         btn.dataset.poemIndex = String(i);
-        btn.textContent = poemTitleFromText(pool[i]);
-        if (offset === 0) btn.classList.add('active');
+        btn.textContent = poemTitleFromText(poem);
+        if (i === currentIndex) btn.classList.add('active');
         btn.addEventListener('click', () => {
             selectPoem(i);
             playSound(sfx.click);
         });
         list.appendChild(btn);
-    }
+    });
 }
 
 export function selectPoem(index) {
@@ -87,6 +83,11 @@ export function selectPoem(index) {
     if (body) body.textContent = pool[currentIndex];
     renderPoemList();
     scrollPoemReaderToTop();
+    listEl()?.querySelector('.ios-poem-list-item.active')?.scrollIntoView({ block: 'nearest' });
+}
+
+function listEl() {
+    return document.getElementById('ios-poem-list');
 }
 
 export function stepIosPoem(delta) {

@@ -5005,7 +5005,8 @@ body.ios-ui #modal-poems .ios-poem-list {
     flex: 0 0 auto;
     margin: 0;
     padding: 4px 0 8px;
-    overflow: visible;
+    max-height: min(28vh, 220px);
+    overflow-y: auto;
     border-bottom: 1px solid rgba(0, 255, 0, 0.2);
     display: flex;
     flex-direction: column;

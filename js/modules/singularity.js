@@ -12,7 +12,7 @@ import {
     setGardenLoopActive,
     setGardenAnimId,
 } from '../core/state.js';
-import { buildSingularityPoemPool } from '../data/singularity-poems.data.js';
+import { buildSingularityPoemPool, poemTitleFromText } from '../data/singularity-poems.data.js';
 
 function pushTerminalLog(msg) {
     if (typeof globalThis.pushTerminalLog === 'function') globalThis.pushTerminalLog(msg);
@@ -645,7 +645,10 @@ function cyclePoem() {
         setCurrentPoemIndex(nextIndex);
         const poem = pool[nextIndex];
         speakSingularity(poem);
-        if (!isIosSingularity()) pushTerminalLog('> NEXT TRANSMISSION DECODED.');
+        if (!isIosSingularity()) {
+            const title = poemTitleFromText(poem);
+            pushTerminalLog(`> TRANSMISSION ${nextIndex + 1}/${pool.length}: ${title.toUpperCase()}`);
+        }
         nextBtn.disabled = false;
         nextBtn.style.opacity = '1';
         nextBtn.innerText = isIosSingularity() ? 'Next' : '[NEXT TRANSMISSION]';
