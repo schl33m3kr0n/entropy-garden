@@ -30,6 +30,7 @@ globalThis.lorePools = {
         "Nashville (surprisingly no official song)",
         "Nashville (disturbingly lacking in dim sum)",
         "Nashville (a Kurd's home away from home)",
+        "Nashville (for the love of the game)",
     ],
     baseLocationsGritty: [
         "Nashville (because your baby mama lives 5 states away)",
