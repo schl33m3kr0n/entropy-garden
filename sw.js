@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v219';
+const CACHE_VERSION = 'entropy-garden-v220';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -40,7 +40,8 @@ const PRECACHE_URLS = [
     'assets/icons/cards.svg',
     'assets/icons/play.svg',
     'assets/icons/pause.svg',
-    'assets/icons/skip.svg',
+    'assets/icons/skip-back.svg',
+    'assets/icons/skip-forward.svg',
     'assets/img/vault/sun-poster.webp',
     'assets/img/vault/ahoy.jpg',
 ];
