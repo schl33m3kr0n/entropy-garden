@@ -8,6 +8,7 @@
     
     /* --- MASTER FONT STACK --- */
     --main-font: 'Avenir', 'Avenir Next', 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --poem-font: 'Spectral', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
 
     /* --- CORNER RADIUS --- */
     --radius-sm: 10px;
@@ -34,6 +35,22 @@
     src: url('../assets/fonts/flames.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Spectral';
+    src: url('../assets/fonts/spectral-regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Spectral';
+    src: url('../assets/fonts/spectral-italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
     font-display: swap;
 }
 
@@ -2073,10 +2090,16 @@ body.ios-ui #singularity-canvas {
 #poem-container { 
     position: absolute; 
     z-index: 10; 
-    font-family: var(--main-font); 
-    font-size: 1.2rem; line-height: 2; 
-    color: #fff; text-shadow: 0 0 10px cyan; 
-    max-width: 800px; padding: 20px; 
+    font-family: var(--poem-font);
+    font-size: 1.35rem;
+    font-weight: 400;
+    line-height: 2.05;
+    letter-spacing: 0.015em;
+    font-variant-ligatures: common-ligatures;
+    color: #fff;
+    text-shadow: 0 0 10px cyan; 
+    max-width: 800px;
+    padding: 20px; 
     pointer-events: none; 
 }
 
@@ -2102,7 +2125,9 @@ body.singularity-active #singularity-controls {
     display: block; 
     margin-bottom: 15px; 
     opacity: 0; 
-    animation: simpleFade 1s forwards; 
+    animation: simpleFade 1s forwards;
+    font-family: inherit;
+    font-style: normal;
 }
 
 @keyframes simpleFade { 
@@ -5017,12 +5042,16 @@ body.ios-ui #modal-poems .ios-poem-reader {
     text-align: center;
 }
 
-body.ios-ui #ios-poem-body {
+body.ios-ui #ios-poem-body,
+.ios-poem-text {
     margin: 0;
     white-space: pre-wrap;
-    font-family: var(--main-font);
-    font-size: 1rem;
-    line-height: 1.75;
+    font-family: var(--poem-font);
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 2;
+    letter-spacing: 0.015em;
+    font-variant-ligatures: common-ligatures;
     color: var(--neon-green);
 }
 
