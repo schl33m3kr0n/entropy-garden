@@ -386,22 +386,103 @@ are you ready to be commodified
 into the abyss of status and infinite wealth?
 no?
 
-well, too bad
+well too bad
 you’ve already been integrated
 
-the machine requires your blood, sweat, & tears
-your time, allegiance, & commitment
-your unflinching devotion, sacrifice, & obedience
-your money, programming, & ignorance
-your assets, skills, and productivity
-your complacency, your apathy, your complicity
+the machine requires your blood sweat & tears
+your time allegiance & commitment
+your unflinching devotion sacrifice & obedience
+your money programming & ignorance
+your assets skills and productivity
+your complacency your apathy your complicity
 
 what do you get in return?
 
 a stable job that can barely pay rent and essentials
-a motley of shiny screens anesthetizing you into silence
+a motley of shiny screens anesthetizing you into compliance
 a promising future after your burial
-a pleasure pod in exchange for your compliance`,
+a pleasure pod in exchange for your silence`,
+
+`dream
+
+the threshold keeps walking before i can cross it
+i try to catch a dream but it melts right off my palms
+bound twixt marginal prophets and margins of profit
+stretched thin by the tension of cigs and psalms
+
+a circle that dwindles and withers with each passing year
+a heaviness that multiplies with each drop of a tear
+only in silence does the world speak so clearly
+an unsteady alliance between the high sky and low sea
+
+under these tree leaves sit rusted eaves
+droppings of enrichment into soils resplendent
+god dips his tea leaves and relieves
+he prefers his heaven and earth independent
+
+the circle of crowns seeded in folly
+consumed by the iron will to divest
+from the potomac to the woods of holly
+they’d truly become one of the best
+
+if an atom bomb were to strike
+i’d appreciate the simplicity it’d bring
+saints and sinners perish alike
+existence just another tune to sing`,
+
+`the expanding horizon
+
+our estrangement refurbished with each orbit
+plumes of combustion soaring to heights morbid
+a single speck that we in contempt forfeit
+giving pause for a population grown torpid
+
+for a chance to many stellar systems claim
+by happenstance our entropy yet radiates
+the collective lattice embroiled in flame
+a dream perverse yet its pull never abates
+
+to abandon the promised land for promising plans
+a litany of schemes escaping local perdition
+our caged machine still outwardly sifts and scans
+never minding the global course for collision
+
+a concavity in a foundation of concrete
+the convexity of minds with so-called discretion
+bringing into focus ambitions incomplete
+a destiny manifest one of psychotic obsession`,
+
+`the semantic fractal
+
+what is restitution to the indigenous man?
+what is retaliation to the ravished woman?
+what is retribution to the black man?
+what is revolution to those on the margin?
+
+what is remission to the cancer patient?
+what is rehabilitation to the addict?
+what is revision to the ancient?
+what is resolution to the death row convict?
+
+what is reason to the professor?
+what is reason to the proselytizer?
+what is revelation to the baptist?
+what is religion to the atheist?
+
+what is resignation to the tired worker?
+what is resignation to the world leader?
+what is recognition to the aspiring artist?
+what is recognition to the blacklister?
+
+these different lives with different lenses of the same
+experiences that fractalize yet are given a single name
+hopes and dreams plots and schemes
+bursting at the seams notice the themes
+
+a resurrection refracted into raw reality
+an ideal grating against fundamentality
+the legacy of primordial dimensionality
+the product of many a failed principality`,
 ];
 
 export const singularityPoemsGritty = [
@@ -469,12 +550,61 @@ practice makes perfect unless perfection was the symptom
 i focus on the good things in life especially if they’re buxom
 
 i contain multitudes… of bad ideas and cholesterol
-when life gives you lemons say thank you—inflation’s abysmal
+when life gives you lemons say thank you—inflation's abysmal
 my voice matters most in the middle of a symphony
 i am grateful for all i have… borrowed indefinitely
 
 i can see my goals clearly which is why i doubt my choices
 i am intelligent even if the door makes judgmental noises`,
+
+`real shit
+
+i’m the shit
+baller type shi
+that’s that shit
+on some real shit
+
+i shit on you
+eat my shit
+shit happens?
+yeah, no shit
+
+hello, fine shyt
+i can handle that shit
+i shit you not
+i got the good shit
+
+this is a shit hole
+what is this horse shit?
+what in the shit?
+are you shitting me?
+
+you think you’re hot shit?
+wanna talk shit?
+stop the bullshit
+oh, real shit?
+
+not putting up with this shit
+shut up, shithead
+you’re dogshit
+piece of shit
+
+shit’s hitting the fan
+what’s that shit-eating grin?
+shit’s going down
+i’m gonna rock your shit
+
+wait, oh, shit…
+
+my shit got rocked
+i’m done with this shit
+this shit’s wack
+fuckin’ shit
+
+aw shit
+i’m so shit
+where’s all my shit
+fuck this shit`,
 ];
 
 export function buildSingularityPoemPool(isCorrupted) {
