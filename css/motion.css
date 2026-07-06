@@ -195,6 +195,24 @@
     .god-mode-triangle-layer {
         transition-duration: 0.2s;
     }
+
+    #panopticon-eye.god-rainbow,
+    #panopticon-eye.god-rainbow.dizzy {
+        filter: drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
+    }
+
+    body.corrupted #panopticon-eye.god-rainbow,
+    body.corrupted #panopticon-eye.god-rainbow.dizzy {
+        filter: drop-shadow(0 0 18px rgba(255, 0, 85, 0.45));
+    }
+
+    .god-mode-triangle-layer.god-triangle-visible {
+        filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.22));
+    }
+
+    body.corrupted.god-mode .god-mode-triangle-layer.god-triangle-visible {
+        filter: drop-shadow(0 0 5px rgba(255, 0, 85, 0.22));
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

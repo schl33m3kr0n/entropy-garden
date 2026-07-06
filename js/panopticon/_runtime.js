@@ -970,17 +970,21 @@ function beginPanopticonLand(displayAngle, gazeX, gazeY) {
 }
 
 export function syncPanopticonRainbow() {
-    const offset = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--rainbow-offset')
-    ) || 0;
-    const cycle = (offset / 2) % 100;
-    const transform = `translate(${-cycle}, 0)`;
+    const root = getComputedStyle(document.documentElement);
+    const hue = parseFloat(root.getPropertyValue('--matrix-hue')) || 0;
+    const eyeTransform = `rotate(${hue} 50 50)`;
+
     if (panopticonRainbowGradEl) {
-        panopticonRainbowGradEl.setAttribute('gradientTransform', transform);
+        panopticonRainbowGradEl.setAttribute('gradientTransform', eyeTransform);
     }
+
     const godRainbow = document.getElementById('god-mode-rainbow') ?? godModeRainbowGradEl;
     if (godRainbow) {
-        godRainbow.setAttribute('gradientTransform', transform);
+        const layer = getGodTriangleLayerEl();
+        const vb = layer?.getAttribute('viewBox')?.split(/\s+/).map(Number);
+        const cx = vb?.length === 4 ? vb[0] + vb[2] * 0.5 : 50;
+        const cy = vb?.length === 4 ? vb[1] + vb[3] * 0.5 : 50;
+        godRainbow.setAttribute('gradientTransform', `rotate(${hue} ${cx} ${cy})`);
     }
 }
 
