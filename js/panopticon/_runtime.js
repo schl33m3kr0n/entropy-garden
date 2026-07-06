@@ -970,21 +970,14 @@ function beginPanopticonLand(displayAngle, gazeX, gazeY) {
 }
 
 export function syncPanopticonRainbow() {
-    const root = getComputedStyle(document.documentElement);
-    const hue = parseFloat(root.getPropertyValue('--matrix-hue')) || 0;
-    const eyeTransform = `rotate(${hue} 50 50)`;
-
+    // God-eye hues track the cipher wheel via CSS --cipher-wheel-hue-filter on #panopticon-eye.
+    // HUD chrome still animates --rainbow-offset in matrix.js.
     if (panopticonRainbowGradEl) {
-        panopticonRainbowGradEl.setAttribute('gradientTransform', eyeTransform);
+        panopticonRainbowGradEl.removeAttribute('gradientTransform');
     }
-
     const godRainbow = document.getElementById('god-mode-rainbow') ?? godModeRainbowGradEl;
     if (godRainbow) {
-        const layer = getGodTriangleLayerEl();
-        const vb = layer?.getAttribute('viewBox')?.split(/\s+/).map(Number);
-        const cx = vb?.length === 4 ? vb[0] + vb[2] * 0.5 : 50;
-        const cy = vb?.length === 4 ? vb[1] + vb[3] * 0.5 : 50;
-        godRainbow.setAttribute('gradientTransform', `rotate(${hue} ${cx} ${cy})`);
+        godRainbow.removeAttribute('gradientTransform');
     }
 }
 

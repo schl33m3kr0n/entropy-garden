@@ -79,23 +79,11 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
 }
 
 #panopticon-eye.god-rainbow {
-    filter: drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
-}
-
-@supports (background: conic-gradient(from -90deg, red, blue)) {
-    #panopticon-eye.god-rainbow {
-        filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
-    }
+    filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
 }
 
 #panopticon-eye.god-rainbow.dizzy {
-    filter: drop-shadow(0 0 22px rgba(0, 255, 0, 0.55));
-}
-
-@supports (background: conic-gradient(from -90deg, red, blue)) {
-    #panopticon-eye.god-rainbow.dizzy {
-        filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 22px rgba(0, 255, 0, 0.55));
-    }
+    filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 22px rgba(0, 255, 0, 0.55));
 }
 
 body.corrupted #panopticon-eye.god-rainbow {
@@ -117,14 +105,6 @@ body.perf-safari #panopticon-eye.god-rainbow {
     stroke: url(#panopticon-rainbow);
 }
 
-@supports (background: conic-gradient(from -90deg, red, blue)) {
-    #panopticon-eye.god-rainbow .panopticon-lid,
-    #panopticon-eye.god-rainbow .panopticon-iris-outer,
-    #panopticon-eye.god-rainbow .panopticon-iris-mid {
-        stroke: var(--cipher-wheel-conic);
-    }
-}
-
 #panopticon-eye.god-rainbow .panopticon-iris-outer {
     opacity: 0.55;
 }
@@ -140,12 +120,6 @@ body.perf-safari #panopticon-eye.god-rainbow {
 #panopticon-eye.god-rainbow .panopticon-god-pupil {
     fill: hsl(120, 100%, 55%);
     opacity: 0.88;
-}
-
-@supports not (background: conic-gradient(from -90deg, red, blue)) {
-    #panopticon-eye.god-rainbow .panopticon-god-pupil {
-        fill: url(#panopticon-rainbow);
-    }
 }
 
 body.perf-lite #panopticon-eye.god-rainbow .panopticon-lid,
@@ -190,13 +164,7 @@ body.corrupted #panopticon-eye.god-rainbow .panopticon-god-pupil {
 .god-mode-triangle-layer.god-triangle-visible {
     opacity: 1;
     visibility: visible;
-    filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.22));
-}
-
-@supports (background: conic-gradient(from -90deg, red, blue)) {
-    .god-mode-triangle-layer.god-triangle-visible {
-        filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 5px rgba(0, 255, 0, 0.22));
-    }
+    filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 5px rgba(0, 255, 0, 0.22));
 }
 
 body.perf-lite .god-mode-triangle-layer.god-triangle-visible,
@@ -225,13 +193,6 @@ body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-acti
 body.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
     stroke: url(#god-mode-rainbow);
     stroke-opacity: 0.38;
-}
-
-@supports (background: conic-gradient(from -90deg, red, blue)) {
-    .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
-    body.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
-        stroke: var(--cipher-wheel-conic);
-    }
 }
 
 body.perf-lite .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
