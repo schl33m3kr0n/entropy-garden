@@ -49,6 +49,10 @@ For deeper layout notes, see [`docs/STRUCTURE.md`](docs/STRUCTURE.md).
 
 This is **session-local by design** — no external analytics, no telemetry pipeline. The eye watches this visit; persistence across sessions is limited to things like trophies and a few `localStorage` prefs.
 
+**Wired events** (via `recordBehavior()` / `callHook`): rerolls, chaos toggles, modals, terminal, god mode / konami complete, singularity, playlist, docking bay, slot fails, idle dissociation, pong sessions, arcade clear, cards rounds, trophy unlocks, cipher stage advances, scatter breach, pizza deploy.
+
+**Not separately metered** (covered indirectly or low signal): individual pong rally comments, per-card swap micro-actions, matrix cipher wheel spins, iOS poem page turns. Modal opens already capture sidebar/game entry.
+
 ---
 
 ## Local development

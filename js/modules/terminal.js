@@ -7,6 +7,7 @@ import {
     triggerPanopticonCenterStare,
     perf,
 } from '../core/shared.js';
+import { callHook, getHook } from '../core/hooks.js';
 import {
     cipherStage,
     setCipherStage,
@@ -83,7 +84,7 @@ export function toggleTerminal() {
         setTermInputFocusable(false);
         termInput?.blur();
         if (sfx.burp) playSound(sfx.burp);
-        globalThis.gardenHooks?.firePanopticonComment?.('terminalClose');
+        callHook('firePanopticonComment', 'terminalClose');
         if (cipherStage > 0) {
             setCipherStage(0);
             globalThis.EntropyCipherHint?.resetCipherHints?.();
@@ -95,8 +96,8 @@ export function toggleTerminal() {
     if (document.activeElement) document.activeElement.blur();
     playTerminalOpenSound();
     showTerminalPanel();
-    globalThis.gardenHooks?.firePanopticonComment?.('terminalOpen');
-    globalThis.gardenHooks?.recordBehavior?.('terminal_open');
+    callHook('firePanopticonComment', 'terminalOpen');
+    callHook('recordBehavior', 'terminal_open');
     setTermInputFocusable(true);
     lastTerminalOpenTime = Date.now();
     setTimeout(() => {
@@ -114,7 +115,7 @@ function openTerminalFromClick(options = {}) {
     }
     if (!wasOpen) showTerminalPanel();
     else terminalContainer.classList.add('active');
-    if (!wasOpen) globalThis.gardenHooks?.recordBehavior?.('terminal_open');
+    if (!wasOpen) callHook('recordBehavior', 'terminal_open');
     setTermInputFocusable(true);
     setTimeout(() => {
         termInput?.focus({ preventScroll: true });
@@ -127,7 +128,7 @@ export function focusTerminal() {
     openTerminalFromClick({ playOpenSound: false });
 }
 
-/** Programmatic open (iOS toggle button, gardenHooks). */
+/** Programmatic open (iOS toggle button, garden hook registry). */
 export function openTerminal() {
     resolveTerminalElements();
     openTerminalFromClick({ playOpenSound: true });
@@ -408,7 +409,7 @@ function runExpressOverride() {
 function processCommand(cmd) {
     // Clean the input to ignore capitals and punctuation
     const cleanCmd = cmd.toLowerCase().replace(/[.,]/g, "").trim();
-    globalThis.gardenHooks?.recordBehavior?.('terminal_command');
+    callHook('recordBehavior', 'terminal_command');
 
     if (cmd === 'express') {
         runExpressOverride();
@@ -523,7 +524,7 @@ function processCommand(cmd) {
         printLexicon();
     }
     else if (['analyze', 'behavior', 'behaviour', 'profile'].includes(cleanCmd)) {
-        globalThis.gardenHooks?.printBehaviorReport?.();
+        callHook('printBehaviorReport');
         playSound(sfx.it);
     }
     // THE NEW MULTI-STAGE CIPHER COMMAND
@@ -552,6 +553,7 @@ function processCommand(cmd) {
 
 function triggerScatter() {
     globalThis.unlockTrophy?.('scatter_breach');
+    callHook('recordBehavior', 'scatter_breach');
     playSound(sfx.glitch);
     for(let i=0; i<40; i++) {
         let f = document.createElement('div');
@@ -570,6 +572,7 @@ function triggerScatter() {
 
 function spawnPizza() {
     globalThis.unlockTrophy?.('pizza_protocol');
+    callHook('recordBehavior', 'pizza_deploy');
     const id = incrementExtraPizzas();
     const newPizza = document.createElement('div'); 
     newPizza.className = 'artifact artifact-pizza'; 
@@ -655,7 +658,7 @@ function bindTerminalInteractions() {
    // 3. Pressing the TILDE (`) key triggers the Maya Screen (Boss Key)
     if (e.key === '`' || e.key === '~') {
         e.preventDefault();
-        const toggle = globalThis.gardenHooks?.toggleBossKey ?? globalThis.toggleBossKey;
+        const toggle = getHook('toggleBossKey') ?? globalThis.toggleBossKey;
         if (typeof toggle === 'function') toggle();
     }
     
@@ -670,7 +673,7 @@ function bindTerminalInteractions() {
         // 3. If they aren't typing, spin the eye!
         if (!isTyping) {
             e.preventDefault(); 
-            globalThis.gardenHooks.handleReroll(); 
+            getHook('handleReroll')?.();
         }
     }
 
@@ -704,7 +707,7 @@ function bindTerminalInteractions() {
         
         if (!isTyping) {
             e.preventDefault(); 
-            globalThis.gardenHooks.toggleMode(); // Fires your existing corruption toggle function
+            getHook('toggleMode')?.();
         }
     }
 
@@ -716,10 +719,6 @@ if (document.readyState === 'loading') {
 } else {
     bindTerminalInteractions();
 }
-
-globalThis.gardenHooks = globalThis.gardenHooks || {};
-globalThis.gardenHooks.toggleTerminal = toggleTerminal;
-globalThis.gardenHooks.openTerminal = openTerminal;
 
 window.addEventListener('entropy:garden-ready', () => {
     bindTerminalInteractions();

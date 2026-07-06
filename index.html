@@ -36,7 +36,7 @@
     <div id="boss-key-overlay">
         <div class="win-bg"></div>
         <div class="win95-window">
-            <div class="win95-titlebar"><span>Autodesk Maya 2024</span><span style="cursor:pointer" id="close-maya-btn">X</span></div>
+            <div class="win95-titlebar"><span>Autodesk Maya 2024</span><span id="close-maya-btn">X</span></div>
             <div class="win95-content">
                 <div class="win95-icon">X</div>
                 <div>A fatal error has occurred in module 'topology_anxiety.dll'. <br><br>Application Not Responding. All unsaved progress has been sacrificed to the void.</div>
@@ -64,14 +64,14 @@
         </div>
     </div>
     <div id="playlist-controls">
-        <button type="button" tabindex="-1" onclick="playPrevTrack()" class="ui-btn playlist-btn" aria-label="Previous track">
-            <span class="playlist-icon playlist-icon--prev" aria-hidden="true"></span>
+        <button type="button" tabindex="-1" class="ui-btn playlist-btn" aria-label="Previous track">
+            <span class="mask-icon mask-icon--playlist mask-icon--skip" aria-hidden="true"></span>
         </button>
         <button type="button" tabindex="-1" id="play-pause-btn" class="ui-btn playlist-btn" aria-label="Pause">
-            <span class="playlist-icon playlist-icon--pause" aria-hidden="true"></span>
+            <span class="mask-icon mask-icon--playlist mask-icon--pause" aria-hidden="true"></span>
         </button>
-        <button type="button" tabindex="-1" onclick="playNextTrack()" class="ui-btn playlist-btn" aria-label="Next track">
-            <span class="playlist-icon playlist-icon--next" aria-hidden="true"></span>
+        <button type="button" tabindex="-1" class="ui-btn playlist-btn" aria-label="Next track">
+            <span class="mask-icon mask-icon--playlist mask-icon--skip-next" aria-hidden="true"></span>
         </button>
     </div>
 </div>
@@ -81,44 +81,44 @@
 
     <div id="sidebar-menu">
         <ul>
-            <li onclick="openModal('identity')">
-                <div class="ui-icon" style="background-image: url('assets/icons/identity.svg');"></div>
+            <li data-modal="identity">
+                <span class="mask-icon mask-icon--sidebar mask-icon--identity" aria-hidden="true"></span>
                 <span class="sidebar-text">// IDENTITY</span>
             </li>
-            <li onclick="openModal('stats')">
-                <div class="ui-icon" style="background-image: url('assets/icons/stats.svg');"></div>
+            <li data-modal="stats">
+                <span class="mask-icon mask-icon--sidebar mask-icon--stats" aria-hidden="true"></span>
                 <span class="sidebar-text">// STATS</span>
             </li>
-            <li onclick="openModal('about')">
-                <div class="ui-icon" style="background-image: url('assets/icons/about.svg');"></div>
+            <li data-modal="about">
+                <span class="mask-icon mask-icon--sidebar mask-icon--about" aria-hidden="true"></span>
                 <span class="sidebar-text">// BIO DUMP</span>
             </li>
-            <li onclick="openModal('projects')">
-                <div class="ui-icon" style="background-image: url('assets/icons/storage.svg');"></div>
+            <li data-modal="projects">
+                <span class="mask-icon mask-icon--sidebar mask-icon--storage" aria-hidden="true"></span>
                 <span class="sidebar-text">// REPOSITORY</span>
             </li>
-            <li onclick="openModal('signal')">
-                <div class="ui-icon" style="background-image: url('assets/icons/signal.svg');"></div>
+            <li data-modal="signal">
+                <span class="mask-icon mask-icon--sidebar mask-icon--signal" aria-hidden="true"></span>
                 <span class="sidebar-text">// LIVE FEED</span>
             </li>
-            <li onclick="openModal('vault')">
-                <div class="ui-icon" style="background-image: url('assets/icons/vault.svg');"></div>
+            <li data-modal="vault">
+                <span class="mask-icon mask-icon--sidebar mask-icon--vault" aria-hidden="true"></span>
                 <span class="sidebar-text">// THE VAULT</span>
             </li>
-            <li onclick="openModal('arcade')">
-                <div class="ui-icon" style="background-image: url('assets/icons/joystick.svg');"></div>
+            <li data-modal="arcade">
+                <span class="mask-icon mask-icon--sidebar mask-icon--joystick" aria-hidden="true"></span>
                 <span class="sidebar-text">// ARCADE</span>
             </li>
-            <li onclick="openModal('cards')">
-                <div class="ui-icon" style="background-image: url('assets/icons/cards.svg');"></div>
+            <li data-modal="cards">
+                <span class="mask-icon mask-icon--sidebar mask-icon--cards" aria-hidden="true"></span>
                 <span class="sidebar-text">// CARDS OF CHAOS</span>
             </li>
-            <li id="ios-poems-item" class="ios-only-sidebar-item" hidden onclick="openModal('poems')">
-                <div class="ui-icon" style="background-image: url('assets/icons/feather.svg');"></div>
+            <li id="ios-poems-item" class="ios-only-sidebar-item" hidden data-modal="poems">
+                <span class="mask-icon mask-icon--sidebar mask-icon--feather" aria-hidden="true"></span>
                 <span class="sidebar-text">// POEMS</span>
             </li>
-            <li onclick="openModal('trophies')">
-                <div class="ui-icon theme-icon theme-icon--trophy"></div>
+            <li data-modal="trophies">
+                <span class="mask-icon mask-icon--sidebar-lg mask-icon--trophy" aria-hidden="true"></span>
                 <span class="sidebar-text">// TROPHIES</span>
             </li>
         </ul>
@@ -231,7 +231,7 @@
     </div>
 
     <div id="modal-identity" class="modal">
-        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/identity.svg');"></div>// IDENTITY</h2>
+        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--identity" aria-hidden="true"></span>// IDENTITY</h2>
             <div class="scrollable-content">
                <div class="bio-header" style="border-bottom: none; padding-bottom: 0;">
                     <div class="pfp-wrapper">
@@ -252,25 +252,25 @@
     </div>
     
     <div id="modal-stats" class="modal">
-        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/stats.svg');"></div>// STATS</h2>
+        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--stats" aria-hidden="true"></span>// STATS</h2>
             <div class="scrollable-content"><ul id="stats-list"></ul></div>
         </div>
     </div>
 
     <div id="modal-about" class="modal">
-        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/about.svg');"></div>// BIO DUMP</h2>
+        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--about" aria-hidden="true"></span>// BIO DUMP</h2>
             <div id="bio-container" class="scrollable-content"></div>
         </div>
     </div>
 
     <div id="modal-projects" class="modal">
-         <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/storage.svg');"></div>// REPOSITORY</h2>
+         <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--storage" aria-hidden="true"></span>// REPOSITORY</h2>
             <div class="scrollable-content"><ul id="project-list"></ul></div>
         </div>
     </div>
 
     <div id="modal-vault" class="modal wide">
-         <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/vault.svg');"></div>// THE VAULT</h2>
+         <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--vault" aria-hidden="true"></span>// THE VAULT</h2>
            <div class="scrollable-content vault-grid">
                 <div class="vault-item">
                     <img data-src="assets/img/vault/geometry-art.webp" data-fallback="assets/img/vault/geometry-art.jpg" alt="serpentine" class="vault-media">
@@ -324,7 +324,7 @@
 </div> <div id="modal-signal" class="modal">
      <div class="modal-content">
         <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
-            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/signal.svg');"></div>// LIVE FEED</h2>
+            <h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--signal" aria-hidden="true"></span>// LIVE FEED</h2>
             <div class="scrollable-content">
                 <p>Audio: <span id="val-audio" class="data-value">...</span></p>
                 <p>Action: <span id="val-activity" class="data-value">...</span></p>
@@ -336,7 +336,7 @@
 <div id="modal-arcade" class="modal wide">
         <div class="modal-content">
             <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
-            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/joystick.svg');"></div>// ARCADE CABINET</h2>
+            <h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--joystick" aria-hidden="true"></span>// ARCADE CABINET</h2>
             <div class="scrollable-content" style="text-align: center; margin-top: 10px;">
                 <div id="arcade-game-container">
                     <div id="arcade-screen">
@@ -353,7 +353,7 @@
     <div id="modal-cards" class="modal wide">
         <div class="modal-content">
             <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
-            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/cards.svg');"></div>// CARDS OF CHAOS</h2>
+            <h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--cards" aria-hidden="true"></span>// CARDS OF CHAOS</h2>
             <div class="scrollable-content coc-modal-scroll">
                 <div id="cards-game-container"></div>
             </div>
@@ -363,7 +363,7 @@
     <div id="modal-poems" class="modal wide ios-poems-modal">
         <div class="modal-content">
             <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
-            <h2 class="drag-handle"><div class="ui-icon" style="background-image: url('assets/icons/feather.svg');"></div>// POEMS</h2>
+            <h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--feather" aria-hidden="true"></span>// POEMS</h2>
             <div class="ios-poems-layout">
                 <nav id="ios-poem-list" class="ios-poem-list scrollable-content" aria-label="Poem list"></nav>
                 <article id="ios-poem-reader" class="ios-poem-reader scrollable-content" aria-label="Poem text">
@@ -380,7 +380,7 @@
     <div id="modal-trophies" class="modal wide">
         <div class="modal-content">
             <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
-            <h2 class="drag-handle"><div class="ui-icon theme-icon theme-icon--trophy"></div>// TROPHIES</h2>
+            <h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar-lg mask-icon--trophy" aria-hidden="true"></span>// TROPHIES</h2>
             <div class="scrollable-content trophy-case-scroll">
                 <p class="trophy-case-intro">> Recovered anomalies from the garden substrate. Locked entries remain classified until you trigger them in the wild.</p>
                 <p id="trophy-count" class="trophy-count">0 / 15</p>
@@ -406,8 +406,13 @@
 <script src="js/boot/file-protocol-guard.js"></script>
 <script src="js/boot/terminal-sfx.js" defer></script>
 <script src="js/ios/terminal-boot.js" defer></script>
-<script src="js/data/lore-pools.data.js"></script>
-<script src="js/cipher/vigenere.js"></script>
+<script src="js/data/lore/identity.data.js"></script>
+<script src="js/data/lore/stats-bio.data.js"></script>
+<script src="js/data/lore/projects.data.js"></script>
+<script src="js/data/lore/vibes.data.js"></script>
+<script src="js/data/lore/terminal.data.js"></script>
+<script src="js/data/lore/panopticon.data.js"></script>
+<script type="module" src="js/cipher/vigenere.js"></script>
 <script src="js/cipher/entropy-hint.js"></script>
 <script src="js/boot/trophies.js"></script>
 <script>

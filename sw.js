@@ -1,5 +1,5 @@
 /* Entropy Garden — offline shell + runtime caches (audio after first play) */
-const CACHE_VERSION = 'entropy-garden-v221';
+const CACHE_VERSION = '__EG_CACHE_VERSION__';
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
@@ -8,8 +8,16 @@ const AUDIO_CACHE = `${CACHE_VERSION}-audio`;
 const PRECACHE_URLS = [
     'index.html',
     'css/style.css',
+    'css/tokens.css',
+    'css/base.css',
+    'css/garden.css',
+    'css/chrome.css',
+    'css/games.css',
+    'css/ios.css',
+    'css/motion.css',
     'js/main.js',
     'js/lazy.js',
+    'js/core/hooks.js',
     'js/core/state.js',
     'js/core/shared.js',
     'js/core/environment.js',
@@ -17,7 +25,12 @@ const PRECACHE_URLS = [
     'js/core/god-title.js',
     'js/data/cards-of-chaos.data.js',
     'js/core/canvas-resize.js',
-    'js/data/lore-pools.data.js',
+    'js/data/lore/identity.data.js',
+    'js/data/lore/stats-bio.data.js',
+    'js/data/lore/projects.data.js',
+    'js/data/lore/vibes.data.js',
+    'js/data/lore/terminal.data.js',
+    'js/data/lore/panopticon.data.js',
     'js/data/cipher-glyphs.data.js',
     'js/cipher/vigenere.js',
     'js/cipher/entropy-hint.js',

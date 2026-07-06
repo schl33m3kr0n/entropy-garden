@@ -1,4 +1,5 @@
 import { sfx, playSound, perf, ICO_SYMBOLS } from '../core/shared.js';
+import { callHook, getHook } from '../core/hooks.js';
 import {
     isSingularityActive,
     currentPoemIndex,
@@ -332,7 +333,7 @@ function bindSingularityOverlayUi() {
         e.stopPropagation();
         if (next) cyclePoem();
         else {
-            const resetFn = globalThis.gardenHooks?.resetTimeline ?? globalThis.resetTimeline;
+            const resetFn = getHook('resetTimeline') ?? globalThis.resetTimeline;
             if (typeof resetFn === 'function') resetFn();
         }
     };
@@ -443,8 +444,8 @@ function triggerSingularity() {
     if (isIosSingularity()) return;
 
     setIsSingularityActive(true);
-    globalThis.gardenHooks?.firePanopticonComment?.('singularity', { force: true });
-    globalThis.gardenHooks?.recordBehavior?.('singularity');
+    callHook('firePanopticonComment', 'singularity', { force: true });
+    callHook('recordBehavior', 'singularity');
     hideSingularityChrome();
     globalThis.unlockTrophy?.('singularity_ritual');
     setTimeout(() => openSingularityRitual(true), 500);
@@ -739,7 +740,7 @@ function bindSingularityControls() {
     };
 
     const exitGarden = () => {
-        const reset = globalThis.gardenHooks?.resetTimeline ?? globalThis.resetTimeline;
+        const reset = getHook('resetTimeline') ?? globalThis.resetTimeline;
         if (typeof reset === 'function') reset();
     };
 

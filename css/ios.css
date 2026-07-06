@@ -1,0 +1,1883 @@
+/* Entropy Garden — iOS layout & overrides */
+
+body.ios-ui #init-screen {
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+    box-sizing: border-box;
+}
+
+body.ios-ui #epilepsy-warning {
+    max-width: min(78vw, 300px);
+    width: 100%;
+    padding: 18px 14px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+body.ios-ui #epilepsy-warning .warning-title {
+    font-size: clamp(0.52rem, 2.65vw, 0.68rem);
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    white-space: nowrap;
+}
+
+body.ios-ui #epilepsy-warning p {
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+body.ios-ui #loader {
+    display: block;
+}
+
+body.ios-ui #ouroboros-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: 0;
+    transform: translate(-50%, -50%);
+}
+
+body.ios-ui #loader-text {
+    position: absolute;
+    top: calc(50% + 48px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(80vw, 320px);
+    margin: 0;
+}
+
+/* iOS WebKit: parent background-clip:text on flex chrome often renders invisible — paint per letter. */
+body.ios-ui h1.god-title-live .god-title-chrome {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: inherit;
+    color: inherit;
+}
+
+body.ios-ui h1.god-title-live .god-title-letter {
+    background: linear-gradient(90deg,
+        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
+        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
+    );
+    background-size: 200% 100%;
+    background-position: var(--rainbow-offset, 0%) 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+body.ios-ui.corrupted h1.god-title-live .god-title-letter {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: var(--alert-red);
+    color: var(--alert-red);
+    text-shadow: 0 0 8px rgba(255, 0, 85, 0.35);
+}
+
+body:not(.ios-ui) #grid-canvas {
+    pointer-events: none;
+}
+
+/* iOS: horizontally centered; top set in JS below the eye; behind sidebar (z-index 10008) */
+body.ios-ui #panopticon-comment {
+    z-index: 10004;
+    left: calc(50% + var(--ios-vv-offset-x, 0px));
+    right: auto;
+    transform: translateX(-50%);
+    max-width: min(340px, 84vw);
+}
+
+body.pong-playing #panopticon-comment,
+body.pong-playing:not(.ios-ui) #panopticon-comment {
+    display: none !important;
+}
+
+.mask-icon,
+body.ios-ui.corrupted .mask-icon {
+    filter: none;
+}
+
+body.ios-ui #singularity-canvas {
+    pointer-events: none !important;
+    touch-action: none;
+}
+
+body.ios-ui #arcade-controls,
+body.ios-ui .arcade-answers-row {
+    gap: 10px;
+}
+
+body.ios-ui #arcade-controls .interactive-square {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.ios-ui #sequence-display {
+    flex-wrap: nowrap;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 14px 18px;
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #sequence-display .matrix-grid {
+    border-radius: var(--ios-radius-sm);
+    overflow: hidden;
+}
+
+body.ios-ui #arcade-screen {
+    height: auto;
+    min-height: 120px;
+    padding: 14px 18px;
+    border-radius: var(--ios-radius-md);
+}
+
+body:not(.ios-ui) #playlist-menu {
+    width: 186px;
+    max-width: 186px;
+    box-sizing: border-box;
+}
+
+body:not(.ios-ui) #track-title {
+    max-width: 100%;
+}
+
+/* App chrome above pong HUD overlays (≤10007) */
+body:not(.ios-ui) .control-panel.active,
+body:not(.ios-ui) #playlist-menu.active {
+    position: fixed;
+    z-index: 10020;
+    pointer-events: auto;
+}
+
+html:has(body.ios-ui),
+body.ios-ui {
+    overscroll-behavior-y: none;
+    overscroll-behavior: none;
+}
+
+/* --- iOS: vertical HUD rail + sidebar tools --- */
+body.ios-ui {
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: 100svh;
+    min-height: 100svh;
+    --ios-radius-sm: 12px;
+    --ios-radius-md: 18px;
+    --ios-radius-lg: 24px;
+    --ios-radius-xl: 32px;
+}
+
+/* Rotating 150vmax backdrop is costly on mobile GPUs */
+body.ios-ui::before {
+    animation: none;
+    transform: translate(-50%, -50%);
+}
+
+body.ios-ui.ios-keyboard-open #ios-scroll-shell {
+    overflow: hidden;
+    touch-action: none;
+}
+
+#ios-scroll-shell {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scroll-snap-type: y mandatory;
+    touch-action: pan-y;
+}
+
+#ios-scroll-rail {
+    position: relative;
+    pointer-events: none;
+}
+
+body.ios-ui #grid-canvas,
+body.ios-ui #god-mode-triangle-layer,
+body.ios-ui #panopticon-eye {
+    pointer-events: none;
+}
+
+body.ios-ui #grid-canvas,
+body.ios-ui #god-mode-triangle-layer {
+    position: fixed;
+    transform: translate(var(--ios-vv-offset-x, 0px), var(--ios-vv-offset-y, 0px));
+}
+
+body.ios-ui #grid-canvas {
+    contain: strict;
+}
+
+body.ios-ui.singularity-active #grid-canvas {
+    visibility: hidden;
+}
+
+body.ios-ui #panopticon-eye:not(.pong-active) {
+    transform: translate(
+        calc(-50% + var(--ios-vv-offset-x, 0px)),
+        calc(-50% + var(--ios-vv-offset-y, 0px))
+    );
+}
+
+body.ios-ui .ios-pane {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    pointer-events: none;
+}
+
+body.ios-ui .ios-pane-top {
+    min-height: 46dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(env(safe-area-inset-top) + 20px) 16px 28px;
+    box-sizing: border-box;
+}
+
+body.ios-ui .ios-pane-main {
+    position: relative;
+    min-height: 100dvh;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}
+
+body.ios-ui .ios-scroll-hint {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0;
+    text-align: center;
+    font-size: clamp(1rem, 4.5vw, 1.35rem);
+    letter-spacing: 0.18em;
+    text-transform: lowercase;
+    color: rgba(0, 255, 0, 0.72);
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.45);
+    pointer-events: none;
+    user-select: none;
+    z-index: 2;
+    opacity: 1;
+    transition: opacity 0.9s ease, visibility 0.9s ease;
+}
+
+body.ios-ui .ios-scroll-hint-top {
+    top: calc(env(safe-area-inset-top) + 28px);
+}
+
+body.ios-ui .ios-scroll-hint-bottom {
+    bottom: calc(env(safe-area-inset-bottom) + 28px);
+}
+
+body.ios-ui .ios-scroll-hint.is-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+body.ios-ui:not(.garden-ready) .ios-scroll-hint {
+    opacity: 0;
+    visibility: hidden;
+}
+
+body.ios-ui .ios-pane-bottom {
+    min-height: 36dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px calc(env(safe-area-inset-bottom) + 32px);
+    box-sizing: border-box;
+    pointer-events: auto;
+}
+
+/* Phone landscape only — iPad landscape height stays >= 700px */
+@media (orientation: landscape) and (max-height: 699px) {
+    body.ios-ui .ios-pane-top,
+    body.ios-ui .ios-pane-main,
+    body.ios-ui .ios-pane-bottom {
+        min-height: 100svh;
+        max-height: 100svh;
+        box-sizing: border-box;
+    }
+
+    body.ios-ui .ios-pane-top {
+        padding-top: calc(env(safe-area-inset-top) + 12px);
+        padding-bottom: 12px;
+    }
+
+    body.ios-ui .ios-pane-bottom {
+        padding-top: 12px;
+        padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+    }
+
+    body.ios-ui .ios-pane-main {
+        scroll-snap-align: start;
+    }
+}
+
+body.ios-ui.ios-tablet .ios-pane-top {
+    min-height: min(38dvh, 280px);
+    max-height: min(38dvh, 280px);
+    align-items: flex-start;
+    scroll-snap-align: start;
+}
+
+body.ios-ui.ios-tablet .ios-pane-bottom {
+    min-height: min(34dvh, 260px);
+    max-height: min(34dvh, 260px);
+    align-items: flex-end;
+    scroll-snap-align: start;
+}
+
+body.ios-ui.ios-tablet .ios-pane-main {
+    min-height: 100dvh;
+    max-height: none;
+    scroll-snap-align: center;
+}
+
+body.ios-ui.ios-tablet.ios-landscape .ios-pane-top {
+    min-height: min(26dvh, 168px);
+    max-height: min(26dvh, 168px);
+    padding-top: calc(env(safe-area-inset-top) + 8px);
+    padding-bottom: 6px;
+}
+
+body.ios-ui.ios-tablet.ios-landscape .ios-pane-bottom {
+    min-height: min(24dvh, 152px);
+    max-height: min(24dvh, 152px);
+    padding-top: 6px;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+}
+
+body.ios-ui.ios-tablet.ios-landscape .ios-pane-main {
+    min-height: 100dvh;
+    max-height: none;
+    scroll-snap-align: center;
+}
+
+body.ios-ui #hud {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    transform: none;
+    opacity: 1;
+    pointer-events: none;
+}
+
+body.ios-ui #hud.active.anim-drop,
+body.ios-ui #hud.active.anim-rise,
+body.ios-ui #hud.active.anim-zoom,
+body.ios-ui #hud.active.anim-slide,
+body.ios-ui #hud.active.anim-glitch {
+    animation: none;
+    transform: none;
+    opacity: 1;
+}
+
+body.ios-ui #hud h1 {
+    font-size: clamp(2rem, 11vw, 3.25rem);
+    letter-spacing: 0.12em;
+    padding: 16px 22px 14px;
+    line-height: 1.05;
+}
+
+body.ios-ui .hud-title-card::after {
+    border-radius: var(--ios-radius-lg);
+}
+
+body.ios-ui .hud-credit {
+    font-size: clamp(0.68rem, 2.9vw, 0.78rem);
+    letter-spacing: 0.05em;
+    padding: 0;
+}
+
+/* iOS Konami — Game Boy D-pad + A/B (fixed bottom, HUD reveal) */
+body.ios-ui .ios-konami-pad {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10018;
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0 20px calc(env(safe-area-inset-bottom) + 18px);
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-44px);
+    pointer-events: none;
+    will-change: opacity, transform;
+    transition:
+        opacity 0.6s ease,
+        transform 0.85s cubic-bezier(0.25, 1, 0.45, 1),
+        visibility 0.6s ease;
+}
+
+body.ios-ui .ios-konami-pad.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+body.ios-ui.ios-tablet .ios-konami-pad {
+    top: 50%;
+    bottom: auto;
+    padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+    transform: translateY(-50%) translateY(-44px);
+}
+
+body.ios-ui.ios-tablet .ios-konami-pad.is-visible {
+    transform: translateY(-50%);
+}
+
+body.ios-ui.ios-tablet .ios-gb-layout {
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
+    margin: 0;
+    gap: 0;
+}
+
+body.ios-ui.ios-tablet .ios-gb-dpad {
+    margin-left: 0;
+}
+
+body.ios-ui.ios-tablet.ios-landscape .ios-konami-pad {
+    padding-left: max(28px, env(safe-area-inset-left));
+    padding-right: max(28px, env(safe-area-inset-right));
+}
+
+body.ios-ui.ios-tablet.ios-landscape .ios-gb-layout {
+    padding: 0 8px;
+}
+
+/* iPad / large iOS tablet — CSS fallback when JS class lags or misses */
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
+    body.ios-ui .ios-pane-top {
+        min-height: min(38dvh, 280px);
+        max-height: min(38dvh, 280px);
+        align-items: flex-start;
+        scroll-snap-align: start;
+    }
+
+    body.ios-ui .ios-pane-bottom {
+        min-height: min(34dvh, 260px);
+        max-height: min(34dvh, 260px);
+        align-items: flex-end;
+        scroll-snap-align: start;
+    }
+
+    body.ios-ui .ios-pane-main {
+        min-height: 100dvh;
+        max-height: none;
+        scroll-snap-align: center;
+    }
+
+    body.ios-ui .ios-konami-pad {
+        top: 50%;
+        bottom: auto;
+        padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+        transform: translateY(-50%) translateY(-44px);
+    }
+
+    body.ios-ui .ios-konami-pad.is-visible {
+        transform: translateY(-50%);
+    }
+
+    body.ios-ui .ios-gb-layout {
+        width: 100%;
+        max-width: none;
+        justify-content: space-between;
+        margin: 0;
+        gap: 0;
+    }
+
+    body.ios-ui .ios-gb-dpad {
+        margin-left: 0;
+    }
+}
+
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) and (orientation: landscape) {
+    body.ios-ui .ios-pane-top {
+        min-height: min(26dvh, 168px);
+        max-height: min(26dvh, 168px);
+        padding-top: calc(env(safe-area-inset-top) + 8px);
+        padding-bottom: 6px;
+    }
+
+    body.ios-ui .ios-pane-bottom {
+        min-height: min(24dvh, 152px);
+        max-height: min(24dvh, 152px);
+        padding-top: 6px;
+        padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+    }
+
+    body.ios-ui .ios-pane-main {
+        min-height: 100dvh;
+        scroll-snap-align: center;
+    }
+
+    body.ios-ui .ios-konami-pad {
+        padding-left: max(28px, env(safe-area-inset-left));
+        padding-right: max(28px, env(safe-area-inset-right));
+    }
+
+    body.ios-ui .ios-gb-layout {
+        padding: 0 8px;
+    }
+}
+
+.ios-gb-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(28px, 10vw, 52px);
+    width: min(100%, 320px);
+    margin: 0 auto;
+}
+
+.ios-gb-dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: -14px;
+}
+
+.ios-gb-arrow {
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 2px solid rgba(0, 255, 0, 0.55);
+    border-radius: 50%;
+    background: rgba(0, 12, 0, 0.72);
+    color: var(--neon-green);
+    font-family: var(--main-font);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.ios-gb-arrow-glyph {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.ios-gb-arrow-up { grid-column: 2; grid-row: 1; }
+
+.ios-gb-arrow-left { grid-column: 1; grid-row: 2; }
+
+.ios-gb-arrow-right { grid-column: 3; grid-row: 2; }
+
+.ios-gb-arrow-down { grid-column: 2; grid-row: 3; }
+
+.ios-gb-arrow.is-held,
+.ios-gb-arrow.is-ok {
+    color: #050505;
+    background: var(--neon-green);
+    border-color: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 14px rgba(0, 255, 0, 0.65);
+}
+
+.ios-gb-arrow.is-bad {
+    color: #fff;
+    background: var(--alert-red);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
+}
+
+.ios-gb-arrow.is-held.is-bad {
+    color: #fff;
+    background: var(--alert-red);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
+}
+
+.ios-gb-actions {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+}
+
+.ios-gb-btn {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    padding: 0;
+    border: 2px solid rgba(0, 255, 0, 0.55);
+    border-radius: 50%;
+    background: rgba(0, 12, 0, 0.72);
+    color: var(--neon-green);
+    font-family: var(--main-font);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.28);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.ios-gb-btn-b {
+    bottom: 0;
+    left: 0;
+}
+
+.ios-gb-btn-a {
+    top: 0;
+    right: 0;
+}
+
+.ios-gb-btn.is-held,
+.ios-gb-btn.is-ok {
+    color: #050505;
+    background: var(--neon-green);
+    border-color: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 14px rgba(0, 255, 0, 0.65);
+}
+
+.ios-gb-btn.is-bad {
+    color: #fff;
+    background: var(--alert-red);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
+}
+
+.ios-gb-btn.is-held.is-bad {
+    color: #fff;
+    background: var(--alert-red);
+    border-color: rgba(255, 255, 255, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
+}
+
+body.corrupted .ios-gb-arrow {
+    color: var(--alert-red);
+    border-color: rgba(255, 0, 85, 0.55);
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.28);
+}
+
+body.corrupted .ios-gb-arrow.is-held,
+body.corrupted .ios-gb-arrow.is-ok {
+    color: #050505;
+    background: var(--alert-red);
+}
+
+body.corrupted .ios-gb-btn {
+    color: var(--alert-red);
+    border-color: rgba(255, 0, 85, 0.55);
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.28);
+}
+
+body.corrupted .ios-gb-btn.is-held,
+body.corrupted .ios-gb-btn.is-ok {
+    color: #050505;
+    background: var(--alert-red);
+}
+
+body.ios-pong-playing .ios-konami-pad,
+body.singularity-active .ios-konami-pad {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+body.ios-ui #docking-bay {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    padding: 0;
+    pointer-events: auto;
+}
+
+body.ios-ui .control-panel {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 14px);
+    left: 14px;
+    bottom: auto;
+    right: auto;
+    z-index: 10011;
+    opacity: 0;
+    transform: none;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+}
+
+body.ios-ui.garden-ready .control-panel.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.ios-ui #mode-btn {
+    position: static;
+    top: auto;
+    right: auto;
+    left: auto;
+    opacity: 0;
+    transform: none;
+    width: 100%;
+    margin-bottom: 12px;
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    transition: opacity 0.8s ease;
+}
+
+body.ios-ui.garden-ready #mode-btn.active {
+    opacity: 1;
+}
+
+body.ios-ui #panopticon-mute-btn {
+    position: static;
+    top: auto;
+    right: auto;
+    left: auto;
+    opacity: 0;
+    transform: none;
+    width: 100%;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+    padding: 10px 12px;
+    transition: opacity 0.8s ease;
+}
+
+body.ios-ui.garden-ready #panopticon-mute-btn.active {
+    opacity: 1;
+}
+
+body.ios-ui #playlist-menu {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    left: calc(env(safe-area-inset-left) + 12px);
+    right: auto;
+    z-index: 10020;
+    opacity: 0;
+    pointer-events: none;
+    width: min(200px, calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.75);
+    border-left: 2px solid var(--neon-green);
+    border-top: none;
+    padding: 10px;
+    transition: opacity 0.8s ease;
+}
+
+/* iPhone — playlist lives at the bottom of the sidebar tools stack */
+body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu {
+    position: static;
+    bottom: auto;
+    left: auto;
+    z-index: auto;
+    width: 100%;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-left: none;
+    border-top: 1px solid rgba(0, 255, 0, 0.25);
+    background: transparent;
+    transition: opacity 0.8s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu:hover {
+    background: var(--neon-green);
+    border-top-color: #000;
+}
+
+body.ios-ui.corrupted:not(.ios-tablet) .ios-sidebar-tools #playlist-menu:hover {
+    background: var(--alert-red);
+    border-top-color: #000;
+}
+
+body.ios-ui #playlist-header {
+    width: 100%;
+}
+
+body.ios-ui #track-title {
+    max-width: 100%;
+    width: 100%;
+}
+
+body.ios-ui.garden-ready #playlist-menu.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.ios-ui #playlist-controls .ui-btn {
+    flex: 1;
+    min-height: 36px;
+    padding: 6px 8px;
+}
+
+body.ios-ui .mask-icon--playlist {
+    width: 20px;
+    height: 20px;
+}
+
+body.ios-ui #sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding-top: calc(env(safe-area-inset-top) + 72px);
+    padding-bottom: 0;
+    box-sizing: border-box;
+    z-index: 10008;
+}
+
+body.ios-ui #sidebar-menu ul {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.ios-ui .ios-sidebar-tools {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 14px 16px calc(env(safe-area-inset-bottom) + 14px);
+    border-top: 1px solid rgba(0, 255, 0, 0.2);
+    background: rgba(5, 5, 5, 0.98);
+}
+
+body.ios-ui.garden-ready #terminal-container.fab-ready:not([hidden]) {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui.garden-ready #terminal-container.fab-ready.active:not([hidden]) {
+    border-radius: var(--ios-radius-lg);
+    width: min(320px, calc(100vw - 20px - env(safe-area-inset-right)));
+}
+
+body.ios-ui #panopticon-eye {
+    width: clamp(90px, 22vw, 150px);
+    height: clamp(90px, 22vw, 150px);
+}
+
+@media (pointer: coarse) {
+    .vault-item.carousel-container .carousel-controls .carousel-btn {
+        opacity: 1;
+        padding: 2px 8px;
+        font-size: 13px;
+        background: rgba(0, 0, 0, 0.4);
+    }
+}
+
+body.ios-ui #lightbox.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000001;
+}
+
+body.lightbox-open {
+    overflow: hidden;
+}
+
+body.ios-ui #lightbox.lightbox-overlay.active {
+    display: grid !important;
+    opacity: 1;
+    visibility: visible;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+        "image image"
+        "prev next";
+    align-items: center;
+    justify-items: center;
+    align-content: center;
+    gap: 14px;
+    padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px);
+    box-sizing: border-box;
+}
+
+body.ios-ui #lightbox .lightbox-image-wrapper {
+    grid-area: image;
+    max-width: min(92vw, 100%);
+    max-height: calc(100svh - 130px);
+}
+
+body.ios-ui #lightbox #lightbox-img {
+    max-height: calc(100svh - 130px);
+}
+
+body.ios-ui #lightbox .lightbox-btn {
+    position: relative;
+    top: auto;
+    left: auto !important;
+    right: auto !important;
+    transform: none;
+    padding: 10px 18px;
+    font-size: 18px;
+}
+
+body.ios-ui #lightbox .lb-prev {
+    grid-area: prev;
+    justify-self: end;
+    margin-right: 10px;
+}
+
+body.ios-ui #lightbox .lb-next {
+    grid-area: next;
+    justify-self: start;
+    margin-left: 10px;
+}
+
+/* iOS modal reroll eye */
+body.ios-ui #refresh-hint {
+    display: none !important;
+}
+
+body.ios-ui .ios-modal-reroll {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    margin-top: auto;
+    padding: 10px 0 4px;
+    width: 54px;
+    height: 54px;
+    border: none;
+    background: transparent;
+    color: var(--neon-green);
+    cursor: pointer;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 0, 0.35));
+}
+
+body.ios-ui .ios-modal-reroll.visible {
+    display: flex;
+}
+
+body.ios-ui .ios-modal-reroll svg {
+    width: 100%;
+    height: 100%;
+}
+
+body.ios-ui.corrupted .ios-modal-reroll {
+    color: var(--alert-red);
+    filter: drop-shadow(0 0 6px rgba(255, 0, 85, 0.35));
+}
+
+body.ios-ui .modal-content {
+    min-height: 0;
+    border-radius: var(--ios-radius-lg);
+}
+
+/* --- iOS: rounded corners on all chrome --- */
+body.ios-ui #init-btn,
+body.ios-ui #progress-container,
+body.ios-ui .ui-btn,
+body.ios-ui #mode-btn,
+body.ios-ui .playlist-btn,
+body.ios-ui .singularity-btn,
+body.ios-ui .arcade-btn,
+body.ios-ui .carousel-btn,
+body.ios-ui .lightbox-close,
+body.ios-ui .lightbox-btn {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #terminal-container,
+body.ios-ui.garden-ready #terminal-container:not([hidden]),
+body.ios-ui #terminal-container.reveal-in,
+body.ios-ui #terminal-container.active {
+    border-radius: var(--ios-radius-lg);
+}
+
+body.ios-ui #terminal-container.active {
+    overflow: hidden;
+}
+
+body.ios-ui #terminal-input-line {
+    border-radius: var(--ios-radius-sm);
+    background: rgba(0, 20, 0, 0.35);
+    padding: 4px 8px;
+    margin-top: 6px;
+}
+
+/* iOS: singularity overlay retired — poems live in sidebar modal */
+body.ios-ui #singularity-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+body:not(.ios-ui) .ios-only-sidebar-item {
+    display: none !important;
+}
+
+body.ios-ui #ios-poems-item[hidden] {
+    display: none !important;
+}
+
+body.ios-ui #modal-poems .ios-poems-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    flex: 1 1 auto;
+    max-height: min(62vh, 520px);
+}
+
+body.ios-ui #modal-poems .ios-poem-list {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 4px 0 8px;
+    max-height: min(28vh, 220px);
+    overflow-y: auto;
+    border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+body.ios-ui .ios-poem-list-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    margin: 0 0 4px;
+    border: 1px solid rgba(0, 255, 0, 0.25);
+    border-radius: var(--ios-radius-sm, 6px);
+    background: rgba(0, 20, 0, 0.35);
+    color: var(--neon-green);
+    font-family: var(--main-font);
+    font-size: 0.95rem;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+body.ios-ui .ios-poem-list-item.active {
+    background: rgba(0, 255, 0, 0.15);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+body.ios-ui #modal-poems .ios-poem-reader {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    text-align: center;
+}
+
+body.ios-ui #ios-poem-body,
+.ios-poem-text {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: var(--poem-font);
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 2;
+    letter-spacing: 0.015em;
+    font-variant-ligatures: common-ligatures;
+    color: var(--neon-green);
+}
+
+body.ios-ui .ios-poem-nav {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 8px;
+}
+
+body.ios-ui #modal-poems .modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: min(88dvh, 720px);
+}
+
+body.ios-ui .control-panel {
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-sizing: border-box;
+}
+
+body.ios-ui #playlist-menu {
+    border-radius: var(--ios-radius-md);
+    border: 1px solid rgba(0, 255, 0, 0.25);
+}
+
+body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu {
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid rgba(0, 255, 0, 0.25);
+}
+
+body.ios-ui #track-title {
+    border-radius: var(--ios-radius-sm);
+}
+
+body.ios-ui #sidebar-menu {
+    border-radius: 0 var(--ios-radius-xl) var(--ios-radius-xl) 0;
+}
+
+body.ios-ui #sidebar-menu li {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui .ios-sidebar-tools {
+    border-radius: var(--ios-radius-md) var(--ios-radius-md) 0 0;
+}
+
+body.ios-ui .modal,
+body.ios-ui .modal.wide {
+    border-radius: var(--ios-radius-lg);
+    overflow: hidden;
+}
+
+body.ios-ui #modal-cards.modal.wide {
+    width: min(880px, 98vw);
+}
+
+body.ios-ui .modal h2 {
+    border-radius: var(--ios-radius-sm) var(--ios-radius-sm) 0 0;
+}
+
+body.ios-ui .scrollable-content {
+    border-radius: var(--ios-radius-sm);
+}
+
+body.ios-ui .vault-item,
+body.ios-ui .carousel-stage,
+body.ios-ui .carousel-slide,
+body.ios-ui .vault-media,
+body.ios-ui .vault-item iframe.genesis-iframe {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui .trophy-card,
+body.ios-ui #arcade-game-container {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #arcade-screen,
+body.ios-ui #sequence-display,
+body.ios-ui .interactive-square,
+body.ios-ui .matrix-grid {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #lightbox .lightbox-image-wrapper,
+body.ios-ui #lightbox #lightbox-img {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #ios-pong-scoreboard,
+body.ios-ui #ios-pong-comment,
+body.ios-ui #pong-quit-hint {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui #ios-pong-scoreboard.visible {
+    padding: 10px 22px;
+}
+
+body.ios-ui #ios-pong-comment.visible,
+body.ios-ui #pong-quit-hint {
+    padding: 6px 12px;
+    background: rgba(0, 8, 0, 0.55);
+}
+
+body.ios-ui .artifact-pizza {
+    border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui .ios-modal-reroll {
+    border-radius: var(--radius-pill);
+}
+
+#modal-arcade .modal-content {
+    overflow: hidden;
+}
+
+#modal-arcade .scrollable-content {
+    overflow-x: hidden;
+    overflow-y: visible;
+    max-height: none;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 14px 18px;
+}
+
+#modal-vault .scrollable-content {
+    max-height: min(72vh, 900px);
+}
+
+#modal-vault #refresh-hint,
+#modal-vault .ios-modal-reroll,
+#modal-arcade #refresh-hint,
+#modal-arcade .ios-modal-reroll,
+#modal-trophies #refresh-hint,
+#modal-trophies .ios-modal-reroll {
+    display: none !important;
+}
+
+/* --- iOS PANOPTICON PING PONG --- */
+.ios-pong-unselectable,
+.ios-pong-unselectable * {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.ios-pong-playing #ios-scroll-shell {
+    visibility: hidden;
+    overflow: hidden;
+    touch-action: none;
+    pointer-events: none;
+}
+
+body.ios-pong-playing #ios-pong-scoreboard,
+body.ios-pong-playing #ios-pong-comment,
+body.ios-pong-playing #panopticon-eye,
+body.pong-playing:not(.ios-ui) #ios-pong-scoreboard,
+body.pong-playing:not(.ios-ui) #ios-pong-comment,
+body.pong-playing:not(.ios-ui) #panopticon-eye {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+body.ios-pong-playing .control-panel.active,
+body.ios-pong-playing #terminal-container,
+body.ios-pong-playing.garden-ready #playlist-menu.active,
+body.pong-playing:not(.ios-ui) .control-panel.active,
+body.pong-playing:not(.ios-ui) #terminal-container,
+body.pong-playing:not(.ios-ui) #playlist-menu.active {
+    z-index: 10020;
+    pointer-events: auto;
+}
+
+body.ios-ui:has(#sidebar-menu.active) .control-panel {
+    z-index: 10022;
+    pointer-events: auto;
+    opacity: 1;
+}
+
+body:not(.ios-ui) .ios-pong-eye-tap {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+.ios-pong-eye-tap {
+    position: fixed;
+    z-index: 10006;
+    pointer-events: none;
+    touch-action: manipulation;
+    background: transparent;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.ios-pong-eye-tap.visible {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.ios-pong-panel {
+    position: fixed;
+    z-index: 10006;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+    touch-action: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.ios-pong-panel.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.pong-keyboard-hint-panel {
+    position: fixed;
+    z-index: 10021;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.pong-keyboard-hint-panel.visible,
+body.pong-keyboard-mode.pong-playing .pong-keyboard-hint-panel {
+    opacity: 1;
+    visibility: visible;
+}
+
+.pong-key-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    font-family: var(--main-font);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--neon-green);
+    border: 2px solid rgba(0, 255, 0, 0.55);
+    border-radius: var(--radius-sm);
+    background: rgba(0, 12, 0, 0.45);
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.28);
+    transition: color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.pong-key-hint.is-held {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.75);
+    background: rgba(0, 40, 0, 0.65);
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.55);
+}
+
+body.corrupted .pong-key-hint {
+    color: var(--alert-red);
+    border-color: rgba(255, 0, 85, 0.55);
+    background: rgba(24, 0, 8, 0.45);
+    box-shadow: 0 0 8px rgba(255, 0, 85, 0.28);
+}
+
+body.corrupted .pong-key-hint.is-held {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.75);
+    background: rgba(48, 0, 16, 0.65);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.55);
+}
+
+.ios-pong-arrow {
+    width: 54px;
+    height: 54px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--neon-green);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    outline: none;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 0, 0.35));
+}
+
+.ios-pong-arrow svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.ios-pong-ring {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.ios-pong-chevron {
+    fill: currentColor;
+}
+
+body.corrupted .ios-pong-arrow {
+    color: var(--alert-red);
+    filter: drop-shadow(0 0 6px rgba(255, 0, 85, 0.35));
+}
+
+#ios-pong-court {
+    position: fixed;
+    z-index: 13;
+    pointer-events: none;
+    touch-action: none;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+#ios-pong-court .pong-ball {
+    shape-rendering: geometricPrecision;
+}
+
+#ios-pong-court .pong-court-fill {
+    fill: rgba(0, 16, 0, 0.28);
+    stroke: none;
+    pointer-events: none;
+}
+
+#ios-pong-court .pong-court-boundary {
+    fill: none;
+    stroke: var(--neon-green);
+    stroke-width: 2.5;
+    opacity: 1;
+    pointer-events: none;
+}
+
+#ios-pong-court .pong-paddle {
+    shape-rendering: geometricPrecision;
+}
+
+#ios-pong-court.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#ios-pong-court.visible .pong-court-fill {
+    pointer-events: auto;
+}
+
+#ios-pong-court.visible.is-paused .pong-court-fill {
+    fill: rgba(0, 16, 0, 0.42);
+}
+
+#ios-pong-court.visible.is-paused .pong-court-boundary {
+    opacity: 0.72;
+}
+
+body.ios-ui #panopticon-pong {
+    display: none;
+}
+
+#ios-pong-quit {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom) + 24px);
+    transform: translateX(-50%);
+    z-index: 10007;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: 1.5px solid rgba(0, 255, 0, 0.42);
+    border-radius: 50%;
+    background: rgba(0, 8, 0, 0.78);
+    color: var(--neon-green);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    outline: none;
+    box-shadow: 0 0 14px rgba(0, 255, 0, 0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#ios-pong-quit:not([hidden]) {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (orientation: landscape) {
+    body.ios-pong-playing #ios-pong-quit:not([hidden]),
+    body.pong-playing:not(.pong-keyboard-mode) #ios-pong-quit:not([hidden]) {
+        top: calc(env(safe-area-inset-top) + 10px);
+        right: calc(env(safe-area-inset-right) + 10px);
+        left: auto;
+        bottom: auto;
+        transform: none;
+    }
+}
+
+body.pong-keyboard-mode #ios-pong-quit {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+.ios-pong-quit-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+    position: relative;
+}
+
+.ios-pong-quit-icon::before,
+.ios-pong-quit-icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 1px;
+}
+
+.ios-pong-quit-icon::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.ios-pong-quit-icon::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+body.corrupted #ios-pong-quit {
+    color: var(--alert-red);
+    border-color: rgba(255, 0, 85, 0.42);
+    background: rgba(20, 0, 6, 0.78);
+    box-shadow: 0 0 14px rgba(255, 0, 85, 0.18);
+}
+
+body.ios-pong-fading #panopticon-eye.pong-active,
+body.ios-pong-fading #panopticon-eye.pong-active #panopticon-pong,
+body.ios-pong-fading #ios-pong-court.visible,
+body.ios-pong-fading .ios-pong-panel.visible,
+body.ios-pong-fading #ios-pong-scoreboard,
+body.ios-pong-fading #ios-pong-quit,
+body.ios-pong-fading #ios-pong-comment,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active #panopticon-pong,
+body.pong-fading:not(.ios-ui) #ios-pong-court.visible,
+body.pong-fading:not(.ios-ui) #ios-pong-scoreboard,
+body.pong-fading:not(.ios-ui) #ios-pong-quit,
+body.pong-fading:not(.ios-ui) #ios-pong-comment {
+    opacity: 0 !important;
+    transition: opacity 0.48s ease;
+    pointer-events: none !important;
+}
+
+body.ios-pong-fading #panopticon-eye.pong-active .panopticon-lid,
+body.ios-pong-fading #panopticon-eye.pong-active .panopticon-iris-outer,
+body.ios-pong-fading #panopticon-eye.pong-active .panopticon-iris-mid,
+body.ios-pong-fading #panopticon-eye.pong-active .panopticon-pupil,
+body.ios-pong-fading #panopticon-eye.pong-active .panopticon-god-pupil,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active .panopticon-lid,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active .panopticon-iris-outer,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active .panopticon-iris-mid,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active .panopticon-pupil,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active .panopticon-god-pupil {
+    opacity: 1 !important;
+    transition: opacity 0.48s ease;
+}
+
+body.ios-pong-fading #panopticon-eye.pong-active .panopticon-socket-fill,
+body.ios-pong-fading #panopticon-eye.pong-active .panopticon-socket-inlay,
+body.ios-pong-fading #panopticon-eye.pong-active .panopticon-socket-inlay-rim,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active .panopticon-socket-fill,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active .panopticon-socket-inlay,
+body.pong-fading:not(.ios-ui) #panopticon-eye.pong-active .panopticon-socket-inlay-rim {
+    opacity: 1 !important;
+    transition: opacity 0.48s ease;
+}
+
+body.ios-pong-playing #panopticon-eye.pong-active .panopticon-lid,
+body.ios-pong-playing #panopticon-eye.pong-active .panopticon-iris-outer,
+body.ios-pong-playing #panopticon-eye.pong-active .panopticon-iris-mid,
+body.ios-pong-playing #panopticon-eye.pong-active .panopticon-pupil,
+body.ios-pong-playing #panopticon-eye.pong-active .panopticon-god-pupil,
+body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-lid,
+body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-iris-outer,
+body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-iris-mid,
+body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-pupil,
+body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-god-pupil {
+    opacity: 1 !important;
+}
+
+body.ios-pong-playing #panopticon-eye.pong-active .panopticon-socket-fill,
+body.ios-pong-playing #panopticon-eye.pong-active .panopticon-socket-inlay,
+body.ios-pong-playing #panopticon-eye.pong-active .panopticon-socket-inlay-rim,
+body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-socket-fill,
+body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-socket-inlay,
+body.pong-playing:not(.ios-ui) #panopticon-eye.pong-active .panopticon-socket-inlay-rim {
+    opacity: 0.72 !important;
+}
+
+#panopticon-eye.eye-move-anim,
+body.ios-pong-playing #panopticon-eye,
+body.pong-playing:not(.ios-ui) #panopticon-eye {
+    z-index: 14;
+    transition:
+        top 0.64s cubic-bezier(0.25, 0.75, 0.35, 1),
+        left 0.64s cubic-bezier(0.25, 0.75, 0.35, 1),
+        width 0.64s cubic-bezier(0.25, 0.75, 0.35, 1),
+        height 0.64s cubic-bezier(0.25, 0.75, 0.35, 1),
+        opacity 0.35s ease;
+}
+
+#ios-pong-comment {
+    position: fixed;
+    z-index: 10005;
+    margin: 0;
+    padding: 0 8px;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: var(--main-font);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    line-height: 1.35;
+    color: rgba(0, 255, 0, 0.78);
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.35);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+#ios-pong-comment.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: none;
+}
+
+body.corrupted #ios-pong-comment {
+    color: rgba(255, 0, 85, 0.78);
+    text-shadow: 0 0 8px rgba(255, 0, 85, 0.35);
+}
+
+#pong-quit-hint {
+    position: fixed;
+    z-index: 10005;
+    margin: 0;
+    padding: 0 8px;
+    font-family: var(--main-font);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: rgba(0, 255, 0, 0.62);
+    text-shadow: 0 0 6px rgba(0, 255, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body.corrupted #pong-quit-hint {
+    color: rgba(255, 0, 85, 0.62);
+    text-shadow: 0 0 6px rgba(255, 0, 85, 0.35);
+}
+
+#pong-start-hint,
+#konami-start-hint {
+    position: fixed;
+    z-index: 10005;
+    margin: 0;
+    padding: 0 8px;
+    font-family: var(--main-font);
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    color: rgba(0, 255, 0, 0.52);
+    text-shadow: 0 0 6px rgba(0, 255, 0, 0.28);
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    user-select: none;
+    transform: translate(-50%, -24px);
+}
+
+#pong-start-hint.hint-drop-in,
+#konami-start-hint.hint-drop-in {
+    animation: pongHintDropIn 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+#pong-start-hint .pong-hint-arrow,
+#konami-start-hint .pong-hint-arrow {
+    display: inline-block;
+    font-size: 1.65rem;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    color: rgba(0, 255, 0, 0.52);
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.38);
+    transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+
+#pong-start-hint .pong-hint-arrow.is-confirmed,
+#konami-start-hint .pong-hint-arrow.is-confirmed {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.85);
+}
+
+body.corrupted #pong-start-hint,
+body.corrupted #konami-start-hint {
+    color: rgba(255, 0, 85, 0.52);
+    text-shadow: 0 0 6px rgba(255, 0, 85, 0.28);
+}
+
+body.corrupted #pong-start-hint .pong-hint-arrow,
+body.corrupted #konami-start-hint .pong-hint-arrow {
+    color: rgba(255, 0, 85, 0.52);
+    text-shadow: 0 0 6px rgba(255, 0, 85, 0.28);
+}
+
+body.corrupted #pong-start-hint .pong-hint-arrow.is-confirmed,
+body.corrupted #konami-start-hint .pong-hint-arrow.is-confirmed {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.85);
+}
+
+body.pong-playing:not(.ios-ui) #ios-pong-court {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 0 18px rgba(0, 255, 0, 0.28);
+}
+
+body.pong-playing:not(.ios-ui) #ios-pong-court .pong-court-fill {
+    fill: rgba(0, 16, 0, 0.32);
+}
+
+body.pong-playing:not(.ios-ui) #ios-pong-court .pong-court-boundary {
+    stroke-width: 2.5;
+}
+
+body:not(.ios-ui) #panopticon-pong {
+    display: none !important;
+}
+
+body.pong-playing:not(.ios-ui) #ios-pong-scoreboard {
+    border-radius: var(--radius-sm);
+}
+
+body.pong-playing:not(.ios-ui) #ios-pong-comment {
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    background: rgba(0, 8, 0, 0.55);
+}
+
+#panopticon-pong {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+
+#panopticon-eye.pong-active #panopticon-pong {
+    opacity: 1;
+}
+
+#panopticon-eye.pong-active .panopticon-lid,
+#panopticon-eye.pong-active .panopticon-iris-outer,
+#panopticon-eye.pong-active .panopticon-iris-mid,
+#panopticon-eye.pong-active .panopticon-pupil,
+#panopticon-eye.pong-active .panopticon-god-pupil {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+body:has(#panopticon-eye.pong-active) .god-mode-triangle-layer {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+#panopticon-eye.pong-active .panopticon-socket-fill,
+#panopticon-eye.pong-active .panopticon-socket-inlay,
+#panopticon-eye.pong-active .panopticon-socket-inlay-rim {
+    opacity: 0.35;
+}
+
+.pong-paddle {
+    stroke: var(--neon-green);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    fill: none;
+    filter: drop-shadow(0 0 4px rgba(0, 255, 0, 0.45));
+}
+
+.pong-ball {
+    fill: var(--neon-green);
+    stroke: none;
+    filter: drop-shadow(0 0 6px rgba(0, 255, 0, 0.65));
+}
+
+body.corrupted .pong-paddle {
+    stroke: var(--alert-red);
+    filter: drop-shadow(0 0 4px rgba(255, 0, 85, 0.45));
+}
+
+body.corrupted .pong-ball {
+    fill: var(--alert-red);
+    filter: drop-shadow(0 0 6px rgba(255, 0, 85, 0.65));
+}
+
+body.corrupted #ios-pong-court .pong-court-fill {
+    fill: rgba(24, 0, 8, 0.28);
+}
+
+body.corrupted #ios-pong-court .pong-court-boundary {
+    fill: none;
+    stroke: var(--alert-red);
+}
+
+#ios-pong-scoreboard {
+    position: fixed;
+    top: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10005;
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 20px;
+    font-family: var(--main-font);
+    font-size: 1.15rem;
+    letter-spacing: 0.12em;
+    color: var(--neon-green);
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+    border: 1px solid rgba(0, 255, 0, 0.35);
+    background: rgba(0, 8, 0, 0.82);
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#ios-pong-scoreboard.visible {
+    display: flex;
+}
+
+#ios-pong-scoreboard.score-drop {
+    animation: pongScoreDropBelow 0.65s cubic-bezier(0.25, 1, 0.45, 1) forwards;
+}
+
+body.corrupted #ios-pong-scoreboard {
+    color: var(--alert-red);
+    border-color: rgba(255, 0, 85, 0.35);
+    text-shadow: 0 0 8px rgba(255, 0, 85, 0.5);
+}

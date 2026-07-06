@@ -51,7 +51,7 @@
     }
 
     function trophyIconMarkup(className) {
-        return `<span class="${className} theme-icon theme-icon--trophy" aria-hidden="true"></span>`;
+        return `<span class="${className} mask-icon mask-icon--sidebar-lg mask-icon--trophy" aria-hidden="true"></span>`;
     }
 
     function notifyUnlock(def) {
@@ -67,7 +67,7 @@
         }
         const el = document.createElement('div');
         el.className = 'trophy-unlock-flash';
-        el.innerHTML = `<span class="trophy-unlock-flash-icon theme-icon theme-icon--trophy" aria-hidden="true"></span>`;
+        el.innerHTML = `<span class="trophy-unlock-flash-icon mask-icon mask-icon--trophy" aria-hidden="true"></span>`;
         document.body.appendChild(el);
         flashEl = el;
 
@@ -88,6 +88,7 @@
         const def = defById[id];
         notifyUnlock(def);
         playUnlockFlash();
+        globalThis.gardenHooks?.recordBehavior?.('trophy_unlock');
         return true;
     }
 

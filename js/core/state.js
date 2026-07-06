@@ -1,4 +1,5 @@
 // Mutable app state (live bindings for ES modules)
+import { callHook } from './hooks.js';
 export let time = 0;
 export let isCorrupted = false;
 export let isRepulsing = false;
@@ -28,8 +29,11 @@ export function getCipherStage() {
 }
 
 export function setCipherStage(stage) {
+    if (stage > cipherStage) {
+        callHook('recordBehavior', 'cipher_stage');
+    }
     cipherStage = stage;
-    globalThis.gardenHooks?.syncPanopticonCodeSequenceComments?.();
+    callHook('syncPanopticonCodeSequenceComments');
 }
 
 globalThis.getCipherStage = getCipherStage;

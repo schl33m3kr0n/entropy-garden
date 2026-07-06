@@ -4,6 +4,9 @@
  */
 import { gardenHasStarted } from '../core/state.js';
 import { resetPanopticonIdleCommentTimer } from '../core/shared.js';
+import { deriveProfileLabels } from './behavioral-labels.js';
+
+export { deriveProfileLabels } from './behavioral-labels.js';
 
 const ANALYSIS_INTERVAL_MS = 240_000;
 const POINTER_SAMPLE_MS = 4000;
@@ -25,6 +28,14 @@ const metrics = {
     slotFails: 0,
     pointerBursts: 0,
     keypresses: 0,
+    pongSessions: 0,
+    konamiCompletes: 0,
+    arcadeClears: 0,
+    cardsRounds: 0,
+    trophyUnlocks: 0,
+    cipherStages: 0,
+    scatterBreaches: 0,
+    pizzaDeploys: 0,
 };
 
 const milestones = new Set();
@@ -52,30 +63,7 @@ function topModal() {
 }
 
 function deriveLabels() {
-    const labels = [];
-    const mins = sessionMinutes();
-
-    if (metrics.rerolls >= 4) labels.push('entropy-addict');
-    else if (metrics.rerolls >= 2) labels.push('timeline-tinkerer');
-
-    if (metrics.corruptEngagements >= 2) labels.push('chaos-seeker');
-    else if (metrics.corruptEngagements === 1) labels.push('chaos-curious');
-
-    const modalTotal = Object.values(metrics.modalOpens).reduce((a, b) => a + b, 0);
-    if (modalTotal >= 5) labels.push('archivist');
-    if (metrics.terminalCommands >= 6) labels.push('operator');
-    if (metrics.terminalOpens >= 3 && metrics.terminalCommands < 2) labels.push('peeker');
-
-    if (metrics.idleDissociations >= 2) labels.push('dissociator');
-    if (metrics.pointerBursts >= 8 && mins <= 12) labels.push('restless-cursor');
-    if (metrics.pointerBursts <= 2 && mins >= 5) labels.push('statue');
-
-    if (metrics.godModeToggles >= 1) labels.push('override-curious');
-    if (metrics.slotFails >= 2) labels.push('vault-guesser');
-    if (metrics.dockingCycles >= 6) labels.push('bay-tinkerer');
-
-    if (!labels.length) labels.push('baseline-observer');
-    return labels;
+    return deriveProfileLabels(metrics, sessionMinutes());
 }
 
 function emitInsight(triggerId, options = {}, attempt = 0) {
@@ -156,6 +144,30 @@ export function recordBehavior(event, detail = {}) {
         case 'slot_fail':
             metrics.slotFails++;
             break;
+        case 'pong_session':
+            metrics.pongSessions++;
+            break;
+        case 'konami_complete':
+            metrics.konamiCompletes++;
+            break;
+        case 'arcade_clear':
+            metrics.arcadeClears++;
+            break;
+        case 'cards_round':
+            metrics.cardsRounds++;
+            break;
+        case 'trophy_unlock':
+            metrics.trophyUnlocks++;
+            break;
+        case 'cipher_stage':
+            metrics.cipherStages++;
+            break;
+        case 'scatter_breach':
+            metrics.scatterBreaches++;
+            break;
+        case 'pizza_deploy':
+            metrics.pizzaDeploys++;
+            break;
         default:
             break;
     }
@@ -187,6 +199,8 @@ export function printBehaviorReport() {
         pushLog(`> TOP MODAL: ${snap.modalTop.id.toUpperCase()} (${snap.modalTop.count}x)`);
     }
     pushLog(`> IDLE VOIDS: ${snap.idleDissociations} | POINTER BURSTS: ${snap.pointerBursts}`);
+    pushLog(`> GAMES: pong ${snap.pongSessions} | konami ${snap.konamiCompletes} | arcade ${snap.arcadeClears} | cards ${snap.cardsRounds}`);
+    pushLog(`> TROPHIES: ${snap.trophyUnlocks} | CIPHER STAGES: ${snap.cipherStages} | SCATTER: ${snap.scatterBreaches} | PIZZA: ${snap.pizzaDeploys}`);
     pushLog('> NOTE: analysis is local to this session. the eye forgets nothing.');
 }
 

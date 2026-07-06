@@ -1,5 +1,15 @@
 // Entropy Garden — main entry (lazy-loads terminal, matrix, singularity, arcade)
 import { bindPlaylistPlayPause, isPlayPauseShowingPlaying } from './playlist-icons.js';
+import { registerHooks, getHook } from './core/hooks.js';
+import { bindSidebarNavigation } from './ui/sidebar.js';
+import { bindPlaylistTransport, bindBossKeyClose } from './ui/playlist.js';
+import {
+    onModalOpened,
+    onModalClosed,
+    bindModalEscapeClose,
+    enhanceSidebarItems,
+    bindPlaylistTransportLabels,
+} from './ui/modal-a11y.js';
 import {
     sfx,
     playSound,
@@ -206,6 +216,7 @@ function activateGodMode() {
         pushTerminalLog("!!! OVERRIDE ACCEPTED !!!");
         playSound(sfx.missionCleared);
         globalThis.unlockTrophy?.('konami_god');
+        recordBehavior('konami_complete');
         globalThis.EntropyCipherHint?.unlock?.();
     }
 }
@@ -424,8 +435,6 @@ function toggleBossKey() {
 
 globalThis.toggleBossKey = toggleBossKey;
 
-const closeMayaBtn = document.getElementById('close-maya-btn');
-if (closeMayaBtn) closeMayaBtn.addEventListener('click', toggleBossKey);
 document.querySelectorAll('.boss-btn').forEach((btn) => btn.addEventListener('click', toggleBossKey));
 
 // --- TIME SENSITIVE LORE ---
@@ -1056,6 +1065,8 @@ function openModal(id) {
             attachRefreshHint(m);
             triggerGhostHint();
         }
+
+        onModalOpened(m);
     } else {
         pushTerminalLog(`> ERROR: modal-${resolvedId} not found.`);
     }
@@ -1064,6 +1075,7 @@ function openModal(id) {
 function closeModal(modalElement) { 
     const closeClone = sfx.close.cloneNode();
     closeClone.play().catch(e => {});
+    onModalClosed(modalElement);
     modalElement.style.display = 'none';
     detachRefreshHint();
 }
@@ -1143,6 +1155,17 @@ function onModalDragEnd() {
 // --- INITIALIZATION & EVENT BINDING ---
 function bindDomEvents() {
     initIosUi();
+    bindSidebarNavigation(openModal, { playHoverSound: !perf.isIOS });
+    enhanceSidebarItems();
+    bindPlaylistTransport({ onPrev: playPrevTrack, onNext: playNextTrack });
+    bindPlaylistTransportLabels();
+    bindBossKeyClose(toggleBossKey);
+    bindModalEscapeClose(closeModal);
+
+    document.querySelectorAll('.modal').forEach((modal) => {
+        modal.setAttribute('aria-hidden', 'true');
+    });
+
     // 1. Bind Modal Close Buttons
     document.querySelectorAll('.modal-close').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -1171,17 +1194,6 @@ function bindDomEvents() {
             pushTerminalLog("> AUDIO RESUMED.");
             firePanopticonComment('playlistPlay');
             recordBehavior('playlist_toggle');
-        });
-    }
-    
-    // 3. Sidebar hover sounds (desktop only; iOS taps use press in openModal)
-    if (!perf.isIOS) {
-        document.querySelectorAll('#sidebar-menu li').forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                const hoverClone = sfx.click.cloneNode();
-                hoverClone.volume = 0.4;
-                hoverClone.play().catch(e => {});
-            });
         });
     }
 
@@ -1625,12 +1637,12 @@ lightbox?.addEventListener('click', (e) => {
 });
 
 function pongBlocksArrowNav(e) {
-    return globalThis.gardenHooks?.pongBlocksArrowNav?.(e) ?? false;
+    return getHook('pongBlocksArrowNav')?.(e) ?? false;
 }
 
 function konamiClaimsKey(e) {
-    const isPongActive = globalThis.gardenHooks?.isPongSessionActive ?? (() => false);
-    return globalThis.gardenHooks?.konamiClaimsKey?.(e, isPongActive) ?? false;
+    const isPongActive = getHook('isPongSessionActive') ?? (() => false);
+    return getHook('konamiClaimsKey')?.(e, isPongActive) ?? false;
 }
 
 // -- 3. Unified Keyboard Logic --
@@ -1650,8 +1662,7 @@ document.addEventListener('keydown', (e) => {
 
 window.addEventListener('resize', updateCarousel);
 
-globalThis.gardenHooks = {
-    ...globalThis.gardenHooks,
+registerHooks({
     toggleBossKey,
     handleReroll,
     toggleMode,
@@ -1674,7 +1685,7 @@ globalThis.gardenHooks = {
     syncPanopticonCodeSequenceComments,
     stopGardenLoop,
     resumeGardenLoop,
-};
+});
 
 // --- GLOBAL HTML HANDLERS ---
 window.openModal = openModal;

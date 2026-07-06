@@ -1,0 +1,308 @@
+/* Entropy Garden — reset, gatekeeper, loader */
+
+/* --- CUSTOM FONTS --- */
+@font-face {
+    font-family: 'PsychedelicFlames';
+    src: url('../assets/fonts/flames.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+html {
+    scrollbar-gutter: stable;
+}
+
+body, html { 
+    margin: 0; 
+    padding: 0; 
+    background-color: var(--void-black); 
+    font-family: var(--main-font); 
+    overflow: hidden; 
+    
+    /* --- THE NUCLEAR LOCK --- */
+    position: fixed; 
+    width: 100vw;
+    height: 100vh; 
+    top: 0;
+    left: 0;
+    /* ------------------------ */
+
+    cursor: default; 
+    user-select: none; 
+    animation: fadeInPage 1.5s ease-out forwards; 
+}
+
+body.corrupted {
+    --neon-green: var(--alert-red); 
+}
+
+/* --- THE BACKGROUND ANIMATION ENGINE --- */
+@keyframes entropySpin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* --- THE ROTATING BACKGROUND IMAGE (off on gatekeeper — saves decode + compositor) --- */
+body::before {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 150vmax;
+    height: 150vmax;
+    /* Keep centered when animation is off (iOS / reduced-motion) */
+    transform: translate(-50%, -50%);
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+    animation: none;
+}
+
+body.garden-loading::before,
+body.garden-ready::before {
+    background-image: url('../assets/img/backgrounds/bkgrnd.jpg');
+    background-image: -webkit-image-set(
+        url('../assets/img/backgrounds/bkgrnd.webp') type('image/webp'),
+        url('../assets/img/backgrounds/bkgrnd.jpg') type('image/jpeg')
+    );
+    background-image: image-set(
+        url('../assets/img/backgrounds/bkgrnd.webp') type('image/webp'),
+        url('../assets/img/backgrounds/bkgrnd.jpg') type('image/jpeg')
+    );
+    opacity: 0.02;
+}
+
+body.garden-ready::before {
+    animation: entropySpin 90s linear infinite;
+}
+
+/* --- INITIALIZE GATEKEEPER --- */
+#init-screen {
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    background: var(--void-black);
+    z-index: 100000; /* Sits above absolutely everything */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#init-btn {
+    background: rgba(0, 20, 0, 0.8);
+    border: 2px solid var(--neon-green);
+    color: var(--neon-green);
+    font-family: var(--main-font); /* <-- Updated! */
+    font-size: 1.5rem;
+    padding: 20px 40px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px var(--neon-green);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+}
+
+#init-btn:hover {
+    background: var(--neon-green);
+    color: black;
+    box-shadow: 0 0 30px var(--neon-green);
+}
+
+/* --- PHOTOSENSITIVITY WARNING --- */
+#init-screen {
+    flex-direction: column; /* Stacks the warning and the button vertically */
+    gap: 30px; 
+}
+
+#epilepsy-warning {
+    max-width: 500px;
+    text-align: center;
+    padding: 25px;
+    border-radius: var(--radius-lg);
+    background: rgba(10, 5, 8, 0.85);
+}
+
+.warning-title {
+    color: var(--alert-red);
+    font-size: 1.2rem;
+    font-weight: bold;
+    letter-spacing: 3px;
+    display: block;
+    margin-bottom: 15px;
+    text-shadow: 0 0 8px var(--alert-red);
+    animation: pulseWarning 2s infinite alternate;
+}
+
+#epilepsy-warning p {
+    color: #ddd;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+    font-family: var(--main-font);
+}
+
+/* Subtle pulse for the warning title */
+@keyframes pulseWarning {
+    0% { opacity: 0.8; text-shadow: 0 0 5px var(--alert-red); }
+    100% { opacity: 1; text-shadow: 0 0 15px var(--alert-red); }
+}
+
+/* --- LOADING SCREEN --- */
+#loader { 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    background: var(--void-black); 
+    z-index: 10100; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    color: var(--neon-green); 
+    transition: opacity 1.2s ease-out;
+    pointer-events: auto;
+}
+
+/* Above init gatekeeper (100000) once Initialize is clicked */
+body.garden-loading #loader {
+    z-index: 100001;
+}
+
+#loader.loader-exiting {
+    pointer-events: none;
+}
+
+#progress-container { 
+    width: 350px; height: 20px; 
+    border: 2px solid var(--neon-green); 
+    margin-top: 20px; position: relative; 
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+#progress-bar { 
+    width: 0%; height: 100%; 
+    background: var(--neon-green); 
+    transition: width 0.1s linear; 
+}
+
+#loader-text { 
+    text-transform: uppercase; 
+    letter-spacing: 2px; min-height: 20px; 
+    font-size: 0.9rem; text-align: center; max-width: 80%; 
+}
+
+/* --- THE OUROBOROS --- */
+
+#ouroboros-container {
+    width: 65px;  /* Cut down from 120px */
+    height: 65px; /* Cut down from 120px */
+    margin-top: 30px;
+}
+
+#loader-leaf {
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: var(--neon-green);
+    -webkit-mask-image: url('../assets/icons/cannabis-leaf.png');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: url('../assets/icons/cannabis-leaf.png');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    animation: spinSnake 4s linear infinite;
+}
+
+body.april-420 #ouroboros-svg {
+    display: none;
+}
+
+body.april-420 #loader-leaf {
+    display: block;
+}
+
+#ouroboros-svg {
+    width: 100%;
+    height: 100%;
+    animation: spinSnake 4s linear infinite;
+    /* This adds the terminal radiation glow */
+}
+
+/* This forces every piece of the SVG to become pure neon green */
+#ouroboros-svg path, 
+#ouroboros-svg circle, 
+#ouroboros-svg polygon {
+    fill: var(--neon-green) !important;
+    stroke: var(--neon-green) !important;
+}
+
+#ouroboros-path {
+    transition: stroke-dashoffset 0.1s linear;
+}
+
+/* --- MOBILE / LOW-POWER PERF MODE --- */
+body.perf-lite::before {
+    animation-duration: 180s;
+    width: 120vmax;
+    height: 120vmax;
+}
+
+body.perf-lite #ouroboros-svg,
+body.perf-lite #loader-leaf {
+    animation-duration: 12s;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+    h1 {
+        font-size: 2.75rem;
+        letter-spacing: 3px;
+        padding: 18px 24px 14px;
+    }
+
+    .modal {
+        width: min(450px, 92vw);
+    }
+
+    .modal.wide {
+        width: min(700px, 96vw);
+    }
+
+    #modal-cards.modal.wide {
+        width: min(880px, 98vw);
+    }
+
+    .modal-content {
+        padding: 28px 24px;
+    }
+
+    #terminal-container.active {
+        width: min(350px, 85vw);
+    }
+
+    #sidebar-menu {
+        width: min(250px, 80vw);
+    }
+
+    .vault-grid {
+        columns: 1;
+        column-gap: 0;
+        padding: 20px;
+    }
+
+    .vault-item {
+        margin-bottom: 32px;
+    }
+
+    .vault-item.carousel-container {
+        width: 100%;
+    }
+}

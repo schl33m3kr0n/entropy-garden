@@ -1,16 +1,19 @@
-/** SVG playlist transport controls (replaces Unicode symbols / iOS text labels). */
+/** SVG playlist transport controls (mask-icon play/pause toggle). */
+
+const PLAYLIST_ICON = '.mask-icon';
 
 export function isPlayPauseShowingPlaying(btn) {
-    return Boolean(btn?.querySelector('.playlist-icon')?.classList.contains('playlist-icon--pause'));
+    return Boolean(btn?.querySelector(PLAYLIST_ICON)?.classList.contains('mask-icon--pause'));
 }
 
 export function setPlayPauseIcon(btn, playing) {
-    const icon = btn?.querySelector('.playlist-icon');
+    const icon = btn?.querySelector(PLAYLIST_ICON);
     if (!icon) return;
 
-    icon.classList.remove('playlist-icon--play', 'playlist-icon--pause');
-    icon.classList.add(playing ? 'playlist-icon--pause' : 'playlist-icon--play');
+    icon.classList.remove('mask-icon--play', 'mask-icon--pause');
+    icon.classList.add(playing ? 'mask-icon--pause' : 'mask-icon--play');
     btn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    btn.setAttribute('aria-pressed', playing ? 'true' : 'false');
 }
 
 export function syncPlayPauseIcon(btn, track) {

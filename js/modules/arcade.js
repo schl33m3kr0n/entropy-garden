@@ -1,5 +1,6 @@
 import { sfx, playSound } from '../core/shared.js';
 import { pushTerminalLog, loadTerminal } from '../lazy.js';
+import { callHook } from '../core/hooks.js';
 
 let arcadeScore = 0;
 let currentSequenceIndex = 0;
@@ -70,6 +71,7 @@ const arcadeSequences = [
 
 function dispenseArcadeReward() {
     globalThis.unlockTrophy?.('arcade_clear');
+    callHook('recordBehavior', 'arcade_clear');
     const modal = document.getElementById('modal-arcade');
     if (modal) modal.style.display = 'none';
     loadTerminal()

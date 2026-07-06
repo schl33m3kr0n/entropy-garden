@@ -4,7 +4,7 @@ import {
     getActivationHintOwner,
     revealActivationHint,
     updateActivationHintHtml,
-} from './pong.js';
+} from './pong/index.js';
 
 const KONAMI_CODE = [
     'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',

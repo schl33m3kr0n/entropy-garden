@@ -71,6 +71,8 @@ if ! (
 fi
 log "Pack complete."
 
+bash "$ROOT/scripts/dev/inject-sw-cache-version.sh" "$DEST/sw.js"
+
 # Cloudflare Pages reads _headers / _redirects / _routes.json from the publish root
 for meta in _headers _redirects _routes.json; do
   if [ -f "$ROOT/$meta" ]; then
@@ -94,7 +96,8 @@ check_file "$DEST/js/core/shared.js"
 check_file "$DEST/js/modules/matrix.js"
 check_file "$DEST/js/modules/singularity.js"
 check_file "$DEST/js/modules/arcade.js"
-check_file "$DEST/js/game/pong.js"
+check_file "$DEST/js/game/pong/index.js"
+check_file "$DEST/js/game/pong/session.js"
 check_file "$DEST/js/game/konami.js"
 check_file "$DEST/_headers"
 check_file "$DEST/_redirects"
@@ -139,8 +142,8 @@ if grep -qE "import\(['\"]\./core/" "$DEST/js/modules/"*.js 2>/dev/null; then
   exit 1
 fi
 
-if ! grep -q "import('./game/pong.js')" "$DEST/js/lazy.js"; then
-  echo "Deploy check failed: dist/js/lazy.js must lazy-load game/pong.js" >&2
+if ! grep -q "game/pong" "$DEST/js/loaders/game-addons.js"; then
+  echo "Deploy check failed: dist/js/loaders/game-addons.js must lazy-load game/pong" >&2
   exit 1
 fi
 
@@ -154,13 +157,13 @@ if grep -qE "from ['\"].*game/pong\.js['\"]" "$DEST/js/ios/ios-ui.js" 2>/dev/nul
   exit 1
 fi
 
-if ! grep -q 'let panopticonPongInitialized = false' "$DEST/js/game/pong.js"; then
-  echo "Deploy check failed: js/game/pong.js missing panopticonPongInitialized guard" >&2
+if ! grep -q 'let panopticonPongInitialized = false' "$DEST/js/game/pong/session.js"; then
+  echo "Deploy check failed: js/game/pong/session.js missing panopticonPongInitialized guard" >&2
   exit 1
 fi
 
-if ! grep -q 'z-index: 10020' "$DEST/css/style.css"; then
-  echo "Deploy check failed: dist/css/style.css missing app-chrome z-index fix" >&2
+if ! grep -rq 'z-index: 10020' "$DEST/css/"; then
+  echo "Deploy check failed: dist/css missing app-chrome z-index fix" >&2
   exit 1
 fi
 
@@ -169,24 +172,28 @@ if ! grep -q 'wheelConicGradient' "$DEST/js/modules/matrix.js"; then
   exit 1
 fi
 
-if grep -q 'setTimeout(showPongArmingHint' "$DEST/js/game/pong.js"; then
-  echo "Deploy check failed: dist/js/game/pong.js still auto-shows pong arming hint" >&2
+if grep -q 'setTimeout(showPongArmingHint' "$DEST/js/game/pong/session.js"; then
+  echo "Deploy check failed: dist/js/game/pong/session.js still auto-shows pong arming hint" >&2
   exit 1
 fi
 
-if ! grep -q 'pong-keyboard-hint-panel' "$DEST/css/style.css"; then
-  echo "Deploy check failed: dist/css/style.css missing desktop pong keyboard hints" >&2
+if ! grep -rq 'pong-keyboard-hint-panel' "$DEST/css/"; then
+  echo "Deploy check failed: dist/css missing desktop pong keyboard hints" >&2
   exit 1
 fi
 
-if ! grep -q 'bindKeyboardHintPanel' "$DEST/js/game/pong.js"; then
-  echo "Deploy check failed: dist/js/game/pong.js missing desktop pong keyboard hints" >&2
+if ! grep -q 'bindKeyboardHintPanel' "$DEST/js/game/pong/session.js"; then
+  echo "Deploy check failed: dist/js/game/pong/session.js missing desktop pong keyboard hints" >&2
   exit 1
 fi
 
-SW_VER="$(grep -E "const CACHE_VERSION = " "$ROOT/sw.js" | head -1)"
-if ! grep -qF "$SW_VER" "$DEST/sw.js"; then
-  echo "Deploy check failed: dist/sw.js out of sync with source (re-run scripts/deploy/cloudflare.sh)" >&2
+SW_VER="$(grep -E "const CACHE_VERSION = " "$DEST/sw.js" | head -1)"
+if ! grep -qE "entropy-garden-[0-9a-f]{4,}" "$DEST/sw.js"; then
+  echo "Deploy check failed: dist/sw.js missing git-derived CACHE_VERSION (re-run scripts/deploy/cloudflare.sh)" >&2
+  exit 1
+fi
+if grep -q '__EG_CACHE_VERSION__' "$DEST/sw.js"; then
+  echo "Deploy check failed: dist/sw.js still has __EG_CACHE_VERSION__ placeholder" >&2
   exit 1
 fi
 

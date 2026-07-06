@@ -1,6 +1,7 @@
 // iOS layout: vertical HUD rail, sidebar tools, playlist SVG icons.
 
 import { perf, isIosTabletScreen } from '../core/shared.js';
+import { callHook } from '../core/hooks.js';
 
 import { resizeCanvas, stopGardenLoop, resumeGardenLoop } from '../lazy.js';
 import { isSingularityActive } from '../core/state.js';
@@ -176,7 +177,7 @@ function addIosModalRerollButtons() {
 
             e.stopPropagation();
 
-            globalThis.gardenHooks?.handleReroll?.();
+            callHook('handleReroll');
 
         });
 

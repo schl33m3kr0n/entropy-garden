@@ -1,0 +1,48 @@
+/* Entropy Garden — design tokens & fonts */
+
+:root {
+    --void-black: #050505;
+    --neon-green: #0f0;
+    --alert-red: #ff0055;
+    --tech-grey: #1a1a1a;
+    --cyan: #0ff;
+    --glass: rgba(10, 20, 15, 0.95);
+    
+    /* --- MASTER FONT STACK --- */
+    --main-font: 'Avenir', 'Avenir Next', 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --poem-font: 'Spectral', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+
+    /* --- CORNER RADIUS --- */
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 22px;
+    --radius-xl: 28px;
+    --radius-pill: 999px;
+
+    /* Cipher / preview chromatic aberration (drop-shadow RGB split) */
+    --chroma-filter:
+        drop-shadow(2px 0.5px 0 rgba(255, 0, 85, 0.65))
+        drop-shadow(-2px -0.5px 0 rgba(0, 255, 255, 0.65));
+    --chroma-filter-lite:
+        drop-shadow(1.5px 0.5px 0 rgba(255, 0, 85, 0.55))
+        drop-shadow(-1.5px -0.5px 0 rgba(0, 255, 255, 0.55));
+    --chroma-filter-corrupted:
+        drop-shadow(2px 0.5px 0 rgba(255, 0, 85, 0.72))
+        drop-shadow(-2px -0.5px 0 rgba(255, 80, 120, 0.45));
+}
+
+@font-face {
+    font-family: 'Spectral';
+    src: url('../assets/fonts/spectral-regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Spectral';
+    src: url('../assets/fonts/spectral-italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
