@@ -68,6 +68,7 @@
         "Situational Awareness (Level -5)",
         "Skyrim Khajit Main (Lvl M30W)",
         "Lego Star Wars Padawan (99%)",
+        "Analytic Paralytic (Lvl 83)",
     ],
     classTitlesGritty: [
         "Chronic Consumer (Lvl 420)",
@@ -76,6 +77,7 @@
         "Multi-hyphenate Outpatient (Lvl 27)",
         "Cruster (Lvl 2)",
         "Cheez-Its Guzzler (Lvl 999)",
+        "Nipple-Twister (Lvl 00)",
     ]
     });
 })(globalThis);
