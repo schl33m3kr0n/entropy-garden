@@ -25,7 +25,6 @@ import {
     panopticonRainbowGradEl,
     godModeRainbowGradEl,
 } from './dom.js';
-import { applyGodPupilSymbol, resetGodPupilPosition } from './god-symbol-offsets.js';
 
 export let eyeAngle = 0;
 export let eyeMode = 'idle';
@@ -84,13 +83,13 @@ function ensureGodTriangleLayer() {
     grad.setAttribute('gradientUnits', 'userSpaceOnUse');
     grad.setAttribute('spreadMethod', 'repeat');
     const stops = [
-        ['0%', 'hsl(0, 100%, 55%)'],
-        ['17%', 'hsl(60, 100%, 55%)'],
-        ['33%', 'hsl(120, 100%, 55%)'],
-        ['50%', 'hsl(180, 100%, 55%)'],
-        ['67%', 'hsl(240, 100%, 55%)'],
-        ['83%', 'hsl(300, 100%, 55%)'],
-        ['100%', 'hsl(0, 100%, 55%)'],
+        ['0%', 'hsl(0, 100%, 50%)'],
+        ['17%', 'hsl(60, 100%, 50%)'],
+        ['33%', 'hsl(120, 100%, 50%)'],
+        ['50%', 'hsl(180, 100%, 50%)'],
+        ['67%', 'hsl(240, 100%, 50%)'],
+        ['83%', 'hsl(300, 100%, 50%)'],
+        ['100%', 'hsl(0, 100%, 50%)'],
     ];
     for (const [offset, color] of stops) {
         const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
@@ -161,7 +160,10 @@ export function syncGodModeTriangleSize() {
     tri.setAttribute('points', points);
     tri.setAttribute('stroke-width', String(strokeW));
     tri.setAttribute('fill', 'none');
-    tri.removeAttribute('stroke');
+    tri.setAttribute(
+        'stroke',
+        isCorrupted && document.body.classList.contains('god-mode') ? '#ff0055' : '#00ff00'
+    );
 }
 
 function showGodModeTriangle() {
@@ -970,14 +972,17 @@ function beginPanopticonLand(displayAngle, gazeX, gazeY) {
 }
 
 export function syncPanopticonRainbow() {
-    // God-eye hues track the cipher wheel via CSS --cipher-wheel-hue-filter on #panopticon-eye.
-    // HUD chrome still animates --rainbow-offset in matrix.js.
+    const offset = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--rainbow-offset')
+    ) || 0;
+    const cycle = (offset / 2) % 100;
+    const transform = `translate(${-cycle}, 0)`;
     if (panopticonRainbowGradEl) {
-        panopticonRainbowGradEl.removeAttribute('gradientTransform');
+        panopticonRainbowGradEl.setAttribute('gradientTransform', transform);
     }
     const godRainbow = document.getElementById('god-mode-rainbow') ?? godModeRainbowGradEl;
     if (godRainbow) {
-        godRainbow.removeAttribute('gradientTransform');
+        godRainbow.setAttribute('gradientTransform', transform);
     }
 }
 
@@ -1111,10 +1116,7 @@ function resetPanopticonGodStyling() {
     panopticonEl?.classList.remove('god-active', 'god-rainbow');
     hideGodModeTriangle();
     if (panopticonPupilEl) panopticonPupilEl.style.display = '';
-    if (panopticonGodPupilEl) {
-        panopticonGodPupilEl.style.display = 'none';
-        resetGodPupilPosition(panopticonGodPupilEl);
-    }
+    if (panopticonGodPupilEl) panopticonGodPupilEl.style.display = 'none';
 }
 
 function resetPanopticonNormalPupil() {
@@ -1127,7 +1129,7 @@ function enablePanopticonGodPupil() {
     showGodModeTriangle();
     if (panopticonPupilEl) panopticonPupilEl.style.display = 'none';
     if (panopticonGodPupilEl) {
-        applyGodPupilSymbol(panopticonGodPupilEl, drawGodSymbol());
+        panopticonGodPupilEl.textContent = drawGodSymbol();
         panopticonGodPupilEl.style.display = 'block';
     }
     document.dispatchEvent(new CustomEvent('panopticon-god-active'));
@@ -1219,7 +1221,7 @@ function animatePanopticonGodEye(now) {
 
         if (now - godSymbolTick >= (perf.prefersReducedMotion ? 380 : PANOPTICON_GOD_SYMBOL_MS)) {
             if (panopticonGodPupilEl) {
-                applyGodPupilSymbol(panopticonGodPupilEl, drawGodSymbol());
+                panopticonGodPupilEl.textContent = drawGodSymbol();
             }
             godSymbolTick = now;
         }

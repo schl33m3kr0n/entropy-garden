@@ -78,51 +78,14 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
     box-shadow: 0 0 12px rgba(255, 0, 85, 0.45);
 }
 
-#panopticon-eye.god-rainbow {
-    filter: drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
-}
-
-#panopticon-eye.god-rainbow.dizzy {
-    filter: drop-shadow(0 0 22px rgba(0, 255, 0, 0.55));
-}
-
-body.corrupted #panopticon-eye.god-rainbow {
-    filter: drop-shadow(0 0 18px rgba(255, 0, 85, 0.45));
-}
-
-body.corrupted #panopticon-eye.god-rainbow.dizzy {
-    filter: drop-shadow(0 0 26px rgba(255, 0, 85, 0.65));
-}
-
-body.perf-lite #panopticon-eye.god-rainbow,
-body.perf-safari #panopticon-eye.god-rainbow {
-    filter: drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
-}
-
-/* Iris + lid painted on #grid-canvas via drawGodModeEyeChrome (same conic as wheels). */
 #panopticon-eye.god-rainbow .panopticon-lid,
 #panopticon-eye.god-rainbow .panopticon-iris-outer,
 #panopticon-eye.god-rainbow .panopticon-iris-mid {
-    stroke: none;
-    opacity: 0;
+    stroke: url(#panopticon-rainbow);
 }
 
 #panopticon-eye.god-rainbow .panopticon-god-pupil {
-    fill: hsl(120, 100%, 55%);
-    opacity: 0.88;
-    filter: var(--cipher-wheel-hue-filter);
-}
-
-body.perf-lite #panopticon-eye.god-rainbow .panopticon-god-pupil,
-body.perf-safari #panopticon-eye.god-rainbow .panopticon-god-pupil {
-    fill: rgba(0, 255, 0, 0.88);
-    filter: none;
-}
-
-body.corrupted #panopticon-eye.god-rainbow .panopticon-god-pupil {
-    fill: var(--alert-red);
-    opacity: 0.82;
-    filter: none;
+    fill: url(#panopticon-rainbow);
 }
 
 .god-mode-triangle-layer {
@@ -142,16 +105,7 @@ body.corrupted #panopticon-eye.god-rainbow .panopticon-god-pupil {
 .god-mode-triangle-layer.god-triangle-visible {
     opacity: 1;
     visibility: visible;
-    filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 5px rgba(0, 255, 0, 0.22));
-}
-
-body.perf-lite .god-mode-triangle-layer.god-triangle-visible,
-body.perf-safari .god-mode-triangle-layer.god-triangle-visible {
-    filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.22));
-}
-
-body.corrupted.god-mode .god-mode-triangle-layer.god-triangle-visible {
-    filter: drop-shadow(0 0 5px rgba(255, 0, 85, 0.22));
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.4));
 }
 
 body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-active)) .god-mode-triangle-layer.god-triangle-visible {
@@ -169,21 +123,13 @@ body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-acti
 
 .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
 body.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
+    stroke: #00ff00;
     stroke: url(#god-mode-rainbow);
-    stroke-opacity: 0.38;
-}
-
-body.perf-lite .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
-body.perf-safari .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
-body.perf-lite.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle,
-body.perf-safari.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
-    stroke: rgba(0, 255, 0, 0.38);
 }
 
 body.corrupted.god-mode .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
 body.corrupted.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
     stroke: var(--alert-red);
-    stroke-opacity: 0.42;
 }
 
 .panopticon-god-pupil {
