@@ -84,8 +84,32 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
     stroke: url(#panopticon-rainbow);
 }
 
+#panopticon-eye.god-rainbow .panopticon-iris-outer {
+    opacity: 0.55;
+}
+
+#panopticon-eye.god-rainbow .panopticon-iris-mid {
+    opacity: 0.85;
+}
+
+#panopticon-eye.god-rainbow .panopticon-lid {
+    opacity: 0.9;
+}
+
 #panopticon-eye.god-rainbow .panopticon-god-pupil {
     fill: url(#panopticon-rainbow);
+    opacity: 0.88;
+}
+
+body.corrupted #panopticon-eye.god-rainbow .panopticon-lid,
+body.corrupted #panopticon-eye.god-rainbow .panopticon-iris-outer,
+body.corrupted #panopticon-eye.god-rainbow .panopticon-iris-mid {
+    stroke: var(--alert-red);
+}
+
+body.corrupted #panopticon-eye.god-rainbow .panopticon-god-pupil {
+    fill: var(--alert-red);
+    opacity: 0.82;
 }
 
 .god-mode-triangle-layer {
@@ -105,7 +129,7 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
 .god-mode-triangle-layer.god-triangle-visible {
     opacity: 1;
     visibility: visible;
-    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.4));
+    filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.22));
 }
 
 body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-active)) .god-mode-triangle-layer.god-triangle-visible {
@@ -123,13 +147,14 @@ body.god-mode:has(#panopticon-eye.god-active):not(:has(#panopticon-eye.pong-acti
 
 .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
 body.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
-    stroke: #00ff00;
     stroke: url(#god-mode-rainbow);
+    stroke-opacity: 0.38;
 }
 
 body.corrupted.god-mode .god-mode-triangle-layer.god-triangle-visible .panopticon-god-triangle,
 body.corrupted.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer .panopticon-god-triangle {
     stroke: var(--alert-red);
+    stroke-opacity: 0.42;
 }
 
 .panopticon-god-pupil {

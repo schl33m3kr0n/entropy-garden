@@ -25,6 +25,7 @@ import {
     panopticonRainbowGradEl,
     godModeRainbowGradEl,
 } from './dom.js';
+import { applyGodPupilSymbol, resetGodPupilPosition } from './god-symbol-offsets.js';
 
 export let eyeAngle = 0;
 export let eyeMode = 'idle';
@@ -83,13 +84,13 @@ function ensureGodTriangleLayer() {
     grad.setAttribute('gradientUnits', 'userSpaceOnUse');
     grad.setAttribute('spreadMethod', 'repeat');
     const stops = [
-        ['0%', 'hsl(0, 100%, 50%)'],
-        ['17%', 'hsl(60, 100%, 50%)'],
-        ['33%', 'hsl(120, 100%, 50%)'],
-        ['50%', 'hsl(180, 100%, 50%)'],
-        ['67%', 'hsl(240, 100%, 50%)'],
-        ['83%', 'hsl(300, 100%, 50%)'],
-        ['100%', 'hsl(0, 100%, 50%)'],
+        ['0%', 'hsl(0, 100%, 55%)'],
+        ['17%', 'hsl(60, 100%, 55%)'],
+        ['33%', 'hsl(120, 100%, 55%)'],
+        ['50%', 'hsl(180, 100%, 55%)'],
+        ['67%', 'hsl(240, 100%, 55%)'],
+        ['83%', 'hsl(300, 100%, 55%)'],
+        ['100%', 'hsl(0, 100%, 55%)'],
     ];
     for (const [offset, color] of stops) {
         const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
@@ -160,10 +161,7 @@ export function syncGodModeTriangleSize() {
     tri.setAttribute('points', points);
     tri.setAttribute('stroke-width', String(strokeW));
     tri.setAttribute('fill', 'none');
-    tri.setAttribute(
-        'stroke',
-        isCorrupted && document.body.classList.contains('god-mode') ? '#ff0055' : '#00ff00'
-    );
+    tri.removeAttribute('stroke');
 }
 
 function showGodModeTriangle() {
@@ -1116,7 +1114,10 @@ function resetPanopticonGodStyling() {
     panopticonEl?.classList.remove('god-active', 'god-rainbow');
     hideGodModeTriangle();
     if (panopticonPupilEl) panopticonPupilEl.style.display = '';
-    if (panopticonGodPupilEl) panopticonGodPupilEl.style.display = 'none';
+    if (panopticonGodPupilEl) {
+        panopticonGodPupilEl.style.display = 'none';
+        resetGodPupilPosition(panopticonGodPupilEl);
+    }
 }
 
 function resetPanopticonNormalPupil() {
@@ -1129,7 +1130,7 @@ function enablePanopticonGodPupil() {
     showGodModeTriangle();
     if (panopticonPupilEl) panopticonPupilEl.style.display = 'none';
     if (panopticonGodPupilEl) {
-        panopticonGodPupilEl.textContent = drawGodSymbol();
+        applyGodPupilSymbol(panopticonGodPupilEl, drawGodSymbol());
         panopticonGodPupilEl.style.display = 'block';
     }
     document.dispatchEvent(new CustomEvent('panopticon-god-active'));
@@ -1221,7 +1222,7 @@ function animatePanopticonGodEye(now) {
 
         if (now - godSymbolTick >= (perf.prefersReducedMotion ? 380 : PANOPTICON_GOD_SYMBOL_MS)) {
             if (panopticonGodPupilEl) {
-                panopticonGodPupilEl.textContent = drawGodSymbol();
+                applyGodPupilSymbol(panopticonGodPupilEl, drawGodSymbol());
             }
             godSymbolTick = now;
         }

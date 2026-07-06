@@ -90,8 +90,8 @@ body.corrupted #panopticon-comment {
 /* Not scoped to .visible — keeps oracle styling through the fade-out */
 body.god-mode #panopticon-comment,
 #panopticon-comment.panopticon-comment-god {
-    color: rgba(210, 225, 255, 0.88);
-    text-shadow: 0 0 10px rgba(160, 200, 255, 0.45);
+    color: rgba(0, 255, 0, 0.72);
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.28);
     letter-spacing: 0.12em;
     font-size: 0.62rem;
     text-transform: uppercase;
