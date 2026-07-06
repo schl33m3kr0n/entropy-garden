@@ -79,11 +79,11 @@ body.corrupted:not(.god-mode) .hud-title-card::after {
 }
 
 #panopticon-eye.god-rainbow {
-    filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
+    filter: drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
 }
 
 #panopticon-eye.god-rainbow.dizzy {
-    filter: var(--cipher-wheel-hue-filter) drop-shadow(0 0 22px rgba(0, 255, 0, 0.55));
+    filter: drop-shadow(0 0 22px rgba(0, 255, 0, 0.55));
 }
 
 body.corrupted #panopticon-eye.god-rainbow {
@@ -99,52 +99,30 @@ body.perf-safari #panopticon-eye.god-rainbow {
     filter: drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
 }
 
+/* Iris + lid painted on #grid-canvas via drawGodModeEyeChrome (same conic as wheels). */
 #panopticon-eye.god-rainbow .panopticon-lid,
 #panopticon-eye.god-rainbow .panopticon-iris-outer,
 #panopticon-eye.god-rainbow .panopticon-iris-mid {
-    stroke: url(#panopticon-rainbow);
-}
-
-#panopticon-eye.god-rainbow .panopticon-iris-outer {
-    opacity: 0.55;
-}
-
-#panopticon-eye.god-rainbow .panopticon-iris-mid {
-    opacity: 0.85;
-}
-
-#panopticon-eye.god-rainbow .panopticon-lid {
-    opacity: 0.9;
+    stroke: none;
+    opacity: 0;
 }
 
 #panopticon-eye.god-rainbow .panopticon-god-pupil {
     fill: hsl(120, 100%, 55%);
     opacity: 0.88;
-}
-
-body.perf-lite #panopticon-eye.god-rainbow .panopticon-lid,
-body.perf-lite #panopticon-eye.god-rainbow .panopticon-iris-outer,
-body.perf-lite #panopticon-eye.god-rainbow .panopticon-iris-mid,
-body.perf-safari #panopticon-eye.god-rainbow .panopticon-lid,
-body.perf-safari #panopticon-eye.god-rainbow .panopticon-iris-outer,
-body.perf-safari #panopticon-eye.god-rainbow .panopticon-iris-mid {
-    stroke: rgba(0, 255, 0, 0.72);
+    filter: var(--cipher-wheel-hue-filter);
 }
 
 body.perf-lite #panopticon-eye.god-rainbow .panopticon-god-pupil,
 body.perf-safari #panopticon-eye.god-rainbow .panopticon-god-pupil {
     fill: rgba(0, 255, 0, 0.88);
-}
-
-body.corrupted #panopticon-eye.god-rainbow .panopticon-lid,
-body.corrupted #panopticon-eye.god-rainbow .panopticon-iris-outer,
-body.corrupted #panopticon-eye.god-rainbow .panopticon-iris-mid {
-    stroke: var(--alert-red);
+    filter: none;
 }
 
 body.corrupted #panopticon-eye.god-rainbow .panopticon-god-pupil {
     fill: var(--alert-red);
     opacity: 0.82;
+    filter: none;
 }
 
 .god-mode-triangle-layer {

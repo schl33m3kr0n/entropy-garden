@@ -220,6 +220,74 @@ function wheelConicGradient(cx, cy, alpha) {
     return g;
 }
 
+function godEyeLiteStroke(alpha) {
+    return isCorrupted ? `rgba(255, 0, 85, ${alpha})` : `rgba(0, 255, 0, ${alpha})`;
+}
+
+function godEyeWheelStroke(cx, cy, alpha) {
+    return usesLiteCipherWheelPaint()
+        ? godEyeLiteStroke(alpha)
+        : wheelConicGradient(cx, cy, alpha);
+}
+
+/** Iris + lid in god mode — same conic paint as cipher wheels (SVG linear gradients cannot match). */
+function drawGodModeEyeChrome(cx, cy) {
+    if (!panopticonEl?.classList.contains('god-rainbow')) return;
+
+    const eyeRect = panopticonEl.getBoundingClientRect();
+    const canvasRect = canvas?.getBoundingClientRect();
+    if (!eyeRect.width || !canvasRect) return;
+
+    const scale = eyeRect.width / 100;
+    const rOuter = 26 * scale;
+    const rMid = 16 * scale;
+
+    const savedAlpha = ctx.globalAlpha;
+    const savedCap = ctx.lineCap;
+    const savedJoin = ctx.lineJoin;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1.5 * scale;
+    ctx.strokeStyle = godEyeWheelStroke(cx, cy, 0.55);
+    ctx.beginPath();
+    ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.globalAlpha = 0.85;
+    ctx.lineWidth = 2 * scale;
+    ctx.strokeStyle = godEyeWheelStroke(cx, cy, 0.85);
+    ctx.beginPath();
+    ctx.arc(cx, cy, rMid, 0, Math.PI * 2);
+    ctx.stroke();
+
+    const map = (vx, vy) => ({
+        x: cx + (vx - 50) * scale,
+        y: cy + (vy - 50) * scale,
+    });
+    const p0 = map(8, 50);
+    const c1 = map(28, 12);
+    const c2 = map(72, 12);
+    const p1 = map(92, 50);
+    const c3 = map(72, 88);
+    const c4 = map(28, 88);
+
+    ctx.globalAlpha = 0.9;
+    ctx.lineWidth = 3 * scale;
+    ctx.strokeStyle = godEyeWheelStroke(cx, cy, 0.9);
+    ctx.beginPath();
+    ctx.moveTo(p0.x, p0.y);
+    ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, p1.x, p1.y);
+    ctx.bezierCurveTo(c3.x, c3.y, c4.x, c4.y, p0.x, p0.y);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.globalAlpha = savedAlpha;
+    ctx.lineCap = savedCap;
+    ctx.lineJoin = savedJoin;
+}
+
 function drawChannelRings(cx, cy) {
     ctx.lineCap = 'round';
     ctx.strokeStyle = usesLiteCipherWheelPaint()
@@ -286,6 +354,8 @@ function drawCipherWheels(cx, cy) {
     if (fastGlyphs) {
         ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     }
+
+    drawGodModeEyeChrome(cx, cy);
 
     syncGodModeTriangleSize();
 
@@ -596,6 +666,7 @@ document.addEventListener('focusout', (e) => {
 
 document.addEventListener('panopticon-god-active', () => {
     syncGodModeTriangleSize();
+    setNeedsFullRedraw(true);
 });
 
 document.addEventListener('visibilitychange', () => {
