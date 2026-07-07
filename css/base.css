@@ -170,11 +170,22 @@ body.garden-ready::before {
 }
 
 .init-partner-logo {
-    width: clamp(64px, 16vw, 88px);
-    height: clamp(64px, 16vw, 88px);
+    display: block;
     opacity: 0;
     transform: translateY(-36px);
     filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+}
+
+.init-partner-logo--gemini {
+    width: clamp(100px, 22vw, 156px);
+    height: auto;
+    aspect-ratio: 1024 / 576;
+}
+
+.init-partner-logo--cursor {
+    width: clamp(64px, 16vw, 88px);
+    height: auto;
+    aspect-ratio: 1 / 1;
 }
 
 #init-partner-splash.is-active .init-partner-logo {
