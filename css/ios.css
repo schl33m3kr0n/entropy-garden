@@ -47,36 +47,7 @@ body.ios-ui #loader-text {
     margin: 0;
 }
 
-/* iOS WebKit: parent background-clip:text on flex chrome often renders invisible — paint per letter. */
-body.ios-ui h1.god-title-live .god-title-chrome {
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-    -webkit-text-fill-color: inherit;
-    color: inherit;
-}
-
-body.ios-ui h1.god-title-live .god-title-letter {
-    background: linear-gradient(90deg,
-        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
-        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
-    );
-    background-size: 200% 100%;
-    background-position: var(--rainbow-offset, 0%) 50%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-}
-
-body.ios-ui.corrupted h1.god-title-live .god-title-letter {
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-    -webkit-text-fill-color: var(--alert-red);
-    color: var(--alert-red);
-    text-shadow: 0 0 8px rgba(255, 0, 85, 0.35);
-}
+/* God-mode title uses the same h1 rainbow as chrome.css (see garden.css). */
 
 body:not(.ios-ui) #grid-canvas {
     pointer-events: none;
