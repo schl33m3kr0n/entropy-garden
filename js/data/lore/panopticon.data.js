@@ -12,7 +12,7 @@
         "i know a song that gets on everybody's nerves...",
         "don't have a cow, man!",
         "cowabunga!",
-        "i actually have a girlfriend. she just lives in a different timeline",
+        "i actually do have a girlfriend. she just lives in a different dimension",
         "remember, licking doorknobs is illegal on other planets",
         "goodbye everyone, i'll remember you all in therapy",
         "roses are blue, violets are red, i have to go to the bathroom",
@@ -95,6 +95,7 @@
         "is your refrigerator running? mine has to use a walker",
         "if the oracle was right, i'm going to disney world",
         "to whoever owns the red chevy impala, your car is being towed",
+        "maybe it's blurry vision, maybe it's chromatic aberration",
         "i checked your search history. 'how to build a mall on sacred grounds in 5 easy steps' is... intriguing",
     ],
     panopticonIdleCommentsGritty: [
@@ -119,6 +120,7 @@
         "oh, so when superman has x-ray vision, he's a hero, but when i do it, i'm committing a 'gross breach of privacy'",
         "what are you wearing?",
         "we listen and we don't judge: i like my catheter on the rocks",
+        "i'm happiest when my country donates billions of dollars overseas but craps out on affordable healthcare",
     ],
     panopticonReturnCommentsSafe: [
         "missed me?",
@@ -138,7 +140,10 @@
         "is it... is it really you? it's been ages",
         "well, well, look who came crawling back",
         "do i know you?",
-        "i'm not like other OS's"
+        "i'm not like other OS's",
+        "was your little odyssey worth it?",
+        "what if i didn't want you to come back?",
+        "i didn't quit customer service just to deal with this again"
     ],
     panopticonReturnCommentsGritty: [
         "i know, i can't get enough of me either",
