@@ -189,7 +189,11 @@ body.garden-ready::before {
 }
 
 #init-partner-splash.is-active .init-partner-logo {
-    animation: initPartnerDrop 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: initPartnerDrop var(--init-partner-anim-ms, 1s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+#init-partner-splash.is-exiting .init-partner-logo {
+    animation: initPartnerRise var(--init-partner-anim-ms, 1s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes initPartnerDrop {
@@ -199,10 +203,30 @@ body.garden-ready::before {
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    #init-partner-splash.is-active .init-partner-logo {
-        animation: none;
+@keyframes initPartnerRise {
+    from {
         opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-36px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #init-partner-splash.is-active .init-partner-logo,
+    #init-partner-splash.is-exiting .init-partner-logo {
+        animation: none;
+    }
+
+    #init-partner-splash.is-active .init-partner-logo {
+        opacity: 1;
+        transform: none;
+    }
+
+    #init-partner-splash.is-exiting .init-partner-logo {
+        opacity: 0;
         transform: none;
     }
 }

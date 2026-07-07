@@ -111,9 +111,13 @@ function prefetchGardenBoot() {
     warmSound(sfx.boop);
 }
 
+const INIT_PARTNER_ANIM_MS = 1000;
 const INIT_PARTNER_SPLASH_MS = 3000;
 
 function playInitPartnerSplash(onComplete) {
+    warmSound(sfx.collectible);
+    playSound(sfx.collectible);
+
     const splash = document.getElementById('init-partner-splash');
     const warning = document.getElementById('epilepsy-warning');
     const initBtn = document.getElementById('init-btn');
@@ -131,10 +135,15 @@ function playInitPartnerSplash(onComplete) {
 
     window.setTimeout(() => {
         splash.classList.remove('is-active');
-        splash.hidden = true;
-        splash.setAttribute('aria-hidden', 'true');
-        onComplete();
-    }, INIT_PARTNER_SPLASH_MS);
+        splash.classList.add('is-exiting');
+
+        window.setTimeout(() => {
+            splash.classList.remove('is-exiting');
+            splash.hidden = true;
+            splash.setAttribute('aria-hidden', 'true');
+            onComplete();
+        }, INIT_PARTNER_ANIM_MS);
+    }, INIT_PARTNER_SPLASH_MS - INIT_PARTNER_ANIM_MS);
 }
 
 function beginGardenExperience() {
@@ -187,8 +196,6 @@ function beginGardenExperience() {
         }, { once: true, passive: true });
 
         requestAnimationFrame(() => {
-            warmSound(sfx.collectible);
-            playSound(sfx.collectible);
             warmSound(sfx.boop);
             lastTerminalLoggedTrackIndex = -1;
             resetBgmToStart();
