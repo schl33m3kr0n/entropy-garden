@@ -19,6 +19,27 @@ function getHudTitleEl() {
     return document.querySelector('#hud h1');
 }
 
+function corruptedTitleFill() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--alert-red').trim() || '#ff0055';
+}
+
+/** Solid corrupted fill — overrides background-clip:text so letters stay visible. */
+function applyCorruptedTitleLetters(letters) {
+    const fill = corruptedTitleFill();
+    letters.forEach((el) => {
+        el.style.removeProperty('background');
+        el.style.removeProperty('background-image');
+        el.style.removeProperty('background-size');
+        el.style.removeProperty('background-position');
+        el.style.removeProperty('background-repeat');
+        el.style.setProperty('-webkit-background-clip', 'border-box');
+        el.style.setProperty('background-clip', 'border-box');
+        el.style.webkitTextFillColor = fill;
+        el.style.color = fill;
+        el.style.textShadow = 'none';
+    });
+}
+
 /** @param {DOMRect} frameRect — .hud-title-card::after box (card + 3px inset each side) */
 function hudFrameRect(h1) {
     const card = h1.closest('.hud-title-card');
@@ -44,11 +65,7 @@ export function syncGodTitleGradient(h1 = getHudTitleEl()) {
     if (!letters.length) return;
 
     if (document.body.classList.contains('corrupted')) {
-        letters.forEach((el) => {
-            el.style.removeProperty('background-size');
-            el.style.removeProperty('background-position');
-            el.style.removeProperty('background-image');
-        });
+        applyCorruptedTitleLetters(letters);
         return;
     }
 
@@ -270,8 +287,8 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
         return Promise.resolve();
     }
 
-    // iOS WebKit often paints parent background-clip:text as invisible — restore plain h1 on exit.
-    if (!pondery && perf.isIOS && existingChrome) {
+    // WebKit + corrupted: letter spans with background-clip:text go invisible — use plain h1.
+    if (!pondery && existingChrome && (perf.isIOS || document.body.classList.contains('corrupted'))) {
         if (titleAnimating) cancelTitleAnimation(existingChrome);
         restorePlainTitle(h1);
         return Promise.resolve();

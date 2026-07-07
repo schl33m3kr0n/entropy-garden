@@ -89,7 +89,7 @@ import {
 } from './lazy.js';
 import { registerServiceWorkerAfterInit } from './core/sw-register.js';
 import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios/ios-ui.js';
-import { setGodTitleArrangement } from './core/god-title.js';
+import { setGodTitleArrangement, syncGodTitleGradient } from './core/god-title.js';
 import {
     firePanopticonComment,
     initPanopticonComments,
@@ -865,6 +865,7 @@ function toggleMode() {
         firePanopticonComment('corruptOff');
         recordBehavior('corrupt_off');
     }
+    syncGodTitleGradient();
     randomizeData();
     rebuildTerminalLogPool();
     reconcileSingularityPoem();
@@ -1500,9 +1501,9 @@ const prevBtn = document.querySelector('.prev-btn');
 // Lightbox Elements
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
-const lbClose = document.querySelector('.lightbox-close');
-const lbNext = document.querySelector('.lb-next');
-const lbPrev = document.querySelector('.lb-prev');
+const lbClose = lightbox?.querySelector('.lightbox-close');
+const lbNext = lightbox?.querySelector('.lb-next');
+const lbPrev = lightbox?.querySelector('.lb-prev');
 
 let currentIndex = 0;
 let isLightboxOpen = false;
@@ -1631,9 +1632,12 @@ lbPrev?.addEventListener('click', () => {
 });
 
 // Close button and click-outside-to-close
-lbClose?.addEventListener('click', closeLightbox);
+lbClose?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeLightbox();
+});
 lightbox?.addEventListener('click', (e) => {
-  if (e.target === lightbox) closeLightbox();
+  if (e.target === lightbox || e.target.closest('.lightbox-close')) closeLightbox();
 });
 
 function pongBlocksArrowNav(e) {

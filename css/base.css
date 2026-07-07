@@ -293,13 +293,12 @@ body.perf-lite #loader-leaf {
     }
 
     .vault-grid {
-        columns: 1;
-        column-gap: 0;
+        gap: 32px;
         padding: 20px;
     }
 
     .vault-item {
-        margin-bottom: 32px;
+        margin-bottom: 0;
     }
 
     .vault-item.carousel-container {

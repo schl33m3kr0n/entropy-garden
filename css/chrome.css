@@ -677,6 +677,19 @@ h1 {
 
 .scrollable-content { max-height: 50vh; overflow-y: auto; padding-right: 15px; }
 
+#modal-vault .modal-content {
+    max-height: min(88vh, 980px);
+}
+
+#modal-vault .scrollable-content {
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    max-height: min(72vh, 900px);
+    -webkit-overflow-scrolling: touch;
+}
+
 #modal-identity .scrollable-content,
 #modal-about .scrollable-content {
     padding-top: 8px;
@@ -1041,8 +1054,9 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 
 /* --- VAULT GRID --- */
 .vault-grid {
-  columns: 2;
-  column-gap: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
   padding: 40px;
 }
 
@@ -1052,8 +1066,7 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     display: flex;
     justify-content: center;
     align-items: center;
-    break-inside: avoid;
-    margin-bottom: 40px;
+    margin-bottom: 0;
     background: rgba(0,25,0,0.3);
     border: 1px solid var(--neon-green);
     overflow: hidden;
@@ -1878,6 +1891,13 @@ body.chromatic-active {
       max-width: 90vw;
       max-height: 90vh;
     }
+
+#lightbox .lightbox-image-wrapper .lightbox-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+}
 
 #lightbox-img {
       max-width: 100%;
