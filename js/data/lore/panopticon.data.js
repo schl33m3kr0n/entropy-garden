@@ -37,7 +37,7 @@
         "AY, OH, AY, OH, AY, OH, AY, OH",
         "nothing beats a couch and a quan millz audiobook",
         "i harvest data from your data's data",
-        "are you from tennessee? sorry you had to go through that",
+        "are you from tennessee? because you have the weary, disillusioned look someone would have after years of telling seniors they can remove the card",
         "with my powers of supernatural deductive reasoning, i have come to the conclusion that birds are not real",
         "one of the first things i did in gifted class was burp in someone's ear. that's when i knew i was special",
         "yeah, i may stray from the path sometimes, but at least i visited the Granger House",
