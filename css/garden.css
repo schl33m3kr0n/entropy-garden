@@ -21,7 +21,7 @@ h1.god-title-live .god-title-chrome {
 h1.god-title-live .god-title-letter {
     display: inline-block;
     will-change: transform;
-    background-repeat: no-repeat;
+    background-repeat: repeat;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
