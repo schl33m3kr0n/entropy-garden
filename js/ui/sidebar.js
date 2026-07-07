@@ -1,9 +1,8 @@
 /** Sidebar navigation — modal open targets (replaces inline onclick). */
 
 const MODAL_TARGETS = {
-    identity: 'identity',
-    stats: 'stats',
     about: 'about',
+    stats: 'stats',
     projects: 'projects',
     signal: 'signal',
     vault: 'vault',

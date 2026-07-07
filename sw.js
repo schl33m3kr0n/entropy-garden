@@ -42,6 +42,8 @@ const PRECACHE_URLS = [
     'js/ios/terminal-boot.js',
     'assets/icons/about.svg',
     'assets/icons/identity.svg',
+    'assets/icons/gemini.png',
+    'assets/icons/init-cursor.svg',
     'assets/icons/joystick.svg',
     'assets/icons/ouroboros.svg',
     'assets/icons/cannabis-leaf.png',

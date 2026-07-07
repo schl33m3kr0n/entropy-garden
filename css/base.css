@@ -89,6 +89,8 @@ body.garden-ready::before {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    gap: 30px;
 }
 
 #init-btn {
@@ -114,11 +116,6 @@ body.garden-ready::before {
 }
 
 /* --- PHOTOSENSITIVITY WARNING --- */
-#init-screen {
-    flex-direction: column; /* Stacks the warning and the button vertically */
-    gap: 30px; 
-}
-
 #epilepsy-warning {
     max-width: 500px;
     text-align: center;
@@ -150,6 +147,53 @@ body.garden-ready::before {
 @keyframes pulseWarning {
     0% { opacity: 0.8; text-shadow: 0 0 5px var(--alert-red); }
     100% { opacity: 1; text-shadow: 0 0 15px var(--alert-red); }
+}
+
+#init-partner-splash {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#init-partner-splash[hidden] {
+    display: none !important;
+}
+
+.init-partner-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(28px, 8vw, 56px);
+}
+
+.init-partner-logo {
+    width: clamp(64px, 16vw, 88px);
+    height: clamp(64px, 16vw, 88px);
+    opacity: 0;
+    transform: translateY(-36px);
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+}
+
+#init-partner-splash.is-active .init-partner-logo {
+    animation: initPartnerDrop 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes initPartnerDrop {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #init-partner-splash.is-active .init-partner-logo {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
 }
 
 /* --- LOADING SCREEN --- */

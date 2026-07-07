@@ -366,17 +366,13 @@
                 "touch the slots. destiny is a combination lock",
             ],
         },
-        modalIdentity: {
-            safe: ["identity protocol opened. who are you, really?"],
-            gritty: ["dossier accessed. the eye already knew"],
+        modalAbout: {
+            safe: ["about protocol opened. identity plus bio dump incoming"],
+            gritty: ["dossier and overshare accessed. the eye already knew"],
         },
         modalStats: {
             safe: ["stats loaded. numbers lie but the eye doesn't"],
             gritty: ["sanity stat missing. feature, not bug"],
-        },
-        modalAbout: {
-            safe: ["bio dump incoming. prepare for overshare"],
-            gritty: ["reading about yourself? narcissism detected"],
         },
         modalProjects: {
             safe: ["repository opened. so many unfinished files"],

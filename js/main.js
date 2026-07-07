@@ -111,6 +111,32 @@ function prefetchGardenBoot() {
     warmSound(sfx.boop);
 }
 
+const INIT_PARTNER_SPLASH_MS = 3000;
+
+function playInitPartnerSplash(onComplete) {
+    const splash = document.getElementById('init-partner-splash');
+    const warning = document.getElementById('epilepsy-warning');
+    const initBtn = document.getElementById('init-btn');
+
+    if (!splash || perf.prefersReducedMotion) {
+        onComplete();
+        return;
+    }
+
+    warning?.setAttribute('hidden', '');
+    initBtn?.setAttribute('hidden', '');
+    splash.hidden = false;
+    splash.setAttribute('aria-hidden', 'false');
+    splash.classList.add('is-active');
+
+    window.setTimeout(() => {
+        splash.classList.remove('is-active');
+        splash.hidden = true;
+        splash.setAttribute('aria-hidden', 'true');
+        onComplete();
+    }, INIT_PARTNER_SPLASH_MS);
+}
+
 function beginGardenExperience() {
     try {
         // Show loader before audio decode / BGM load (those can block the main thread).
@@ -179,7 +205,7 @@ function bindInitButton() {
     const initBtn = document.getElementById('init-btn');
     if (!initBtn || initBtn.dataset.bound) return;
     initBtn.dataset.bound = '1';
-    initBtn.addEventListener('click', beginGardenExperience);
+    initBtn.addEventListener('click', () => playInitPartnerSplash(beginGardenExperience));
     initBtn.addEventListener('pointerenter', prefetchGardenBoot, { once: true });
     initBtn.addEventListener('touchstart', prefetchGardenBoot, { once: true, passive: true });
 }
@@ -674,16 +700,10 @@ function randomizeData() {
     const frags = pickMany(lore.bioFragmentsSafe, lore.bioFragmentsGritty, 4);
 
     document.getElementById('bio-container').innerHTML = `
-        <div class="bio-header">
-            <div class="pfp-wrapper">
-                <img data-src="${imgPath('profile/schl33m3kr0n-pfp.webp')}" data-fallback="${imgPath('profile/schl33m3kr0n-pfp.jpeg')}" alt="schl33m3kr0n" class="pfp-image">
-            </div>
-            <p class="bio-p" style="margin-bottom: 0;">> <strong>IDENTITY_STRING:</strong> I'm Daniel. I'm a visual artist currently evolving from a Studio Art major into an Animation main through a Vanderbilt mentorship.</p>
-        </div>
+        <p class="bio-p" style="margin-top: 0;">> <strong>IDENTITY_STRING:</strong> I'm Daniel. I'm a visual artist currently evolving from a Studio Art major into an Animation main through a Vanderbilt mentorship.</p>
         <p class="bio-p">${frags[0]} ${frags[1]}</p>
         <p class="bio-p">${frags[2]} ${frags[3]}</p>
     `;
-    setImgWithFallback(document.querySelector('#bio-container .pfp-image'));
     
     const pList = document.getElementById('project-list'); 
     pList.innerHTML = ''; 
@@ -1004,6 +1024,7 @@ function detachRefreshHint() {
 
 function openModal(id) { 
     const modalAliases = {
+        identity: 'about',
         live_feed: 'signal',
         'live-feed': 'signal',
         livefeed: 'signal'

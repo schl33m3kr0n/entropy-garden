@@ -18,6 +18,12 @@
             <p>This experience contains rapid flashing lights, high-contrast strobing, and glitch effects that may trigger seizures for people with photosensitive epilepsy. Viewer discretion is strongly advised.</p>
         </div>
         <button id="init-btn">[ INITIALIZE ]</button>
+        <div id="init-partner-splash" hidden aria-hidden="true">
+            <div class="init-partner-logos">
+                <img src="assets/icons/gemini.png" alt="" class="init-partner-logo init-partner-logo--gemini" width="80" height="80">
+                <img src="assets/icons/init-cursor.svg" alt="" class="init-partner-logo init-partner-logo--cursor" width="80" height="80">
+            </div>
+        </div>
     </div>
 
     <div id="loader">
@@ -81,17 +87,13 @@
 
     <div id="sidebar-menu">
         <ul>
-            <li data-modal="identity">
+            <li data-modal="about">
                 <span class="mask-icon mask-icon--sidebar mask-icon--identity" aria-hidden="true"></span>
-                <span class="sidebar-text">// IDENTITY</span>
+                <span class="sidebar-text">// ABOUT</span>
             </li>
             <li data-modal="stats">
                 <span class="mask-icon mask-icon--sidebar mask-icon--stats" aria-hidden="true"></span>
                 <span class="sidebar-text">// STATS</span>
-            </li>
-            <li data-modal="about">
-                <span class="mask-icon mask-icon--sidebar mask-icon--about" aria-hidden="true"></span>
-                <span class="sidebar-text">// BIO DUMP</span>
             </li>
             <li data-modal="projects">
                 <span class="mask-icon mask-icon--sidebar mask-icon--storage" aria-hidden="true"></span>
@@ -230,36 +232,31 @@
         </div>
     </div>
 
-    <div id="modal-identity" class="modal">
-        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--identity" aria-hidden="true"></span>// IDENTITY</h2>
+    <div id="modal-about" class="modal">
+        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--identity" aria-hidden="true"></span>// ABOUT</h2>
             <div class="scrollable-content">
-               <div class="bio-header" style="border-bottom: none; padding-bottom: 0;">
+                <div class="bio-header about-identity-header">
                     <div class="pfp-wrapper">
                         <picture>
                             <source srcset="assets/img/profile/schl33m3kr0n-pfp.webp" type="image/webp">
                             <img src="assets/img/profile/schl33m3kr0n-pfp.jpeg" alt="schl33m3kr0n" class="pfp-image">
                         </picture>
                     </div>
-                    <div style="flex-grow: 1;">
+                    <div class="about-identity-meta">
                         <p style="margin-top: 0;"><strong>USER:</strong> schl33m3kr0n</p>
                         <p><strong>CLASS:</strong> <span id="val-class">Keyframe Sorcerer (Lvl 1)</span></p>
                         <p><strong>BASE:</strong> <span id="val-base">Nashville (for the humidity)</span></p>
                         <p style="margin-bottom: 0;"><strong>COMMS:</strong> dycurlee@gmail.com | <a href="https://instagram.com/schl33m3kr0n" target="_blank" class="social-link">@schl33m3kr0n</a></p>
                     </div>
                 </div>
+                <div id="bio-container" class="about-bio-body"></div>
             </div>
         </div>
     </div>
-    
+
     <div id="modal-stats" class="modal">
         <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--stats" aria-hidden="true"></span>// STATS</h2>
             <div class="scrollable-content"><ul id="stats-list"></ul></div>
-        </div>
-    </div>
-
-    <div id="modal-about" class="modal">
-        <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--about" aria-hidden="true"></span>// BIO DUMP</h2>
-            <div id="bio-container" class="scrollable-content"></div>
         </div>
     </div>
 
