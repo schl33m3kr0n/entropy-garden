@@ -9,12 +9,24 @@ h1.god-title-live {
     color: unset;
 }
 
-/* One continuous title gradient on the chrome while letters shuffle (Chowder-style). */
+/* One continuous title gradient while letters shuffle (Chowder-style).
+   Flex chrome + background-clip:text on the parent often renders invisible in
+   Chrome/WebKit — paint the gradient on each letter instead. */
 h1.god-title-live .god-title-chrome {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-wrap: nowrap;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: inherit;
+    color: inherit;
+}
+
+h1.god-title-live .god-title-letter {
+    display: inline-block;
+    will-change: transform;
     background: linear-gradient(90deg,
         hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
         hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
@@ -25,24 +37,23 @@ h1.god-title-live .god-title-chrome {
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
+    text-shadow: none;
 }
 
-h1.god-title-live .god-title-letter {
-    display: inline-block;
-    will-change: transform;
-    background: none;
-    -webkit-background-clip: unset;
-    background-clip: unset;
-    -webkit-text-fill-color: inherit;
-    color: inherit;
-    text-shadow: none;
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+    h1.god-title-live .god-title-letter {
+        background: none;
+        -webkit-text-fill-color: var(--neon-green);
+        color: var(--neon-green);
+        text-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+    }
 }
 
 h1.god-title-live .god-title-letter.is-space {
     min-width: 0.38em;
 }
 
-body.corrupted h1.god-title-live .god-title-chrome {
+body.corrupted h1.god-title-live .god-title-letter {
     background: none;
     -webkit-background-clip: unset;
     background-clip: unset;
