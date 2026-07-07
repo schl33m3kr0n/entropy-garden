@@ -47,15 +47,15 @@ export function syncGodTitleGradient(h1 = getHudTitleEl()) {
     ) || 0;
 
     const bgW = titleW * 2;
-    // h1 uses background-position: offset% with size 200% → bg left = -(offset/100)*titleW
-    const h1BgLeft = -(offsetPct / 100) * titleW;
+    // chrome.css h1: size 200%, position offset% 50%, default repeat — pixel equivalent:
+    const shiftPx = (offsetPct / 100) * (bgW - titleW);
 
     letters.forEach((el) => {
         const letterLeft = el.getBoundingClientRect().left - h1Rect.left;
         el.style.backgroundImage = HUD_TITLE_GRADIENT;
-        el.style.backgroundRepeat = 'no-repeat';
+        el.style.backgroundRepeat = 'repeat';
         el.style.backgroundSize = `${bgW}px 100%`;
-        el.style.backgroundPosition = `${h1BgLeft - letterLeft}px 50%`;
+        el.style.backgroundPosition = `${shiftPx - letterLeft}px 50%`;
         el.style.webkitBackgroundClip = 'text';
         el.style.backgroundClip = 'text';
         el.style.webkitTextFillColor = 'transparent';
