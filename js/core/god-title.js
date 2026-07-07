@@ -47,14 +47,15 @@ export function syncGodTitleGradient(h1 = getHudTitleEl()) {
     ) || 0;
 
     const bgW = titleW * 2;
-    const shiftPx = (offsetPct / 100) * (bgW - titleW);
+    // h1 uses background-position: offset% with size 200% → bg left = -(offset/100)*titleW
+    const h1BgLeft = -(offsetPct / 100) * titleW;
 
     letters.forEach((el) => {
         const letterLeft = el.getBoundingClientRect().left - h1Rect.left;
         el.style.backgroundImage = HUD_TITLE_GRADIENT;
         el.style.backgroundRepeat = 'no-repeat';
         el.style.backgroundSize = `${bgW}px 100%`;
-        el.style.backgroundPosition = `${shiftPx - letterLeft}px 50%`;
+        el.style.backgroundPosition = `${h1BgLeft - letterLeft}px 50%`;
         el.style.webkitBackgroundClip = 'text';
         el.style.backgroundClip = 'text';
         el.style.webkitTextFillColor = 'transparent';
