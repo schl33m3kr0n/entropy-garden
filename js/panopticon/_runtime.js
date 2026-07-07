@@ -25,6 +25,7 @@ import {
     panopticonRainbowGradEl,
     godModeRainbowGradEl,
 } from './dom.js';
+import { applyGodPupilSymbol, resetGodPupilPosition } from './god-symbol-offsets.js';
 
 export let eyeAngle = 0;
 export let eyeMode = 'idle';
@@ -1116,7 +1117,10 @@ function resetPanopticonGodStyling() {
     panopticonEl?.classList.remove('god-active', 'god-rainbow');
     hideGodModeTriangle();
     if (panopticonPupilEl) panopticonPupilEl.style.display = '';
-    if (panopticonGodPupilEl) panopticonGodPupilEl.style.display = 'none';
+    if (panopticonGodPupilEl) {
+        panopticonGodPupilEl.style.display = 'none';
+        resetGodPupilPosition(panopticonGodPupilEl);
+    }
 }
 
 function resetPanopticonNormalPupil() {
@@ -1129,7 +1133,7 @@ function enablePanopticonGodPupil() {
     showGodModeTriangle();
     if (panopticonPupilEl) panopticonPupilEl.style.display = 'none';
     if (panopticonGodPupilEl) {
-        panopticonGodPupilEl.textContent = drawGodSymbol();
+        applyGodPupilSymbol(panopticonGodPupilEl, drawGodSymbol());
         panopticonGodPupilEl.style.display = 'block';
     }
     document.dispatchEvent(new CustomEvent('panopticon-god-active'));
@@ -1221,7 +1225,7 @@ function animatePanopticonGodEye(now) {
 
         if (now - godSymbolTick >= (perf.prefersReducedMotion ? 380 : PANOPTICON_GOD_SYMBOL_MS)) {
             if (panopticonGodPupilEl) {
-                panopticonGodPupilEl.textContent = drawGodSymbol();
+                applyGodPupilSymbol(panopticonGodPupilEl, drawGodSymbol());
             }
             godSymbolTick = now;
         }

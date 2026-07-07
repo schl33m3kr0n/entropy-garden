@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>God-mode iris symbol tuner</title>
+  <style>
+    :root {
+      --neon: #0f0;
+      --void: #050505;
+      --panel: #0a140f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--void);
+      color: var(--neon);
+      font-family: Menlo, "Avenir Next", monospace;
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    h1 { font-size: 1rem; margin: 0 0 0.5rem; letter-spacing: 0.08em; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(0, 255, 0, 0.35);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    label { display: block; font-size: 0.72rem; opacity: 0.85; margin-bottom: 0.25rem; }
+    select, button, textarea {
+      width: 100%;
+      background: #000;
+      color: var(--neon);
+      border: 1px solid rgba(0, 255, 0, 0.45);
+      border-radius: 8px;
+      padding: 0.5rem;
+      font: inherit;
+    }
+    button { cursor: pointer; margin-top: 0.5rem; }
+    button:hover { background: rgba(0, 255, 0, 0.12); }
+    .row { display: flex; gap: 0.5rem; }
+    .row button { flex: 1; }
+    input[type="range"] { width: 100%; accent-color: var(--neon); }
+    .val { font-size: 0.8rem; opacity: 0.9; }
+    .preview-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+    }
+    .eye-box {
+      width: min(420px, 90vw);
+      filter: drop-shadow(0 0 18px rgba(0, 255, 0, 0.35));
+    }
+    .eye-box svg { width: 100%; height: auto; display: block; }
+    .panopticon-lid,
+    .panopticon-iris-outer,
+    .panopticon-iris-mid { stroke: var(--neon); fill: none; }
+    .panopticon-iris-outer { stroke-width: 1.5; opacity: 0.55; }
+    .panopticon-iris-mid { stroke-width: 2; opacity: 0.85; }
+    .panopticon-lid { stroke-width: 3; }
+    .panopticon-pupil { display: none; }
+    .panopticon-god-pupil {
+      font-family: "Apple Symbols", Menlo, "PingFang SC", sans-serif;
+      font-size: 22px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      fill: var(--neon);
+    }
+    .panopticon-socket-fill { fill: rgba(0, 20, 0, 0.12); }
+    .crosshair { stroke: rgba(0, 255, 0, 0.25); stroke-width: 0.35; stroke-dasharray: 2 2; }
+    .center-dot { fill: rgba(0, 255, 0, 0.5); }
+    textarea {
+      min-height: 200px;
+      resize: vertical;
+      font-size: 0.68rem;
+      line-height: 1.35;
+      margin-top: 0.5rem;
+    }
+    .hint { font-size: 0.68rem; opacity: 0.7; line-height: 1.4; margin-top: 0.75rem; }
+    kbd {
+      border: 1px solid rgba(0, 255, 0, 0.4);
+      border-radius: 4px;
+      padding: 0 0.3rem;
+      font-size: 0.65rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>GOD-MODE IRIS SYMBOL TUNER</h1>
+    <p class="hint">viewBox 0–100 · anchor (50, 50) · paste export into <code>js/panopticon/god-symbol-offsets.data.js</code></p>
+
+    <label for="symbol-select">Symbol</label>
+    <select id="symbol-select"></select>
+
+    <div class="row">
+      <button type="button" id="btn-prev">← Prev</button>
+      <button type="button" id="btn-next">Next →</button>
+    </div>
+
+    <label for="dx">dx (horizontal)</label>
+    <input id="dx" type="range" min="-3" max="3" step="0.05" value="0" />
+    <div class="val" id="dx-val">0</div>
+
+    <label for="dy">dy (vertical)</label>
+    <input id="dy" type="range" min="-3" max="3" step="0.05" value="0" />
+    <div class="val" id="dy-val">0</div>
+
+    <div class="row">
+      <button type="button" id="btn-reset-symbol">Reset symbol</button>
+      <button type="button" id="btn-reset-all">Reset all</button>
+    </div>
+    <button type="button" id="btn-load-repo">Load from repo .data.js</button>
+    <button type="button" id="btn-copy">Copy export to clipboard</button>
+
+    <textarea id="export" readonly></textarea>
+    <p class="hint">Arrow keys nudge dx/dy (±0.05). Shift = ±0.25.</p>
+  </div>
+
+  <div class="preview-wrap panel">
+    <div class="eye-box">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <clipPath id="socket-clip">
+            <path d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+          </clipPath>
+        </defs>
+        <g clip-path="url(#socket-clip)">
+          <path class="panopticon-socket-fill" d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+          <g>
+            <line class="crosshair" x1="50" y1="38" x2="50" y2="62" />
+            <line class="crosshair" x1="38" y1="50" x2="62" y2="50" />
+            <circle class="center-dot" cx="50" cy="50" r="0.6" />
+            <circle class="panopticon-iris-outer" cx="50" cy="50" r="26" />
+            <circle class="panopticon-iris-mid" cx="50" cy="50" r="16" />
+            <circle class="panopticon-pupil" cx="50" cy="50" r="7" />
+            <text id="god-pupil" class="panopticon-god-pupil" x="50" y="50">⛦</text>
+          </g>
+        </g>
+        <path class="panopticon-lid" d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'entropy-garden-god-symbol-offsets';
+    const CENTER = 50;
+    const SYMBOLS = [
+      '⛦', '⚛︎', '☯︎', '❖', '◉', '⧊', '☉', '⛬', '⛢', '☧',
+      '☥', '♁', '∴', '△', '⊕', 'ψ', '✖', '☸', '⚖', '∞',
+      '𖣂', '🜲', '🜁', '𖤓',
+      '◆', '◎', '●', '◇', '○', '▲', '◈', '✚', '✕', '✦',
+    ];
+
+    const DEFAULT_OFFSETS = {
+      '⛦': { dx: 0, dy: -0.55 },
+      '⚛︎': { dx: 0, dy: 0.75 },
+      '⚛': { dx: 0, dy: 0.75 },
+      '☯︎': { dx: 0, dy: 0.15 },
+      '☯': { dx: 0, dy: 0.15 },
+      '❖': { dx: 0, dy: -0.15 },
+      '◉': { dx: 0, dy: 0 },
+      '⧊': { dx: 0, dy: 0.1 },
+      '☉': { dx: 0, dy: -0.35 },
+      '⛬': { dx: 0, dy: 1.05 },
+      '⛢': { dx: 0, dy: -0.25 },
+      '☧': { dx: 0, dy: 0.65 },
+      '☥': { dx: 0, dy: 0.85 },
+      '♁': { dx: 0, dy: 0.9 },
+      '∴': { dx: 0, dy: -0.95 },
+      '△': { dx: 0, dy: 1.15 },
+      '⊕': { dx: 0, dy: 0.05 },
+      'ψ': { dx: 0.05, dy: -0.55 },
+      '✖': { dx: 0, dy: 0.05 },
+      '☸': { dx: 0, dy: 0.35 },
+      '⚖': { dx: 0, dy: 0.95 },
+      '∞': { dx: 0, dy: -0.45 },
+      '𖣂': { dx: 0, dy: 0.55 },
+      '🜲': { dx: 0, dy: 0.45 },
+      '🜁': { dx: 0, dy: -0.35 },
+      '𖤓': { dx: 0, dy: 0.5 },
+      '◆': { dx: 0, dy: -0.2 },
+      '◎': { dx: 0, dy: 0.75 },
+      '●': { dx: 0, dy: 0 },
+      '◇': { dx: 0, dy: 0.1 },
+      '○': { dx: 0, dy: -0.35 },
+      '▲': { dx: 0, dy: 1.05 },
+      '◈': { dx: 0, dy: -0.25 },
+      '✚': { dx: 0, dy: 0.65 },
+      '✕': { dx: 0, dy: 0.05 },
+      '✦': { dx: 0, dy: 0.35 },
+    };
+
+    let offsets = loadOffsets();
+
+    const $ = (id) => document.getElementById(id);
+    const select = $('symbol-select');
+    const pupil = $('god-pupil');
+    const dx = $('dx');
+    const dy = $('dy');
+    const dxVal = $('dx-val');
+    const dyVal = $('dy-val');
+    const exportBox = $('export');
+
+    function loadOffsets() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return { ...DEFAULT_OFFSETS, ...JSON.parse(saved) };
+      } catch (_) {}
+      return structuredClone(DEFAULT_OFFSETS);
+    }
+
+    function saveOffsets() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(offsets));
+    }
+
+    function currentSymbol() {
+      return select.value;
+    }
+
+    function ensureOffset(sym) {
+      if (!offsets[sym]) offsets[sym] = { dx: 0, dy: 0 };
+      return offsets[sym];
+    }
+
+    function applyPreview() {
+      const sym = currentSymbol();
+      const o = ensureOffset(sym);
+      pupil.textContent = sym;
+      pupil.setAttribute('x', String(CENTER + o.dx));
+      pupil.setAttribute('y', String(CENTER + o.dy));
+      dx.value = String(o.dx);
+      dy.value = String(o.dy);
+      dxVal.textContent = o.dx.toFixed(2);
+      dyVal.textContent = o.dy.toFixed(2);
+      renderExport();
+      saveOffsets();
+    }
+
+    function renderExport() {
+      const lines = [
+        '/**',
+        ' * TEMP — manual optical center tweaks for god-mode iris symbols.',
+        ' * Generated / edited via scripts/dev/god-symbol-tuner.html',
+        ' */',
+        'export const GOD_SYMBOL_VISUAL_OFFSETS = {',
+      ];
+      for (const sym of SYMBOLS) {
+        const o = ensureOffset(sym);
+        const key = sym.includes("'") ? `"${sym}"` : `'${sym}'`;
+        lines.push(`    ${key}: { dx: ${o.dx}, dy: ${o.dy} },`);
+      }
+      lines.push('};', '');
+      exportBox.value = lines.join('\n');
+    }
+
+    function setOffsetFromSliders() {
+      const sym = currentSymbol();
+      const o = ensureOffset(sym);
+      o.dx = parseFloat(dx.value);
+      o.dy = parseFloat(dy.value);
+      applyPreview();
+    }
+
+    function nudge(dxDelta, dyDelta) {
+      const sym = currentSymbol();
+      const o = ensureOffset(sym);
+      o.dx = Math.round((o.dx + dxDelta) * 100) / 100;
+      o.dy = Math.round((o.dy + dyDelta) * 100) / 100;
+      applyPreview();
+    }
+
+    SYMBOLS.forEach((sym) => {
+      const opt = document.createElement('option');
+      opt.value = sym;
+      opt.textContent = sym;
+      select.appendChild(opt);
+    });
+
+    select.addEventListener('change', applyPreview);
+    dx.addEventListener('input', setOffsetFromSliders);
+    dy.addEventListener('input', setOffsetFromSliders);
+
+    $('btn-prev').addEventListener('click', () => {
+      const i = SYMBOLS.indexOf(currentSymbol());
+      select.value = SYMBOLS[(i - 1 + SYMBOLS.length) % SYMBOLS.length];
+      applyPreview();
+    });
+    $('btn-next').addEventListener('click', () => {
+      const i = SYMBOLS.indexOf(currentSymbol());
+      select.value = SYMBOLS[(i + 1) % SYMBOLS.length];
+      applyPreview();
+    });
+    $('btn-reset-symbol').addEventListener('click', () => {
+      offsets[currentSymbol()] = { dx: 0, dy: 0 };
+      applyPreview();
+    });
+    $('btn-reset-all').addEventListener('click', () => {
+      if (!confirm('Reset all symbols to defaults?')) return;
+      offsets = structuredClone(DEFAULT_OFFSETS);
+      applyPreview();
+    });
+    $('btn-copy').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(exportBox.value);
+      $('btn-copy').textContent = 'Copied!';
+      setTimeout(() => { $('btn-copy').textContent = 'Copy export to clipboard'; }, 1200);
+    });
+    $('btn-load-repo').addEventListener('click', async () => {
+      const paths = [
+        '/js/panopticon/god-symbol-offsets.data.js',
+        '../../js/panopticon/god-symbol-offsets.data.js',
+      ];
+      for (const path of paths) {
+        try {
+          const res = await fetch(path);
+          if (!res.ok) continue;
+          const text = await res.text();
+          const match = text.match(/GOD_SYMBOL_VISUAL_OFFSETS\s*=\s*(\{[\s\S]*?\n\});/);
+          if (!match) throw new Error('parse failed');
+          const parsed = (0, eval)('(' + match[1] + ')');
+          offsets = { ...DEFAULT_OFFSETS, ...parsed };
+          applyPreview();
+          alert('Loaded from ' + path);
+          return;
+        } catch (_) {}
+      }
+      alert('Could not load .data.js — serve repo root (python3 -m http.server) or paste export manually.');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.matches('textarea, select')) return;
+      const step = e.shiftKey ? 0.25 : 0.05;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); nudge(-step, 0); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); nudge(step, 0); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); nudge(0, -step); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); nudge(0, step); }
+    });
+
+    applyPreview();
+  </script>
+</body>
+</html>
