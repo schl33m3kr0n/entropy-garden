@@ -19,7 +19,21 @@ function getHudTitleEl() {
     return document.querySelector('#hud h1');
 }
 
-/** Align each letter onto one shared HUD gradient (chrome.css h1 math). */
+/** @param {DOMRect} frameRect — .hud-title-card::after box (card + 3px inset each side) */
+function hudFrameRect(h1) {
+    const card = h1.closest('.hud-title-card');
+    if (!card) return h1.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const inset = 3; /* matches .hud-title-card::after top/left/right/bottom */
+    return {
+        left: cardRect.left - inset,
+        width: cardRect.width + inset * 2,
+        top: cardRect.top - inset,
+        height: cardRect.height + inset * 2,
+    };
+}
+
+/** Align each letter onto the same gradient field as .hud-title-card::after. */
 export function syncGodTitleGradient(h1 = getHudTitleEl()) {
     if (!h1?.classList.contains('god-title-live')) return;
 
@@ -38,20 +52,20 @@ export function syncGodTitleGradient(h1 = getHudTitleEl()) {
         return;
     }
 
-    const h1Rect = h1.getBoundingClientRect();
-    const titleW = h1Rect.width;
-    if (titleW <= 0) return;
+    const frame = hudFrameRect(h1);
+    const frameW = frame.width;
+    if (frameW <= 0) return;
 
     const offsetPct = parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue('--rainbow-offset'),
     ) || 0;
 
-    const bgW = titleW * 2;
-    // chrome.css h1: size 200%, position offset% 50%, default repeat — pixel equivalent:
-    const shiftPx = (offsetPct / 100) * (bgW - titleW);
+    const bgW = frameW * 2;
+    // ::after border uses background-size 200% + background-position: offset% 50%
+    const shiftPx = (offsetPct / 100) * (bgW - frameW);
 
     letters.forEach((el) => {
-        const letterLeft = el.getBoundingClientRect().left - h1Rect.left;
+        const letterLeft = el.getBoundingClientRect().left - frame.left;
         el.style.backgroundImage = HUD_TITLE_GRADIENT;
         el.style.backgroundRepeat = 'repeat';
         el.style.backgroundSize = `${bgW}px 100%`;

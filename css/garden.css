@@ -2,7 +2,7 @@
 
 /* --- GOD MODE --- */
 /* Letter spans can't inherit h1 background-clip:text — syncGodTitleGradient() in
-   god-title.js positions each glyph on one shared HUD-wide gradient. */
+   god-title.js tiles each glyph on the .hud-title-card::after gradient field. */
 h1.god-title-live {
     background: none;
     -webkit-background-clip: unset;
