@@ -3,11 +3,64 @@ import { perf } from './shared.js';
 const SOURCE = 'ENTROPY GARDEN';
 const TARGET = 'PONDERY ARGENT';
 
+/** Matches chrome.css h1 rainbow (200% wide, --rainbow-offset). */
+const HUD_TITLE_GRADIENT = 'linear-gradient(90deg, '
+    + 'hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), '
+    + 'hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)'
+    + ')';
+
 /** Visual slot left→right → source letter index (anagram: same letters as ENTROPY GARDEN). */
 const TO_PONDERY = [5, 4, 1, 11, 0, 3, 6, 7, 9, 10, 8, 12, 13, 2];
 
 let titleAnimating = false;
 let titleAnimToken = 0;
+
+function getHudTitleEl() {
+    return document.querySelector('#hud h1');
+}
+
+/** Align each letter onto one shared HUD gradient (chrome.css h1 math). */
+export function syncGodTitleGradient(h1 = getHudTitleEl()) {
+    if (!h1?.classList.contains('god-title-live')) return;
+
+    const chrome = h1.querySelector('.god-title-chrome');
+    if (!chrome) return;
+
+    const letters = chrome.querySelectorAll('.god-title-letter');
+    if (!letters.length) return;
+
+    if (document.body.classList.contains('corrupted')) {
+        letters.forEach((el) => {
+            el.style.removeProperty('background-size');
+            el.style.removeProperty('background-position');
+            el.style.removeProperty('background-image');
+        });
+        return;
+    }
+
+    const h1Rect = h1.getBoundingClientRect();
+    const titleW = h1Rect.width;
+    if (titleW <= 0) return;
+
+    const offsetPct = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--rainbow-offset'),
+    ) || 0;
+
+    const bgW = titleW * 2;
+    const shiftPx = (offsetPct / 100) * (bgW - titleW);
+
+    letters.forEach((el) => {
+        const letterLeft = el.getBoundingClientRect().left - h1Rect.left;
+        el.style.backgroundImage = HUD_TITLE_GRADIENT;
+        el.style.backgroundRepeat = 'no-repeat';
+        el.style.backgroundSize = `${bgW}px 100%`;
+        el.style.backgroundPosition = `${shiftPx - letterLeft}px 50%`;
+        el.style.webkitBackgroundClip = 'text';
+        el.style.backgroundClip = 'text';
+        el.style.webkitTextFillColor = 'transparent';
+        el.style.color = 'transparent';
+    });
+}
 
 function clearLetterStyles(chrome) {
     chrome.classList.remove('god-title-shuffling');
@@ -16,8 +69,13 @@ function clearLetterStyles(chrome) {
         el.style.transform = '';
         el.style.removeProperty('color');
         el.style.removeProperty('background');
+        el.style.removeProperty('background-image');
+        el.style.removeProperty('background-size');
+        el.style.removeProperty('background-position');
+        el.style.removeProperty('background-repeat');
         el.style.removeProperty('-webkit-background-clip');
         el.style.removeProperty('background-clip');
+        el.style.removeProperty('-webkit-text-fill-color');
         el.style.removeProperty('text-shadow');
     });
 }
@@ -109,7 +167,7 @@ function shouldAnimateTitle(animate) {
     return animate && !perf.prefersReducedMotion && !perf.isIOS;
 }
 
-function flipReorder(chrome, ordered, token, durationMs = 720) {
+function flipReorder(h1, chrome, ordered, token, durationMs = 720) {
     const first = new Map(ordered.map((el) => [el, el.getBoundingClientRect()]));
 
     ordered.forEach((el) => chrome.appendChild(el));
@@ -121,7 +179,19 @@ function flipReorder(chrome, ordered, token, durationMs = 720) {
         el.style.transform = `translate(${a.left - b.left}px, ${a.top - b.top}px)`;
     });
 
+    syncGodTitleGradient(h1);
+
     return new Promise((resolve) => {
+        const shuffleUntil = performance.now() + durationMs + 100;
+        const syncWhileShuffling = () => {
+            if (token !== titleAnimToken) return;
+            syncGodTitleGradient(h1);
+            if (performance.now() < shuffleUntil) {
+                requestAnimationFrame(syncWhileShuffling);
+            }
+        };
+        requestAnimationFrame(syncWhileShuffling);
+
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 if (token !== titleAnimToken) {
@@ -146,6 +216,7 @@ function flipReorder(chrome, ordered, token, durationMs = 720) {
                         el.style.transition = '';
                         el.style.transform = '';
                     });
+                    syncGodTitleGradient(h1);
                     resolve();
                 };
 
@@ -208,6 +279,7 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     if (!shouldAnimateTitle(animate)) {
         applyArrangement(chrome, pondery);
         lockTitleWidth(h1, chrome, letters);
+        syncGodTitleGradient(h1);
         finish();
         return Promise.resolve();
     }
@@ -217,9 +289,10 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     lockTitleWidth(h1, chrome, letters);
 
     const ordered = orderedForArrangement(letters, pondery);
-    return flipReorder(chrome, ordered, token).finally(() => {
+    return flipReorder(h1, chrome, ordered, token).finally(() => {
         if (token !== titleAnimToken) return;
         titleAnimating = false;
+        syncGodTitleGradient(h1);
         finish();
     });
 }

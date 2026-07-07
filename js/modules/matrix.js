@@ -9,6 +9,7 @@ import {
     panopticonEl,
     syncGodModeTriangleSize,
 } from '../core/shared.js';
+import { syncGodTitleGradient } from '../core/god-title.js';
 import {
     isEmptyWheelGlyph,
     pickCipherChar,
@@ -563,9 +564,12 @@ function animate() {
     if (!perf.liteGfx) {
         document.documentElement.style.setProperty('--rainbow-offset', `${(time * 0.5) % 200}%`);
         syncPanopticonRainbow();
+        syncGodTitleGradient();
         if (!perf.prefersReducedMotion && !isCorrupted) {
             document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);
         }
+    } else {
+        syncGodTitleGradient();
     }
 
     if (gardenLoopActive) {

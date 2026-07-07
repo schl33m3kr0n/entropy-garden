@@ -1,9 +1,8 @@
 /* Entropy Garden — matrix, panopticon, artifacts, docking bay */
 
 /* --- GOD MODE --- */
-/* h1 text becomes letter spans — Chrome won't clip the parent h1 gradient through
-   nested flex. Same HUD gradient on each letter with background-attachment: fixed
-   so the rainbow is one continuous field (not a mini-gradient per glyph). */
+/* Letter spans can't inherit h1 background-clip:text — syncGodTitleGradient() in
+   god-title.js positions each glyph on one shared HUD-wide gradient. */
 h1.god-title-live {
     background: none;
     -webkit-background-clip: unset;
@@ -22,13 +21,7 @@ h1.god-title-live .god-title-chrome {
 h1.god-title-live .god-title-letter {
     display: inline-block;
     will-change: transform;
-    background: linear-gradient(90deg,
-        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
-        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
-    );
-    background-size: 200% 100%;
-    background-position: var(--rainbow-offset, 0%) 50%;
-    background-attachment: fixed;
+    background-repeat: no-repeat;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -39,7 +32,6 @@ h1.god-title-live .god-title-letter {
 @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
     h1.god-title-live .god-title-letter {
         background: none;
-        background-attachment: unset;
         -webkit-text-fill-color: var(--neon-green);
         color: var(--neon-green);
         text-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
@@ -52,7 +44,6 @@ h1.god-title-live .god-title-letter.is-space {
 
 body.corrupted.god-mode h1.god-title-live .god-title-letter {
     background: none;
-    background-attachment: unset;
     -webkit-background-clip: unset;
     background-clip: unset;
     -webkit-text-fill-color: var(--alert-red);
