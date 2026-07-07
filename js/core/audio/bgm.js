@@ -27,7 +27,7 @@ export const BGM_TRACK_INFO = [
     { title: 'Ambient Soundscape - Glitch Bells', artist: 'GregorQuendel' },
     { title: 'Preparing for the Uncertain', artist: 'Grand_Project' },
     { title: 'Ambient', artist: 'leberch' },
-    { title: '7am (slowed + reverb)', artist: 'Adrian' },
+    { title: '7am', artist: 'Adrian' },
     { title: 'Cybernetic Night (Sci-Fi Ambient)', artist: 'KonstantinPazuzuStudio' },
     { title: 'Fractals', artist: '5Δ' },
 ];
