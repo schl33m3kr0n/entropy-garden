@@ -43,6 +43,7 @@ const PRECACHE_URLS = [
     'assets/icons/about.svg',
     'assets/icons/identity.svg',
     'assets/icons/gemini.png',
+    'assets/icons/chatgpt.png',
     'assets/icons/init-cursor.svg',
     'assets/icons/joystick.svg',
     'assets/icons/ouroboros.svg',

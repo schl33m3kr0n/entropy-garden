@@ -189,6 +189,13 @@ body.garden-ready::before {
     aspect-ratio: 1 / 1;
 }
 
+.init-partner-logo--chatgpt {
+    width: clamp(64px, 16vw, 88px);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
+
 #init-partner-splash.is-active .init-partner-logo {
     animation: initPartnerDrop var(--init-partner-anim-ms, 1s) cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
