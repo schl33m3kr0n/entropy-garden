@@ -102,7 +102,7 @@
         "Considering the bomb",
         "Crying myself to sleep after the Mexico & England game",
         "Refurbishing angst into silly & marketable shapes",
-        "Overanalyzing my deicisions until paralysis",
+        "Overanalyzing my decisions until paralysis",
         "Lifting weights (of my despair & melancholy)",
         "Establishing a palatable ethnostate in Animal Crossing",
         "Refactoring the code because it sounds important",
