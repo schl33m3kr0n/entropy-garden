@@ -290,22 +290,6 @@ const PANOPTICON_READING_SCAN_MS = 1100;
 const PANOPTICON_PUPIL_R = 7;
 const PANOPTICON_PUPIL_R_HIGH = 12;
 
-const PANOPTICON_AWAY_ACTIVITIES = [
-    'reading',
-    'plant',
-    'folders',
-    'doomscroll',
-    'knitting',
-    'rubiks',
-    'smaller-eye',
-    'polishing',
-    'solitaire',
-    'notebook',
-    'basilisk',
-    'blinking',
-    'void',
-];
-
 let catEyePhase = null;
 let catEyeStart = 0;
 let catEyeAudioEl = null;
@@ -567,10 +551,6 @@ function pickPanopticonReturnComment() {
     return pickOne(safe, pools.panopticonReturnCommentsGritty || []);
 }
 
-function pickPanopticonAwayActivity() {
-    return PANOPTICON_AWAY_ACTIVITIES[Math.floor(Math.random() * PANOPTICON_AWAY_ACTIVITIES.length)];
-}
-
 function pickPanopticonAwayReturnComment(activityId) {
     const pools = globalThis.lorePools;
     const entry = pools?.panopticonAwayReturnComments?.[activityId];
@@ -614,16 +594,13 @@ function cancelPanopticonAwayActivity() {
 function startPanopticonAwayActivity() {
     if (!canStartPanopticonAwayActivity()) return;
 
-    panopticonAwayActivity = pickPanopticonAwayActivity();
+    panopticonAwayActivity = 'reading';
     panopticonReadingScanStart = performance.now();
     panopticonAwayLookupFromX = panopticonGazeX;
     panopticonAwayLookupFromY = panopticonGazeY;
     eyeMode = 'reading';
-
-    if (panopticonAwayActivity === 'reading') {
-        panopticonEl?.classList.add('away-reading');
-        panopticonEl?.classList.remove('away-fading');
-    }
+    panopticonEl?.classList.add('away-reading');
+    panopticonEl?.classList.remove('away-fading');
 
     schedulePanopticonAuxLoop();
 }
