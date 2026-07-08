@@ -318,9 +318,15 @@ body.corrupted .ui-btn:hover {
 
 /* Style the icons injected into the slots */
 .slot .slot-icon {
-    width: 80%;
-    height: 80%;
-    filter: drop-shadow(0 0 5px var(--neon-green));
+    display: block;
+    flex-shrink: 0;
+    width: 54%;
+    height: 54%;
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    mask-position: center;
+    -webkit-mask-position: center;
+    filter: drop-shadow(0 0 4px var(--neon-green));
     transition: transform 0.1s;
 }
 
@@ -329,16 +335,22 @@ body.corrupted .ui-btn:hover {
 }
 
 .mask-icon--dock-pizza {
+    width: 50%;
+    height: 50%;
     mask-image: url('../assets/icons/pizza.svg');
     -webkit-mask-image: url('../assets/icons/pizza.svg');
 }
 
 .mask-icon--dock-flask {
+    width: 44%;
+    height: 44%;
     mask-image: url('../assets/icons/flask.svg');
     -webkit-mask-image: url('../assets/icons/flask.svg');
 }
 
 .mask-icon--dock-save {
+    width: 48%;
+    height: 48%;
     mask-image: url('../assets/icons/save.svg');
     -webkit-mask-image: url('../assets/icons/save.svg');
 }
@@ -371,7 +383,9 @@ body.corrupted .ui-btn:hover {
     color: #333; 
     font-size: 0.7rem; 
     background: rgba(0,0,0,0.5); 
-    transition: border-color 0.3s, box-shadow 0.3s; 
+    transition: border-color 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .slot.occupied { border-color: var(--neon-green); border-style: solid; }
