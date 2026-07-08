@@ -334,26 +334,28 @@ body.corrupted .ui-btn:hover {
     transform: scale(0.9);
 }
 
-.mask-icon--dock-pizza {
-    width: 75%;
-    height: 75%;
+.slot .slot-icon.mask-icon--dock-pizza {
+    width: 62%;
+    height: 62%;
     transform: scaleY(-1);
     mask-image: url('../assets/icons/pizza.svg');
     -webkit-mask-image: url('../assets/icons/pizza.svg');
+    mask-size: 110%;
+    -webkit-mask-size: 110%;
 }
 
-.slot:active .mask-icon--dock-pizza {
+.slot:active .slot-icon.mask-icon--dock-pizza {
     transform: scaleY(-1) scale(0.9);
 }
 
-.mask-icon--dock-flask {
-    width: 44%;
-    height: 44%;
+.slot .slot-icon.mask-icon--dock-flask {
+    width: 52%;
+    height: 52%;
     mask-image: url('../assets/icons/flask.svg');
     -webkit-mask-image: url('../assets/icons/flask.svg');
 }
 
-.mask-icon--dock-save {
+.slot .slot-icon.mask-icon--dock-save {
     width: 48%;
     height: 48%;
     mask-image: url('../assets/icons/save.svg');

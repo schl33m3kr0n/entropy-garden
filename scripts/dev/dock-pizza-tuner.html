@@ -87,11 +87,15 @@
 <body>
   <div class="panel">
     <h1>DOCK PIZZA TUNER</h1>
-    <p class="hint">Matches <code>.slot</code> (70×70) in <code>css/garden.css</code>. Paste export into <code>.mask-icon--dock-pizza</code>.</p>
+    <p class="hint">Matches <code>.slot .slot-icon.mask-icon--dock-pizza</code> in <code>css/garden.css</code>.</p>
 
     <label for="size">Size (% of slot)</label>
-    <input id="size" type="range" min="30" max="75" step="0.5" value="75" />
-    <div class="val" id="size-val">75%</div>
+    <input id="size" type="range" min="54" max="100" step="0.5" value="62" />
+    <div class="val" id="size-val">62%</div>
+
+    <label for="mask-zoom">Mask zoom (SVG stroke padding)</label>
+    <input id="mask-zoom" type="range" min="100" max="140" step="1" value="110" />
+    <div class="val" id="mask-zoom-val">110%</div>
 
     <label>
       <input id="flip" type="checkbox" checked />
@@ -113,7 +117,7 @@
   </div>
 
   <script>
-    const DEFAULTS = { size: 75, flip: true };
+    const DEFAULTS = { size: 62, maskZoom: 110, flip: true };
     const STORAGE_KEY = 'entropy-garden-dock-pizza-tuner';
 
     const sizeEl = document.getElementById('size');
@@ -121,6 +125,8 @@
     const preview = document.getElementById('preview');
     const exportEl = document.getElementById('export');
     const sizeVal = document.getElementById('size-val');
+    const maskZoomEl = document.getElementById('mask-zoom');
+    const maskZoomVal = document.getElementById('mask-zoom-val');
 
     function loadState() {
       try {
@@ -138,15 +144,17 @@
     function cssBlock(state) {
       const transform = state.flip ? 'scaleY(-1)' : 'none';
       const activeTransform = state.flip ? 'scaleY(-1) scale(0.9)' : 'scale(0.9)';
-      return `.mask-icon--dock-pizza {
+      return `.slot .slot-icon.mask-icon--dock-pizza {
     width: ${state.size}%;
     height: ${state.size}%;
     transform: ${transform};
     mask-image: url('../assets/icons/pizza.svg');
     -webkit-mask-image: url('../assets/icons/pizza.svg');
+    mask-size: ${state.maskZoom}%;
+    -webkit-mask-size: ${state.maskZoom}%;
 }
 
-.slot:active .mask-icon--dock-pizza {
+.slot:active .slot-icon.mask-icon--dock-pizza {
     transform: ${activeTransform};
 }`;
     }
@@ -155,7 +163,10 @@
       preview.style.width = `${state.size}%`;
       preview.style.height = `${state.size}%`;
       preview.style.transform = state.flip ? 'scaleY(-1)' : 'none';
+      preview.style.maskSize = `${state.maskZoom}%`;
+      preview.style.webkitMaskSize = `${state.maskZoom}%`;
       sizeVal.textContent = `${state.size}%`;
+      maskZoomVal.textContent = `${state.maskZoom}%`;
       exportEl.value = cssBlock(state);
       saveState(state);
     }
@@ -163,15 +174,18 @@
     function readState() {
       return {
         size: parseFloat(sizeEl.value),
+        maskZoom: parseFloat(maskZoomEl.value),
         flip: flipEl.checked,
       };
     }
 
     sizeEl.addEventListener('input', () => apply(readState()));
+    maskZoomEl.addEventListener('input', () => apply(readState()));
     flipEl.addEventListener('change', () => apply(readState()));
 
     document.getElementById('btn-reset').addEventListener('click', () => {
       sizeEl.value = String(DEFAULTS.size);
+      maskZoomEl.value = String(DEFAULTS.maskZoom);
       flipEl.checked = DEFAULTS.flip;
       apply({ ...DEFAULTS });
     });
@@ -182,6 +196,7 @@
 
     const initial = loadState();
     sizeEl.value = String(initial.size);
+    maskZoomEl.value = String(initial.maskZoom ?? DEFAULTS.maskZoom);
     flipEl.checked = initial.flip;
     apply(initial);
   </script>
