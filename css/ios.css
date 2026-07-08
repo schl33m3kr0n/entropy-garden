@@ -1141,8 +1141,7 @@ body.ios-ui .scrollable-content {
 body.ios-ui .vault-item,
 body.ios-ui .carousel-stage,
 body.ios-ui .carousel-slide,
-body.ios-ui .vault-media,
-body.ios-ui .vault-item iframe.genesis-iframe {
+body.ios-ui .vault-media {
     border-radius: var(--ios-radius-md);
 }
 

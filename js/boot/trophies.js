@@ -18,7 +18,7 @@
         { id: 'arcade_clear', title: 'Cabinet Cleared', desc: 'All sequences accepted.' },
         { id: 'cards_chaos', title: 'Chaos Dealer', desc: 'Four rounds of Cards of Chaos conquered.' },
         { id: 'feline_freq', title: 'Meow!', desc: 'Panopticon narrowed to cat eye.' },
-        { id: 'genesis_gate', title: 'Genesis Gate', desc: 'Vault iframe opened the prequel.' },
+        { id: 'genesis_gate', title: 'Genesis Gate', desc: 'Vault genesis reel opened.' },
         { id: 'vault_sun', title: 'Solar Uncapped', desc: 'The sun played in the vault.' },
     ];
 

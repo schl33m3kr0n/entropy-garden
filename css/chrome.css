@@ -1072,13 +1072,14 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     transform-origin: center center;
 }
 
-/* --- VAULT GRID (Pinterest-style board, vertical scroll) --- */
-.vault-grid {
+/* --- VAULT GRID (exactly 3 columns in the wide modal) --- */
+#modal-vault .vault-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
   padding: 4px 2px 8px 0;
-  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .vault-item {
@@ -1087,6 +1088,7 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     width: 100%;
     height: fit-content;
     margin: 0;
+    align-self: start;
     background: rgba(0,25,0,0.3);
     border: 1px solid var(--neon-green);
     overflow: hidden;
@@ -1095,19 +1097,7 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     cursor: pointer;
 }
 
-@media (min-width: 720px) {
-    #modal-vault .vault-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-@media (min-width: 1100px) {
-    #modal-vault .vault-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-}
-
-.vault-item:hover { 
+.vault-item:hover {
     border-style: solid; 
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
 }
@@ -1133,19 +1123,13 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     object-position: center;
 }
 
-.vault-item iframe.genesis-iframe.vault-media--col-fill {
-    width: 100%;
-    max-width: 100%;
-    object-fit: initial;
-}
-
 .vault-media--landscape {
     aspect-ratio: auto;
     height: auto;
     max-height: none;
 }
 
-.vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun)) {
+.vault-media:is(video:not(.vault-media--contain):not(.vault-media--sun):not(.vault-media--genesis)) {
     width: 100%;
     height: auto;
     max-width: 100%;
@@ -1160,6 +1144,16 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     max-width: 100%;
     max-height: none;
     aspect-ratio: 541 / 675;
+    object-fit: cover;
+    object-position: center;
+}
+
+.vault-media.vault-media--genesis:is(video) {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: none;
+    aspect-ratio: 5 / 4;
     object-fit: cover;
     object-position: center;
 }
@@ -1872,29 +1866,23 @@ body.chromatic-active {
     animation: fadeInPage 1.5s ease-out forwards, chromaticFlash 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
-/* --- VAULT IFRAME INTEGRATION --- */
+/* --- VAULT GENESIS VIDEO --- */
 
-/* 1. Prevent the thumbnail from stealing the click so the Lightbox can open */
-.vault-item iframe.genesis-iframe {
+/* Thumbnail in the pin grid — clicks open the lightbox */
+.vault-item video.vault-media--genesis {
     pointer-events: none;
     display: block;
-    width: 100%;
-    max-width: 100%;
-    aspect-ratio: 5 / 4;
-    height: auto;
-    border: 0;
 }
 
-/* 2. When opened in the Lightbox, target the NEW class the JS creates */
-#lightbox-overlay.active iframe.lightbox-content,
-#lightbox-overlay.active iframe.genesis-lightbox {
+#lightbox-overlay video.lightbox-content.vault-media--genesis {
     pointer-events: auto;
-    background: #efefef;
-    aspect-ratio: 5 / 4;
     width: min(90vw, calc(90vh * 5 / 4));
     height: auto;
     max-height: 90vh;
     max-width: 90vw;
+    aspect-ratio: 5 / 4;
+    object-fit: contain;
+    background: #000;
     border: 2px solid var(--neon-green);
 }
 

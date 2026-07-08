@@ -10,7 +10,7 @@ import {
     enhanceSidebarItems,
     bindPlaylistTransportLabels,
 } from './ui/modal-a11y.js';
-import { startGardenBirdsAmbience, stopGardenBirdsAmbience } from './core/audio/init-ambient.js';
+import { prefetchGardenBirdsAmbience, primeGardenBirdsAmbience, startGardenBirdsAmbience, stopGardenBirdsAmbience } from './core/audio/init-ambient.js';
 import {
     sfx,
     playSound,
@@ -118,6 +118,8 @@ const INIT_PARTNER_SPLASH_MS = 3000;
 function playInitPartnerSplash(onComplete) {
     warmSound(sfx.collectible);
     playSound(sfx.collectible);
+    primeGardenBirdsAmbience();
+    prefetchGardenBirdsAmbience();
 
     const splash = document.getElementById('init-partner-splash');
     const warning = document.getElementById('epilepsy-warning');
@@ -150,6 +152,7 @@ function playInitPartnerSplash(onComplete) {
 function beginGardenExperience() {
     try {
         stopGardenBirdsAmbience();
+        prefetchGardenBirdsAmbience();
         // Show loader before audio decode / BGM load (those can block the main thread).
         document.body.classList.add('garden-loading');
         document.body.classList.remove('garden-ready');
@@ -1292,6 +1295,9 @@ document.querySelectorAll('.vault-item').forEach(item => {
                 clone.controls = true;
                 ensureMediaSrc(clone);
                 clone.play().catch(() => {});
+                if (media.classList.contains('vault-media--genesis')) {
+                    globalThis.unlockTrophy?.('genesis_gate');
+                }
             }
             if (clone.tagName === 'IMG') ensureMediaSrc(clone);
             lightboxOverlay.appendChild(clone);

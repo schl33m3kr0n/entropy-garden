@@ -25,7 +25,6 @@ TAR_EXCLUDES=(
   'archive'
   'scripts'
   'docs'
-  'assets/video/genesis-web.mov'
   'assets/img/vault/sun-poster.png'
   'deploy.exclude'
   'deploy.manifest'

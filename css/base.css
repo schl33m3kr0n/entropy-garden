@@ -177,9 +177,10 @@ body.garden-ready::before {
 }
 
 .init-partner-logo--gemini {
-    width: clamp(100px, 22vw, 156px);
+    width: clamp(64px, 16vw, 88px);
     height: auto;
-    aspect-ratio: 1024 / 576;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
 }
 
 .init-partner-logo--cursor {

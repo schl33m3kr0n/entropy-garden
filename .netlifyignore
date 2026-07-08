@@ -6,7 +6,6 @@ archive
 scripts
 docs
 js/script.js
-assets/video/genesis-web.mov
 assets/img/vault/sun-poster.png
 deploy.exclude
 deploy.manifest
