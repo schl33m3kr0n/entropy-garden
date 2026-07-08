@@ -7,7 +7,6 @@
 export const CIPHER_BMP_SAFE_EXTRA =
     "♠♣♥♦" +
     "←→↑↓↔⇐⇒" +
-    "◆●▪■▲▼" +
     "✦✧✩✪✫✭✯" +
     "∀∃∅∈∉";
 

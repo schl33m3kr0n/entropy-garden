@@ -477,7 +477,7 @@ what is recognition to the blacklister?
 these different lives with different lenses of the same
 experiences that fractalize yet are given a single name
 hopes and dreams plots and schemes
-bursting at the seams notice the themes
+bursting at the seams with many themes
 
 a resurrection refracted into raw reality
 an ideal grating against fundamentality
