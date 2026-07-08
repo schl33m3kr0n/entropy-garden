@@ -10,6 +10,7 @@ import {
     enhanceSidebarItems,
     bindPlaylistTransportLabels,
 } from './ui/modal-a11y.js';
+import { startInitScreenAmbience } from './core/audio/init-ambient.js';
 import {
     sfx,
     playSound,
@@ -529,6 +530,7 @@ const weirdLoadingPhrases = [
 function revealGardenUI() {
     document.body.classList.remove('garden-loading');
     document.body.classList.add('garden-ready');
+    startInitScreenAmbience();
     updatePanopticonVisibility();
     startGlitchLoop();
     startIdleDissociation();

@@ -1126,6 +1126,10 @@ body.ios-ui #modal-cards.modal.wide {
     width: min(880px, 98vw);
 }
 
+body.ios-ui #modal-vault.modal.wide {
+    width: min(980px, 98vw);
+}
+
 body.ios-ui .modal h2 {
     border-radius: var(--ios-radius-sm) var(--ios-radius-sm) 0 0;
 }
@@ -1200,9 +1204,10 @@ body.ios-ui .ios-modal-reroll {
 #modal-vault .scrollable-content {
     overflow-x: hidden;
     overflow-y: auto;
-    min-height: 0;
     flex: 1 1 auto;
-    max-height: min(72vh, 900px);
+    min-height: 0;
+    max-height: min(68vh, 780px);
+    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
 

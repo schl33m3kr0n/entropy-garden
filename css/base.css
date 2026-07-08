@@ -372,15 +372,7 @@ body.perf-lite #loader-leaf {
     }
 
     .vault-grid {
-        gap: 32px;
-        padding: 20px;
-    }
-
-    .vault-item {
-        margin-bottom: 0;
-    }
-
-    .vault-item.carousel-container {
-        width: 100%;
+        grid-template-columns: 1fr;
+        gap: 14px;
     }
 }
