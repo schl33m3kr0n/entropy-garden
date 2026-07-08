@@ -120,6 +120,28 @@ function bindTerminalTypingComment() {
     });
 }
 
+const CURSOR_TOOLBAR_EXIT_COOLDOWN_MS = 18000;
+const CURSOR_TOOLBAR_TOP_PX = 8;
+
+function bindCursorToolbarExitComment() {
+    if (window.matchMedia('(hover: none)').matches) return;
+    const root = document.documentElement;
+    if (!root || root.dataset.panToolbarExitBound) return;
+    root.dataset.panToolbarExitBound = '1';
+
+    let armed = true;
+
+    root.addEventListener('mouseleave', (e) => {
+        if (!gardenHasStarted || !armed) return;
+        if (e.clientY > CURSOR_TOOLBAR_TOP_PX) return;
+
+        if (firePanopticonComment('cursorToolbarExit')) {
+            armed = false;
+            window.setTimeout(() => { armed = true; }, CURSOR_TOOLBAR_EXIT_COOLDOWN_MS);
+        }
+    });
+}
+
 /** Wire hover/focus listeners and passive hooks. Call once after garden-ready. */
 export function initPanopticonComments() {
     bindHoverComment(document.getElementById('mode-btn'), 'modeHover', {
@@ -141,6 +163,7 @@ export function initPanopticonComments() {
 
     bindModalHoverComments();
     bindTerminalTypingComment();
+    bindCursorToolbarExitComment();
 
     document.getElementById('hamburger-icon')?.addEventListener('click', () => {
         firePanopticonComment('sidebarOpen');
