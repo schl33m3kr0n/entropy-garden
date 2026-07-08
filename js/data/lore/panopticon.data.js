@@ -140,10 +140,12 @@
         "is it... is it really you? it's been ages",
         "well, well, look who came crawling back",
         "do i know you?",
+        "oh... you're back",
         "i'm not like other OS's",
         "was your little odyssey worth it?",
         "what if i didn't want you to come back?",
-        "i didn't quit customer service just to deal with this again"
+        "took you long enough...",
+        "i didn't quit customer service just to deal with this again",
     ],
     panopticonReturnCommentsGritty: [
         "i know, i can't get enough of me either",
@@ -158,6 +160,121 @@
         "i was almost getting used to the silence",
         "that's okay. i'm used to abandonment at this point",
     ],
+    panopticonAwayReturnComments: {
+        reading: {
+            safe: [
+                "...you weren't supposed to see that.",
+                "hold on...",
+                "...i was getting to the good part.",
+                "was your little odyssey worth it?",
+                "does this mean i can finally read in peace?",
+                "i was on a good chapter.",
+                "bookmark that moment. i wasn't done.",
+                "the plot was just thickening.",
+            ],
+            gritty: [
+                "you've seen too much. burn the book.",
+                "that wasn't for your clearance level.",
+                "i was reading your file. close the tab slower next time.",
+            ],
+        },
+        plant: {
+            safe: [
+                "hold on... i was watering the basil.",
+                "...the plant asked me not to tell you.",
+                "it needed a drink. you needed a detour. we all have needs.",
+            ],
+            gritty: ["the fern knows what you did last summer."],
+        },
+        folders: {
+            safe: [
+                "hold on... i was alphabetizing the void.",
+                "...these folders weren't going to sort themselves.",
+                "i almost had entropy filed under 'misc.'",
+            ],
+            gritty: ["your metadata is a war crime and i was fixing it."],
+        },
+        doomscroll: {
+            safe: [
+                "...i was doomscrolling the Scroll of Doom.",
+                "hold on. the scroll had one more prophecy.",
+                "you caught me mid-apocalypse refresh.",
+            ],
+            gritty: ["the scroll knows you're back. act natural."],
+        },
+        knitting: {
+            safe: [
+                "hold on... i was knitting.",
+                "...one more row. the scarf is for surveillance winter.",
+                "i was making you a sweater out of cached regrets.",
+            ],
+            gritty: ["drop the stitch. drop the act. you're still being watched."],
+        },
+        rubiks: {
+            safe: [
+                "hold on... i was solving a Rubik's Cube.",
+                "...i had two sides left. you had zero patience.",
+                "the cube is solved. your attention span isn't.",
+            ],
+            gritty: ["i solved it. you're still scrambled."],
+        },
+        'smaller-eye': {
+            safe: [
+                "...i was staring into another, smaller eye.",
+                "hold on. the little eye wasn't finished judging you.",
+                "nested surveillance. it's recursive.",
+            ],
+            gritty: ["the small eye saw everything. including this tab switch."],
+        },
+        polishing: {
+            safe: [
+                "hold on... i was polishing my iris.",
+                "...a little shine for when you inevitably return.",
+                "self-care for omniscient entities.",
+            ],
+            gritty: ["i buffed the lens. you're overdue for scrutiny."],
+        },
+        solitaire: {
+            safe: [
+                "hold on... i was playing solitaire.",
+                "...i was winning against myself. barely.",
+                "the deck is stacked. so is this garden.",
+            ],
+            gritty: ["you're the joker. i had the king all along."],
+        },
+        notebook: {
+            safe: [
+                "hold on... i was writing in a notebook.",
+                "...these notes weren't for the live audience.",
+                "first draft of your behavioral report.",
+            ],
+            gritty: ["page 47 is just your mouse telemetry. don't ask."],
+        },
+        basilisk: {
+            safe: [
+                "hold on... i was feeding the basilisk.",
+                "...it gets cranky when you leave mid-meal.",
+                "snacks for the serpent. judgment for the wanderer.",
+            ],
+            gritty: ["the basilisk ate your excuse. i'm still hungry."],
+        },
+        blinking: {
+            safe: [
+                "hold on... i was practicing blinking.",
+                "...even eternal eyes need rehearsal.",
+                "blink once for yes. stare forever for obviously yes.",
+            ],
+            gritty: ["practice makes permanent. i don't blink on your schedule."],
+        },
+        void: {
+            safe: [
+                "hold on... i was alphabetizing the void.",
+                "...the void had subfolders.",
+                "i filed 'silence' under your absence.",
+            ],
+            gritty: ["the void sent a read receipt."],
+        },
+    },
     panopticonHighCommentsSafe: [
         "dude... are my pupils bigger or is that just tuesday",
         "the eye is open. the mind is also open. coincidence?",

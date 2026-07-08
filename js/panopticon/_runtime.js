@@ -280,8 +280,31 @@ const PANOPTICON_WAKE_BLINK_SHUT = 0.88;
 const PANOPTICON_IDLE_COMMENT_MS = 10000;
 const PANOPTICON_IDLE_COMMENT_CHANCE = 1;
 const PANOPTICON_TAB_RETURN_MIN_MS = 500;
+const PANOPTICON_AWAY_NOTICE_MIN_MS = 300;
+const PANOPTICON_AWAY_NOTICE_MAX_MS = 800;
+const PANOPTICON_AWAY_LOOKUP_MS = 680;
+const PANOPTICON_AWAY_STARE_MS = 680;
+const PANOPTICON_READING_GAZE_Y = 11;
+const PANOPTICON_READING_SCAN_X = 8;
+const PANOPTICON_READING_SCAN_MS = 1100;
 const PANOPTICON_PUPIL_R = 7;
 const PANOPTICON_PUPIL_R_HIGH = 12;
+
+const PANOPTICON_AWAY_ACTIVITIES = [
+    'reading',
+    'plant',
+    'folders',
+    'doomscroll',
+    'knitting',
+    'rubiks',
+    'smaller-eye',
+    'polishing',
+    'solitaire',
+    'notebook',
+    'basilisk',
+    'blinking',
+    'void',
+];
 
 let catEyePhase = null;
 let catEyeStart = 0;
@@ -296,6 +319,12 @@ let panopticonIdleCommentTimer = null;
 let panopticonCommentTimeout = null;
 let panopticonTabHiddenAt = 0;
 let panopticonCodeSequenceActivePrev = false;
+let panopticonAwayActivity = null;
+let panopticonAwayReturnTimer = null;
+let panopticonAwayLookupStart = 0;
+let panopticonReadingScanStart = 0;
+let panopticonAwayLookupFromX = 0;
+let panopticonAwayLookupFromY = PANOPTICON_READING_GAZE_Y;
 
 function isPanopticonGodModeCommentary() {
     return document.body.classList.contains('god-mode');
@@ -326,6 +355,7 @@ function canShowPanopticonComment() {
 function canShowPanopticonIdleComment() {
     if (!canShowPanopticonComment()) return false;
     if (panopticonSleepWakeActive()) return false;
+    if (eyeMode === 'reading' || eyeMode === 'away-lookup') return false;
     return true;
 }
 
@@ -537,6 +567,147 @@ function pickPanopticonReturnComment() {
     return pickOne(safe, pools.panopticonReturnCommentsGritty || []);
 }
 
+function pickPanopticonAwayActivity() {
+    return PANOPTICON_AWAY_ACTIVITIES[Math.floor(Math.random() * PANOPTICON_AWAY_ACTIVITIES.length)];
+}
+
+function pickPanopticonAwayReturnComment(activityId) {
+    const pools = globalThis.lorePools;
+    const entry = pools?.panopticonAwayReturnComments?.[activityId];
+    if (entry?.safe?.length) return pickOne(entry.safe, entry.gritty || []);
+    return pickPanopticonReturnComment();
+}
+
+function canStartPanopticonAwayActivity() {
+    if (!gardenHasStarted || !isGardenReady()) return false;
+    if (!panopticonEl?.classList.contains('visible')) return false;
+    if (isPanopticonCodeSequenceActive()) return false;
+    if (panopticonSleepWakeActive()) return false;
+    if (document.body.classList.contains('pong-playing')) return false;
+    if (isSingularityActive) return false;
+    if (eyeMode === 'reroll') return false;
+    return true;
+}
+
+function clearPanopticonAwayReturnTimer() {
+    if (panopticonAwayReturnTimer == null) return;
+    clearTimeout(panopticonAwayReturnTimer);
+    panopticonAwayReturnTimer = null;
+}
+
+function resetPanopticonAwayState() {
+    clearPanopticonAwayReturnTimer();
+    panopticonAwayActivity = null;
+    panopticonReadingScanStart = 0;
+    panopticonAwayLookupStart = 0;
+    panopticonEl?.classList.remove('away-reading', 'away-fading');
+}
+
+function cancelPanopticonAwayActivity() {
+    clearPanopticonAwayReturnTimer();
+    if (eyeMode === 'reading' || eyeMode === 'away-lookup') {
+        eyeMode = 'idle';
+    }
+    resetPanopticonAwayState();
+}
+
+function startPanopticonAwayActivity() {
+    if (!canStartPanopticonAwayActivity()) return;
+
+    panopticonAwayActivity = pickPanopticonAwayActivity();
+    panopticonReadingScanStart = performance.now();
+    panopticonAwayLookupFromX = panopticonGazeX;
+    panopticonAwayLookupFromY = panopticonGazeY;
+    eyeMode = 'reading';
+
+    if (panopticonAwayActivity === 'reading') {
+        panopticonEl?.classList.add('away-reading');
+        panopticonEl?.classList.remove('away-fading');
+    }
+
+    schedulePanopticonAuxLoop();
+}
+
+function finishPanopticonAwayReturnComment() {
+    const activityId = panopticonAwayActivity;
+    resetPanopticonAwayState();
+    if (!activityId) return;
+
+    const text = pickPanopticonAwayReturnComment(activityId);
+    requestAnimationFrame(() => {
+        if (canShowPanopticonComment()) showPanopticonComment(text);
+    });
+}
+
+function beginPanopticonAwayReturn() {
+    clearPanopticonAwayReturnTimer();
+
+    if (!panopticonAwayActivity || eyeMode !== 'reading') {
+        resetPanopticonAwayState();
+        return;
+    }
+
+    const noticeMs = PANOPTICON_AWAY_NOTICE_MIN_MS
+        + Math.random() * (PANOPTICON_AWAY_NOTICE_MAX_MS - PANOPTICON_AWAY_NOTICE_MIN_MS);
+
+    panopticonAwayReturnTimer = setTimeout(() => {
+        panopticonAwayReturnTimer = null;
+        if (eyeMode !== 'reading' || !panopticonAwayActivity) return;
+
+        panopticonAwayLookupFromX = panopticonGazeX;
+        panopticonAwayLookupFromY = panopticonGazeY;
+        panopticonEl?.classList.add('away-fading');
+        eyeMode = 'away-lookup';
+        panopticonAwayLookupStart = performance.now();
+        schedulePanopticonAuxLoop();
+    }, noticeMs);
+}
+
+function updatePanopticonReadingScan(now) {
+    if (!panopticonGazeEl) return;
+
+    if (isApril420()) applyPanopticonLidShut(0);
+
+    if (!panopticonReadingScanStart) panopticonReadingScanStart = now;
+    const period = perf.prefersReducedMotion ? PANOPTICON_READING_SCAN_MS * 2 : PANOPTICON_READING_SCAN_MS;
+    const phase = ((now - panopticonReadingScanStart) % period) / period;
+    const scanX = -PANOPTICON_READING_SCAN_X + phase * PANOPTICON_READING_SCAN_X * 2;
+
+    panopticonGazeX = scanX;
+    panopticonGazeY = PANOPTICON_READING_GAZE_Y;
+    panopticonInnerEl.style.transform = '';
+    panopticonGazeEl.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
+}
+
+function updatePanopticonAwayLookup(now) {
+    if (!panopticonGazeEl) return false;
+
+    if (isApril420()) applyPanopticonLidShut(0);
+
+    const duration = perf.prefersReducedMotion ? PANOPTICON_AWAY_LOOKUP_MS * 1.4 : PANOPTICON_AWAY_LOOKUP_MS;
+    const elapsed = now - panopticonAwayLookupStart;
+    const p = smoothstep(Math.min(1, elapsed / duration));
+
+    panopticonGazeX = panopticonAwayLookupFromX + (0 - panopticonAwayLookupFromX) * p;
+    panopticonGazeY = panopticonAwayLookupFromY + (0 - panopticonAwayLookupFromY) * p;
+    panopticonInnerEl.style.transform = '';
+    panopticonGazeEl.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
+
+    if (p < 1) return true;
+
+    eyeMode = 'stare';
+    stareFromX = panopticonGazeX;
+    stareFromY = panopticonGazeY;
+    stareStart = now;
+    panopticonEl?.classList.remove('away-reading', 'away-fading');
+
+    setTimeout(() => {
+        finishPanopticonAwayReturnComment();
+    }, PANOPTICON_AWAY_STARE_MS);
+
+    return false;
+}
+
 function clearPanopticonIdleCommentTimer() {
     clearTimeout(panopticonIdleCommentTimer);
     panopticonIdleCommentTimer = null;
@@ -575,6 +746,8 @@ export function handlePanopticonVisibilityChange(hidden) {
         panopticonTabHiddenAt = performance.now();
         hidePanopticonComment();
         clearPanopticonIdleCommentTimer();
+        clearPanopticonAwayReturnTimer();
+        startPanopticonAwayActivity();
         return;
     }
 
@@ -583,11 +756,18 @@ export function handlePanopticonVisibilityChange(hidden) {
     const awayMs = panopticonTabHiddenAt ? performance.now() - panopticonTabHiddenAt : 0;
     panopticonTabHiddenAt = 0;
 
-    if (awayMs >= PANOPTICON_TAB_RETURN_MIN_MS) {
+    if (awayMs >= PANOPTICON_TAB_RETURN_MIN_MS && panopticonAwayActivity) {
+        beginPanopticonAwayReturn();
+    } else if (awayMs >= PANOPTICON_TAB_RETURN_MIN_MS) {
+        resetPanopticonAwayState();
+        if (eyeMode === 'reading') eyeMode = 'idle';
         const text = pickPanopticonReturnComment();
         requestAnimationFrame(() => {
             if (canShowPanopticonComment()) showPanopticonComment(text);
         });
+    } else {
+        resetPanopticonAwayState();
+        if (eyeMode === 'reading' || eyeMode === 'away-lookup') eyeMode = 'idle';
     }
 
     resetPanopticonIdleCommentTimer();
@@ -802,6 +982,7 @@ if (panopticonEl) {
 }
 
 function enterPanopticonReroll() {
+    cancelPanopticonAwayActivity();
     cancelPanopticonCatEye();
     const mod = normalizeMod360(eyeAngle);
     const minSpins = perf.prefersReducedMotion ? 2 : 3;
@@ -855,6 +1036,7 @@ export function triggerPanopticonSleep() {
     if (!panopticonEl.classList.contains('visible')) return;
     if (panopticonGodActive || godEyeSequence) return;
     if (eyeMode === 'reroll' || eyeMode === 'sleeping') return;
+    cancelPanopticonAwayActivity();
     cancelPanopticonCatEye();
     hidePanopticonComment();
     eyeMode = 'sleeping';
@@ -1352,6 +1534,16 @@ export function animatePanopticon() {
     if (panopticonEl.classList.contains('pong-active')) return;
 
     animatePanopticonCatEye(performance.now());
+
+    if (eyeMode === 'reading') {
+        updatePanopticonReadingScan(performance.now());
+        return;
+    }
+
+    if (eyeMode === 'away-lookup') {
+        updatePanopticonAwayLookup(performance.now());
+        return;
+    }
 
     if (eyeMode === 'eyeroll') {
         if (isApril420()) applyPanopticonLidShut(0);

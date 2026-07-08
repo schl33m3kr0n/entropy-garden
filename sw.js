@@ -61,6 +61,7 @@ const PRECACHE_URLS = [
     'assets/icons/skip.png',
     'assets/img/vault/sun-poster.webp',
     'assets/img/vault/ahoy.jpg',
+    'assets/img/panopticon/eye-reading-book.png',
 ];
 
 function isAudioRequest(pathname) {
