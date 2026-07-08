@@ -316,7 +316,34 @@ body.corrupted .ui-btn:hover {
     cursor: pointer;
 }
 
-/* Style the SVGs injected into the slots */
+/* Style the icons injected into the slots */
+.slot .slot-icon {
+    width: 80%;
+    height: 80%;
+    filter: drop-shadow(0 0 5px var(--neon-green));
+    transition: transform 0.1s;
+}
+
+.slot:active .slot-icon {
+    transform: scale(0.9);
+}
+
+.mask-icon--dock-pizza {
+    mask-image: url('../assets/icons/pizza.svg');
+    -webkit-mask-image: url('../assets/icons/pizza.svg');
+}
+
+.mask-icon--dock-flask {
+    mask-image: url('../assets/icons/flask.svg');
+    -webkit-mask-image: url('../assets/icons/flask.svg');
+}
+
+.mask-icon--dock-save {
+    mask-image: url('../assets/icons/save.svg');
+    -webkit-mask-image: url('../assets/icons/save.svg');
+}
+
+/* Legacy inline SVG slots (if any remain) */
 .slot svg { 
     width: 80%; 
     height: 80%; 

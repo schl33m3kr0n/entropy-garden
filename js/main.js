@@ -351,7 +351,7 @@ function handleDragEnd(e) {
 }
 
 
-const winningCombo = ["art-fuel", "art-source", "art-hoard"];
+const winningCombo = ['pizza', 'flask', 'save'];
 
 // --- GHOST HINT LOGIC ---
 let hasShownRefreshNote = false;
@@ -736,10 +736,10 @@ function randomizeData() {
 }
 // --- COMBINATION LOCK SYSTEM ---
 const cycleArtifacts = [
-    { id: "empty", svg: "" },
-    { id: "art-fuel", svg: `<svg viewBox="0 0 100 100"><path d="M50 10 L85 85 L15 85 Z" fill="none"/><circle cx="50" cy="40" r="4" fill="none"/><circle cx="65" cy="65" r="4" fill="none"/><circle cx="35" cy="65" r="4" fill="none"/></svg>` },
-    { id: "art-source", svg: `<svg viewBox="0 0 100 100"><path d="M40 5 L60 5 L60 30 A 30 30 0 1 1 40 30 Z" fill="none"/><path d="M28 60 L72 60" fill="none" stroke-width="2.5"/></svg>` },
-    { id: "art-hoard", svg: `<svg viewBox="0 0 100 100"><path d="M15 10 L70 10 L85 25 L85 90 L15 90 Z" fill="none"/><rect x="30" y="10" width="40" height="25" fill="none"/><rect x="25" y="60" width="50" height="30" fill="none"/></svg>` }
+    { id: 'empty', html: '' },
+    { id: 'pizza', html: '<span class="mask-icon slot-icon mask-icon--dock-pizza" aria-hidden="true"></span>' },
+    { id: 'flask', html: '<span class="mask-icon slot-icon mask-icon--dock-flask" aria-hidden="true"></span>' },
+    { id: 'save', html: '<span class="mask-icon slot-icon mask-icon--dock-save" aria-hidden="true"></span>' },
 ];
 
 
@@ -748,7 +748,7 @@ function renderCycleSlot(slotNumber) {
     if (!slotEl) return;
 
     const artifact = cycleArtifacts[slotIndexes[slotNumber - 1]];
-    slotEl.innerHTML = artifact.svg;
+    slotEl.innerHTML = artifact.html;
     slotEl.dataset.currentId = artifact.id;
     slotEl.classList.toggle('occupied', artifact.id !== 'empty');
 }
@@ -786,10 +786,7 @@ function checkCycleWin() {
         cycleArtifacts[slotIndexes[2]].id
     ];
 
-    const isComboCorrect =
-        currentIds[0] === "art-fuel" &&
-        currentIds[1] === "art-source" &&
-        currentIds[2] === "art-hoard";
+    const isComboCorrect = currentIds.every((id, i) => id === winningCombo[i]);
 
     if (!isComboCorrect) return;
 
