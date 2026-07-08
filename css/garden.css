@@ -335,10 +335,15 @@ body.corrupted .ui-btn:hover {
 }
 
 .mask-icon--dock-pizza {
-    width: 50%;
-    height: 50%;
+    width: 57.5%;
+    height: 57.5%;
+    transform: scaleY(-1);
     mask-image: url('../assets/icons/pizza.svg');
     -webkit-mask-image: url('../assets/icons/pizza.svg');
+}
+
+.slot:active .mask-icon--dock-pizza {
+    transform: scaleY(-1) scale(0.9);
 }
 
 .mask-icon--dock-flask {
