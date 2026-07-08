@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book preview — Entropy Garden</title>
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/chrome.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            background: #000;
+            color: var(--neon-green);
+            font-family: monospace;
+        }
+        body.corrupted { color: var(--alert-red); }
+
+        .label {
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0.75;
+        }
+
+        .preview-wrap {
+            width: min(240px, 72vw);
+        }
+
+        #panopticon-eye {
+            position: relative;
+            opacity: 1;
+            width: min(190px, 40vw);
+            height: min(190px, 40vw);
+            margin: 0 auto;
+            filter: drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
+        }
+
+        body.corrupted #panopticon-eye {
+            filter: drop-shadow(0 0 18px rgba(255, 0, 85, 0.45));
+        }
+
+        #panopticon-eye.away-reading .panopticon-away-scene {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid currentColor;
+            color: inherit;
+            font: inherit;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            letter-spacing: 0.08em;
+        }
+    </style>
+</head>
+<body>
+    <span class="label">Away-reading book (SVG icon)</span>
+
+    <div class="preview-wrap">
+        <div id="panopticon-eye" class="away-reading" aria-hidden="true">
+            <div class="panopticon-inner" style="border: 2px solid var(--neon-green); border-radius: 50%; aspect-ratio: 1;"></div>
+            <div id="panopticon-away-scene" class="panopticon-away-scene" aria-hidden="true">
+                <div class="panopticon-away-book">
+                    <span class="panopticon-away-book-icon" aria-hidden="true"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" id="toggle-mode">Toggle corrupted</button>
+
+    <script>
+        document.getElementById('toggle-mode').addEventListener('click', () => {
+            document.body.classList.toggle('corrupted');
+        });
+    </script>
+</body>
+</html>

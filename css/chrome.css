@@ -156,8 +156,8 @@ body.corrupted #panopticon-eye.panopticon-high {
 .panopticon-away-scene {
     position: absolute;
     left: 50%;
-    top: 72%;
-    width: 132%;
+    top: 88%;
+    width: 72%;
     transform: translateX(-50%);
     opacity: 0;
     visibility: hidden;
@@ -178,45 +178,37 @@ body.corrupted #panopticon-eye.panopticon-high {
 
 .panopticon-away-book {
     position: relative;
-    overflow: hidden;
-    border-radius: 2px;
 }
 
-.panopticon-away-book::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: var(--neon-green);
-    mix-blend-mode: color;
-    pointer-events: none;
-}
-
-body.corrupted #panopticon-eye.away-reading .panopticon-away-book::before {
-    background: var(--alert-red);
-}
-
-.panopticon-away-book img {
+.panopticon-away-book-icon {
     display: block;
     width: 100%;
-    height: auto;
-    transform: translateY(-46%);
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.35));
+    aspect-ratio: 1;
+    background-color: var(--neon-green);
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.45));
+    mask-image: url('../assets/icons/book%20cover.svg');
+    -webkit-mask-image: url('../assets/icons/book%20cover.svg');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    transition: background-color 0.3s ease, filter 0.3s ease;
 }
 
-body.corrupted #panopticon-eye.away-reading .panopticon-away-book img {
-    filter: drop-shadow(0 0 5px rgba(255, 0, 85, 0.4));
+body.corrupted #panopticon-eye.away-reading .panopticon-away-book-icon {
+    background-color: var(--alert-red);
+    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.45));
 }
 
 .panopticon-away-book::after {
     content: '';
     position: absolute;
-    left: 14%;
-    right: 14%;
+    left: 22%;
+    right: 22%;
     height: 2px;
-    z-index: 2;
+    z-index: 1;
     background: var(--neon-green);
     box-shadow: 0 0 6px rgba(0, 255, 0, 0.55);
     opacity: 0;
@@ -229,10 +221,10 @@ body.corrupted #panopticon-eye.away-reading .panopticon-away-book img {
 }
 
 @keyframes panopticonBookScan {
-    0% { top: 22%; }
-    45% { top: 22%; }
-    55% { top: 78%; }
-    100% { top: 78%; }
+    0% { top: 28%; }
+    45% { top: 28%; }
+    55% { top: 62%; }
+    100% { top: 62%; }
 }
 
 body.corrupted #panopticon-eye.away-reading .panopticon-away-book::after {
