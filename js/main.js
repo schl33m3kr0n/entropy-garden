@@ -10,7 +10,7 @@ import {
     enhanceSidebarItems,
     bindPlaylistTransportLabels,
 } from './ui/modal-a11y.js';
-import { startInitScreenAmbience } from './core/audio/init-ambient.js';
+import { startGardenBirdsAmbience, stopGardenBirdsAmbience } from './core/audio/init-ambient.js';
 import {
     sfx,
     playSound,
@@ -149,6 +149,7 @@ function playInitPartnerSplash(onComplete) {
 
 function beginGardenExperience() {
     try {
+        stopGardenBirdsAmbience();
         // Show loader before audio decode / BGM load (those can block the main thread).
         document.body.classList.add('garden-loading');
         document.body.classList.remove('garden-ready');
@@ -530,7 +531,7 @@ const weirdLoadingPhrases = [
 function revealGardenUI() {
     document.body.classList.remove('garden-loading');
     document.body.classList.add('garden-ready');
-    startInitScreenAmbience();
+    startGardenBirdsAmbience();
     updatePanopticonVisibility();
     startGlitchLoop();
     startIdleDissociation();

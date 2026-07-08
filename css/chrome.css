@@ -1078,12 +1078,14 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   padding: 4px 2px 8px 0;
+  align-items: start;
 }
 
 .vault-item {
     position: relative;
     display: block;
     width: 100%;
+    height: fit-content;
     margin: 0;
     background: rgba(0,25,0,0.3);
     border: 1px solid var(--neon-green);
@@ -1110,14 +1112,14 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
 }
 
-/* Pins fill column width; height follows each asset's aspect ratio */
+/* Pins fill column width; frame height shrink-wraps to each asset */
 .vault-media {
     display: block;
     width: 100%;
     height: auto;
     max-width: 100%;
     max-height: none;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
     filter: grayscale(80%) contrast(1.2) brightness(0.8);
     transition: filter 0.4s ease;
@@ -1126,7 +1128,8 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 .vault-media--col-fill {
     width: 100%;
     max-width: 100%;
-    object-fit: cover;
+    height: auto;
+    object-fit: contain;
     object-position: center;
 }
 
@@ -1137,7 +1140,8 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 }
 
 .vault-media--landscape {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: auto;
+    height: auto;
     max-height: none;
 }
 
