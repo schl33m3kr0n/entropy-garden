@@ -538,39 +538,38 @@ function isGardenMatrixSuspended() {
         || document.body.classList.contains('ios-pong-playing');
 }
 
+function updateHudRainbow() {
+    document.documentElement.style.setProperty('--rainbow-offset', `${(time * 0.5) % 200}%`);
+    syncPanopticonRainbow();
+    syncGodTitleGradient();
+    if (!perf.liteGfx && !perf.prefersReducedMotion && !isCorrupted) {
+        document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);
+    }
+}
+
 function animate() {
     if (!gardenLoopActive) return;
 
-    if (isGardenMatrixSuspended()) {
-        scheduleGardenFrame();
-        return;
-    }
-
-    incrementMatrixFrameCount();
-    const shouldDrawMatrix = !perf.matrixFrameSkip || (matrixFrameCount % (perf.matrixFrameSkip + 1) === 0);
-
-    if (shouldDrawMatrix && wheels.length > 0) {
-        animateMatrix();
-    }
-
-    const shouldAnimatePanopticon = !perf.panopticonFrameSkip
-        || (matrixFrameCount % (perf.panopticonFrameSkip + 1) === 0);
-    if (shouldAnimatePanopticon) {
-        animatePanopticon();
-    }
-
     const timeStep = isCorrupted ? 2 : (perf.isMobile ? 0.25 : 0.5);
-    addTime(timeStep);
-    if (!perf.liteGfx) {
-        document.documentElement.style.setProperty('--rainbow-offset', `${(time * 0.5) % 200}%`);
-        syncPanopticonRainbow();
-        syncGodTitleGradient();
-        if (!perf.prefersReducedMotion && !isCorrupted) {
-            document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);
+    const suspended = isGardenMatrixSuspended();
+
+    if (!suspended) {
+        incrementMatrixFrameCount();
+        const shouldDrawMatrix = !perf.matrixFrameSkip || (matrixFrameCount % (perf.matrixFrameSkip + 1) === 0);
+
+        if (shouldDrawMatrix && wheels.length > 0) {
+            animateMatrix();
         }
-    } else {
-        syncGodTitleGradient();
+
+        const shouldAnimatePanopticon = !perf.panopticonFrameSkip
+            || (matrixFrameCount % (perf.panopticonFrameSkip + 1) === 0);
+        if (shouldAnimatePanopticon) {
+            animatePanopticon();
+        }
     }
+
+    addTime(timeStep);
+    updateHudRainbow();
 
     if (gardenLoopActive) {
         scheduleGardenFrame();

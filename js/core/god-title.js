@@ -1,4 +1,13 @@
-import { perf } from './shared.js';
+import {
+    addTime,
+    time,
+} from './state.js';
+import {
+    gardenLoopActive,
+    perf,
+    syncPanopticonRainbow,
+} from './shared.js';
+import { registerHook } from './hooks.js';
 
 const SOURCE = 'ENTROPY GARDEN';
 const TARGET = 'PONDERY ARGENT';
@@ -14,6 +23,36 @@ const TO_PONDERY = [5, 4, 1, 11, 0, 3, 6, 7, 9, 10, 8, 12, 13, 2];
 
 let titleAnimating = false;
 let titleAnimToken = 0;
+let godTitleRainbowRaf = 0;
+
+function stopGodTitleRainbowLoop() {
+    if (!godTitleRainbowRaf) return;
+    cancelAnimationFrame(godTitleRainbowRaf);
+    godTitleRainbowRaf = 0;
+}
+
+/** Keep HUD rainbow cycling when the garden loop is paused (e.g. pong). */
+function godTitleRainbowLoopTick() {
+    godTitleRainbowRaf = 0;
+
+    const h1 = getHudTitleEl();
+    if (!h1?.classList.contains('god-title-live') || gardenLoopActive) return;
+
+    const timeStep = document.body.classList.contains('corrupted') ? 2 : 0.5;
+    addTime(timeStep);
+    document.documentElement.style.setProperty('--rainbow-offset', `${(time * 0.5) % 200}%`);
+    syncPanopticonRainbow();
+    syncGodTitleGradient(h1);
+    godTitleRainbowRaf = requestAnimationFrame(godTitleRainbowLoopTick);
+}
+
+function ensureGodTitleRainbowLoop() {
+    if (godTitleRainbowRaf || gardenLoopActive) return;
+    godTitleRainbowRaf = requestAnimationFrame(godTitleRainbowLoopTick);
+}
+
+registerHook('stopGardenLoop', ensureGodTitleRainbowLoop);
+registerHook('resumeGardenLoop', stopGodTitleRainbowLoop);
 
 function getHudTitleEl() {
     return document.querySelector('#hud h1');
@@ -78,15 +117,15 @@ export function syncGodTitleGradient(h1 = getHudTitleEl()) {
     ) || 0;
 
     const bgW = frameW * 2;
-    // ::after border uses background-size 200% + background-position: offset% 50%
-    const shiftPx = (offsetPct / 100) * (bgW - frameW);
+    // ::after: background-size 200%; position X% → px offset (W - B) * X/100
+    const bgLeft = (offsetPct / 100) * (frameW - bgW);
 
     letters.forEach((el) => {
         const letterLeft = el.getBoundingClientRect().left - frame.left;
         el.style.backgroundImage = HUD_TITLE_GRADIENT;
         el.style.backgroundRepeat = 'repeat';
         el.style.backgroundSize = `${bgW}px 100%`;
-        el.style.backgroundPosition = `${shiftPx - letterLeft}px 50%`;
+        el.style.backgroundPosition = `${bgLeft - letterLeft}px 50%`;
         el.style.webkitBackgroundClip = 'text';
         el.style.backgroundClip = 'text';
         el.style.webkitTextFillColor = 'transparent';
@@ -134,7 +173,10 @@ function cancelTitleAnimation(chrome) {
 
 function ensureChrome(h1) {
     let chrome = h1.querySelector('.god-title-chrome');
-    if (chrome) return chrome;
+    if (chrome) {
+        ensureGodTitleRainbowLoop();
+        return chrome;
+    }
 
     chrome = document.createElement('span');
     chrome.className = 'god-title-chrome';
@@ -152,6 +194,7 @@ function ensureChrome(h1) {
     h1.textContent = '';
     h1.appendChild(chrome);
     h1.classList.add('god-title-live');
+    ensureGodTitleRainbowLoop();
     return chrome;
 }
 
@@ -189,6 +232,7 @@ function lockTitleWidth(h1, chrome, letters) {
 
 function restorePlainTitle(h1) {
     if (!h1) return;
+    stopGodTitleRainbowLoop();
     h1.textContent = SOURCE;
     h1.classList.remove('god-title-live', 'god-title-pondery');
     h1.style.removeProperty('min-width');
