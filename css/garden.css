@@ -335,8 +335,8 @@ body.corrupted .ui-btn:hover {
 }
 
 .mask-icon--dock-pizza {
-    width: 57.5%;
-    height: 57.5%;
+    width: 75%;
+    height: 75%;
     transform: scaleY(-1);
     mask-image: url('../assets/icons/pizza.svg');
     -webkit-mask-image: url('../assets/icons/pizza.svg');

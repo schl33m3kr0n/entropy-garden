@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dock pizza tuner</title>
+  <style>
+    :root { --neon: #0f0; --void: #050505; --panel: #0a140f; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--void);
+      color: var(--neon);
+      font-family: Menlo, "Avenir Next", monospace;
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    h1 { font-size: 1rem; margin: 0 0 0.5rem; letter-spacing: 0.08em; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(0, 255, 0, 0.35);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    label { display: block; font-size: 0.72rem; opacity: 0.85; margin: 0.75rem 0 0.25rem; }
+    button, textarea {
+      width: 100%;
+      background: #000;
+      color: var(--neon);
+      border: 1px solid rgba(0, 255, 0, 0.45);
+      border-radius: 8px;
+      padding: 0.5rem;
+      font: inherit;
+      cursor: pointer;
+    }
+    button { margin-top: 0.5rem; }
+    button:hover { background: rgba(0, 255, 0, 0.12); }
+    input[type="range"] { width: 100%; accent-color: var(--neon); }
+    input[type="checkbox"] { accent-color: var(--neon); margin-right: 0.4rem; }
+    .val { font-size: 0.8rem; opacity: 0.9; }
+    .hint { font-size: 0.68rem; opacity: 0.7; line-height: 1.4; margin-top: 0.75rem; }
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+      font-size: 0.68rem;
+      line-height: 1.35;
+      margin-top: 0.5rem;
+    }
+    .preview-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      min-height: 70vh;
+      flex-wrap: wrap;
+    }
+    .slot {
+      width: 70px;
+      height: 70px;
+      border: 2px solid var(--neon);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .slot-icon {
+      display: block;
+      flex-shrink: 0;
+      mask-size: contain;
+      -webkit-mask-size: contain;
+      mask-position: center;
+      -webkit-mask-position: center;
+      background-color: var(--neon);
+      filter: drop-shadow(0 0 4px var(--neon));
+      mask-image: url('../../assets/icons/pizza.svg');
+      -webkit-mask-image: url('../../assets/icons/pizza.svg');
+    }
+    .slot-label { text-align: center; font-size: 0.65rem; opacity: 0.7; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>DOCK PIZZA TUNER</h1>
+    <p class="hint">Matches <code>.slot</code> (70×70) in <code>css/garden.css</code>. Paste export into <code>.mask-icon--dock-pizza</code>.</p>
+
+    <label for="size">Size (% of slot)</label>
+    <input id="size" type="range" min="30" max="75" step="0.5" value="75" />
+    <div class="val" id="size-val">75%</div>
+
+    <label>
+      <input id="flip" type="checkbox" checked />
+      Crust facing down (<code>scaleY(-1)</code>)
+    </label>
+
+    <button type="button" id="btn-reset">Reset to repo defaults</button>
+    <button type="button" id="btn-copy">Copy CSS to clipboard</button>
+
+    <textarea id="export" readonly></textarea>
+    <p class="hint">Serve from repo root:<br><code>python3 -m http.server 8770</code><br>→ <code>/scripts/dev/dock-pizza-tuner.html</code></p>
+  </div>
+
+  <div class="preview-wrap">
+    <div>
+      <div class="slot"><span class="slot-icon" id="preview"></span></div>
+      <div class="slot-label">live preview</div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULTS = { size: 75, flip: true };
+    const STORAGE_KEY = 'entropy-garden-dock-pizza-tuner';
+
+    const sizeEl = document.getElementById('size');
+    const flipEl = document.getElementById('flip');
+    const preview = document.getElementById('preview');
+    const exportEl = document.getElementById('export');
+    const sizeVal = document.getElementById('size-val');
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        return { ...DEFAULTS, ...saved };
+      } catch {
+        return { ...DEFAULTS };
+      }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function cssBlock(state) {
+      const transform = state.flip ? 'scaleY(-1)' : 'none';
+      const activeTransform = state.flip ? 'scaleY(-1) scale(0.9)' : 'scale(0.9)';
+      return `.mask-icon--dock-pizza {
+    width: ${state.size}%;
+    height: ${state.size}%;
+    transform: ${transform};
+    mask-image: url('../assets/icons/pizza.svg');
+    -webkit-mask-image: url('../assets/icons/pizza.svg');
+}
+
+.slot:active .mask-icon--dock-pizza {
+    transform: ${activeTransform};
+}`;
+    }
+
+    function apply(state) {
+      preview.style.width = `${state.size}%`;
+      preview.style.height = `${state.size}%`;
+      preview.style.transform = state.flip ? 'scaleY(-1)' : 'none';
+      sizeVal.textContent = `${state.size}%`;
+      exportEl.value = cssBlock(state);
+      saveState(state);
+    }
+
+    function readState() {
+      return {
+        size: parseFloat(sizeEl.value),
+        flip: flipEl.checked,
+      };
+    }
+
+    sizeEl.addEventListener('input', () => apply(readState()));
+    flipEl.addEventListener('change', () => apply(readState()));
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      sizeEl.value = String(DEFAULTS.size);
+      flipEl.checked = DEFAULTS.flip;
+      apply({ ...DEFAULTS });
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(exportEl.value);
+    });
+
+    const initial = loadState();
+    sizeEl.value = String(initial.size);
+    flipEl.checked = initial.flip;
+    apply(initial);
+  </script>
+</body>
+</html>
