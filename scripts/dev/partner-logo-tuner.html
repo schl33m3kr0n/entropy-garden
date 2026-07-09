@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Init partner logo tuner (temp)</title>
+  <style>
+    :root {
+      --neon: #0f0;
+      --void: #050505;
+      --panel: #0a140f;
+      --init-partner-logo-h: 88px;
+      --init-partner-gap: 56px;
+      --logo-gemini-scale: 1;
+      --logo-cursor-scale: 1.14;
+      --logo-chatgpt-scale: 1;
+      --logo-gemini-y: 0px;
+      --logo-cursor-y: 0px;
+      --logo-chatgpt-y: 0px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--void);
+      color: var(--neon);
+      font-family: Menlo, "Avenir Next", monospace;
+      display: grid;
+      grid-template-columns: minmax(300px, 380px) 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    h1 { font-size: 1rem; margin: 0 0 0.35rem; letter-spacing: 0.08em; }
+    .hint { font-size: 0.72rem; opacity: 0.7; margin: 0 0 1rem; line-height: 1.45; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(0, 255, 0, 0.35);
+      border-radius: 12px;
+      padding: 1rem;
+      overflow-y: auto;
+      max-height: calc(100vh - 2rem);
+    }
+    .group {
+      border-top: 1px solid rgba(0, 255, 0, 0.15);
+      padding-top: 0.85rem;
+      margin-top: 0.85rem;
+    }
+    .group:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+    .group h2 { font-size: 0.78rem; margin: 0 0 0.65rem; letter-spacing: 0.06em; }
+    label { display: block; font-size: 0.72rem; opacity: 0.85; margin: 0.55rem 0 0.2rem; }
+    input[type="range"] { width: 100%; accent-color: var(--neon); }
+    button, textarea {
+      width: 100%;
+      background: #000;
+      color: var(--neon);
+      border: 1px solid rgba(0, 255, 0, 0.45);
+      border-radius: 8px;
+      padding: 0.5rem;
+      font: inherit;
+    }
+    button { cursor: pointer; margin-top: 0.5rem; }
+    button:hover { background: rgba(0, 255, 0, 0.12); }
+    .row { display: flex; gap: 0.5rem; }
+    .row button { flex: 1; }
+    .val { font-size: 0.78rem; opacity: 0.9; }
+    textarea {
+      min-height: 220px;
+      resize: vertical;
+      font-size: 0.68rem;
+      line-height: 1.4;
+      margin-top: 0.5rem;
+    }
+    .preview-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 2rem);
+      background: radial-gradient(ellipse at center, rgba(0, 40, 0, 0.25), transparent 70%);
+      border: 1px solid rgba(0, 255, 0, 0.2);
+      border-radius: 12px;
+      position: relative;
+    }
+    .preview-meta {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      font-size: 0.68rem;
+      opacity: 0.65;
+    }
+    #init-screen-mock {
+      position: relative;
+      width: min(720px, 92vw);
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed rgba(0, 255, 0, 0.2);
+      border-radius: 8px;
+    }
+    .init-partner-logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--init-partner-gap);
+    }
+    .init-partner-logo {
+      display: block;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+      transform: translateY(var(--logo-y, 0px));
+    }
+    .init-partner-logo--gemini {
+      height: calc(var(--init-partner-logo-h) * var(--logo-gemini-scale));
+      max-width: calc(var(--init-partner-logo-h) * 1.25);
+      --logo-y: var(--logo-gemini-y);
+    }
+    .init-partner-logo--cursor {
+      height: calc(var(--init-partner-logo-h) * var(--logo-cursor-scale));
+      max-width: calc(var(--init-partner-logo-h) * 1.25);
+      --logo-y: var(--logo-cursor-y);
+    }
+    .init-partner-logo--chatgpt {
+      height: calc(var(--init-partner-logo-h) * var(--logo-chatgpt-scale));
+      max-width: calc(var(--init-partner-logo-h) * 1.25);
+      --logo-y: var(--logo-chatgpt-y);
+    }
+    .guide-line {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      border-top: 1px dashed rgba(0, 255, 0, 0.35);
+      pointer-events: none;
+    }
+    .guide-line--top { top: calc(50% - var(--init-partner-logo-h) / 2); }
+    .guide-line--bottom { top: calc(50% + var(--init-partner-logo-h) / 2); }
+  </style>
+</head>
+<body>
+  <aside class="panel">
+    <h1>// PARTNER LOGO TUNER</h1>
+    <p class="hint">Temporary preview · serve from repo root:<br><code>python3 -m http.server 8766</code><br>→ <code>/scripts/dev/partner-logo-tuner.html</code></p>
+
+    <div class="group">
+      <h2>GLOBAL</h2>
+      <label for="base-h">Base height (px)</label>
+      <input id="base-h" type="range" min="48" max="120" step="1" value="88" />
+      <div class="val" id="base-h-val">88px</div>
+
+      <label for="gap">Gap (px)</label>
+      <input id="gap" type="range" min="16" max="96" step="1" value="56" />
+      <div class="val" id="gap-val">56px</div>
+    </div>
+
+    <div class="group">
+      <h2>GEMINI</h2>
+      <label for="gemini-scale">Height scale</label>
+      <input id="gemini-scale" type="range" min="0.6" max="1.6" step="0.01" value="1" />
+      <div class="val" id="gemini-scale-val">1.00</div>
+      <label for="gemini-y">Vertical offset (px)</label>
+      <input id="gemini-y" type="range" min="-24" max="24" step="1" value="0" />
+      <div class="val" id="gemini-y-val">0px</div>
+    </div>
+
+    <div class="group">
+      <h2>CURSOR</h2>
+      <label for="cursor-scale">Height scale</label>
+      <input id="cursor-scale" type="range" min="0.6" max="1.6" step="0.01" value="1.14" />
+      <div class="val" id="cursor-scale-val">1.14</div>
+      <label for="cursor-y">Vertical offset (px)</label>
+      <input id="cursor-y" type="range" min="-24" max="24" step="1" value="0" />
+      <div class="val" id="cursor-y-val">0px</div>
+    </div>
+
+    <div class="group">
+      <h2>CHATGPT</h2>
+      <label for="chatgpt-scale">Height scale</label>
+      <input id="chatgpt-scale" type="range" min="0.6" max="1.6" step="0.01" value="1" />
+      <div class="val" id="chatgpt-scale-val">1.00</div>
+      <label for="chatgpt-y">Vertical offset (px)</label>
+      <input id="chatgpt-y" type="range" min="-24" max="24" step="1" value="0" />
+      <div class="val" id="chatgpt-y-val">0px</div>
+    </div>
+
+    <div class="row">
+      <button type="button" id="reset-btn">Reset</button>
+      <button type="button" id="copy-btn">Copy CSS</button>
+    </div>
+    <textarea id="css-out" readonly spellcheck="false"></textarea>
+  </aside>
+
+  <main class="preview-wrap">
+    <p class="preview-meta">Dashed lines = base height band</p>
+    <div id="init-screen-mock">
+      <span class="guide-line guide-line--top" aria-hidden="true"></span>
+      <span class="guide-line guide-line--bottom" aria-hidden="true"></span>
+      <div class="init-partner-logos">
+        <img src="../../assets/icons/gemini.png" alt="" class="init-partner-logo init-partner-logo--gemini" />
+        <img src="../../assets/icons/init-cursor.svg" alt="" class="init-partner-logo init-partner-logo--cursor" />
+        <img src="../../assets/icons/chatgpt.png" alt="" class="init-partner-logo init-partner-logo--chatgpt" />
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const root = document.documentElement;
+    const cssOut = document.getElementById('css-out');
+
+    const controls = [
+      { id: 'base-h', varName: '--init-partner-logo-h', suffix: 'px', valId: 'base-h-val' },
+      { id: 'gap', varName: '--init-partner-gap', suffix: 'px', valId: 'gap-val' },
+      { id: 'gemini-scale', varName: '--logo-gemini-scale', valId: 'gemini-scale-val', digits: 2 },
+      { id: 'gemini-y', varName: '--logo-gemini-y', suffix: 'px', valId: 'gemini-y-val' },
+      { id: 'cursor-scale', varName: '--logo-cursor-scale', valId: 'cursor-scale-val', digits: 2 },
+      { id: 'cursor-y', varName: '--logo-cursor-y', suffix: 'px', valId: 'cursor-y-val' },
+      { id: 'chatgpt-scale', varName: '--logo-chatgpt-scale', valId: 'chatgpt-scale-val', digits: 2 },
+      { id: 'chatgpt-y', varName: '--logo-chatgpt-y', suffix: 'px', valId: 'chatgpt-y-val' },
+    ];
+
+    const defaults = Object.fromEntries(controls.map((c) => [c.id, document.getElementById(c.id).value]));
+
+    function readNum(id) {
+      return Number(document.getElementById(id).value);
+    }
+
+    function apply() {
+      controls.forEach(({ id, varName, suffix = '', valId, digits }) => {
+        const raw = document.getElementById(id).value;
+        root.style.setProperty(varName, `${raw}${suffix}`);
+        const valEl = document.getElementById(valId);
+        if (valEl) {
+          valEl.textContent = digits != null ? `${Number(raw).toFixed(digits)}` : `${raw}${suffix}`;
+        }
+      });
+      renderCss();
+    }
+
+    function renderCss() {
+      const baseH = readNum('base-h');
+      const gap = readNum('gap');
+      const gemini = readNum('gemini-scale');
+      const cursor = readNum('cursor-scale');
+      const chatgpt = readNum('chatgpt-scale');
+      const geminiY = readNum('gemini-y');
+      const cursorY = readNum('cursor-y');
+      const chatgptY = readNum('chatgpt-y');
+
+      const yRules = [];
+      if (geminiY) yRules.push(`    transform: translateY(${geminiY}px);`);
+      if (cursorY) yRules.push(`.init-partner-logo--cursor {\n    height: calc(var(--init-partner-logo-h) * ${cursor});\n    transform: translateY(${cursorY}px);\n}`);
+      if (chatgptY) yRules.push(`.init-partner-logo--chatgpt {\n    height: calc(var(--init-partner-logo-h) * ${chatgpt});\n    transform: translateY(${chatgptY}px);\n}`);
+
+      const cursorBlock = cursor === 1
+        ? ''
+        : `\n.init-partner-logo--cursor {\n    height: calc(var(--init-partner-logo-h) * ${cursor});\n}`;
+
+      const geminiBlock = gemini === 1 ? '' : `\n.init-partner-logo--gemini {\n    height: calc(var(--init-partner-logo-h) * ${gemini});\n}`;
+      const chatgptBlock = chatgpt === 1 ? '' : `\n.init-partner-logo--chatgpt {\n    height: calc(var(--init-partner-logo-h) * ${chatgpt});\n}`;
+
+      cssOut.value = `/* Paste into css/base.css — init partner logos */
+.init-partner-logos {
+    --init-partner-logo-h: clamp(64px, 16vw, ${baseH}px);
+    gap: clamp(28px, 8vw, ${gap}px);
+}
+
+.init-partner-logo {
+    height: var(--init-partner-logo-h);
+    width: auto;
+    max-width: calc(var(--init-partner-logo-h) * 1.25);
+    object-fit: contain;
+}${geminiBlock}${cursorBlock}${chatgptBlock}${geminiY || cursorY || chatgptY ? '\n\n/* Per-logo Y offsets — add transform on each modifier if needed */' : ''}${geminiY ? `\n.init-partner-logo--gemini { transform: translateY(${geminiY}px); }` : ''}${cursorY && !yRules.length ? `\n.init-partner-logo--cursor { transform: translateY(${cursorY}px); }` : ''}${chatgptY ? `\n.init-partner-logo--chatgpt { transform: translateY(${chatgptY}px); }` : ''}`;
+    }
+
+    controls.forEach(({ id }) => {
+      document.getElementById(id).addEventListener('input', apply);
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      controls.forEach(({ id }) => {
+        document.getElementById(id).value = defaults[id];
+      });
+      apply();
+    });
+
+    document.getElementById('copy-btn').addEventListener('click', async () => {
+      await navigator.clipboard.writeText(cssOut.value);
+      const btn = document.getElementById('copy-btn');
+      const prev = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = prev; }, 1200);
+    });
+
+    apply();
+  </script>
+</body>
+</html>

@@ -181,9 +181,13 @@ body.garden-ready::before {
     filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
 }
 
-/* Cursor glyph sits inside a full circle; scale up so the mark matches the others */
+/* Cursor + ChatGPT marks need extra scale to match Gemini visually */
 .init-partner-logo--cursor {
-    height: calc(var(--init-partner-logo-h) * 1.14);
+    height: calc(var(--init-partner-logo-h) * 1.6);
+}
+
+.init-partner-logo--chatgpt {
+    height: calc(var(--init-partner-logo-h) * 1.6);
 }
 
 #init-partner-splash.is-active .init-partner-logo {
