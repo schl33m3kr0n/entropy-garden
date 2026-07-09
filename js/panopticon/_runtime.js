@@ -284,6 +284,7 @@ const PANOPTICON_AWAY_NOTICE_MIN_MS = 300;
 const PANOPTICON_AWAY_NOTICE_MAX_MS = 800;
 const PANOPTICON_AWAY_LOOKUP_MS = 680;
 const PANOPTICON_AWAY_STARE_MS = 680;
+const PANOPTICON_AWAY_READING_CHANCE = 1 / 3;
 const PANOPTICON_READING_GAZE_Y = 11;
 const PANOPTICON_READING_SCAN_X = 8;
 const PANOPTICON_READING_SCAN_MS = 1100;
@@ -593,6 +594,7 @@ function cancelPanopticonAwayActivity() {
 
 function startPanopticonAwayActivity() {
     if (!canStartPanopticonAwayActivity()) return;
+    if (Math.random() >= PANOPTICON_AWAY_READING_CHANCE) return;
 
     panopticonAwayActivity = 'reading';
     panopticonReadingScanStart = performance.now();
