@@ -381,6 +381,7 @@ body.perf-lite #loader-leaf {
 
     .vault-grid {
         grid-template-columns: 1fr;
-        gap: 14px;
+        row-gap: 0;
+        column-gap: 0;
     }
 }

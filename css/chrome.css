@@ -1166,7 +1166,8 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 #modal-vault .vault-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  row-gap: 0;
+  column-gap: 14px;
   padding: 4px 2px 8px 0;
   width: 100%;
   box-sizing: border-box;
