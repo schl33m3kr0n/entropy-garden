@@ -581,7 +581,7 @@ function spawnPizza() {
     newPizza.style.left = (Math.random() * 80 + 10) + '%'; 
     newPizza.style.zIndex = '10070';
     newPizza.style.transition = 'transform 0.1s';
-    newPizza.innerHTML = `<svg viewBox="0 0 100 100"><path d="M50 10 L85 85 L15 85 Z" fill="none"/><circle cx="50" cy="40" r="4" fill="none"/><circle cx="65" cy="65" r="4" fill="none"/><circle cx="35" cy="65" r="4" fill="none"/></svg>`;
+    newPizza.innerHTML = '<span class="mask-icon artifact-pizza-icon" aria-hidden="true"></span>';
     document.body.appendChild(newPizza);
     setTimeout(() => { newPizza.style.transition = 'top 0.5s ease-out, left 0.5s ease-out'; newPizza.style.top = (Math.random() * 60 + 10) + '%'; }, 50);
     setTimeout(() => { newPizza.style.transition = 'transform 0.1s'; }, 600); 

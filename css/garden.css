@@ -238,7 +238,21 @@ body.corrupted .ui-btn:hover {
 
 .artifact:active { cursor: grabbing; transform: scale(1.1); }
 
-.artifact svg { 
+.artifact .artifact-pizza-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    mask-image: url('../assets/icons/pizza.svg');
+    -webkit-mask-image: url('../assets/icons/pizza.svg');
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-position: center;
+}
+
+.artifact svg {
     width: 100%; height: 100%; 
     fill: rgba(0, 20, 0, 0.5); 
     stroke: var(--neon-green); 
@@ -249,7 +263,12 @@ body.corrupted .ui-btn:hover {
 
 .artifact.wrong-slot { animation: errorShake 0.4s ease; }
 
-.artifact.wrong-slot svg { 
+.artifact.wrong-slot .artifact-pizza-icon {
+    background-color: var(--alert-red);
+    filter: drop-shadow(0 0 5px var(--alert-red));
+}
+
+.artifact.wrong-slot svg {
     stroke: var(--alert-red); 
     filter: drop-shadow(0 0 5px var(--alert-red)); 
 }
