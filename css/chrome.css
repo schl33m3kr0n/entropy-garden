@@ -1164,8 +1164,9 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
 
 /* --- VAULT GRID (3-column masonry, vertical scroll) --- */
 #modal-vault .vault-grid {
+  --vault-gap: 14px;
   columns: 3;
-  column-gap: 14px;
+  column-gap: var(--vault-gap);
   padding: 4px 2px 8px 0;
   width: 100%;
   box-sizing: border-box;
@@ -1176,7 +1177,7 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     display: block;
     width: 100%;
     height: fit-content;
-    margin: 0;
+    margin: 0 0 var(--vault-gap, 14px);
     break-inside: avoid;
     -webkit-column-break-inside: avoid;
     page-break-inside: avoid;
