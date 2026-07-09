@@ -380,8 +380,7 @@ body.perf-lite #loader-leaf {
     }
 
     .vault-grid {
-        grid-template-columns: 1fr;
-        row-gap: 0;
+        columns: 1;
         column-gap: 0;
     }
 }
