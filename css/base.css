@@ -163,6 +163,7 @@ body.garden-ready::before {
 }
 
 .init-partner-logos {
+    --init-partner-logo-h: clamp(64px, 16vw, 88px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -171,29 +172,18 @@ body.garden-ready::before {
 
 .init-partner-logo {
     display: block;
+    height: var(--init-partner-logo-h);
+    width: auto;
+    max-width: calc(var(--init-partner-logo-h) * 1.25);
+    object-fit: contain;
     opacity: 0;
     transform: translateY(-36px);
     filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
 }
 
-.init-partner-logo--gemini {
-    width: clamp(64px, 16vw, 88px);
-    height: auto;
-    aspect-ratio: 1 / 1;
-    object-fit: contain;
-}
-
+/* Cursor glyph sits inside a full circle; scale up so the mark matches the others */
 .init-partner-logo--cursor {
-    width: clamp(64px, 16vw, 88px);
-    height: auto;
-    aspect-ratio: 1 / 1;
-}
-
-.init-partner-logo--chatgpt {
-    width: clamp(64px, 16vw, 88px);
-    height: auto;
-    aspect-ratio: 1 / 1;
-    object-fit: contain;
+    height: calc(var(--init-partner-logo-h) * 1.14);
 }
 
 #init-partner-splash.is-active .init-partner-logo {
