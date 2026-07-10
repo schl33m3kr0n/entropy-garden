@@ -49,6 +49,41 @@ function usesSingularityVoiceover() {
     return !isIosSingularity();
 }
 
+/** Prefer macOS/iOS Samantha; fall back to any en-US voice, then browser default. */
+let singularityVoice = null;
+let singularityVoicesBound = false;
+
+function pickSingularityVoice(voices) {
+    if (!voices?.length) return null;
+    const byUri = voices.find((v) => /samantha/i.test(v.voiceURI || ''));
+    if (byUri) return byUri;
+    const byName = voices.find((v) => /^samantha$/i.test(v.name) || /\bsamantha\b/i.test(v.name));
+    if (byName) return byName;
+    return voices.find((v) => /^en(-|_)US$/i.test(v.lang)) || null;
+}
+
+function refreshSingularityVoice() {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    singularityVoice = pickSingularityVoice(synth.getVoices());
+}
+
+function ensureSingularityVoice() {
+    const synth = window.speechSynthesis;
+    if (!synth) return null;
+    if (!singularityVoicesBound) {
+        singularityVoicesBound = true;
+        refreshSingularityVoice();
+        if (typeof synth.addEventListener === 'function') {
+            synth.addEventListener('voiceschanged', refreshSingularityVoice);
+        } else {
+            synth.onvoiceschanged = refreshSingularityVoice;
+        }
+    }
+    if (!singularityVoice) refreshSingularityVoice();
+    return singularityVoice;
+}
+
 function restoreSingularityButtonLabels() {
     const nextBtn = document.getElementById('next-poem-btn');
     const resetBtn = document.getElementById('reset-timeline-btn');
@@ -535,6 +570,8 @@ function runSpeechQueue(items, lineElements, token) {
 
         const item = items[index++];
         const utterance = new SpeechSynthesisUtterance(item.text);
+        const voice = ensureSingularityVoice();
+        if (voice) utterance.voice = voice;
         utterance.volume = item.silent ? 0 : 1;
         if (item.silent) utterance.rate = item.rate || 3;
         else utterance.rate = perf.isMobile ? 0.92 : 1;
