@@ -72,7 +72,7 @@ body.garden-ready::before {
         url('../assets/img/backgrounds/bkgrnd.webp') type('image/webp'),
         url('../assets/img/backgrounds/bkgrnd.jpg') type('image/jpeg')
     );
-    opacity: 0.02;
+    opacity: 0.22;
 }
 
 body.garden-ready::before {
