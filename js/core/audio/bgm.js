@@ -31,7 +31,7 @@ export const BGM_TRACK_INFO = [
     { title: 'Preparing for the Uncertain', artist: 'Grand_Project' },
     { title: 'Ambient', artist: 'leberch' },
     { title: '7am', artist: 'Adrian' },
-    { title: 'Nostalgia (slowed & reverb)', artist: 'Windows96' },
+    { title: 'Nostalgia (slowed + reverb)', artist: 'Windows96' },
     { title: 'Echoes (slowed + reverb)', artist: 'Washed Out' },
     { title: 'Cardigan (slowed + reverb)', artist: 'Don Toliver' },
     { title: 'Cybernetic Night (Sci-Fi Ambient)', artist: 'KonstantinPazuzuStudio' },
