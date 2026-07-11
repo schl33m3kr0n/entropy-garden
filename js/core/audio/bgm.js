@@ -17,6 +17,7 @@ export const BGM_TRACKS = [
     'playboi carti - 7am (slowed reverb).mp3',
     'windows96 - nostalgia (slowed reverb).mp3',
     'washed out - echoes (slowed + reverb).mp3',
+    'don toliver - cardigan (slowed + reverb).mp3',
     'ambient8.mp3',
     'fractals.mp3',
 ];
@@ -32,6 +33,7 @@ export const BGM_TRACK_INFO = [
     { title: '7am', artist: 'Adrian' },
     { title: 'Nostalgia (slowed & reverb)', artist: 'Windows96' },
     { title: 'Echoes (slowed + reverb)', artist: 'Washed Out' },
+    { title: 'Cardigan (slowed + reverb)', artist: 'Don Toliver' },
     { title: 'Cybernetic Night (Sci-Fi Ambient)', artist: 'KonstantinPazuzuStudio' },
     { title: 'Fractals', artist: '5Δ' },
 ];
@@ -220,6 +222,7 @@ const BGM_LARGE_FILES = new Set([
     'playboi carti - 7am (slowed reverb).mp3',
     'windows96 - nostalgia (slowed reverb).mp3',
     'washed out - echoes (slowed + reverb).mp3',
+    'don toliver - cardigan (slowed + reverb).mp3',
 ]);
 
 function isLargeBgmFile(fileName) {
