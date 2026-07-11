@@ -181,7 +181,17 @@ body.ios-ui #god-mode-triangle-layer {
 }
 
 body.ios-ui #grid-canvas {
-    contain: strict;
+    /* size/layout only — paint containment clips chromatic drop-shadows */
+    contain: size layout style;
+}
+
+/* Match desktop RGB split on the cipher wheels (skip animated hue-rotate) */
+body.ios-ui #grid-canvas.matrix-visible {
+    filter: var(--chroma-filter);
+}
+
+body.ios-ui.corrupted #grid-canvas.matrix-visible {
+    filter: var(--chroma-filter-corrupted);
 }
 
 body.ios-ui.singularity-active #grid-canvas {
@@ -760,17 +770,7 @@ body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu {
     border-left: none;
     border-top: 1px solid rgba(0, 255, 0, 0.25);
     background: transparent;
-    transition: opacity 0.8s ease, background 0.3s ease, border-color 0.3s ease;
-}
-
-body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu:hover {
-    background: var(--neon-green);
-    border-top-color: #000;
-}
-
-body.ios-ui.corrupted:not(.ios-tablet) .ios-sidebar-tools #playlist-menu:hover {
-    background: var(--alert-red);
-    border-top-color: #000;
+    transition: opacity 0.8s ease;
 }
 
 body.ios-ui #playlist-header {

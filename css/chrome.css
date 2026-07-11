@@ -1791,51 +1791,51 @@ body.corrupted #panopticon-mute-btn.is-muted {
     transition: opacity 1s ease, background 0.3s ease, border-color 0.3s ease;
 }
 
-#playlist-menu:hover {
-    background: var(--neon-green);
-    border-left-color: #000;
-}
+/* Real mouse only — sticky :hover on iOS turns the panel green and can hide the title */
+@media (hover: hover) and (pointer: fine) {
+    #playlist-menu:hover {
+        background: var(--neon-green);
+        border-left-color: #000;
+    }
 
-#playlist-menu:hover #playlist-header,
-#playlist-menu:hover #track-title,
-#playlist-menu:hover .track-title-content {
-    color: #000;
-}
+    #playlist-menu:hover #playlist-header,
+    #playlist-menu:hover #track-title,
+    #playlist-menu:hover .track-title-content {
+        color: #000;
+    }
 
-#playlist-menu:hover .ui-btn {
-    border-color: #000;
-    color: #000;
-    background: transparent;
-}
+    #playlist-menu:hover .ui-btn {
+        border-color: #000;
+        color: #000;
+        background: transparent;
+    }
 
-#playlist-menu:hover .ui-btn:hover {
-    background: rgba(0, 0, 0, 0.2);
-}
+    #playlist-menu:hover .ui-btn:hover {
+        background: rgba(0, 0, 0, 0.2);
+    }
 
-#playlist-menu .ui-btn:hover .mask-icon,
-#playlist-menu:hover .mask-icon {
-    filter: none;
-    background-color: #000;
-}
+    #playlist-menu .ui-btn:hover .mask-icon,
+    #playlist-menu:hover .mask-icon {
+        filter: none;
+        background-color: #000;
+    }
 
-body.corrupted #playlist-menu:hover {
-    background: var(--alert-red);
-}
+    body.corrupted #playlist-menu:hover {
+        background: var(--alert-red);
+        border-left-color: #000;
+    }
 
-body.corrupted #playlist-menu:hover #playlist-header,
-body.corrupted #playlist-menu:hover #track-title,
-body.corrupted #playlist-menu:hover .track-title-content {
-    color: #000;
-}
+    body.corrupted #playlist-menu:hover #playlist-header,
+    body.corrupted #playlist-menu:hover #track-title,
+    body.corrupted #playlist-menu:hover .track-title-content {
+        color: #000;
+    }
 
-body.corrupted #playlist-menu:hover {
-    border-left-color: #000;
-}
-
-body.corrupted #playlist-menu .ui-btn:hover .mask-icon,
-body.corrupted #playlist-menu:hover .mask-icon {
-    filter: none;
-    background-color: #000;
+    body.corrupted #playlist-menu .ui-btn:hover .mask-icon,
+    body.corrupted #playlist-menu:hover .mask-icon {
+        filter: none;
+        background-color: #000;
+    }
 }
 
 /* Add this new class to handle the reveal */
