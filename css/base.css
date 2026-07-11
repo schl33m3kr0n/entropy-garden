@@ -37,28 +37,19 @@ body.corrupted {
     --neon-green: var(--alert-red); 
 }
 
-/* --- THE BACKGROUND ANIMATION ENGINE --- */
-@keyframes entropySpin {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* --- THE ROTATING BACKGROUND IMAGE (off on gatekeeper — saves decode + compositor) --- */
+/* --- STATIC BACKGROUND IMAGE (off on gatekeeper — saves decode + compositor) --- */
 body::before {
     content: '';
     position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 150vmax;
-    height: 150vmax;
-    /* Keep centered when animation is off (iOS / reduced-motion) */
-    transform: translate(-50%, -50%);
+    inset: 0;
+    width: 100%;
+    height: 100%;
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     opacity: 0;
     z-index: 1;
     pointer-events: none;
-    animation: none;
 }
 
 body.garden-loading::before,
@@ -73,10 +64,6 @@ body.garden-ready::before {
         url('../assets/img/backgrounds/bkgrnd.jpg') type('image/jpeg')
     );
     opacity: 0.22;
-}
-
-body.garden-ready::before {
-    animation: entropySpin 90s linear infinite;
 }
 
 /* --- INITIALIZE GATEKEEPER --- */
@@ -331,12 +318,6 @@ body.april-420 #loader-leaf {
 }
 
 /* --- MOBILE / LOW-POWER PERF MODE --- */
-body.perf-lite::before {
-    animation-duration: 180s;
-    width: 120vmax;
-    height: 120vmax;
-}
-
 body.perf-lite #ouroboros-svg,
 body.perf-lite #loader-leaf {
     animation-duration: 12s;

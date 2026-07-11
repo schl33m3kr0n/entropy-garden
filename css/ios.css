@@ -146,12 +146,6 @@ body.ios-ui {
     --ios-radius-xl: 32px;
 }
 
-/* Rotating 150vmax backdrop is costly on mobile GPUs */
-body.ios-ui::before {
-    animation: none;
-    transform: translate(-50%, -50%);
-}
-
 body.ios-ui.ios-keyboard-open #ios-scroll-shell {
     overflow: hidden;
     touch-action: none;
