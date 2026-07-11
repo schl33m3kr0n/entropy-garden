@@ -321,7 +321,7 @@ function animateMatrix() {
     const { cx, cy } = getCipherWheelCenter();
 
     if (!matrixFilled) {
-        const revealEvery = perf.liteGfx ? 6 : (perf.isMobile ? 4 : 2);
+        const revealEvery = perf.isIOS ? 3 : (perf.liteGfx ? 6 : (perf.isMobile ? 4 : 2));
         if (matrixFrameCount % revealEvery === 0 && visibleRingCount < wheels.length) {
             visibleRingCount++;
         }
@@ -550,7 +550,7 @@ function updateHudRainbow() {
 function animate() {
     if (!gardenLoopActive) return;
 
-    const timeStep = isCorrupted ? 2 : (perf.isMobile ? 0.25 : 0.5);
+    const timeStep = isCorrupted ? 2 : (perf.isIOS ? 0.4 : (perf.isMobile ? 0.25 : 0.5));
     const suspended = isGardenMatrixSuspended();
 
     if (!suspended) {

@@ -63,10 +63,11 @@ function applyPerfNumbers() {
     perf.dprCap = ios ? 1 : (saf ? 1 : (mob ? 1.5 : 2));
     perf.spawnPerFrame = rm ? 12 : (ios ? 2 : (saf ? 3 : (mob ? 4 : 8)));
     perf.steadySwapsPerFrame = rm ? 8 : (ios ? 4 : (saf ? 6 : (mob ? 12 : 30)));
+    // iOS: draw every frame — skip 2 made wheel spin stutter at ~20fps
     perf.matrixFrameSkip = rm
         ? 0
-        : (ios ? 2 : (saf ? 2 : (mob ? 1 : 0)));
-    perf.panopticonFrameSkip = rm ? 0 : ((ios || saf) ? 1 : 0);
+        : (ios ? 0 : (saf ? 2 : (mob ? 1 : 0)));
+    perf.panopticonFrameSkip = rm ? 0 : (saf && !ios ? 1 : 0);
     perf.maxCipherRings = ios ? 7 : (saf ? 8 : null);
     perf.cellSpacing = mob ? 1.45 : 1.65;
 }
