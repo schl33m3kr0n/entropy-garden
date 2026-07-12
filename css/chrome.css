@@ -1649,7 +1649,13 @@ body.singularity-active #singularity-controls {
     width: 22px;
     height: 22px;
     transform-origin: center;
-    transition: transform 0.15s ease;
+    transition: transform 0.15s ease, background-color 0.3s ease, filter 0.3s ease;
+}
+
+.settings-toggle:hover .mask-icon,
+.settings-toggle:focus-visible .mask-icon {
+    background-color: #000;
+    filter: none;
 }
 
 .settings-toggle.is-spinning .mask-icon--cog {
