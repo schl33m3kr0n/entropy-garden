@@ -3,8 +3,7 @@
 import { perf, isIosTabletScreen } from '../core/shared.js';
 import { callHook } from '../core/hooks.js';
 
-import { resizeCanvas, stopGardenLoop, resumeGardenLoop } from '../lazy.js';
-import { isSingularityActive } from '../core/state.js';
+import { resizeCanvas } from '../lazy.js';
 
 
 
@@ -189,25 +188,6 @@ function addIosModalRerollButtons() {
 
 
 
-function pauseGardenDuringHudScroll() {
-    const shell = scrollShell();
-    if (!shell || shell.dataset.scrollPerfBound) return;
-    shell.dataset.scrollPerfBound = '1';
-    let resumeTimer;
-    const pause = () => {
-        stopGardenLoop();
-        clearTimeout(resumeTimer);
-        resumeTimer = setTimeout(() => {
-            if (!document.body.classList.contains('singularity-active') && !isSingularityActive) {
-                resumeGardenLoop();
-            }
-        }, 280);
-    };
-    // Scroll only — touchstart/move paused the cipher wheel on every tap (Firefox iOS),
-    // while Magic Keyboard trackpad never fired those events.
-    shell.addEventListener('scroll', pause, { passive: true });
-}
-
 function preventPullToRefresh() {
 
     const shell = scrollShell();
@@ -311,7 +291,6 @@ export function initIosUi() {
     import('./ios/ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
 
     preventPullToRefresh();
-    pauseGardenDuringHudScroll();
 
     window.addEventListener('orientationchange', () => {
         setTimeout(onIosViewportChange, 260);
