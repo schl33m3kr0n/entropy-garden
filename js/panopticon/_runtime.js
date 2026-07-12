@@ -266,6 +266,7 @@ const PANOPTICON_GOD_CLOSE_MS = 480;
 const PANOPTICON_GOD_HOLD_MS = 280;
 const PANOPTICON_GOD_OPEN_MS = 480;
 const PANOPTICON_GOD_SYMBOL_MS = 260;
+const PANOPTICON_SLEEP_REST_SHUT = 1; // fully closed → straight lid line
 const PANOPTICON_LID_OPEN = 'M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z';
 const PANOPTICON_LID_CLOSED = 'M 8 50 L 92 50';
 const PANOPTICON_CAT_MORPH_MS = 420;
@@ -1025,7 +1026,7 @@ export function triggerPanopticonSleep() {
     if (!panopticonEl) return;
     updatePanopticonVisibility();
     if (!panopticonEl.classList.contains('visible')) return;
-    if (panopticonGodActive || godEyeSequence) return;
+    if (panopticonGodActive || (godEyeSequence && godEyeSequence !== 'open')) return;
     if (eyeMode === 'reroll') return;
 
     // Re-enter sleep cleanly even if a prior wake/noise left us mid-waking.
@@ -1041,9 +1042,12 @@ export function triggerPanopticonSleep() {
     clearPanopticonIdleCommentTimer();
     eyeMode = 'sleeping';
     const closeMs = panopticonSleepCloseMs();
-    sleepStart = document.hidden ? performance.now() - closeMs : performance.now();
-    lidShutNow = 0;
+    // Start partially closed so the first painted frame already reads as "going to sleep".
+    sleepStart = document.hidden ? performance.now() - closeMs : performance.now() - closeMs * 0.25;
+    lidShutNow = document.hidden ? 1 : 0.25;
     panopticonEl.classList.add('panopticon-sleeping');
+    panopticonEl.classList.remove('panopticon-zzz');
+    applyPanopticonLidShut(lidShutNow);
     schedulePanopticonAuxLoop();
     updatePanopticonSleepWake(performance.now());
 }
@@ -1051,6 +1055,7 @@ export function triggerPanopticonSleep() {
 export function triggerPanopticonWake() {
     if (!panopticonEl) return;
     if (eyeMode !== 'sleeping') return;
+    panopticonEl.classList.remove('panopticon-zzz');
     resetPanopticonIdleCommentTimer();
     wakeFromShut = lidShutNow;
     eyeMode = 'waking';
@@ -1271,7 +1276,7 @@ function animatePanopticonCatEye(now) {
 function resetPanopticonLidGeometry() {
     cancelPanopticonCatEye();
     cancelPanopticonAuxLoop();
-    panopticonEl?.classList.remove('panopticon-sleeping');
+    panopticonEl?.classList.remove('panopticon-sleeping', 'panopticon-zzz');
     lidShutNow = 0;
     panopticonLidEl?.setAttribute('d', PANOPTICON_LID_OPEN);
     panopticonClipPathEl?.setAttribute('d', PANOPTICON_LID_OPEN);
@@ -1456,20 +1461,23 @@ function updatePanopticonSleepWake(now) {
         const elapsed = now - sleepStart;
 
         if (elapsed >= closeMs) {
-            lidShutNow = 1;
-            applyPanopticonLidShut(1);
+            lidShutNow = PANOPTICON_SLEEP_REST_SHUT;
+            applyPanopticonSleepVisual(lidShutNow);
             if (panopticonInnerEl) panopticonInnerEl.style.transform = '';
+            panopticonEl?.classList.add('panopticon-zzz');
             return true;
         }
 
-        const shut = smoothstep(elapsed / closeMs);
+        panopticonEl?.classList.remove('panopticon-zzz');
+        const shut = smoothstep(elapsed / closeMs) * PANOPTICON_SLEEP_REST_SHUT;
         lidShutNow = shut;
-        applyPanopticonLidShut(shut);
+        applyPanopticonSleepVisual(shut);
         if (panopticonInnerEl) panopticonInnerEl.style.transform = '';
         return true;
     }
 
     if (eyeMode === 'waking') {
+        panopticonEl?.classList.remove('panopticon-zzz');
         const elapsed = now - wakeStart;
         const { peekMs, blinkMs, yawnMs, settleMs } = panopticonWakeTimings();
         easePanopticonWakeGaze();
@@ -1509,7 +1517,7 @@ function updatePanopticonSleepWake(now) {
         lidShutNow = 0;
         applyPanopticonSleepVisual(0);
         eyeMode = 'idle';
-        panopticonEl?.classList.remove('panopticon-sleeping');
+        panopticonEl?.classList.remove('panopticon-sleeping', 'panopticon-zzz');
         cancelPanopticonAuxLoop();
         if (!panopticonIdleCommentTimer) schedulePanopticonIdleCommentTimer();
         return true;

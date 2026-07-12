@@ -1528,66 +1528,182 @@ function startGlitchLoop() {
 }
 
 // --- IDLE DISSOCIATION ENGINE ---
-const IDLE_DISSOCIATION_MS = 120000; // 2 minutes of inactivity
-const IDLE_DISSOCIATION_ARM_GRACE_MS = 400; // ignore filter-induced pointer noise
+const IDLE_DISSOCIATION_MS_DEFAULT = 120000; // 2 minutes of inactivity
+const IDLE_DISSOCIATION_ARM_GRACE_MS = 1200; // ignore filter-induced pointer noise
+const IDLE_PTR_RESET_PX = 10; // ignore trackpad/OS jitter when arming the idle timer
+const IDLE_PTR_WAKE_PX = 48; // require a real move to wake from sleep
 let idleTimer;
 let idleDissociationActive = false;
 let idleDissociationIgnoreUntil = 0;
+let idleLastPtr = null;
+
+function idleDissociationDelayMs() {
+    try {
+        const raw = new URLSearchParams(globalThis.location?.search || '').get('idle');
+        if (raw == null || raw === '') return IDLE_DISSOCIATION_MS_DEFAULT;
+        const sec = Number(raw);
+        if (!Number.isFinite(sec) || sec <= 0) return IDLE_DISSOCIATION_MS_DEFAULT;
+        return Math.max(1, Math.round(sec * 1000));
+    } catch {
+        return IDLE_DISSOCIATION_MS_DEFAULT;
+    }
+}
+
+function idlePointerCoords(e) {
+    if (!e) return null;
+    if (e.touches && e.touches.length) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    if (typeof e.clientX === 'number' && typeof e.clientY === 'number') {
+        return { x: e.clientX, y: e.clientY };
+    }
+    return null;
+}
+
+const IDLE_BLUR_SKIP_IDS = new Set([
+    'panopticon-eye', // keep the sleeping eye sharp
+    'init-screen',
+    'loader',
+    'boss-key-overlay',
+    'singularity-overlay',
+]);
+
+function idleBlurTargets() {
+    // Blur every top-level UI surface. Never filter ancestors of the eye.
+    return Array.from(document.body.children).filter((el) => {
+        if (!(el instanceof HTMLElement) && !(el instanceof SVGElement)) return false;
+        const tag = el.tagName;
+        if (tag === 'SCRIPT' || tag === 'LINK' || tag === 'STYLE' || tag === 'TEMPLATE') return false;
+        if (IDLE_BLUR_SKIP_IDS.has(el.id)) return false;
+        return true;
+    });
+}
 
 function clearIdleDissociationBlur() {
-    if (!document.body.style.filter) return;
-    document.body.style.transition = 'filter 0.2s ease';
+    const marked = document.querySelectorAll('[data-idle-blur]');
+    const targets = marked.length ? marked : idleBlurTargets();
+    for (const el of targets) {
+        el.style.transition = 'filter 0.2s ease';
+        el.style.filter = 'none';
+        if (el instanceof HTMLElement || el instanceof SVGElement) {
+            delete el.dataset.idleBlur;
+        }
+    }
     document.body.style.filter = 'none';
 }
 
 function endIdleDissociation() {
-    if (!idleDissociationActive && !document.body.style.filter) return;
+    const hadBodyBlur = Boolean(document.body.style.filter);
+    const hadTargetBlur = Boolean(
+        document.querySelector('[data-idle-blur]')
+        || idleBlurTargets().some((el) => Boolean(el.style.filter))
+    );
+    if (!idleDissociationActive && !hadBodyBlur && !hadTargetBlur) return;
     idleDissociationActive = false;
+    idleDissociationIgnoreUntil = 0;
     clearIdleDissociationBlur();
     triggerPanopticonWake();
 }
 
-function resetIdleTimer() {
-    if (!gardenHasStarted) return;
+function beginIdleDissociation() {
+    idleDissociationActive = true;
+    idleDissociationIgnoreUntil = performance.now() + IDLE_DISSOCIATION_ARM_GRACE_MS;
+    idleLastPtr = null; // next pointer sample only anchors; do not wake on first report
 
-    // Applying body filter can synthesize pointer events; ignore them briefly.
-    if (performance.now() < idleDissociationIgnoreUntil) return;
+    // Eye sleeps first (kept sharp), then the whole UI drifts into a blurry void
+    triggerPanopticonSleep();
 
-    clearTimeout(idleTimer);
-    endIdleDissociation();
-
-    if (document.body.classList.contains('pong-playing')) return;
-    
-    idleTimer = setTimeout(() => {
-        // Only trigger if they are actually looking at the page and not in the singularity
-        if (!document.hidden && !isSingularityActive && !document.body.classList.contains('pong-playing')) {
-            const idlePool = isCorrupted
-                ? lore.idleMessagesSafe.concat(lore.idleMessagesGritty)
-                : lore.idleMessagesSafe;
-            const randomMsg = idlePool[Math.floor(Math.random() * idlePool.length)];
-            pushTerminalLog(randomMsg);
-            recordBehavior('idle_dissociation');
-
-            idleDissociationActive = true;
-            idleDissociationIgnoreUntil = performance.now() + IDLE_DISSOCIATION_ARM_GRACE_MS;
-
-            // Eye sleeps first, then a slow descent into a blurry void
-            triggerPanopticonSleep();
-            document.body.style.transition = 'filter 15s ease-in-out';
-            document.body.style.filter = 'grayscale(100%) blur(3px)';
-        }
-    }, IDLE_DISSOCIATION_MS);
+    for (const el of idleBlurTargets()) {
+        el.dataset.idleBlur = '1';
+        el.style.transition = 'filter 15s ease-in-out';
+        el.style.filter = 'grayscale(100%) blur(3px)';
+    }
 }
 
-// Listen for any sign of life
-window.addEventListener('mousemove', resetIdleTimer);
-window.addEventListener('keydown', resetIdleTimer);
-window.addEventListener('click', resetIdleTimer);
-window.addEventListener('touchstart', resetIdleTimer, { passive: true });
-window.addEventListener('touchmove', resetIdleTimer, { passive: true });
+function scheduleIdleDissociation() {
+    clearTimeout(idleTimer);
+    if (document.body.classList.contains('pong-playing')) return;
+
+    const delayMs = idleDissociationDelayMs();
+    idleTimer = setTimeout(() => {
+        if (document.hidden || isSingularityActive || document.body.classList.contains('pong-playing')) {
+            return;
+        }
+        // Sleep first — terminal/behavior side effects must not abort dissociation.
+        beginIdleDissociation();
+        try {
+            const idlePool = isCorrupted
+                ? (lore?.idleMessagesSafe || []).concat(lore?.idleMessagesGritty || [])
+                : (lore?.idleMessagesSafe || []);
+            if (idlePool.length) {
+                pushTerminalLog(idlePool[Math.floor(Math.random() * idlePool.length)]);
+            }
+            recordBehavior('idle_dissociation');
+        } catch {
+            /* keep sleeping even if log/behavior fails */
+        }
+    }, delayMs);
+}
+
+function onIdleActivity(e) {
+    if (!gardenHasStarted) return;
+
+    const type = e?.type || '';
+    const isPtrMove = type === 'mousemove' || type === 'touchmove';
+    const pt = isPtrMove ? idlePointerCoords(e) : null;
+    const now = performance.now();
+
+    // While arming sleep, ignore pointer noise entirely (filters can synthesize moves).
+    if (now < idleDissociationIgnoreUntil && isPtrMove) return;
+
+    if (idleDissociationActive) {
+        if (isPtrMove) {
+            if (!pt) return;
+            // First sample after sleep only anchors position — do not wake yet.
+            if (!idleLastPtr) {
+                idleLastPtr = pt;
+                return;
+            }
+            const dist = Math.hypot(pt.x - idleLastPtr.x, pt.y - idleLastPtr.y);
+            if (dist < IDLE_PTR_WAKE_PX) return;
+            idleLastPtr = pt;
+        }
+        endIdleDissociation();
+        scheduleIdleDissociation();
+        return;
+    }
+
+    // Not asleep: only meaningful pointer travel resets the AFK timer.
+    if (isPtrMove) {
+        if (!pt) return;
+        if (!idleLastPtr) {
+            idleLastPtr = pt;
+            return;
+        }
+        const dist = Math.hypot(pt.x - idleLastPtr.x, pt.y - idleLastPtr.y);
+        if (dist < IDLE_PTR_RESET_PX) return;
+        idleLastPtr = pt;
+    } else if (pt) {
+        idleLastPtr = pt;
+    }
+
+    scheduleIdleDissociation();
+}
+
+window.addEventListener('mousemove', onIdleActivity);
+window.addEventListener('keydown', onIdleActivity);
+window.addEventListener('click', onIdleActivity);
+window.addEventListener('touchstart', onIdleActivity, { passive: true });
+window.addEventListener('touchmove', onIdleActivity, { passive: true });
+
+function resetIdleTimer() {
+    if (!gardenHasStarted) return;
+    endIdleDissociation();
+    scheduleIdleDissociation();
+}
 
 function startIdleDissociation() {
-    resetIdleTimer();
+    scheduleIdleDissociation();
 }
 
 // Replace your old carousel script with this block
