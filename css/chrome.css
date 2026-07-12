@@ -1117,17 +1117,18 @@ a.social-link:hover { color: #fff; border-bottom-style: solid; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 4px;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    border-radius: 50%;
     opacity: 0.9;
     transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
 }
 
 .comms-social img {
     display: block;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     object-fit: contain;
 }
 
