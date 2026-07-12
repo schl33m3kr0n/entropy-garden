@@ -46,6 +46,8 @@ const PRECACHE_URLS = [
     'assets/icons/social/youtube.png',
     'assets/icons/social/instagram.png',
     'assets/icons/social/tiktok.png',
+    'assets/icons/social/tumblr.png',
+    'assets/icons/social/soundcloud.png',
     'assets/icons/social/apple-music.png',
     'assets/icons/identity.svg',
     'assets/icons/gemini.png',
