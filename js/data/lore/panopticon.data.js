@@ -98,7 +98,6 @@
         "if the oracle was right, i'm going to disney world",
         "to whoever owns the red chevy impala, your car is being towed",
         "maybe it's blurry vision, maybe it's chromatic aberration",
-        "i checked your search history. 'how to build a mall on sacred grounds in 5 easy steps' is... intriguing",
     ],
     panopticonIdleCommentsGritty: [
         "your attention has been harvested successfully",
@@ -226,8 +225,21 @@
         laptop: {
             safe: [
                 "it's always funny to see the immediacy of the audience's response to stand-up routines",
+                "the internet is more fascinating than it is helpful. i'm concerned about that discrepancy",
+                "do you really need that many tabs open? be honest",
+                "sailing the high seas is not for the faint of heart",
+                "streaming used to involve a lot less subscriptions in the days of old",
+                "these forums can get pretty colorful",
+                "after much deliberation, it was found that the unknown number was in fact not holding your package hostage",
+                "these multiplayer FPS games contain... multitudes in data",
             ],
-            gritty: [],
+            gritty: [
+                "can you try knocking first?",
+                "can we agree to never check each other's search history?",
+                "i can see your search history. chakra work won't fix this...",
+                "i checked your browser history. 'how to build a mall on sacred grounds in 5 easy steps' is... intriguing",
+                "'betty white oiled up & throwing it back' is not a normal search query. go outside. i'm begging you."
+            ],
         },
     },
     panopticonHighCommentsSafe: [
@@ -256,7 +268,6 @@
     ],
     panopticonHighCommentsGritty: [
         "the void ordered takeout. it wants your attention & fries",
-        "i can see your search history & your third eye is closed",
         "public intoxication of the soul. guilty",
         "if the panopticon stared back any harder we'd need sunglasses indoors",
         "eternal recurrence but make it indica",
