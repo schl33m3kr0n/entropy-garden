@@ -543,7 +543,10 @@ function updateHudRainbow() {
     syncPanopticonRainbow();
     syncGodTitleGradient();
     if (!perf.liteGfx && !perf.prefersReducedMotion && !isCorrupted) {
-        document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);
+        // Freeze hue while idle-dissociating so the 15s filter transition can finish.
+        if (!document.body.classList.contains('idle-dissociating')) {
+            document.documentElement.style.setProperty('--matrix-hue', `${time % 360}deg`);
+        }
     }
 }
 

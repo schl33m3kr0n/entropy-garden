@@ -1562,12 +1562,15 @@ function idlePointerCoords(e) {
 
 const IDLE_BLUR_SKIP_IDS = new Set([
     'panopticon-eye', // keep the sleeping eye sharp
-    'grid-canvas', // keep cipher-wheel chromatic aberration intact
+    'grid-canvas', // CSS idle-dissociating handles greyscale/blur + chroma in sync
     'init-screen',
     'loader',
     'boss-key-overlay',
     'singularity-overlay',
 ]);
+const IDLE_BLUR_TRANSITION = 'filter 15s ease-in-out';
+const IDLE_BLUR_UI_FILTER = 'grayscale(100%) blur(3px)';
+const IDLE_BLUR_UI_SEED = 'grayscale(0%) blur(0px)';
 
 function idleBlurTargets() {
     // Blur every top-level UI surface. Never filter ancestors of the eye.
@@ -1581,6 +1584,7 @@ function idleBlurTargets() {
 }
 
 function clearIdleDissociationBlur() {
+    document.body.classList.remove('idle-dissociating');
     const marked = document.querySelectorAll('[data-idle-blur]');
     const targets = marked.length ? marked : idleBlurTargets();
     for (const el of targets) {
@@ -1590,21 +1594,26 @@ function clearIdleDissociationBlur() {
         if (el instanceof HTMLElement || el instanceof SVGElement) {
             delete el.dataset.idleBlur;
         }
-        // Drop the temporary transition after the snap-back settles
         globalThis.setTimeout?.(() => {
             if (!el.isConnected || el.dataset.idleBlur) return;
             el.style.removeProperty('transition');
         }, 220);
     }
     // Scrub any leftover inline canvas filter from older idle sleeps
-    document.getElementById('grid-canvas')?.style.removeProperty('filter');
+    const canvas = document.getElementById('grid-canvas');
+    if (canvas) {
+        canvas.style.removeProperty('filter');
+        canvas.style.removeProperty('transition');
+        delete canvas.dataset.idleBlur;
+    }
     document.body.style.removeProperty('filter');
 }
 
 function endIdleDissociation() {
     const hadBodyBlur = Boolean(document.body.style.filter);
     const hadTargetBlur = Boolean(
-        document.querySelector('[data-idle-blur]')
+        document.body.classList.contains('idle-dissociating')
+        || document.querySelector('[data-idle-blur]')
         || idleBlurTargets().some((el) => Boolean(el.style.filter))
     );
     if (!idleDissociationActive && !hadBodyBlur && !hadTargetBlur) return;
@@ -1622,10 +1631,30 @@ function beginIdleDissociation() {
     // Eye sleeps first (kept sharp), then the whole UI drifts into a blurry void
     triggerPanopticonSleep();
 
-    for (const el of idleBlurTargets()) {
-        el.dataset.idleBlur = '1';
-        el.style.transition = 'filter 15s ease-in-out';
-        el.style.filter = 'grayscale(100%) blur(3px)';
+    const targets = idleBlurTargets();
+    const canvas = document.getElementById('grid-canvas');
+    for (const el of targets) el.dataset.idleBlur = '1';
+    if (canvas) canvas.dataset.idleBlur = '1';
+
+    // Seed UI at grey/blur 0 so it shares the same 15s envelope as the canvas CSS transition.
+    for (const el of targets) {
+        el.style.transition = 'none';
+        el.style.filter = IDLE_BLUR_UI_SEED;
+    }
+    void document.body.offsetWidth;
+
+    for (const el of targets) {
+        el.style.transition = IDLE_BLUR_TRANSITION;
+    }
+    // Arm canvas transition before flipping the idle class (same 15s ease-in-out).
+    if (canvas) {
+        canvas.style.transition = IDLE_BLUR_TRANSITION;
+    }
+    void document.body.offsetWidth;
+
+    document.body.classList.add('idle-dissociating');
+    for (const el of targets) {
+        el.style.filter = IDLE_BLUR_UI_FILTER;
     }
 }
 

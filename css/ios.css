@@ -187,11 +187,32 @@ body.ios-ui #grid-canvas {
 
 /* Match desktop RGB split on the cipher wheels (skip animated hue-rotate) */
 body.ios-ui #grid-canvas.matrix-visible {
-    filter: var(--chroma-filter);
+    filter:
+        grayscale(0%)
+        blur(0px)
+        var(--chroma-filter);
 }
 
 body.ios-ui.corrupted #grid-canvas.matrix-visible {
-    filter: var(--chroma-filter-corrupted);
+    filter:
+        grayscale(0%)
+        blur(0px)
+        var(--chroma-filter-corrupted);
+}
+
+body.ios-ui.idle-dissociating #grid-canvas.matrix-visible {
+    transition: filter 15s ease-in-out, opacity 2.5s ease-out;
+    filter:
+        grayscale(100%)
+        blur(3px)
+        var(--chroma-filter);
+}
+
+body.ios-ui.idle-dissociating.corrupted #grid-canvas.matrix-visible {
+    filter:
+        grayscale(100%)
+        blur(3px)
+        var(--chroma-filter-corrupted);
 }
 
 body.ios-ui.singularity-active #grid-canvas {

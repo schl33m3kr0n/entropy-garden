@@ -203,7 +203,17 @@
     }
 
     #grid-canvas.matrix-visible {
-        filter: var(--chroma-filter-lite);
+        filter:
+            grayscale(0%)
+            blur(0px)
+            var(--chroma-filter-lite);
+    }
+
+    body.idle-dissociating #grid-canvas.matrix-visible {
+        filter:
+            grayscale(100%)
+            blur(3px)
+            var(--chroma-filter-lite);
     }
 }
 

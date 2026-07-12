@@ -13,15 +13,46 @@
 
 #grid-canvas.matrix-visible {
     opacity: 1;
+    /* greyscale/blur stay at 0 awake so idle can interpolate the same filter list */
     filter:
         hue-rotate(var(--matrix-hue, 0deg))
+        grayscale(0%)
+        blur(0px)
         var(--chroma-filter);
 }
 
 /* Safari / lite: skip animated hue-rotate; keep static chromatic split */
 body.perf-safari #grid-canvas.matrix-visible,
 body.perf-lite #grid-canvas.matrix-visible {
-    filter: var(--chroma-filter-lite);
+    filter:
+        grayscale(0%)
+        blur(0px)
+        var(--chroma-filter-lite);
+}
+
+/* Idle sleep: same 15s greyscale/blur ramp as the UI; chroma preserved after */
+body.idle-dissociating #grid-canvas.matrix-visible {
+    transition: filter 15s ease-in-out, opacity 2.5s ease-out;
+    filter:
+        hue-rotate(var(--matrix-hue, 0deg))
+        grayscale(100%)
+        blur(3px)
+        var(--chroma-filter);
+}
+
+body.idle-dissociating.perf-safari #grid-canvas.matrix-visible,
+body.idle-dissociating.perf-lite #grid-canvas.matrix-visible {
+    filter:
+        grayscale(100%)
+        blur(3px)
+        var(--chroma-filter-lite);
+}
+
+body.idle-dissociating.corrupted #grid-canvas.matrix-visible {
+    filter:
+        grayscale(100%)
+        blur(3px)
+        var(--chroma-filter-corrupted);
 }
 
 /* --- PANOPTICON EYE --- */
@@ -410,7 +441,10 @@ body.corrupted .panopticon-pupil {
 }
 
 body.corrupted #grid-canvas.matrix-visible {
-    filter: var(--chroma-filter-corrupted);
+    filter:
+        grayscale(0%)
+        blur(0px)
+        var(--chroma-filter-corrupted);
 }
 
 /* --- INTERACTIVE TERMINAL (FAB morphs into panel and back) --- */
