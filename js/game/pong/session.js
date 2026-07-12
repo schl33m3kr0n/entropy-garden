@@ -1884,7 +1884,7 @@ function bindKeyboardControls() {
 function isPongAppChrome(target) {
     return Boolean(target?.closest?.(
         '#hamburger-icon, .control-panel, #sidebar-menu, #terminal-container, '
-        + '.ios-sidebar-tools, #mode-btn, #playlist-menu, #playlist-header, '
+        + '.ios-sidebar-tools, #settings-menu, #playlist-menu, #playlist-header, '
         + '.ios-pong-eye-tap',
     ));
 }

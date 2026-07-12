@@ -577,8 +577,7 @@ function revealGardenUI() {
 
     if (isIosLayout) {
         hud?.classList.add('active');
-        document.getElementById('mode-btn')?.classList.add('active');
-        document.getElementById('panopticon-mute-btn')?.classList.add('active');
+        document.getElementById('settings-menu')?.classList.add('active');
         document.querySelector('.control-panel')?.classList.add('active');
         if (playlistMenu) {
             playlistMenu.classList.add('active');
@@ -595,8 +594,7 @@ function revealGardenUI() {
 
     setTimeout(() => hud.classList.add('active', 'anim-drop'), HUD_DROP_DELAY_MS);
     setTimeout(() => {
-        document.getElementById('mode-btn').classList.add('active');
-        document.getElementById('panopticon-mute-btn')?.classList.add('active');
+        document.getElementById('settings-menu')?.classList.add('active');
         document.querySelector('.control-panel').classList.add('active');
     }, 450);
     setTimeout(revealTerminalChrome, 450);
@@ -834,7 +832,7 @@ function resetTimeline() {
     setNeedsFullRedraw(true);
 
     document.getElementById('hamburger-icon').style.display = 'flex';
-    document.getElementById('mode-btn').classList.add('active');
+    document.getElementById('settings-menu')?.classList.add('active');
 
     document.getElementById('next-poem-btn').style.display = 'inline-block';
     document.getElementById('singularity-canvas').style.display = 'block';
@@ -869,6 +867,53 @@ function togglePanopticonMuteSetting() {
     playSound(sfx.click);
     pushTerminalLog(muted ? '> PANOPTICON COMMENT SFX MUTED.' : '> PANOPTICON COMMENT SFX ENABLED.');
     recordBehavior('panopticon_mute', { muted });
+}
+
+function setSettingsMenuOpen(open) {
+    const menu = document.getElementById('settings-menu');
+    const toggle = document.getElementById('settings-toggle');
+    const dropdown = document.getElementById('settings-dropdown');
+    if (!menu || !toggle || !dropdown) return;
+    menu.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    dropdown.hidden = !open;
+}
+
+function bindSettingsMenu() {
+    const menu = document.getElementById('settings-menu');
+    const toggle = document.getElementById('settings-toggle');
+    if (!menu || !toggle || toggle.dataset.bound === '1') return;
+    toggle.dataset.bound = '1';
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggle.classList.remove('is-spinning');
+        void toggle.offsetWidth;
+        toggle.classList.add('is-spinning');
+        setSettingsMenuOpen(!menu.classList.contains('is-open'));
+        playSound(sfx.click);
+    });
+
+    toggle.addEventListener('animationend', (e) => {
+        if (e.animationName === 'settings-cog-spin') {
+            toggle.classList.remove('is-spinning');
+        }
+    });
+
+    menu.querySelectorAll('.settings-item').forEach((btn) => {
+        btn.addEventListener('click', () => setSettingsMenuOpen(false));
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!menu.classList.contains('is-open')) return;
+        if (e.target.closest?.('#settings-menu')) return;
+        setSettingsMenuOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape' || !menu.classList.contains('is-open')) return;
+        setSettingsMenuOpen(false);
+    });
 }
 
 function toggleMode() {
@@ -1241,6 +1286,7 @@ function bindDomEvents() {
     if (panopticonMuteBtn) {
         panopticonMuteBtn.addEventListener('click', togglePanopticonMuteSetting);
     }
+    bindSettingsMenu();
     /* next-poem / reset-timeline: bound in singularity.js (iOS touchend-safe) */
 
     initializeCycleSlots();

@@ -116,14 +116,9 @@ function buildScrollShell() {
 function relocateControlsToSidebar() {
 
     const sidebar = document.getElementById('sidebar-menu');
-
-    const modeBtn = document.getElementById('mode-btn');
-    const panopticonMuteBtn = document.getElementById('panopticon-mute-btn');
     const playlist = document.getElementById('playlist-menu');
 
-    if (!sidebar || !modeBtn) return;
-
-
+    if (!sidebar) return;
 
     let tools = sidebar.querySelector('.ios-sidebar-tools');
 
@@ -137,10 +132,7 @@ function relocateControlsToSidebar() {
 
     }
 
-
-
-    tools.replaceChildren(modeBtn);
-    if (panopticonMuteBtn) tools.append(panopticonMuteBtn);
+    tools.replaceChildren();
 
     if (playlist && !isIosTabletScreen()) {
         tools.append(playlist);

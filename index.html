@@ -83,8 +83,15 @@
     </div>
 </div>
 
-<button type="button" tabindex="-1" id="mode-btn" class="ui-btn">SAFE MODE</button>
-<button type="button" tabindex="-1" id="panopticon-mute-btn" class="ui-btn" aria-pressed="false">EYE SFX</button>
+<div id="settings-menu" class="settings-menu">
+    <button type="button" tabindex="-1" id="settings-toggle" class="ui-btn settings-toggle" aria-expanded="false" aria-haspopup="true" aria-controls="settings-dropdown" aria-label="Settings">
+        <span class="mask-icon mask-icon--cog" aria-hidden="true"></span>
+    </button>
+    <div id="settings-dropdown" class="settings-dropdown" hidden>
+        <button type="button" tabindex="-1" id="mode-btn" class="ui-btn settings-item">SAFE MODE</button>
+        <button type="button" tabindex="-1" id="panopticon-mute-btn" class="ui-btn settings-item" aria-pressed="false">EYE SFX</button>
+    </div>
+</div>
 
     <div id="sidebar-menu">
         <ul>

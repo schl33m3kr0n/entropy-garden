@@ -125,7 +125,10 @@ function hideSingularityChrome() {
     document.body.classList.add('singularity-active');
     const hamburger = document.getElementById('hamburger-icon');
     if (hamburger) hamburger.style.display = 'none';
-    document.getElementById('mode-btn')?.classList.remove('active');
+    document.getElementById('settings-menu')?.classList.remove('active', 'is-open');
+    document.getElementById('settings-toggle')?.setAttribute('aria-expanded', 'false');
+    const dropdown = document.getElementById('settings-dropdown');
+    if (dropdown) dropdown.hidden = true;
     document.getElementById('terminal-container')?.classList.remove('active');
     document.getElementById('term-input')?.blur();
 }
