@@ -1105,6 +1105,42 @@ a.social-link { color: var(--neon-green); text-decoration: none; border-bottom: 
 
 a.social-link:hover { color: #fff; border-bottom-style: solid; }
 
+.comms-socials {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    vertical-align: middle;
+    margin: 0 2px;
+}
+
+.comms-social {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    opacity: 0.9;
+    transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+}
+
+.comms-social img {
+    display: block;
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.comms-social:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+    filter: drop-shadow(0 0 6px rgba(0, 255, 0, 0.45));
+}
+
+body.corrupted .comms-social:hover {
+    filter: drop-shadow(0 0 6px rgba(255, 0, 85, 0.45));
+}
+
 .project-title { color: var(--neon-green); font-weight: bold; display: block; }
 
 .project-desc { color: #888; font-size: 0.85rem; display: block; font-style: italic; margin-top: 4px; }
