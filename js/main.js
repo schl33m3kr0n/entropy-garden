@@ -1528,6 +1528,7 @@ function startGlitchLoop() {
 }
 
 // --- IDLE DISSOCIATION ENGINE ---
+const IDLE_DISSOCIATION_MS = 120000; // 2 minutes of inactivity
 let idleTimer;
 
 function resetIdleTimer() {
@@ -1538,8 +1539,9 @@ function resetIdleTimer() {
     if (document.body.style.filter) {
         document.body.style.transition = 'filter 0.2s ease';
         document.body.style.filter = 'none';
-        triggerPanopticonWake();
     }
+    // Wake even if blur hadn't applied yet (sleep starts with the idle timeout).
+    triggerPanopticonWake();
 
     if (document.body.classList.contains('pong-playing')) return;
     
@@ -1553,12 +1555,12 @@ function resetIdleTimer() {
             pushTerminalLog(randomMsg);
             recordBehavior('idle_dissociation');
             
-            // A slow, 15-second descent into a blurry void
+            // Eye sleeps first, then a slow descent into a blurry void
+            triggerPanopticonSleep();
             document.body.style.transition = 'filter 15s ease-in-out';
             document.body.style.filter = 'grayscale(100%) blur(3px)';
-            triggerPanopticonSleep();
         }
-    }, 60000); // 60 seconds of total inactivity
+    }, IDLE_DISSOCIATION_MS);
 }
 
 // Listen for any sign of life
