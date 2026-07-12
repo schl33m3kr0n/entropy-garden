@@ -1106,11 +1106,10 @@ a.social-link { color: var(--neon-green); text-decoration: none; border-bottom: 
 a.social-link:hover { color: #fff; border-bottom-style: solid; }
 
 .comms-socials {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
-    vertical-align: middle;
-    margin: 0 2px;
+    margin: 12px 0 0;
 }
 
 .comms-social {
