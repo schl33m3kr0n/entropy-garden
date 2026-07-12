@@ -1026,13 +1026,23 @@ export function triggerPanopticonSleep() {
     updatePanopticonVisibility();
     if (!panopticonEl.classList.contains('visible')) return;
     if (panopticonGodActive || godEyeSequence) return;
-    if (eyeMode === 'reroll' || eyeMode === 'sleeping') return;
+    if (eyeMode === 'reroll') return;
+
+    // Re-enter sleep cleanly even if a prior wake/noise left us mid-waking.
+    if (eyeMode === 'sleeping') {
+        schedulePanopticonAuxLoop();
+        updatePanopticonSleepWake(performance.now());
+        return;
+    }
+
     cancelPanopticonAwayActivity();
     cancelPanopticonCatEye();
     hidePanopticonComment();
+    clearPanopticonIdleCommentTimer();
     eyeMode = 'sleeping';
     const closeMs = panopticonSleepCloseMs();
     sleepStart = document.hidden ? performance.now() - closeMs : performance.now();
+    lidShutNow = 0;
     panopticonEl.classList.add('panopticon-sleeping');
     schedulePanopticonAuxLoop();
     updatePanopticonSleepWake(performance.now());

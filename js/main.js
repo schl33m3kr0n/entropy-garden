@@ -1529,19 +1529,32 @@ function startGlitchLoop() {
 
 // --- IDLE DISSOCIATION ENGINE ---
 const IDLE_DISSOCIATION_MS = 120000; // 2 minutes of inactivity
+const IDLE_DISSOCIATION_ARM_GRACE_MS = 400; // ignore filter-induced pointer noise
 let idleTimer;
+let idleDissociationActive = false;
+let idleDissociationIgnoreUntil = 0;
+
+function clearIdleDissociationBlur() {
+    if (!document.body.style.filter) return;
+    document.body.style.transition = 'filter 0.2s ease';
+    document.body.style.filter = 'none';
+}
+
+function endIdleDissociation() {
+    if (!idleDissociationActive && !document.body.style.filter) return;
+    idleDissociationActive = false;
+    clearIdleDissociationBlur();
+    triggerPanopticonWake();
+}
 
 function resetIdleTimer() {
     if (!gardenHasStarted) return;
-    clearTimeout(idleTimer);
 
-    // Only touch styles when dissociation blur is active (avoid main-thread churn on every mousemove).
-    if (document.body.style.filter) {
-        document.body.style.transition = 'filter 0.2s ease';
-        document.body.style.filter = 'none';
-    }
-    // Wake even if blur hadn't applied yet (sleep starts with the idle timeout).
-    triggerPanopticonWake();
+    // Applying body filter can synthesize pointer events; ignore them briefly.
+    if (performance.now() < idleDissociationIgnoreUntil) return;
+
+    clearTimeout(idleTimer);
+    endIdleDissociation();
 
     if (document.body.classList.contains('pong-playing')) return;
     
@@ -1554,7 +1567,10 @@ function resetIdleTimer() {
             const randomMsg = idlePool[Math.floor(Math.random() * idlePool.length)];
             pushTerminalLog(randomMsg);
             recordBehavior('idle_dissociation');
-            
+
+            idleDissociationActive = true;
+            idleDissociationIgnoreUntil = performance.now() + IDLE_DISSOCIATION_ARM_GRACE_MS;
+
             // Eye sleeps first, then a slow descent into a blurry void
             triggerPanopticonSleep();
             document.body.style.transition = 'filter 15s ease-in-out';
