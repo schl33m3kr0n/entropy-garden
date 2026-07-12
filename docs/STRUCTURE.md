@@ -93,7 +93,7 @@ bash scripts/dev/serve-local.sh     # serve dist on :8765
 npm install && npm test             # Vitest — vigenère, behavioral labels, poem pool
 ```
 
-Or double-click `scripts/dev/Serve Entropy Garden.command`.
+Run `bash scripts/dev/serve-local.sh`.
 
 Opening `index.html` directly (`file://`) shows a notice only; use the local server for a faithful preview.
 

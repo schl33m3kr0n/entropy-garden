@@ -16,7 +16,7 @@
             '<p class="file-protocol-title">/// LOCAL PREVIEW REQUIRES HTTP ///</p>'
             + '<p>Browsers block modules on <code>file://</code>. Use the same bundle as production:</p>'
             + '<p class="file-protocol-cmd">bash scripts/dev/serve-local.sh</p>'
-            + '<p>Or open <strong>scripts/dev/Serve Entropy Garden.command</strong>, then visit the URL shown (usually <code>http://localhost:8765</code>).</p>';
+            + '<p>Or run <code>bash scripts/dev/serve-local.sh</code>, then visit the URL shown (usually <code>http://localhost:8765</code>).</p>';
 
         document.body.appendChild(panel);
     }

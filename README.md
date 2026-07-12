@@ -64,7 +64,7 @@ bash scripts/deploy/cloudflare.sh   # build dist/ (same bundle Pages publishes)
 bash scripts/dev/serve-local.sh     # serve dist/ (default :8765)
 ```
 
-Or double-click `scripts/dev/Serve Entropy Garden.command`.
+bash scripts/dev/serve-local.sh
 
 ---
 
