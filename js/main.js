@@ -1562,6 +1562,7 @@ function idlePointerCoords(e) {
 
 const IDLE_BLUR_SKIP_IDS = new Set([
     'panopticon-eye', // keep the sleeping eye sharp
+    'grid-canvas', // keep cipher-wheel chromatic aberration intact
     'init-screen',
     'loader',
     'boss-key-overlay',
@@ -1583,13 +1584,21 @@ function clearIdleDissociationBlur() {
     const marked = document.querySelectorAll('[data-idle-blur]');
     const targets = marked.length ? marked : idleBlurTargets();
     for (const el of targets) {
+        // removeProperty (not filter:none) so stylesheet chroma/filters can return
         el.style.transition = 'filter 0.2s ease';
-        el.style.filter = 'none';
+        el.style.removeProperty('filter');
         if (el instanceof HTMLElement || el instanceof SVGElement) {
             delete el.dataset.idleBlur;
         }
+        // Drop the temporary transition after the snap-back settles
+        globalThis.setTimeout?.(() => {
+            if (!el.isConnected || el.dataset.idleBlur) return;
+            el.style.removeProperty('transition');
+        }, 220);
     }
-    document.body.style.filter = 'none';
+    // Scrub any leftover inline canvas filter from older idle sleeps
+    document.getElementById('grid-canvas')?.style.removeProperty('filter');
+    document.body.style.removeProperty('filter');
 }
 
 function endIdleDissociation() {
