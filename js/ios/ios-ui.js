@@ -203,9 +203,9 @@ function pauseGardenDuringHudScroll() {
             }
         }, 280);
     };
+    // Scroll only — touchstart/move paused the cipher wheel on every tap (Firefox iOS),
+    // while Magic Keyboard trackpad never fired those events.
     shell.addEventListener('scroll', pause, { passive: true });
-    shell.addEventListener('touchstart', pause, { passive: true });
-    shell.addEventListener('touchmove', pause, { passive: true });
 }
 
 function preventPullToRefresh() {
