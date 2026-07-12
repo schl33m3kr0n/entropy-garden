@@ -180,6 +180,25 @@ body.corrupted #panopticon-eye.panopticon-high {
     position: relative;
 }
 
+.panopticon-away-laptop {
+    display: none;
+    position: relative;
+}
+
+.away-activity-laptop .panopticon-away-book {
+    display: none;
+}
+
+.away-activity-laptop .panopticon-away-laptop {
+    display: block;
+}
+
+/* Nudge laptop left so the eye aims at the open screen */
+.away-activity-laptop .panopticon-away-scene {
+    left: 28%;
+    transform: translateX(-50%);
+}
+
 .panopticon-away-book-icon {
     display: block;
     width: 100%;
@@ -197,9 +216,23 @@ body.corrupted #panopticon-eye.panopticon-high {
     transition: background-color 0.3s ease, filter 0.3s ease;
 }
 
+.panopticon-away-laptop-icon {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.45));
+    transition: filter 0.3s ease;
+}
+
 body.corrupted #panopticon-eye.away-reading .panopticon-away-book-icon {
     background-color: var(--alert-red);
     filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.45));
+}
+
+body.corrupted #panopticon-eye.away-reading .panopticon-away-laptop-icon {
+    filter: hue-rotate(-120deg) drop-shadow(0 0 8px rgba(255, 0, 85, 0.45));
 }
 
 .panopticon-away-book::after {
@@ -218,6 +251,11 @@ body.corrupted #panopticon-eye.away-reading .panopticon-away-book-icon {
 #panopticon-eye.away-reading .panopticon-away-book::after {
     opacity: 1;
     animation: panopticonBookScan 2.4s linear infinite;
+}
+
+#panopticon-eye.away-activity-laptop .panopticon-away-book::after,
+.away-activity-laptop .panopticon-away-book::after {
+    display: none;
 }
 
 @keyframes panopticonBookScan {

@@ -285,6 +285,7 @@ const PANOPTICON_AWAY_NOTICE_MAX_MS = 800;
 const PANOPTICON_AWAY_LOOKUP_MS = 680;
 const PANOPTICON_AWAY_STARE_MS = 680;
 const PANOPTICON_AWAY_READING_CHANCE = 1 / 3;
+const PANOPTICON_AWAY_READING_ACTIVITIES = ['reading', 'newspaper', 'laptop'];
 const PANOPTICON_READING_GAZE_Y = 11;
 const PANOPTICON_READING_SCAN_X = 8;
 const PANOPTICON_READING_SCAN_MS = 1100;
@@ -581,7 +582,7 @@ function resetPanopticonAwayState() {
     panopticonAwayActivity = null;
     panopticonReadingScanStart = 0;
     panopticonAwayLookupStart = 0;
-    panopticonEl?.classList.remove('away-reading', 'away-fading');
+    panopticonEl?.classList.remove('away-reading', 'away-fading', 'away-activity-laptop');
 }
 
 function cancelPanopticonAwayActivity() {
@@ -596,12 +597,15 @@ function startPanopticonAwayActivity() {
     if (!canStartPanopticonAwayActivity()) return;
     if (Math.random() >= PANOPTICON_AWAY_READING_CHANCE) return;
 
-    panopticonAwayActivity = 'reading';
+    panopticonAwayActivity = PANOPTICON_AWAY_READING_ACTIVITIES[
+        Math.floor(Math.random() * PANOPTICON_AWAY_READING_ACTIVITIES.length)
+    ];
     panopticonReadingScanStart = performance.now();
     panopticonAwayLookupFromX = panopticonGazeX;
     panopticonAwayLookupFromY = panopticonGazeY;
     eyeMode = 'reading';
     panopticonEl?.classList.add('away-reading');
+    panopticonEl?.classList.toggle('away-activity-laptop', panopticonAwayActivity === 'laptop');
     panopticonEl?.classList.remove('away-fading');
 
     schedulePanopticonAuxLoop();
@@ -650,10 +654,18 @@ function updatePanopticonReadingScan(now) {
     if (!panopticonReadingScanStart) panopticonReadingScanStart = now;
     const period = perf.prefersReducedMotion ? PANOPTICON_READING_SCAN_MS * 2 : PANOPTICON_READING_SCAN_MS;
     const phase = ((now - panopticonReadingScanStart) % period) / period;
-    const scanX = -PANOPTICON_READING_SCAN_X + phase * PANOPTICON_READING_SCAN_X * 2;
 
-    panopticonGazeX = scanX;
-    panopticonGazeY = PANOPTICON_READING_GAZE_Y;
+    if (panopticonAwayActivity === 'laptop') {
+        // Soft vertical bob toward the screen face (laptop sits left of center)
+        const bob = Math.sin(phase * Math.PI * 2) * 1.5;
+        panopticonGazeX = -6;
+        panopticonGazeY = PANOPTICON_READING_GAZE_Y + bob;
+    } else {
+        const scanX = -PANOPTICON_READING_SCAN_X + phase * PANOPTICON_READING_SCAN_X * 2;
+        panopticonGazeX = scanX;
+        panopticonGazeY = PANOPTICON_READING_GAZE_Y;
+    }
+
     panopticonInnerEl.style.transform = '';
     panopticonGazeEl.setAttribute('transform', `translate(${panopticonGazeX}, ${panopticonGazeY})`);
 }
@@ -678,7 +690,7 @@ function updatePanopticonAwayLookup(now) {
     stareFromX = panopticonGazeX;
     stareFromY = panopticonGazeY;
     stareStart = now;
-    panopticonEl?.classList.remove('away-reading', 'away-fading');
+    panopticonEl?.classList.remove('away-reading', 'away-fading', 'away-activity-laptop');
 
     setTimeout(() => {
         finishPanopticonAwayReturnComment();
