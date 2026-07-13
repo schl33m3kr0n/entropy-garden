@@ -482,6 +482,44 @@ globalThis.toggleBossKey = toggleBossKey;
 
 document.querySelectorAll('.boss-btn').forEach((btn) => btn.addEventListener('click', toggleBossKey));
 
+// --- FULLSCREEN ---
+function isGardenFullscreen() {
+    return Boolean(
+        document.fullscreenElement
+        || document.webkitFullscreenElement
+        || document.msFullscreenElement
+    );
+}
+
+async function toggleFullscreen() {
+    try {
+        if (isGardenFullscreen()) {
+            const exit = document.exitFullscreen
+                || document.webkitExitFullscreen
+                || document.msExitFullscreen;
+            if (exit) await exit.call(document);
+            pushTerminalLog('> FULLSCREEN DISENGAGED.');
+            return false;
+        }
+
+        const root = document.documentElement;
+        const enter = root.requestFullscreen
+            || root.webkitRequestFullscreen
+            || root.msRequestFullscreen;
+        if (!enter) {
+            pushTerminalLog('> FULLSCREEN UNAVAILABLE IN THIS BROWSER.');
+            return null;
+        }
+        await enter.call(root);
+        pushTerminalLog('> FULLSCREEN ENGAGED.');
+        recordBehavior('fullscreen_toggle', { active: true });
+        return true;
+    } catch {
+        pushTerminalLog('> FULLSCREEN REQUEST BLOCKED.');
+        return null;
+    }
+}
+
 // --- TIME SENSITIVE LORE ---
 
 // --- LOADER LOGIC ---
@@ -1944,6 +1982,7 @@ window.addEventListener('resize', updateCarousel);
 
 registerHooks({
     toggleBossKey,
+    toggleFullscreen,
     handleReroll,
     toggleMode,
     resetTimeline,

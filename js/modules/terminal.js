@@ -340,7 +340,9 @@ function printShortcuts() {
     pushTerminalLog("> [ ENTER ] : Focus Terminal");
     pushTerminalLog("> [ TAB ]   : Toggle Terminal");
     pushTerminalLog("> [ R ]     : Reroll Garden State");
+    pushTerminalLog("> [ F ]     : Toggle Fullscreen");
     pushTerminalLog("> [ H ]     : View Shortcuts");
+    pushTerminalLog("> [ C ]     : Toggle Corrupted Mode");
     pushTerminalLog("> [ ~ ]     : Panic Button (Boss Key)");
     pushTerminalLog("> [ ↑↑↓↓←→←→ b a ] : God Mode");
 }
@@ -708,6 +710,19 @@ function bindTerminalInteractions() {
         if (!isTyping) {
             e.preventDefault(); 
             getHook('toggleMode')?.();
+        }
+    }
+
+// --- 7. F: Toggle Fullscreen (If not typing) ---
+    if (e.key === 'f' || e.key === 'F') {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+        const isTyping = document.activeElement?.tagName === 'INPUT'
+            || document.activeElement?.tagName === 'TEXTAREA';
+
+        if (!isTyping) {
+            e.preventDefault();
+            getHook('toggleFullscreen')?.();
         }
     }
 

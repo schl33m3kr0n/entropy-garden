@@ -81,7 +81,7 @@ installGardenHooksGlobal();
 /**
  * Documented hook names (registry keys):
  * - toggleTerminal, openTerminal
- * - toggleBossKey, handleReroll, toggleMode, resetTimeline, resetIdleTimer
+ * - toggleBossKey, toggleFullscreen, handleReroll, toggleMode, resetTimeline, resetIdleTimer
  * - firePanopticonComment, syncPanopticonCodeSequenceComments
  * - recordBehavior, printBehaviorReport, getBehaviorSnapshot
  * - stopGardenLoop, resumeGardenLoop, setCorrupted
