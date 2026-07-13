@@ -10,7 +10,14 @@ import {
     enhanceSidebarItems,
     bindPlaylistTransportLabels,
 } from './ui/modal-a11y.js';
-import { prefetchGardenBirdsAmbience, primeGardenBirdsAmbience, startGardenBirdsAmbience, stopGardenBirdsAmbience } from './core/audio/init-ambient.js';
+import {
+    prefetchGardenBirdsAmbience,
+    primeGardenBirdsAmbience,
+    startGardenBirdsAmbience,
+    stopGardenBirdsAmbience,
+    toggleGardenBirdsMuted,
+    syncGardenBirdsMuteButton,
+} from './core/audio/init-ambient.js';
 import {
     sfx,
     playSound,
@@ -869,6 +876,13 @@ function togglePanopticonMuteSetting() {
     recordBehavior('panopticon_mute', { muted });
 }
 
+function toggleGardenBirdsMuteSetting() {
+    const muted = toggleGardenBirdsMuted();
+    playSound(sfx.click);
+    pushTerminalLog(muted ? '> RAINFOREST BIRDS MUTED.' : '> RAINFOREST BIRDS ENABLED.');
+    recordBehavior('birds_mute', { muted });
+}
+
 function setSettingsMenuOpen(open) {
     const menu = document.getElementById('settings-menu');
     const toggle = document.getElementById('settings-toggle');
@@ -1285,6 +1299,11 @@ function bindDomEvents() {
     const panopticonMuteBtn = document.getElementById('panopticon-mute-btn');
     if (panopticonMuteBtn) {
         panopticonMuteBtn.addEventListener('click', togglePanopticonMuteSetting);
+    }
+    syncGardenBirdsMuteButton();
+    const birdsMuteBtn = document.getElementById('birds-mute-btn');
+    if (birdsMuteBtn) {
+        birdsMuteBtn.addEventListener('click', toggleGardenBirdsMuteSetting);
     }
     bindSettingsMenu();
     /* next-poem / reset-timeline: bound in singularity.js (iOS touchend-safe) */

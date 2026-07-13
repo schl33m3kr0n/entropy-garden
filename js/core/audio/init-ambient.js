@@ -1,9 +1,20 @@
 /** Looping birds ambience — plays in the garden after the boot loader finishes. */
 import { sfxPath } from '../dom/media.js';
 
+const BIRDS_MUTE_KEY = 'entropy-garden-birds-muted-v1';
+
 let birdsAudio = null;
 let pendingCanPlay = null;
 let unlockFallbackBound = false;
+let birdsMuted = false;
+
+function loadBirdsMutePref() {
+    try {
+        birdsMuted = localStorage.getItem(BIRDS_MUTE_KEY) === '1';
+    } catch {
+        birdsMuted = false;
+    }
+}
 
 function gardenIsReady() {
     return document.body.classList.contains('garden-ready');
@@ -19,7 +30,47 @@ function getBirdsAudio() {
     return birdsAudio;
 }
 
+export function isGardenBirdsMuted() {
+    return birdsMuted;
+}
+
+export function syncGardenBirdsMuteButton() {
+    const btn = document.getElementById('birds-mute-btn');
+    if (!btn) return;
+    btn.textContent = birdsMuted ? 'BIRDS MUTED' : 'BIRDS';
+    btn.setAttribute('aria-pressed', birdsMuted ? 'true' : 'false');
+    btn.classList.toggle('is-muted', birdsMuted);
+}
+
+export function setGardenBirdsMuted(muted) {
+    birdsMuted = !!muted;
+    try {
+        localStorage.setItem(BIRDS_MUTE_KEY, birdsMuted ? '1' : '0');
+    } catch {
+        /* private mode */
+    }
+    document.body?.classList.toggle('birds-muted', birdsMuted);
+    syncGardenBirdsMuteButton();
+
+    if (birdsMuted) {
+        stopGardenBirdsAmbience();
+    } else if (gardenIsReady()) {
+        startGardenBirdsAmbience();
+    }
+}
+
+export function toggleGardenBirdsMuted() {
+    setGardenBirdsMuted(!birdsMuted);
+    return birdsMuted;
+}
+
+loadBirdsMutePref();
+if (document.body) {
+    document.body.classList.toggle('birds-muted', birdsMuted);
+}
+
 export function prefetchGardenBirdsAmbience() {
+    if (birdsMuted) return;
     const audio = getBirdsAudio();
     audio.preload = 'auto';
     audio.load();
@@ -27,6 +78,7 @@ export function prefetchGardenBirdsAmbience() {
 
 /** Call from the init click handler so autoplay survives the loader delay. */
 export function primeGardenBirdsAmbience() {
+    if (birdsMuted) return;
     const audio = getBirdsAudio();
     audio.preload = 'auto';
     audio.load();
@@ -61,7 +113,7 @@ function bindUnlockFallback() {
 }
 
 function attemptPlay(audio, retriesLeft = 10) {
-    if (!gardenIsReady()) return;
+    if (!gardenIsReady() || birdsMuted) return;
 
     audio.play().catch(() => {
         if (retriesLeft <= 0) {
@@ -73,7 +125,7 @@ function attemptPlay(audio, retriesLeft = 10) {
 }
 
 export function startGardenBirdsAmbience() {
-    if (!gardenIsReady()) return;
+    if (!gardenIsReady() || birdsMuted) return;
 
     const audio = getBirdsAudio();
     if (!audio.paused) return;
