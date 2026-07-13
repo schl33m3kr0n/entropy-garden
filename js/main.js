@@ -509,6 +509,9 @@ const weirdLoadingPhrases = [
     "Selling your soul to the devil for a dirtbike...",
     "Auditing ledgers with crayons...",
     "Applying mayonnaise to the problem...",
+    "Turning it off and on again...",
+    "Downloading a car...",
+    "Stealing your bath soaps...",
     "Microwaving the blueprint...",
     "Installing more yee to your haw...",
     "Calibrating clown-to-wizard ratio...",
@@ -531,11 +534,13 @@ const weirdLoadingPhrases = [
     "Navigating crappy real-world UI...",
     "Convincing the GPU to sing and dance until it melts...",
     "Speedrunning jobs...",
+    "Introducing jazz hands to the situation...",
     "Reducing the irreducible... (Error)",
     "Settling scores with my imaginary friends...",
     "Experimenting with unstable isotopes... (and women)",
     "Deferring legal decisions to my clown lawyer...",
-    "Beep boop bop beep boop boop bop..."
+    "Beep boop bop beep boop boop bop...",
+    "Asking loaded questions to elicit a response...",
 ];
 
 function revealGardenUI() {
@@ -718,7 +723,7 @@ function randomizeData() {
     const frags = pickMany(lore.bioFragmentsSafe, lore.bioFragmentsGritty, 4);
 
     document.getElementById('bio-container').innerHTML = `
-        <p class="bio-p" style="margin-top: 0;">> <strong>IDENTITY_STRING:</strong> I'm Daniel. I'm a visual artist currently evolving from a Studio Art major into an Animation main through a Vanderbilt mentorship.</p>
+        <p class="bio-p" style="margin-top: 0;">> <strong>Identity_String:</strong> Most of the select few who find themselves either blessed or otherwise cursed to have personal acquaintance with me, of which there are truly not very many, know me simply by the name of Daniel. When I’m not busy filing for disability or breaking the world record for number of application rejections (and counting), I like to spend my time in hyperfixation mode on the meaning of the silly little shapes and words I create. My inspiration routine involves staring at a wall for an extended period of time and logging it as meditation time in my digital journal. Most creatives draw from observation whereas I neither have the patience nor willpower to dabble in such nonsense. To brag a little bit more, I can consistently make jokes that make the crickets sing. I haunt the halls of art workshops and get a free psychoanalytical consultation and a cup of coffee in the process.</p>
         <p class="bio-p">${frags[0]} ${frags[1]}</p>
         <p class="bio-p">${frags[2]} ${frags[3]}</p>
     `;
