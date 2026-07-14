@@ -18,6 +18,7 @@ export const BGM_TRACKS = [
     'windows96 - nostalgia (slowed reverb).mp3',
     'washed out - echoes (slowed + reverb).mp3',
     'don toliver - cardigan (slowed + reverb).mp3',
+    'home - resonance (slowed + reverb).mp3',
     'ambient8.mp3',
     'fractals.mp3',
 ];
@@ -34,6 +35,7 @@ export const BGM_TRACK_INFO = [
     { title: 'Nostalgia (slowed + reverb)', artist: 'Windows96' },
     { title: 'Echoes (slowed + reverb)', artist: 'Washed Out' },
     { title: 'Cardigan (slowed + reverb)', artist: 'Don Toliver' },
+    { title: 'Resonance (slowed + reverb)', artist: 'HOME' },
     { title: 'Cybernetic Night (Sci-Fi Ambient)', artist: 'KonstantinPazuzuStudio' },
     { title: 'Fractals', artist: '5Δ' },
 ];
