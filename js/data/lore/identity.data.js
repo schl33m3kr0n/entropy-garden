@@ -84,14 +84,14 @@
         "Situational Awareness (Level -5)",
         "Skyrim Khajit Main (Lvl M30W)",
         "Lego Star Wars Padawan (99%)",
+        "Duo Degenerate (Lvl 六九)",
+        "Cheez-Its Guzzler (Lvl 999)",
     ],
     classTitlesGritty: [
         "Chronic Consumer (Lvl 420)",
         "Chicken Choker (Lvl 69)",
-        "Duo Degenerate (Lvl 六九)",
         "Multi-hyphenate Outpatient (Lvl 27)",
         "Cruster (Lvl 2)",
-        "Cheez-Its Guzzler (Lvl 999)",
     ]
     });
 })(globalThis);
