@@ -20,7 +20,7 @@ export {
 
 export { asset, sfxPath, musicPath, imgPath, setImgWithFallback } from './dom/media.js';
 
-export { sfx, playSound, warmSound, playSoundOverlap } from './audio/sfx.js';
+export { sfx, playSound, playGlitchSound, pickGlitchSound, warmSound, playSoundOverlap } from './audio/sfx.js';
 
 export {
     BGM_TRACKS,

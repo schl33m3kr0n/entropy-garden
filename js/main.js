@@ -21,6 +21,7 @@ import {
 import {
     sfx,
     playSound,
+    playGlitchSound,
     warmSound,
     playMeow,
     shuffle,
@@ -248,7 +249,7 @@ function activateGodMode() {
         recordBehavior('god_mode');
         globalThis.EntropyCipherHint?.onGodModeOff?.();
         pushTerminalLog("> SYSTEM OVERRIDE TERMINATED. RETURNING TO NORMALCY.");
-        playSound(sfx.glitch);
+        playGlitchSound();
         setGodTitleArrangement(h1, false);
     }
     // IF NOT ACTIVE, TURN IT ON
@@ -984,7 +985,7 @@ function toggleMode() {
     if (isCorrupted) {
         document.body.classList.add('corrupted');
         btn.innerText = "CORRUPTED MODE";
-        playSound(sfx.glitch);
+        playGlitchSound();
         pushTerminalLog("> CORRUPTED MODE ENGAGED");
         firePanopticonComment('corruptOn', { force: true });
         recordBehavior('corrupt_on');
@@ -1005,7 +1006,7 @@ function toggleMode() {
 }
 
 function triggerEasterEgg() {
-    playSound(sfx.glitch); 
+    playGlitchSound(); 
     document.body.classList.add('god-mode');
     document.querySelectorAll('.artifact').forEach(art => { 
         art.style.transition = "left 0.5s ease-out, top 0.5s ease-out"; 
@@ -1529,7 +1530,7 @@ function openComposer() {
             if(confirm("Erase current draft permanently?")) {
                 textarea.value = '';
                 localStorage.removeItem('garden_draft');
-                playSound(sfx.glitch);
+                playGlitchSound();
             }
         };
         
@@ -1616,11 +1617,9 @@ function triggerRandomGlitch() {
 
         window.setTimeout(clearCorruptFxClasses, burst.ms);
 
-        if (sfx?.glitch && Math.random() < (quiet ? 0.12 : 0.28)) {
+        if (Math.random() < (quiet ? 0.12 : 0.28)) {
             try {
-                const clip = sfx.glitch.cloneNode();
-                clip.volume = quiet ? 0.08 : 0.14;
-                clip.play().catch(() => {});
+                playGlitchSound({ volume: quiet ? 0.08 : 0.14 });
             } catch {
                 /* ignore playback failures */
             }

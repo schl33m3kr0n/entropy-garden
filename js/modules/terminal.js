@@ -1,6 +1,7 @@
 import {
     sfx,
     playSound,
+    playGlitchSound,
     playMeow,
     createBag,
     shuffle,
@@ -424,7 +425,7 @@ function processCommand(cmd) {
     if (cipherStage === 1) {
         if (cleanCmd === 'abort' || cleanCmd === 'exit' || cleanCmd === 'esc' || cleanCmd === 'quit') {
             pushTerminalLog("> CIPHER SEQUENCE ABORTED.");
-            playSound(sfx.glitch);
+            playGlitchSound();
             setCipherStage(0);
             globalThis.EntropyCipherHint?.resetCipherHints?.();
         } else if (tryAcceptCipherKey(cleanCmd)) {
@@ -450,7 +451,7 @@ function processCommand(cmd) {
     if (cipherStage === 2) {
         if (cleanCmd === 'abort' || cleanCmd === 'exit' || cleanCmd === 'esc' || cleanCmd === 'quit') {
             pushTerminalLog("> CIPHER SEQUENCE ABORTED.");
-            playSound(sfx.glitch);
+            playGlitchSound();
             setCipherStage(0);
             globalThis.EntropyCipherHint?.resetCipherHints?.();
         } else if (cleanCmd === 'lexicon') {
@@ -486,7 +487,7 @@ function processCommand(cmd) {
     else if(cmd === 'reset trophies' || cmd === 'trophies reset') {
         if (globalThis.resetTrophies?.()) {
             pushTerminalLog('> TROPHIES PURGED. ALL SLOTS RELOCKED.');
-            playSound(sfx.glitch);
+            playGlitchSound();
         } else {
             pushTerminalLog('> ERROR: TROPHY MODULE OFFLINE.');
             playSound(sfx.oopsy);
@@ -556,7 +557,7 @@ function processCommand(cmd) {
 function triggerScatter() {
     globalThis.unlockTrophy?.('scatter_breach');
     callHook('recordBehavior', 'scatter_breach');
-    playSound(sfx.glitch);
+    playGlitchSound();
     for(let i=0; i<40; i++) {
         let f = document.createElement('div');
         f.className = 'scatter-file';

@@ -8,13 +8,6 @@ function createLazyAudio(src) {
     return audio;
 }
 
-function createBgmAudio(file) {
-    const audio = new Audio();
-    audio.preload = 'auto';
-    audio.src = musicPath(file);
-    return audio;
-}
-
 function createEagerAudio(src) {
     const audio = new Audio();
     audio.preload = 'auto';
@@ -22,11 +15,32 @@ function createEagerAudio(src) {
     return audio;
 }
 
+const glitchBank = [
+    createLazyAudio(sfxPath('glitch.mp3')),
+    createLazyAudio(sfxPath('glitch2.mp3')),
+    createLazyAudio(sfxPath('glitch3.mp3')),
+    createLazyAudio(sfxPath('glitch4.mp3')),
+    createLazyAudio(sfxPath('glitch5.mp3')),
+];
+
+let lastGlitchIdx = -1;
+
+/** Pick a glitch clip, avoiding an immediate repeat when possible. */
+export function pickGlitchSound() {
+    if (glitchBank.length <= 1) return glitchBank[0];
+    let idx = Math.floor(Math.random() * glitchBank.length);
+    if (idx === lastGlitchIdx) {
+        idx = (idx + 1 + Math.floor(Math.random() * (glitchBank.length - 1))) % glitchBank.length;
+    }
+    lastGlitchIdx = idx;
+    return glitchBank[idx];
+}
+
 export const sfx = {
     oneUp: createLazyAudio(sfxPath('1 up.mp3')),
     checkpoint: createLazyAudio(sfxPath('checkpoint.mp3')),
     collectible: createLazyAudio(sfxPath('collectible.mp3')),
-    glitch: createLazyAudio(sfxPath('glitch.mp3')),
+    glitch: glitchBank[0],
     itemAcquired: createLazyAudio(sfxPath('item acquired.mp3')),
     missionCleared: createLazyAudio(sfxPath('mission cleared.mp3')),
     oopsy: createLazyAudio(sfxPath('oopsy daisies.mp3')),
@@ -59,6 +73,7 @@ export const sfx = {
     blip: createLazyAudio(sfxPath('blip.mp3')),
     echo: createLazyAudio(sfxPath('echo.mp3')),
 };
+
 export function playSound(sound) {
     if (!sound) return;
 
@@ -79,6 +94,21 @@ export function playSound(sound) {
     }
 
     playNow();
+}
+
+/** Random glitch from the bank (original + glitch2–5). */
+export function playGlitchSound(options = {}) {
+    const sound = pickGlitchSound();
+    if (!sound) return;
+
+    if (typeof options.volume === 'number') {
+        const clip = sound.cloneNode();
+        clip.volume = Math.max(0, Math.min(1, options.volume));
+        clip.play().catch(() => {});
+        return;
+    }
+
+    playSound(sound);
 }
 
 export function warmSound(sound) {
