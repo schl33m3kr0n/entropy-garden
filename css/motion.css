@@ -278,6 +278,32 @@
     #loader-leaf {
         animation-play-state: paused !important;
     }
+
+    /* 8. Disable corrupted-mode glitch / static overlays */
+    #corrupt-fx,
+    .corrupt-fx-scanlines,
+    .corrupt-fx-noise,
+    .corrupt-fx-tear,
+    .corrupt-fx-blocks,
+    .corrupt-fx-vignette {
+        display: none !important;
+        animation: none !important;
+    }
+
+    body.chromatic-active {
+        animation: fadeInPage 1.5s ease-out forwards !important;
+        filter: none !important;
+        text-shadow: none !important;
+        transform: none !important;
+    }
+
+    body.corrupted.garden-ready::before {
+        filter: none !important;
+    }
+
+    body.corrupted.garden-ready #grid-canvas.matrix-visible {
+        animation: none !important;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

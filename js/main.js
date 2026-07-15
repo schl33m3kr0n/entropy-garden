@@ -991,6 +991,7 @@ function toggleMode() {
         globalThis.unlockTrophy?.('corrupted_bloom');
     } else {
         document.body.classList.remove('corrupted');
+        clearCorruptFxClasses();
         btn.innerText = "SAFE MODE";
         playSound(sfx.it);
         pushTerminalLog("> SAFE MODE RESTORED");
@@ -1552,33 +1553,84 @@ globalThis.openComposer = openComposer;
 // ==========================================
 
 
-// --- OCCASIONAL CHROMATIC ABERRATION ENGINE ---
+// --- CORRUPTED MODE GLITCH / STATIC ENGINE ---
+
+const CORRUPT_FX_CLASSES = [
+    'chromatic-active',
+    'corrupt-static',
+    'corrupt-tear',
+    'corrupt-flicker',
+    'corrupt-blocks',
+];
+
+function corruptGlitchQuiet() {
+    return Boolean(
+        perf?.prefersReducedMotion
+        || document.body.classList.contains('perf-lite')
+        || window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+    );
+}
+
+function clearCorruptFxClasses() {
+    for (const cls of CORRUPT_FX_CLASSES) {
+        document.body.classList.remove(cls);
+    }
+}
+
+function pickCorruptFxBurst(quiet) {
+    const roll = Math.random();
+    if (quiet) {
+        // Overlay-only — skip body transform / chromaticFlash on lite devices
+        if (roll < 0.55) return { classes: ['corrupt-static'], ms: 220 };
+        if (roll < 0.85) return { classes: ['corrupt-flicker'], ms: 280 };
+        return { classes: ['corrupt-static', 'corrupt-flicker'], ms: 260 };
+    }
+    if (roll < 0.28) return { classes: ['chromatic-active'], ms: 380 };
+    if (roll < 0.48) return { classes: ['corrupt-static'], ms: 240 };
+    if (roll < 0.66) return { classes: ['corrupt-tear'], ms: 200 };
+    if (roll < 0.8) return { classes: ['corrupt-flicker'], ms: 320 };
+    if (roll < 0.9) return { classes: ['corrupt-blocks'], ms: 220 };
+    // Heavy combo
+    return { classes: ['chromatic-active', 'corrupt-static', 'corrupt-tear'], ms: 420 };
+}
 
 function triggerRandomGlitch() {
-    // Only fire the glitch if the system is currently in Corrupted Mode
-    if (document.body.classList.contains('corrupted')) {
-        
-        // Add the animation class
-        document.body.classList.add('chromatic-active');
-        
-        // Remove the class after the animation finishes (350ms) so it can be re-triggered later
-        setTimeout(() => {
-            document.body.classList.remove('chromatic-active');
-        }, 350);
-        
-        // Optional: Play a very quiet static/error sound when it glitches
-        // const glitchSfx = sfx.error.cloneNode();
-        // glitchSfx.volume = 0.1;
-        // glitchSfx.play().catch(e => {});
+    const corrupted = document.body.classList.contains('corrupted')
+        && document.body.classList.contains('garden-ready')
+        && !document.body.classList.contains('singularity-active');
+    const quiet = corruptGlitchQuiet();
+
+    if (corrupted && !perf?.prefersReducedMotion) {
+        const burst = pickCorruptFxBurst(quiet);
+        const root = document.documentElement;
+        root.style.setProperty('--corrupt-tear-y', `${12 + Math.random() * 72}%`);
+        root.style.setProperty('--corrupt-tear-x', `${(Math.random() * 36 - 18).toFixed(1)}px`);
+        root.style.setProperty('--corrupt-tear-h', `${4 + Math.random() * 14}%`);
+        root.style.setProperty('--corrupt-block-x', `${(Math.random() * 70).toFixed(1)}%`);
+        root.style.setProperty('--corrupt-block-y', `${(Math.random() * 70).toFixed(1)}%`);
+
+        clearCorruptFxClasses();
+        for (const cls of burst.classes) {
+            document.body.classList.add(cls);
+        }
+
+        window.setTimeout(clearCorruptFxClasses, burst.ms);
+
+        if (sfx?.glitch && Math.random() < (quiet ? 0.12 : 0.28)) {
+            try {
+                const clip = sfx.glitch.cloneNode();
+                clip.volume = quiet ? 0.08 : 0.14;
+                clip.play().catch(() => {});
+            } catch {
+                /* ignore playback failures */
+            }
+        }
     }
-    
-    // Calculate a random delay for the next glitch (between 3 seconds and 10 seconds)
-    const minDelay = 3000; 
-    const maxDelay = 10000; 
+
+    const minDelay = corrupted ? (quiet ? 5000 : 1400) : 8000;
+    const maxDelay = corrupted ? (quiet ? 12000 : 5200) : 16000;
     const nextGlitchTime = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
-    
-    // Schedule the next check
-    setTimeout(triggerRandomGlitch, nextGlitchTime);
+    window.setTimeout(triggerRandomGlitch, nextGlitchTime);
 }
 
 let glitchLoopStarted = false;
@@ -1629,6 +1681,7 @@ const IDLE_BLUR_SKIP_IDS = new Set([
     'loader',
     'boss-key-overlay',
     'singularity-overlay',
+    'corrupt-fx',
 ]);
 const IDLE_BLUR_TRANSITION = 'filter 15s ease-in-out';
 const IDLE_BLUR_UI_FILTER = 'grayscale(100%) blur(3px)';
