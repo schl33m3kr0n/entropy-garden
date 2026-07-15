@@ -1603,27 +1603,105 @@ body.corrupted .comms-social:hover {
 }
 
 /* --- BOSS KEY FAKE MAYA CRASH --- */
-#boss-key-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #a0a0a0; z-index: 100000; font-family: var(--main-font); cursor: default; }
+#boss-key-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #a0a0a0;
+    z-index: 100000;
+    font-family: var(--main-font);
+    cursor: default;
+    /* Win95 chrome is light — isolate from page color-scheme: dark */
+    color-scheme: light;
+    color: #000;
+    -webkit-text-fill-color: #000;
+}
 
 #boss-key-overlay.active { display: block; }
 
 .win-bg { width: 100%; height: 100%; background: #4a6d8c; }
 
-.win95-window { width: 450px; background: #c0c0c0; border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #000; border-bottom: 2px solid #000; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+.win95-window {
+    width: 450px;
+    background: #c0c0c0;
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    color: #000;
+    -webkit-text-fill-color: #000;
+}
 
-.win95-titlebar { background: #000080; color: white; padding: 3px 5px; font-weight: bold; font-size: 13px; display: flex; justify-content: space-between; }
+.win95-titlebar {
+    background: #000080;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    padding: 3px 5px;
+    font-weight: bold;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+}
 
 #close-maya-btn { cursor: pointer; }
 
-.win95-content { padding: 25px; display: flex; align-items: flex-start; gap: 20px; color: black; font-size: 13px; line-height: 1.5;}
+.win95-content {
+    padding: 25px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    color: #000;
+    -webkit-text-fill-color: #000;
+    font-size: 13px;
+    line-height: 1.5;
+}
 
-.win95-icon { width: 40px; height: 40px; background: red; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 28px; flex-shrink: 0; }
+.win95-icon {
+    width: 40px;
+    height: 40px;
+    background: red;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    font-weight: bold;
+    font-size: 28px;
+    flex-shrink: 0;
+}
 
 .win95-buttons { text-align: center; margin-bottom: 20px; }
 
-.win95-btn { background: #c0c0c0; border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 6px 20px; margin: 0 10px; cursor: pointer; font-family: var(--main-font); font-size: 12px; }
+.win95-btn {
+    background: #c0c0c0;
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+    padding: 6px 20px;
+    margin: 0 10px;
+    cursor: pointer;
+    font-family: var(--main-font);
+    font-size: 12px;
+    color: #000;
+    -webkit-text-fill-color: #000;
+}
 
-.win95-btn:active { border-top: 2px solid #000; border-left: 2px solid #000; border-right: 2px solid #fff; border-bottom: 2px solid #fff; }
+.win95-btn:active {
+    border-top: 2px solid #000;
+    border-left: 2px solid #000;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+}
 
 /* --- SINGULARITY EVENT --- */
 #singularity-overlay {
@@ -1970,36 +2048,43 @@ body.corrupted #birds-mute-btn.is-muted {
 #sidebar-menu li:hover {
     background: var(--neon-green);
     box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
 }
 
 /* --- SIDEBAR TEXT ANIMATION --- */
 .sidebar-text {
     color: var(--neon-green) !important;
-    -webkit-text-fill-color: var(--neon-green); /* Safari bug fix */
+    -webkit-text-fill-color: var(--neon-green) !important;
     display: inline-block;
     max-width: 0;
     opacity: 0;
     overflow: hidden;
-    /* Force GPU rendering to stop the browser from dropping the color */
-    transform: translateX(-15px) translateZ(0); 
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Avoid translateZ — Safari often paints transformed text white */
+    transform: translateX(-15px);
+    /* Don't transition color/fill — Safari interpolates them as white */
+    transition:
+        max-width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        opacity 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     white-space: nowrap;
 }
 
 /* --- THE HOVER OVERRIDES --- */
-#sidebar-menu li:hover .sidebar-text {
-    color: #000 !important;
-    -webkit-text-fill-color: #000 !important; /* Safari bug fix */
-    text-shadow: none !important;
-    max-width: 200px; 
-    opacity: 1;
-    transform: translateX(0) translateZ(0); 
-}
-
-#sidebar-menu li:hover .sidebar-text .track-title-content {
+#sidebar-menu li:hover .sidebar-text,
+#sidebar-menu li:hover .sidebar-text *,
+#sidebar-menu li:hover .track-title-content,
+#sidebar-menu li:hover .track-title-scroll,
+#sidebar-menu li:hover .track-title-gap {
     color: #000 !important;
     -webkit-text-fill-color: #000 !important;
     text-shadow: none !important;
+}
+
+#sidebar-menu li:hover .sidebar-text {
+    max-width: 200px;
+    opacity: 1;
+    transform: translateX(0);
 }
 
 #sidebar-menu li:hover .mask-icon {

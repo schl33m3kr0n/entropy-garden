@@ -1,4 +1,5 @@
-/* Entropy Garden — stylesheet entry point */
+/* Entropy Garden — stylesheet entry point (legacy / @import bundle).
+   index.html loads the partials as parallel <link>s to avoid FOUC. */
 
 @import url("tokens.css");
 @import url("base.css");
