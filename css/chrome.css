@@ -67,7 +67,7 @@ body.idle-dissociating.corrupted #grid-canvas.matrix-visible {
     pointer-events: none;
     opacity: 0;
     transition: opacity 2.5s ease-out;
-    filter: drop-shadow(0 0 14px rgba(0, 255, 0, 0.35));
+    filter: none;
 }
 
 .panopticon-inner {
@@ -228,21 +228,19 @@ body.corrupted .panopticon-sleep-zzz span {
 }
 
 #panopticon-eye.dizzy {
-    filter: drop-shadow(0 0 22px rgba(0, 255, 0, 0.55));
+    filter: none;
 }
 
 body.corrupted #panopticon-eye {
-    filter: drop-shadow(0 0 18px rgba(255, 0, 85, 0.45));
+    filter: none;
 }
 
 body.corrupted #panopticon-eye.dizzy {
-    filter: drop-shadow(0 0 26px rgba(255, 0, 85, 0.65));
+    filter: none;
 }
 
 #panopticon-eye.panopticon-high {
-    filter:
-        drop-shadow(0 0 16px rgba(255, 90, 170, 0.55))
-        drop-shadow(0 0 28px rgba(120, 255, 140, 0.28));
+    filter: none;
     animation: panopticonHighPulse 4.2s ease-in-out infinite;
 }
 
@@ -265,9 +263,7 @@ body.corrupted #panopticon-eye.dizzy {
 }
 
 body.corrupted #panopticon-eye.panopticon-high {
-    filter:
-        drop-shadow(0 0 18px rgba(255, 0, 85, 0.5))
-        drop-shadow(0 0 26px rgba(255, 120, 200, 0.35));
+    filter: none;
 }
 
 #panopticon-eye svg {
@@ -558,24 +554,30 @@ body.garden-ready #terminal-container.fab-ready.active:not([hidden]) {
 body.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover {
     background: var(--neon-green);
     color: #000;
+    -webkit-text-fill-color: #000;
     text-shadow: none;
     box-shadow: 0 0 18px rgba(0, 255, 0, 0.35);
 }
 
-body.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover #ios-terminal-toggle {
+body.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover #ios-terminal-toggle,
+body.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover #ios-terminal-toggle .ios-terminal-toggle-glyph {
     color: #000;
+    -webkit-text-fill-color: #000;
     text-shadow: none;
 }
 
 body.corrupted.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover {
     background: var(--alert-red);
     color: #000;
+    -webkit-text-fill-color: #000;
     text-shadow: none;
     box-shadow: 0 0 18px rgba(255, 45, 45, 0.35);
 }
 
-body.corrupted.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover #ios-terminal-toggle {
+body.corrupted.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover #ios-terminal-toggle,
+body.corrupted.garden-ready #terminal-container.fab-ready:not(.active):not([hidden]):hover #ios-terminal-toggle .ios-terminal-toggle-glyph {
     color: #000;
+    -webkit-text-fill-color: #000;
     text-shadow: none;
 }
 
@@ -1123,11 +1125,6 @@ body.corrupted .mask-icon {
     -webkit-mask-image: url('../assets/icons/pause.svg');
 }
 
-#sidebar-menu li:hover .mask-icon {
-    filter: none !important;
-    background-color: #000;
-}
-
 .trophy-unlock-flash-icon.mask-icon {
     width: 72px;
     height: 72px;
@@ -1218,14 +1215,14 @@ body.corrupted .mask-icon {
 }
 
 .lightbox-close:hover {
-    color: #fff;
-    background: none;
+    color: #000;
+    background: var(--neon-green);
     box-shadow: none;
 }
 
-a.social-link { color: var(--neon-green); text-decoration: none; border-bottom: 1px dotted var(--neon-green); transition: color 0.3s; cursor: pointer; }
+a.social-link { color: var(--neon-green); text-decoration: none; border-bottom: 1px dotted var(--neon-green); transition: color 0.3s, background 0.3s, border-color 0.3s; cursor: pointer; }
 
-a.social-link:hover { color: #fff; border-bottom-style: solid; }
+a.social-link:hover { color: #000; background: var(--neon-green); border-bottom-color: transparent; border-bottom-style: solid; }
 
 .comms-socials {
     display: flex;
@@ -1991,16 +1988,23 @@ body.corrupted #birds-mute-btn.is-muted {
 
 /* --- THE HOVER OVERRIDES --- */
 #sidebar-menu li:hover .sidebar-text {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important; /* Safari bug fix */
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important; /* Safari bug fix */
+    text-shadow: none !important;
     max-width: 200px; 
     opacity: 1;
     transform: translateX(0) translateZ(0); 
 }
 
 #sidebar-menu li:hover .sidebar-text .track-title-content {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+    text-shadow: none !important;
+}
+
+#sidebar-menu li:hover .mask-icon {
+    filter: none !important;
+    background-color: #000 !important;
 }
 
 #sidebar-menu li .sidebar-text.track-title-marquee {
@@ -2043,23 +2047,29 @@ body.corrupted #birds-mute-btn.is-muted {
     #playlist-menu:hover #playlist-header,
     #playlist-menu:hover #track-title,
     #playlist-menu:hover .track-title-content {
-        color: #000;
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+        text-shadow: none !important;
     }
 
     #playlist-menu:hover .ui-btn {
         border-color: #000;
-        color: #000;
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
         background: transparent;
+        text-shadow: none !important;
     }
 
     #playlist-menu:hover .ui-btn:hover {
         background: rgba(0, 0, 0, 0.2);
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
     }
 
     #playlist-menu .ui-btn:hover .mask-icon,
     #playlist-menu:hover .mask-icon {
         filter: none;
-        background-color: #000;
+        background-color: #000 !important;
     }
 
     body.corrupted #playlist-menu:hover {
@@ -2070,13 +2080,15 @@ body.corrupted #birds-mute-btn.is-muted {
     body.corrupted #playlist-menu:hover #playlist-header,
     body.corrupted #playlist-menu:hover #track-title,
     body.corrupted #playlist-menu:hover .track-title-content {
-        color: #000;
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+        text-shadow: none !important;
     }
 
     body.corrupted #playlist-menu .ui-btn:hover .mask-icon,
     body.corrupted #playlist-menu:hover .mask-icon {
         filter: none;
-        background-color: #000;
+        background-color: #000 !important;
     }
 }
 
@@ -2147,7 +2159,7 @@ body.corrupted #birds-mute-btn.is-muted {
 }
 
 #playlist-controls .ui-btn:hover .mask-icon {
-    background-color: #000;
+    background-color: #000 !important;
 }
 
 #playlist-menu .ui-btn {
