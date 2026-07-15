@@ -1195,16 +1195,25 @@ body.corrupted .mask-icon {
     position: fixed;
     top: 30px;
     right: 40px;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: var(--neon-green);
-    font-size: 32px;
+    font-size: 1.35rem;
     font-weight: bold;
-    background: none;
+    background: transparent;
     border: none;
+    border-radius: 50%;
     cursor: pointer;
     z-index: 1000000;
     line-height: 1;
     padding: 0;
-    transition: all 0.2s;
+    /* × sits a hair high in Avenir — nudge it onto the circle center */
+    padding-bottom: 0.08em;
+    box-sizing: border-box;
+    transition: color 0.2s ease, background-color 0.2s ease, -webkit-text-fill-color 0.2s ease;
 }
 
 .modal-content > .lightbox-close {
@@ -1216,6 +1225,7 @@ body.corrupted .mask-icon {
 
 .lightbox-close:hover {
     color: #000;
+    -webkit-text-fill-color: #000;
     background: var(--neon-green);
     box-shadow: none;
 }

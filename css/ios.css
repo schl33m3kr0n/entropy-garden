@@ -973,9 +973,12 @@ body.ios-ui .playlist-btn,
 body.ios-ui .singularity-btn,
 body.ios-ui .arcade-btn,
 body.ios-ui .carousel-btn,
-body.ios-ui .lightbox-close,
 body.ios-ui .lightbox-btn {
     border-radius: var(--ios-radius-md);
+}
+
+body.ios-ui .lightbox-close {
+    border-radius: 50%;
 }
 
 body.ios-ui #terminal-container,
