@@ -13,6 +13,10 @@ dist/
 /docs/
 
 /assets/img/vault/sun-poster.png
+# Full-res background master — site serves bkgrnd.jpg/webp only
+/assets/img/backgrounds/space.jpg
+# PDF source, not referenced by the site (vault uses ahoy.jpg)
+/assets/vault/
 
 deploy.exclude
 deploy.manifest
