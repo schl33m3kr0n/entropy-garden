@@ -229,6 +229,8 @@
                 "they always seem to bring in aliens when the press is a little too hot",
                 "i'm pretty sure Trey Parker & Matt Stone are secretly time travellers",
                 "these headlines always seem to break from the PG rating",
+                "tripsitters agree that the wall is definitely caving in",
+                "tripsitters all confirm that there's definitely something under your skin and it's trying to get out",
                 "30 years ago, it was about the Juice. now it's about Kanye and the other type of juice. the more things change...",
             ],
         },
@@ -247,6 +249,7 @@
                 "can you try knocking first?",
                 "can we agree to never check each other's search history?",
                 "i can see your search history. chakra work won't fix this...",
+                "all those insta likes and you can't find a girl that likes you back?",
                 "i checked your browser history. 'how to build a mall on sacred grounds in 5 easy steps' is... intriguing",
                 "'betty white oiled up & throwing it back' is not a normal search query. go outside. i'm begging you."
             ],
