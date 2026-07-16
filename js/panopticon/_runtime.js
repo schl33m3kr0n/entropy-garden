@@ -356,14 +356,33 @@ function positionPanopticonComment() {
     if (!panopticonCommentEl || !panopticonEl) return;
 
     const eyeRect = panopticonEl.getBoundingClientRect();
+    const margin = 8;
+    const gap = 14;
+    const boxW = panopticonCommentEl.offsetWidth || panopticonCommentEl.scrollWidth;
+    const boxH = panopticonCommentEl.offsetHeight || panopticonCommentEl.scrollHeight;
+
+    // Photo comments sit beside the eye (prefer right); text-only stays underneath.
+    if (panopticonCommentEl.classList.contains('has-media')) {
+        let left = eyeRect.right + gap;
+        if (left + boxW > window.innerWidth - margin) {
+            left = eyeRect.left - boxW - gap;
+        }
+        left = Math.max(margin, Math.min(left, window.innerWidth - boxW - margin));
+
+        let top = eyeRect.top + eyeRect.height / 2 - boxH / 2;
+        top = Math.max(margin, Math.min(top, window.innerHeight - boxH - margin));
+
+        panopticonCommentEl.style.left = `${left}px`;
+        panopticonCommentEl.style.top = `${top}px`;
+        panopticonCommentEl.style.removeProperty('transform');
+        return;
+    }
 
     if (perf.isIOS) {
         panopticonCommentEl.style.top = `${eyeRect.bottom + 10}px`;
         return;
     }
 
-    const boxW = panopticonCommentEl.offsetWidth || panopticonCommentEl.scrollWidth;
-    const margin = 8;
     const left = eyeRect.left + eyeRect.width / 2 - boxW / 2;
     const clampedLeft = Math.max(margin, Math.min(left, window.innerWidth - boxW - margin));
 
@@ -473,6 +492,11 @@ function renderPanopticonComment(payload) {
         img.decoding = 'async';
         img.loading = 'eager';
         img.draggable = false;
+        img.addEventListener('load', () => {
+            if (panopticonCommentEl?.classList.contains('visible')) {
+                positionPanopticonComment();
+            }
+        }, { once: true });
         panopticonCommentEl.appendChild(img);
     }
 
