@@ -105,6 +105,34 @@ body.idle-dissociating.corrupted #grid-canvas.matrix-visible {
     user-select: none;
 }
 
+#panopticon-comment.has-media {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    max-width: min(280px, 86vw);
+}
+
+#panopticon-comment .panopticon-comment-text {
+    display: block;
+}
+
+#panopticon-comment .panopticon-comment-media {
+    display: block;
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+    border-radius: var(--radius-sm, 4px);
+    border: 1px solid rgba(0, 255, 0, 0.35);
+    object-fit: cover;
+    pointer-events: none;
+}
+
+body.corrupted #panopticon-comment .panopticon-comment-media {
+    border-color: rgba(255, 0, 85, 0.4);
+}
+
 #panopticon-comment.visible {
     opacity: 1;
     visibility: visible;

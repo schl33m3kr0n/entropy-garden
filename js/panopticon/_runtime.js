@@ -439,13 +439,60 @@ function playPanopticonCommentSfx() {
     playSoundOverlap(isPanopticonGodModeCommentary() ? sfx.echo : sfx.blip);
 }
 
-function showPanopticonIdleComment(text, ttlMs) {
-    if (!panopticonCommentEl || !text || !canShowPanopticonIdleComment()) return;
+function normalizePanopticonComment(entry) {
+    if (!entry) return null;
+    if (typeof entry === 'string') {
+        const text = entry.trim();
+        return text ? { text } : null;
+    }
+    if (typeof entry === 'object' && typeof entry.text === 'string') {
+        const text = entry.text.trim();
+        if (!text) return null;
+        const image = typeof entry.image === 'string' && entry.image.trim()
+            ? entry.image.trim()
+            : null;
+        return { text, image };
+    }
+    return null;
+}
+
+function renderPanopticonComment(payload) {
+    if (!panopticonCommentEl || !payload?.text) return;
+    panopticonCommentEl.replaceChildren();
+
+    const textEl = document.createElement('span');
+    textEl.className = 'panopticon-comment-text';
+    textEl.textContent = payload.text;
+    panopticonCommentEl.appendChild(textEl);
+
+    if (payload.image) {
+        const img = document.createElement('img');
+        img.className = 'panopticon-comment-media';
+        img.src = payload.image;
+        img.alt = '';
+        img.decoding = 'async';
+        img.loading = 'eager';
+        img.draggable = false;
+        panopticonCommentEl.appendChild(img);
+    }
+
+    panopticonCommentEl.classList.toggle('has-media', Boolean(payload.image));
+}
+
+function clearPanopticonCommentContent() {
+    if (!panopticonCommentEl) return;
+    panopticonCommentEl.textContent = '';
+    panopticonCommentEl.classList.remove('has-media');
+}
+
+function showPanopticonIdleComment(entry, ttlMs) {
+    const payload = normalizePanopticonComment(entry);
+    if (!panopticonCommentEl || !payload || !canShowPanopticonIdleComment()) return;
 
     clearIosPanopticonCommentInlinePosition();
     syncPanopticonCommentChrome();
     playPanopticonCommentSfx();
-    panopticonCommentEl.textContent = text;
+    renderPanopticonComment(payload);
     panopticonCommentEl.classList.add('visible');
     panopticonCommentEl.setAttribute('aria-hidden', 'false');
     requestAnimationFrame(() => {
@@ -453,23 +500,26 @@ function showPanopticonIdleComment(text, ttlMs) {
         positionPanopticonComment();
     });
 
-    const duration = ttlMs ?? commentTtlMs(text, { reducedMotion: perf.prefersReducedMotion });
+    const base = commentTtlMs(payload.text, { reducedMotion: perf.prefersReducedMotion });
+    const duration = ttlMs ?? (payload.image ? Math.max(base, 7000) : base);
     clearTimeout(panopticonCommentTimeout);
     panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), duration);
 }
 
-export function showPanopticonComment(text, ttlMs) {
-    if (!panopticonCommentEl || !text || !canShowPanopticonComment()) return;
+export function showPanopticonComment(entry, ttlMs) {
+    const payload = normalizePanopticonComment(entry);
+    if (!panopticonCommentEl || !payload || !canShowPanopticonComment()) return;
 
     clearIosPanopticonCommentInlinePosition();
     syncPanopticonCommentChrome();
     playPanopticonCommentSfx();
-    panopticonCommentEl.textContent = text;
+    renderPanopticonComment(payload);
     panopticonCommentEl.classList.add('visible');
     positionPanopticonComment();
     panopticonCommentEl.setAttribute('aria-hidden', 'false');
 
-    const duration = ttlMs ?? commentTtlMs(text, { reducedMotion: perf.prefersReducedMotion });
+    const base = commentTtlMs(payload.text, { reducedMotion: perf.prefersReducedMotion });
+    const duration = ttlMs ?? (payload.image ? Math.max(base, 7000) : base);
     clearTimeout(panopticonCommentTimeout);
     panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), duration);
 }
@@ -508,7 +558,7 @@ export function syncPanopticonCodeSequenceComments() {
     const active = isPanopticonCodeSequenceActive();
     if (active && !panopticonCodeSequenceActivePrev) {
         hidePanopticonComment();
-        if (panopticonCommentEl) panopticonCommentEl.textContent = '';
+        clearPanopticonCommentContent();
     } else if (!active && panopticonCodeSequenceActivePrev) {
         if (!panopticonIdleCommentTimer) schedulePanopticonIdleCommentTimer();
     }
