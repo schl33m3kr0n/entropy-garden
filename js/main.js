@@ -812,7 +812,7 @@ function cycleSlot(slotNumber) {
     const i = slotNumber - 1;
     slotIndexes[i] = (slotIndexes[i] + 1) % cycleArtifacts.length;
     renderCycleSlot(slotNumber);
-    playSound(sfx.collectible);
+    playSound(sfx.click2);
     firePanopticonComment('dockingSlot');
     recordBehavior('docking_cycle');
     checkCycleWin();

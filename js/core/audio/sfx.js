@@ -66,6 +66,7 @@ export const sfx = {
     stfu: createLazyAudio(sfxPath('stfu.mp3')),
     close: createLazyAudio(sfxPath('close.mp3')),
     click: createLazyAudio(sfxPath('click.mp3')),
+    click2: createLazyAudio(sfxPath('click2.mp3')),
     press: createLazyAudio(sfxPath('press.mp3')),
     stop: createLazyAudio(sfxPath('stop it.mp3')),
     boop: createEagerAudio(sfxPath('boop.mp3')),
