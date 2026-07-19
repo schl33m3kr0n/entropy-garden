@@ -158,6 +158,26 @@ body.god-mode #panopticon-comment,
     text-transform: uppercase;
 }
 
+/* Preformatted god-mode shapes (letter triangle, etc.) */
+#panopticon-comment.has-pre {
+    letter-spacing: 0.06em;
+    line-height: 1.35;
+    max-width: none;
+    font-size: 0.68rem;
+}
+
+#panopticon-comment.has-pre .panopticon-comment-text {
+    display: block;
+    width: max-content;
+    margin-inline: auto;
+    text-align: left;
+    white-space: pre;
+    font-family: ui-monospace, 'Menlo', 'Cascadia Mono', 'Consolas', monospace;
+    letter-spacing: 0.08em;
+    /* letter-spacing adds after the last glyph — nudge so the pyramid reads centered */
+    transform: translateX(-0.04em);
+}
+
 #panopticon-eye.visible {
     opacity: 0.72;
 }

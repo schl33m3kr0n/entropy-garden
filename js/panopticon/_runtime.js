@@ -49,6 +49,7 @@ export {
 const PANOPTICON_LID_WIDTH_RATIO = 0.84;
 const PANOPTICON_LID_HEIGHT_RATIO = 0.76;
 const GOD_TRIANGLE_EYE_CLEARANCE = 1.26;
+const GOD_LETTER_ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 function getGodTriangleLayerEl() {
     return document.getElementById('god-mode-triangle-layer');
@@ -58,9 +59,28 @@ function getGodTriangleEl() {
     return document.getElementById('panopticon-god-triangle');
 }
 
+function getGodLetterTriangleEl() {
+    return document.getElementById('god-mode-letter-triangle');
+}
+
+function ensureGodLetterTriangle(layer) {
+    let group = getGodLetterTriangleEl();
+    if (group) return group;
+
+    group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    group.id = 'god-mode-letter-triangle';
+    group.classList.add('god-mode-letter-triangle');
+    group.setAttribute('aria-hidden', 'true');
+    layer.appendChild(group);
+    return group;
+}
+
 function ensureGodTriangleLayer() {
     let layer = getGodTriangleLayerEl();
-    if (layer) return layer;
+    if (layer) {
+        ensureGodLetterTriangle(layer);
+        return layer;
+    }
 
     const canvas = document.getElementById('grid-canvas');
     const eye = document.getElementById('panopticon-eye');
@@ -106,6 +126,7 @@ function ensureGodTriangleLayer() {
     tri.classList.add('panopticon-god-triangle');
     tri.setAttribute('points', '0,0 0,0 0,0');
     layer.appendChild(tri);
+    ensureGodLetterTriangle(layer);
 
     eye.parentNode?.insertBefore(layer, eye);
     return layer;
@@ -465,12 +486,16 @@ function normalizePanopticonComment(entry) {
         return text ? { text } : null;
     }
     if (typeof entry === 'object' && typeof entry.text === 'string') {
-        const text = entry.text.trim();
+        const pre = Boolean(entry.pre);
+        // Keep leading spaces for preformatted shapes (e.g. letter triangle)
+        const text = pre
+            ? entry.text.replace(/^\n+|\n+$/g, '')
+            : entry.text.trim();
         if (!text) return null;
         const image = typeof entry.image === 'string' && entry.image.trim()
             ? entry.image.trim()
             : null;
-        return { text, image };
+        return { text, image, pre };
     }
     return null;
 }
@@ -501,12 +526,13 @@ function renderPanopticonComment(payload) {
     }
 
     panopticonCommentEl.classList.toggle('has-media', Boolean(payload.image));
+    panopticonCommentEl.classList.toggle('has-pre', Boolean(payload.pre));
 }
 
 function clearPanopticonCommentContent() {
     if (!panopticonCommentEl) return;
     panopticonCommentEl.textContent = '';
-    panopticonCommentEl.classList.remove('has-media');
+    panopticonCommentEl.classList.remove('has-media', 'has-pre');
 }
 
 function showPanopticonIdleComment(entry, ttlMs) {
@@ -525,7 +551,9 @@ function showPanopticonIdleComment(entry, ttlMs) {
     });
 
     const base = commentTtlMs(payload.text, { reducedMotion: perf.prefersReducedMotion });
-    const duration = ttlMs ?? (payload.image ? Math.max(base, 7000) : base);
+    const duration = ttlMs ?? (
+        payload.image || payload.pre ? Math.max(base, 7000) : base
+    );
     clearTimeout(panopticonCommentTimeout);
     panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), duration);
 }
@@ -543,7 +571,9 @@ export function showPanopticonComment(entry, ttlMs) {
     panopticonCommentEl.setAttribute('aria-hidden', 'false');
 
     const base = commentTtlMs(payload.text, { reducedMotion: perf.prefersReducedMotion });
-    const duration = ttlMs ?? (payload.image ? Math.max(base, 7000) : base);
+    const duration = ttlMs ?? (
+        payload.image || payload.pre ? Math.max(base, 7000) : base
+    );
     clearTimeout(panopticonCommentTimeout);
     panopticonCommentTimeout = setTimeout(() => hidePanopticonComment(), duration);
 }
