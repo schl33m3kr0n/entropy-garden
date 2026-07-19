@@ -305,8 +305,10 @@
     ],
     panopticonGodModeComments: [
         "EVERY BLINK IS A SMALL DEATH REHEARSED, A MOMENTARY GLIMPSE INTO THE INEVITABLE VOID",
-        "CHAOS & ORDER ARE BUT TWO SIDES OF THE SAME COIN; PERCEPTION IS THEIR CURRENCY",
+        "CHAOS & ORDER ARE BUT TWO SIDES OF THE SAME COIN; PERCEPTION IS THEIR UNDERLYING CURRENCY",
         "A DREAM IS A DRAMATIC MIRROR OF INNER REALITY, ITS TENSIONS A RIPPLING OF THE PSYCHE",
+        "WHEN THE SKY CAVES IN, TAKE REFUGE IN THE DEPTHS OF THE EARTH",
+        "EVEN IN EDEN, THE FRUIT OF KNOWLEDGE WAS BOUND TO ROT",
         "TIME IS A PARADIGM OF ORDER; A SERIES OF INCREMENTS FORMING MANY NARRATIVES",
         "THE ALL IS MORE VAST THAN THE COLLECTIVE IMAGINATION; ABSOLUTE TRUTH REMAINS BEYOND ITS HORIZON",        
         "CATEGORIES REDUCE REALITY; INSTANCES REFLECT ITS RHYTHMS; SEQUENCE CONSECRATES THEIR MELODY",
@@ -383,13 +385,20 @@
     panopticonTriggerComments: {
         init: {
             safe: [
-                "boot sequence detected. i'm already watching",
-                "INITIALIZE accepted. the garden remembers you",
+                "boot sequence detected. what brings you here?",
+                "INITIALIZE accepted. the garden predicted your arrival",
                 "another observer enters the perimeter",
+                "welcome to the garden. just be glad you didn't have to do a captcha",
+                "welcome to the garden. moral quandaries to follow within the next 5 minutes",
+                "welcome to the garden. please keep your pants on",
+                "welcome to the garden. what happens in the garden stays with you forever",
             ],
             gritty: [
-                "you clicked initialize. brave. or bored",
-                "welcome to the panopticon. population: us",
+                "you clicked initialize. try doing that more IRL",
+                "welcome to the garden. no firearms permitted",
+                "welcome to the garden. please leave your valuables on the way out",
+                "welcome to the garden. prophecy reading every blood moon",
+                "welcome to the garden. we're not responsible for any hazards encountered during your stay",
             ],
         },
         reroll: {
