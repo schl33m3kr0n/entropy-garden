@@ -627,6 +627,12 @@ function syncPanopticonCommentChrome() {
 function pickPanopticonIdleComment() {
     const pools = globalThis.lorePools;
     if (!pools) return null;
+    if (isChristmas()) {
+        const xmas = pools.panopticonIdleCommentsChristmasSafe;
+        if (xmas?.length) {
+            return pickOne(xmas, pools.panopticonIdleCommentsChristmasGritty || []);
+        }
+    }
     if (isApril420()) {
         const high = pools.panopticonHighCommentsSafe;
         if (!high?.length) return null;
@@ -636,6 +642,19 @@ function pickPanopticonIdleComment() {
         const god = pools.panopticonGodModeComments;
         return god?.length ? pickOne(god, []) : null;
     }
+
+    const part = getPanopticonDayPart();
+    const todSafe = part === 'day'
+        ? pools.panopticonIdleCommentsDaySafe
+        : pools.panopticonIdleCommentsEveningSafe;
+    const todGritty = part === 'day'
+        ? pools.panopticonIdleCommentsDayGritty
+        : pools.panopticonIdleCommentsEveningGritty;
+    // Sprinkle time-of-day lines among general idle chatter
+    if (todSafe?.length && Math.random() < 0.28) {
+        return pickOne(todSafe, todGritty || []);
+    }
+
     const safe = pools.panopticonIdleCommentsSafe;
     if (!safe?.length) return null;
     return pickOne(safe, pools.panopticonIdleCommentsGritty || []);
@@ -1203,6 +1222,82 @@ export function isApril420() {
     return now.getMonth() === 3 && now.getDate() === 20;
 }
 
+/** Local-timezone Christmas Day (Dec 25), or ?christmas / previewChristmas=1. */
+export function isChristmas() {
+    try {
+        const params = new URLSearchParams(globalThis.location?.search || '');
+        if (params.has('christmas') || params.get('previewChristmas') === '1') return true;
+    } catch {
+        /* non-browser */
+    }
+    const now = new Date();
+    return now.getMonth() === 11 && now.getDate() === 25;
+}
+
+/**
+ * Local-timezone day part for idle flavor comments.
+ * Day: 06:00–17:59 · Evening: 18:00–05:59
+ * Overrides: ?day / previewDay=1 · ?evening / previewEvening=1
+ */
+export function getPanopticonDayPart() {
+    try {
+        const params = new URLSearchParams(globalThis.location?.search || '');
+        if (params.has('day') || params.get('previewDay') === '1') return 'day';
+        if (params.has('evening') || params.get('previewEvening') === '1') return 'evening';
+    } catch {
+        /* non-browser */
+    }
+    const hour = new Date().getHours();
+    return hour >= 6 && hour < 18 ? 'day' : 'evening';
+}
+
+let panopticonDayPartTimer = null;
+
+/**
+ * Clock angles from local time — 12 o'clock = 0deg, clockwise.
+ * Sun = hour, moon = minute, star = second (drawn on the cipher canvas).
+ */
+export function getPanopticonClockAngles(now = new Date()) {
+    const hours = now.getHours() % 12;
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+    const secondAngle = seconds * 6;
+    const minuteAngle = minutes * 6 + seconds * 0.1;
+    const hourAngle = hours * 30 + minutes * 0.5 + seconds * (0.5 / 60);
+    return { hourAngle, minuteAngle, secondAngle };
+}
+
+function msUntilNextDayPartBoundary(now = new Date()) {
+    const next = new Date(now);
+    next.setSeconds(0, 0);
+    const hour = now.getHours();
+    if (hour < 6) {
+        next.setHours(6, 0, 0, 0);
+    } else if (hour < 18) {
+        next.setHours(18, 0, 0, 0);
+    } else {
+        next.setDate(next.getDate() + 1);
+        next.setHours(6, 0, 0, 0);
+    }
+    return Math.max(1000, next.getTime() - now.getTime() + 50);
+}
+
+function schedulePanopticonDayPartSync() {
+    if (typeof globalThis.setTimeout !== 'function') return;
+    clearTimeout(panopticonDayPartTimer);
+    panopticonDayPartTimer = setTimeout(() => {
+        syncPanopticonTimeOfDay();
+        schedulePanopticonDayPartSync();
+    }, msUntilNextDayPartBoundary());
+}
+
+function syncPanopticonTimeOfDay() {
+    const part = getPanopticonDayPart();
+    const isDay = part === 'day';
+    document.body.classList.toggle('time-day', isDay);
+    document.body.classList.toggle('time-evening', !isDay);
+}
+
 function syncPanopticonApril420() {
     const on = isApril420();
     document.body.classList.toggle('april-420', on);
@@ -1237,6 +1332,8 @@ export function updatePanopticonVisibility() {
     const hidden = singularity?.style.display === 'flex' || boss?.classList.contains('active');
     panopticonEl.classList.toggle('visible', gardenHasStarted && !hidden);
     syncPanopticonApril420();
+    syncPanopticonTimeOfDay();
+    if (panopticonDayPartTimer == null) schedulePanopticonDayPartSync();
 }
 
 function horizontalOffset(angle) {

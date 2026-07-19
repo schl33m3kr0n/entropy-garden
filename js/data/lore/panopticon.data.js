@@ -99,7 +99,27 @@
         "to whoever owns the red chevy impala, your car is being towed",
         "maybe it's blurry vision, maybe it's chromatic aberration",
         "as you can see from this chart of accumulated subscriptions, we are performing quite well against our competit-... wait... oh... it's upside down...",
+        "sorry, am i boring you?",
+        "that's definitely a question i would defer to the paper shredder",
+        "people always say 'that takes guts.' i would hope so. most people require guts to remain alive.",
     ],
+    panopticonIdleCommentsDaySafe: [
+        "the grass ain't gonna touch itself, y'know",
+    ],
+    panopticonIdleCommentsDayGritty: [
+        "shouldn't you be busy working your dead-end job or something?",
+        "oh wow, proof that some clowns don't need makeup",
+        "oh you're an omnivore, huh? bet you won't eat poop… poser",
+    ],
+    panopticonIdleCommentsEveningSafe: [
+        "go home to your family, dude",
+    ],
+    panopticonIdleCommentsEveningGritty: [],
+    panopticonIdleCommentsChristmasSafe: [
+        "the secret elites want you to not only be holly, but jolly this christmas. brother, it's the middle of winter. the bills are due",
+        "christmas came early for me, but so did every other holiday. i'm not sure how calendars work in this dimension",
+    ],
+    panopticonIdleCommentsChristmasGritty: [],
     panopticonIdleCommentsGritty: [
         "your attention has been harvested successfully",
         "i had a dream that i was a real person & started stapling the wrong name tags to people's foreheads",
@@ -121,6 +141,7 @@
         "i'm rick james, bitch!",
         "oh, so when superman has x-ray vision, he's a hero, but when i do it, i'm committing a 'gross breach of privacy'",
         "so what are you wearing?",
+        "Leak, Lick, Leave",
         "we listen and we don't judge: i like my catheter on the rocks",
         "i'm happiest when my country donates billions of dollars overseas but craps out on affordable healthcare",
     ],
@@ -236,7 +257,7 @@
         },
         laptop: {
             safe: [
-                "it's always funny to see the immediacy of the audience's response to stand-up routines",
+                "it's always funny to see how quickly the audience responds to stand-up routines",
                 "the internet is more fascinating than it is helpful. i'm concerned about that discrepancy",
                 "do you really need that many tabs open? be honest",
                 "sailing the high seas is not for the faint of heart",
@@ -278,6 +299,7 @@
         "if a house was built on sand, wouldn't it just be a sandcastle?",
         "... i forgot what i was gonna say",
         "the D.A.R.E. program was a gateway drug",
+        "it's that day of the year again",
     ],
     panopticonHighCommentsGritty: [
         "the void ordered takeout. it wants your attention & fries",
@@ -392,6 +414,10 @@
                 "welcome to the garden. moral quandaries to follow within the next 5 minutes",
                 "welcome to the garden. please keep your pants on",
                 "welcome to the garden. what happens in the garden stays with you forever",
+                "welcome to the garden. yes, i know, there's no plants",
+                "welcome to the garden. please leave your shoes at the front",
+                "welcome traveler. a new path awaits or whatever",
+                "welcome to the garden. home of innovation and imagination. pretend like you're having fun",
             ],
             gritty: [
                 "you clicked initialize. try doing that more IRL",
@@ -399,6 +425,10 @@
                 "welcome to the garden. please leave your valuables on the way out",
                 "welcome to the garden. prophecy reading every blood moon",
                 "welcome to the garden. we're not responsible for any hazards encountered during your stay",
+                "welcome to the garden. don't be racist",
+                "welcome to the garden. privilege checking every monday at noon",
+                "welcome to the garden. please don't steal the g-2 pens",
+                "welcome to the garden. please don't steal the crayola. the marines are getting hangry",
             ],
         },
         reroll: {

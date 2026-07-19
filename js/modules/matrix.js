@@ -199,6 +199,129 @@ function updateWheels() {
 
 let wheelGradientCache = { key: '', stroke: null, fill: null };
 
+/** Clock hands drawn on the innermost cipher ring (sun/moon/star). */
+const clockHandImages = {
+    sun: null,
+    moon: null,
+    star: null,
+};
+let clockHandsLoading = false;
+let clockScratch = null;
+
+function ensureClockHandImages() {
+    if (clockHandsLoading) return;
+    clockHandsLoading = true;
+    const load = (key, src) => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.onload = () => { clockHandImages[key] = img; setNeedsFullRedraw(true); };
+        img.onerror = () => { clockHandImages[key] = null; };
+        img.src = src;
+    };
+    load('sun', 'assets/icons/sun.svg');
+    load('moon', 'assets/icons/moon.svg?v=crescent-2');
+    load('star', 'assets/icons/star.svg');
+}
+
+function getClockScratch(size) {
+    const s = Math.max(8, Math.ceil(size));
+    if (!clockScratch || clockScratch.width !== s) {
+        clockScratch = document.createElement('canvas');
+        clockScratch.width = s;
+        clockScratch.height = s;
+    }
+    return clockScratch;
+}
+
+function fillClockConic(sctx, gcx, gcy, alpha) {
+    const g = sctx.createConicGradient(-Math.PI * 0.5, gcx, gcy);
+    if (isCorrupted) {
+        g.addColorStop(0, `rgba(255, 0, 85, ${alpha})`);
+        g.addColorStop(1, `rgba(255, 0, 85, ${alpha})`);
+    } else {
+        const hues = [0, 60, 120, 180, 240, 300, 360];
+        for (let i = 0; i < hues.length; i++) {
+            g.addColorStop(i / (hues.length - 1), `hsla(${hues[i]}, 100%, 55%, ${alpha})`);
+        }
+    }
+    sctx.fillStyle = g;
+}
+
+/** Paint a white silhouette with the same conic/lite fill as cipher glyphs. */
+function drawClockHandSymbol(img, angleDeg, radius, size, cx, cy) {
+    if (!img?.complete || !(img.naturalWidth > 0)) return;
+
+    // CSS 0° = 12 o'clock; canvas 0° = 3 o'clock
+    const rad = (angleDeg - 90) * (Math.PI / 180);
+    const x = cx + Math.cos(rad) * radius;
+    const y = cy + Math.sin(rad) * radius;
+    const s = Math.max(8, size);
+    const scratch = getClockScratch(s);
+    const sctx = scratch.getContext('2d');
+    sctx.setTransform(1, 0, 0, 1, 0, 0);
+    sctx.globalCompositeOperation = 'source-over';
+    sctx.clearRect(0, 0, s, s);
+    sctx.drawImage(img, 0, 0, s, s);
+    sctx.globalCompositeOperation = 'source-in';
+
+    if (usesLiteCipherWheelPaint()) {
+        sctx.fillStyle = isCorrupted ? 'rgba(255, 0, 85, 0.95)' : 'rgba(0, 255, 0, 0.95)';
+    } else {
+        // Place the wheel conic origin so this glyph samples the same hue as neighbors
+        const gcx = s / 2 - Math.cos(rad) * radius;
+        const gcy = s / 2 - Math.sin(rad) * radius;
+        fillClockConic(sctx, gcx, gcy, 0.95);
+    }
+    sctx.fillRect(0, 0, s, s);
+    ctx.drawImage(scratch, x - s / 2, y - s / 2, s, s);
+}
+
+/** Local-time clock angles — 12 o'clock = 0deg, clockwise (kept local to avoid import cycles). */
+function cipherClockAngles(now = new Date()) {
+    const hours = now.getHours() % 12;
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+    return {
+        hourAngle: hours * 30 + minutes * 0.5 + seconds * (0.5 / 60),
+        minuteAngle: minutes * 6 + seconds * 0.1,
+        secondAngle: seconds * 6,
+    };
+}
+
+/** Radius of the innermost drawn circle stroke (channel between wheel 0 and 1). */
+function getInnermostCircleBoundaryRadius() {
+    const inner = wheels[0];
+    if (!inner) return 0;
+
+    // Prefer the actual channel ring between the first two wheels — that's the
+    // innermost geometric circle boundary painted by drawChannelRings().
+    const next = wheels[1];
+    if (next && visibleRingCount >= 2) {
+        return (inner.charRadius + next.charRadius) * 0.5;
+    }
+
+    // Before the second ring appears, estimate that same mid-channel radius.
+    const charBand = cellSize * (perf.isMobile ? 1.15 : 1.25);
+    const channel = cellSize * (perf.isMobile ? 0.5 : 0.65);
+    return inner.charRadius + (charBand + channel) * 0.5;
+}
+
+function drawCipherClockHands(cx, cy) {
+    if (!wheels.length || visibleRingCount < 1) return;
+    ensureClockHandImages();
+
+    const radius = getInnermostCircleBoundaryRadius();
+    if (!(radius > 0)) return;
+
+    const { hourAngle, minuteAngle, secondAngle } = cipherClockAngles();
+    const base = Math.max(14, Math.min(22, Math.round(cellSize * 0.7)));
+
+    // Draw largest to smallest so the star (seconds) sits on top
+    drawClockHandSymbol(clockHandImages.sun, hourAngle, radius, base, cx, cy);
+    drawClockHandSymbol(clockHandImages.moon, minuteAngle, radius, Math.round(base * 0.95), cx, cy);
+    drawClockHandSymbol(clockHandImages.star, secondAngle, radius, Math.round(base * 0.82), cx, cy);
+}
+
 function wheelConicGradient(cx, cy, alpha) {
     const key = `${Math.round(cx)}|${Math.round(cy)}|${alpha}|${isCorrupted ? 1 : 0}`;
     const slot = alpha < 0.2 ? 'stroke' : 'fill';
@@ -287,6 +410,8 @@ function drawCipherWheels(cx, cy) {
     if (fastGlyphs) {
         ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     }
+
+    drawCipherClockHands(cx, cy);
 
     syncGodModeTriangleSize();
 

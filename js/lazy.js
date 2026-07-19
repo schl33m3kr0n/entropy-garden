@@ -33,14 +33,14 @@ export {
     stopGardenLoop,
     resizeCanvas,
     setMatrixNeedsRedraw,
-} from './facades/matrix.js';
+} from './facades/matrix.js?v=cipher-clock-3';
 
 export { loadArcade, loadArcadeLevel } from './facades/arcade.js';
 
 export { loadCards, initCardsOfChaos } from './facades/cards.js';
 
 import { perf } from './core/shared.js';
-import { loadMatrix } from './facades/matrix.js';
+import { loadMatrix } from './facades/matrix.js?v=cipher-clock-3';
 import { loadTerminal } from './facades/terminal.js';
 import { loadSingularity } from './facades/singularity.js';
 

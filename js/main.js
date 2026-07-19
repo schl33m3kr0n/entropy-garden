@@ -95,7 +95,7 @@ import {
     reconcileSingularityPoem,
     stopSingularity3D,
     bootGameAddons,
-} from './lazy.js';
+} from './lazy.js?v=cipher-clock-3';
 import { registerServiceWorkerAfterInit } from './core/sw-register.js';
 import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios/ios-ui.js';
 import { setGodTitleArrangement, syncGodTitleGradient } from './core/god-title.js';

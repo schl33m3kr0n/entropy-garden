@@ -1,4 +1,4 @@
-import { matrixLoader } from '../loaders/matrix.js';
+import { matrixLoader } from '../loaders/matrix.js?v=cipher-clock-3';
 
 export function loadMatrix() {
     return matrixLoader.load();
