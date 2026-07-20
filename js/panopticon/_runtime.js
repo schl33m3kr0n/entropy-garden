@@ -1252,6 +1252,56 @@ export function getPanopticonDayPart() {
 }
 
 let panopticonDayPartTimer = null;
+let panopticonCoffeeTimer = null;
+
+/**
+ * Local time 09:15–09:30 — coffee cup on the eye.
+ * Overrides: ?coffee / ?previewCoffee=1
+ */
+export function isPanopticonMorningCoffeeTime(now = new Date()) {
+    try {
+        const params = new URLSearchParams(globalThis.location?.search || '');
+        if (params.has('coffee') || params.get('previewCoffee') === '1') return true;
+    } catch {
+        /* non-browser */
+    }
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    return hour === 9 && minute >= 15 && minute < 30;
+}
+
+function msUntilNextCoffeeBoundary(now = new Date()) {
+    const next = new Date(now);
+    next.setSeconds(0, 0);
+    next.setMilliseconds(0);
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    if (hour < 9 || (hour === 9 && minute < 15)) {
+        next.setHours(9, 15, 0, 0);
+    } else if (hour === 9 && minute < 30) {
+        next.setHours(9, 30, 0, 0);
+    } else {
+        next.setDate(next.getDate() + 1);
+        next.setHours(9, 15, 0, 0);
+    }
+    return Math.max(1000, next.getTime() - now.getTime() + 50);
+}
+
+function schedulePanopticonCoffeeSync() {
+    if (typeof globalThis.setTimeout !== 'function') return;
+    clearTimeout(panopticonCoffeeTimer);
+    panopticonCoffeeTimer = setTimeout(() => {
+        syncPanopticonMorningCoffee();
+        schedulePanopticonCoffeeSync();
+    }, msUntilNextCoffeeBoundary());
+}
+
+function syncPanopticonMorningCoffee() {
+    panopticonEl?.classList.toggle(
+        'panopticon-morning-coffee',
+        isPanopticonMorningCoffeeTime(),
+    );
+}
 
 /**
  * Clock angles from local time — 12 o'clock = 0deg, clockwise.
@@ -1333,7 +1383,9 @@ export function updatePanopticonVisibility() {
     panopticonEl.classList.toggle('visible', gardenHasStarted && !hidden);
     syncPanopticonApril420();
     syncPanopticonTimeOfDay();
+    syncPanopticonMorningCoffee();
     if (panopticonDayPartTimer == null) schedulePanopticonDayPartSync();
+    if (panopticonCoffeeTimer == null) schedulePanopticonCoffeeSync();
 }
 
 function horizontalOffset(angle) {

@@ -408,6 +408,36 @@ body.corrupted #panopticon-eye.away-reading .panopticon-away-laptop-icon {
     filter: hue-rotate(-120deg) drop-shadow(0 0 8px rgba(255, 0, 85, 0.45));
 }
 
+/* Morning coffee — bottom-left of the eye, local 09:15–09:30 */
+.panopticon-morning-coffee {
+    position: absolute;
+    left: -10%;
+    bottom: -4%;
+    width: 42%;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 2;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+#panopticon-eye.panopticon-morning-coffee .panopticon-morning-coffee {
+    opacity: 1;
+    visibility: visible;
+}
+
+.panopticon-morning-coffee img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.35));
+}
+
+body.corrupted #panopticon-eye.panopticon-morning-coffee .panopticon-morning-coffee img {
+    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.35));
+}
+
 .panopticon-socket-fill {
     fill: rgba(0, 20, 0, 0.12);
     stroke: none;

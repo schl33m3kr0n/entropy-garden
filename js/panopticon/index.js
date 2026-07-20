@@ -46,6 +46,7 @@ export {
     isChristmas,
     getPanopticonDayPart,
     getPanopticonClockAngles,
+    isPanopticonMorningCoffeeTime,
     updatePanopticonVisibility,
     animatePanopticon,
     eyeAngle,
