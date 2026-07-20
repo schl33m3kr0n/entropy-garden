@@ -16,6 +16,11 @@ import {
     populateEmptyWheelGlyphs,
 } from '../cipher/wheel-fill.js';
 import {
+    applyCaesarDecoderRings,
+    clearCaesarDecoderRings,
+    resetCaesarPairCache,
+} from '../cipher/cipher-rings.js';
+import {
     time,
     isCorrupted,
     fontSize,
@@ -93,6 +98,8 @@ function repairWheelGlyph(wheel, index) {
 function fillEmptyWheelGlyphs() {
     if (!wheels.length) return;
     populateEmptyWheelGlyphs(wheels, randomChar, cipherWheelFont(), {
+        skipHintWheels: true,
+        skipCipherRings: true,
         onAssign: (wheel, index) => refreshWheelGlyphColor(wheel, index),
     });
 }
@@ -109,6 +116,7 @@ function cipherWheelFont() {
 
 function buildWheels() {
     wheels = [];
+    resetCaesarPairCache();
     const maxRadius = Math.hypot(viewW, viewH) / 2 + cellSize;
     const charBand = cellSize * (perf.isMobile ? 1.15 : 1.25);
     const channel = cellSize * (perf.isMobile ? 0.5 : 0.65);
@@ -151,11 +159,15 @@ function buildWheels() {
         globalThis.EntropyCipherHint.applyToWheels(wheels, perf, randomChar);
     }
 
+    if ((globalThis.getCipherStage?.() ?? 0) >= 1) {
+        refreshCaesarCipherRings();
+    }
+
     fillEmptyWheelGlyphs();
 }
 
 function cycleGlyphs(wheel) {
-    if (wheel.isHintWheel) return;
+    if (wheel.isHintWheel || wheel.isCipherRing) return;
     const swaps = perf.prefersReducedMotion
         ? 1
         : (perf.isMobile ? 1 : 2 + Math.floor(Math.random() * 2));
@@ -168,7 +180,7 @@ function cycleGlyphs(wheel) {
 }
 
 function maybeDecoderBurst(wheel) {
-    if (wheel.isHintWheel) return;
+    if (wheel.isHintWheel || wheel.isCipherRing) return;
     if (perf.prefersReducedMotion || Math.random() > 0.004) return;
     wheel.burstSpeed = wheel.direction * 0.012;
     wheel.burstUntil = matrixFrameCount + 10 + Math.floor(Math.random() * 14);
@@ -756,6 +768,21 @@ window.addEventListener('orientationchange', () => {
         scheduleResizeCanvas();
     }, 260);
 });
+
+function refreshCaesarCipherRings() {
+    const stage = globalThis.getCipherStage?.() ?? 0;
+    if (stage >= 1) {
+        applyCaesarDecoderRings(wheels, {
+            active: true,
+            shift: globalThis.EntropyCipher?.shift ?? 3,
+        });
+    } else {
+        clearCaesarDecoderRings(wheels);
+    }
+    setNeedsFullRedraw(true);
+}
+
+globalThis.refreshCaesarCipherRings = refreshCaesarCipherRings;
 
 function refreshCipherEntropyRingHint() {
     const hint = globalThis.EntropyCipherHint;

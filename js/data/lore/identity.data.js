@@ -40,7 +40,7 @@
         "Nashville (where the weather doesn't suit your clothes)",
         "Nashville (where your SoundCloud will definitely get you on Music Row)",
         "Nashville (Johnny Cash still haunts our dreams)",
-        "Nashville (one of the scenes in the Matrix was filmed here)",
+        "Nashville (one of the scenes in The Matrix was filmed here)",
         "Nashville (The Green Mile was mostly filmed here)",
         "Nashville (you could sell your soul @ McKay's)",
         "Nashville (significantly safer than Memphis)",

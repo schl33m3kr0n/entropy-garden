@@ -310,19 +310,41 @@ const fakeFiles = [
 const korzamuronCipherPlain =
     () => globalThis.EntropyCipher?.plaintext || 'hun nuresk';
 
-const CIPHER_FALLBACK_CT = 'jiq rrtsvo';
+const CIPHER_FALLBACK_CT = 'kxq qxuhvn';
 
 function cipherCiphertext() {
     return globalThis.EntropyCipher?.ciphertext || CIPHER_FALLBACK_CT;
 }
 
-/** True when the submitted key decrypts the live ciphertext to the Korzamuron fragment. */
-function tryAcceptCipherKey(cleanCmd) {
+function cipherShift() {
+    return globalThis.EntropyCipher?.shift ?? 3;
+}
+
+/** Parse 0–25 shift from `3` or `shift 3`. */
+function parseCipherShift(cleanCmd) {
+    const direct = cleanCmd.match(/^(\d{1,2})$/);
+    if (direct) return parseInt(direct[1], 10);
+    const labeled = cleanCmd.match(/^shift\s+(\d{1,2})$/);
+    if (labeled) return parseInt(labeled[1], 10);
+    return null;
+}
+
+function tryAcceptCipherPlain(cleanCmd) {
+    const norm = cleanCmd.replace(/[^a-z ]/g, '').trim();
+    return norm === korzamuronCipherPlain();
+}
+
+/** True when shift or plaintext decrypts the live ciphertext to the Korzamuron fragment. */
+function tryAcceptCipherAnswer(cleanCmd) {
+    if (tryAcceptCipherPlain(cleanCmd)) return true;
+
+    const shift = parseCipherShift(cleanCmd);
+    if (shift == null || shift < 0 || shift > 25) return false;
+
     const cipher = globalThis.EntropyCipher;
-    if (!cipher?.decrypt) return cleanCmd === 'codex';
-    const keyNorm = cleanCmd.replace(/[^a-z]/g, '');
-    if (!keyNorm) return false;
-    const plain = cipher.decrypt(cipherCiphertext(), keyNorm);
+    if (!cipher?.decrypt) return shift === cipherShift();
+
+    const plain = cipher.decrypt(cipherCiphertext(), shift);
     return plain === korzamuronCipherPlain();
 }
 
@@ -420,7 +442,7 @@ function processCommand(cmd) {
     }
 
     // ==========================================
-    // STAGE 1: Waiting for the Vigenère Key
+    // STAGE 1: Waiting for Caesar shift / plaintext
     // ==========================================
     if (cipherStage === 1) {
         if (cleanCmd === 'abort' || cleanCmd === 'exit' || cleanCmd === 'esc' || cleanCmd === 'quit') {
@@ -428,8 +450,9 @@ function processCommand(cmd) {
             playGlitchSound();
             setCipherStage(0);
             globalThis.EntropyCipherHint?.resetCipherHints?.();
-        } else if (tryAcceptCipherKey(cleanCmd)) {
-            pushTerminalLog("> KEYWORD ACCEPTED. DECRYPTING...");
+            globalThis.refreshCaesarCipherRings?.();
+        } else if (tryAcceptCipherAnswer(cleanCmd)) {
+            pushTerminalLog("> DISPLACEMENT ACCEPTED. DECRYPTING...");
             playSound(sfx.taskComplete);
             const plain = korzamuronCipherPlain();
             setTimeout(() => {
@@ -439,7 +462,7 @@ function processCommand(cmd) {
                 globalThis.EntropyCipherHint?.syncCipherHints?.();
             }, 1500);
         } else {
-            pushTerminalLog("> ERROR: INVALID KEY. HINT: 'Dresden ..., ... Leicester, ... Gigas'");
+            pushTerminalLog("> ERROR: INVALID SHIFT OR PLAINTEXT. HINT: COUNT THE LETTER OFFSET ON THE TWO ALPHABET RINGS");
             playSound(sfx.oopsy);
         }
         return; // Stops normal commands from running
@@ -538,13 +561,14 @@ function processCommand(cmd) {
             return;
         }
         setCipherStage(1);
-        pushTerminalLog("> INITIATING VIGENÈRE DECRYPTION PROTOCOL...");
+        globalThis.refreshCaesarCipherRings?.();
+        pushTerminalLog("> INITIATING CAESAR DECRYPTION PROTOCOL...");
         playSound(sfx.loading);
         const ct = cipherCiphertext();
         setTimeout(() => {
             pushTerminalLog(`> CIPHERTEXT: '${ct}'`);
-            pushTerminalLog("> AWAITING DECRYPTION KEY...");
-            pushTerminalLog("> (HINT: 'Dresden ..., Aleppo ..., ... Gigas')");
+            pushTerminalLog("> AWAITING SHIFT (0–25) OR DECRYPTED PLAINTEXT...");
+            pushTerminalLog("> (HINT: ALIGN THE TWO 26-LETTER RINGS ON THE WHEEL)");
         }, 2000);
     }
 

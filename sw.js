@@ -33,6 +33,8 @@ const PRECACHE_URLS = [
     'js/data/lore/panopticon.data.js',
     'js/data/cipher-glyphs.data.js',
     'js/cipher/vigenere.js',
+    'js/cipher/caesar-core.js',
+    'js/cipher/cipher-rings.js',
     'js/cipher/entropy-hint.js',
     'js/cipher/wheel-fill.js',
     'js/playlist-icons.js',

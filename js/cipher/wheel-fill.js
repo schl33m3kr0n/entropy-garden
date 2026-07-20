@@ -49,12 +49,13 @@ export function isEmptyWheelGlyph(glyph) {
  * @returns {number} slots rewritten
  */
 export function populateEmptyWheelGlyphs(wheels, pickChar, _font, options = {}) {
-    const { skipHintWheels = true, onAssign = null } = options;
+    const { skipHintWheels = true, skipCipherRings = false, onAssign = null } = options;
     if (!wheels?.length) return 0;
 
     let filled = 0;
     for (const wheel of wheels) {
         if (skipHintWheels && wheel.isHintWheel) continue;
+        if (skipCipherRings && wheel.isCipherRing) continue;
         for (let i = 0; i < wheel.glyphs.length; i++) {
             if (!isEmptyWheelGlyph(wheel.glyphs[i])) continue;
             wheel.glyphs[i] = pickChar();

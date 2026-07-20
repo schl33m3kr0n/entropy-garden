@@ -128,7 +128,7 @@
         "Terminally Online",
         "Buffering...",
         "Vibing (Allegedly)",
-        "Glitch in the Matrix",
+        "Glitch in The Matrix",
         "Low Poly & Tired",
         "Textures Missing (Purple/Black)",
         "Blue Screen of Death",

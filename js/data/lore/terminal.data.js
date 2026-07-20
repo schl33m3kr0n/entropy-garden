@@ -74,7 +74,7 @@
         "> Beating a dead horse with no honey mustard...",
         "> Resisting temptations of the furry femboy... (TOO ENTICING)",
         "> Reducing, reusing, & recycling unmentionables...",
-        "> Retrofitting an F-22 with a commodore 64...",
+        "> Retrofitting an F-22 with a Commodore 64...",
         "> Compiling reasons to give a fuck... (ERROR)",
     ],
     idleMessagesSafe: [

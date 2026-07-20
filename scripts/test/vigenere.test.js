@@ -1,35 +1,36 @@
 import { describe, expect, it } from 'vitest';
 import {
     CIPHER_CIPHERTEXT,
-    CIPHER_KEY,
     CIPHER_PLAINTEXT,
+    CIPHER_SHIFT,
     attachEntropyCipher,
-    vigenere,
-} from '../../js/cipher/vigenere-core.js';
+    caesar,
+} from '../../js/cipher/caesar-core.js';
 
-describe('vigenere', () => {
-    it('encrypts the garden plaintext with codex key', () => {
-        expect(vigenere(CIPHER_PLAINTEXT, CIPHER_KEY)).toBe(CIPHER_CIPHERTEXT);
+describe('caesar', () => {
+    it('encrypts the garden plaintext with the default shift', () => {
+        expect(caesar(CIPHER_PLAINTEXT, CIPHER_SHIFT)).toBe(CIPHER_CIPHERTEXT);
     });
 
     it('round-trips encrypt/decrypt', () => {
         const plain = 'entropy garden';
-        const encrypted = vigenere(plain, CIPHER_KEY, false);
-        expect(vigenere(encrypted, CIPHER_KEY, true)).toBe(plain);
+        const encrypted = caesar(plain, CIPHER_SHIFT, false);
+        expect(caesar(encrypted, CIPHER_SHIFT, true)).toBe(plain);
     });
 
-    it('preserves spaces and ignores non-alpha in key', () => {
-        expect(vigenere('ab cd', 'x y')).toBe('xb yd');
+    it('preserves spaces', () => {
+        expect(caesar('ab cd', 1)).toBe('bc de');
     });
 
-    it('returns empty string when key has no letters', () => {
-        expect(vigenere('hello', '123')).toBe('');
+    it('wraps shifts modulo 26', () => {
+        expect(caesar('a', 27)).toBe(caesar('a', 1));
     });
 
     it('attachEntropyCipher exposes EntropyCipher API', () => {
         const g = {};
         attachEntropyCipher(g);
         expect(g.EntropyCipher.plaintext).toBe(CIPHER_PLAINTEXT);
+        expect(g.EntropyCipher.shift).toBe(CIPHER_SHIFT);
         expect(g.EntropyCipher.decrypt(CIPHER_CIPHERTEXT)).toBe(CIPHER_PLAINTEXT);
     });
 });
