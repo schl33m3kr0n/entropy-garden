@@ -349,11 +349,6 @@ function tryAcceptCipherAnswer(cleanCmd) {
 
 const CIPHER_TRANSLATION_ANSWERS = new Set(['chaos']);
 
-function printLexicon() {
-    pushTerminalLog("> LEXICON FRAGMENT:");
-    pushTerminalLog("> kwlmf = codex (archive)");
-}
-
 // --- NEW: THE SHORTCUTS MENU ---
 function printShortcuts() {
     pushTerminalLog("> --- SYSTEM HOTKEYS ---");
@@ -475,8 +470,6 @@ function processCommand(cmd) {
             playGlitchSound();
             setCipherStage(0);
             globalThis.EntropyCipherHint?.resetCipherHints?.();
-        } else if (cleanCmd === 'lexicon') {
-            printLexicon(); // Print the dictionary without failing the puzzle
         } else if (CIPHER_TRANSLATION_ANSWERS.has(cleanCmd)) {
             pushTerminalLog("> TRANSLATION ACCEPTED. DATA UNLOCKED.");
             playSound(sfx.missionCleared);
@@ -484,7 +477,7 @@ function processCommand(cmd) {
             globalThis.EntropyCipherHint?.resetCipherHints?.();
             triggerCipherReward();
         } else {
-            pushTerminalLog("> ERROR: INVALID TRANSLATION. TYPE 'lexicon' FOR HINTS OR 'abort'.");
+            pushTerminalLog("> ERROR: INVALID TRANSLATION. TYPE 'abort' TO EXIT.");
             playSound(sfx.oopsy);
         }
         return; 
@@ -499,7 +492,7 @@ function processCommand(cmd) {
         triggerPanopticonCenterStare();
         triggerTerminalInsultFlash();
     }
-    else if(cmd === 'help') pushTerminalLog("AVAILABLE: help, clear, meow, pizza, render, scatter, time, cipher, lexicon, shortcuts, analyze");
+    else if(cmd === 'help') pushTerminalLog("AVAILABLE: help, clear, meow, pizza, render, scatter, time, cipher, shortcuts, analyze");
     else if(cmd === 'shortcuts') printShortcuts();
     else if(cmd === 'clear') {
         document.getElementById('terminal-output').innerHTML = '';
@@ -543,9 +536,6 @@ function processCommand(cmd) {
     else if(cmd === 'cards' || cmd === 'chaos') {
         pushTerminalLog("> SHUFFLING THE CHAOS DECK...");
         globalThis.openModal('cards');
-    }
-    else if(cmd === 'lexicon') {
-        printLexicon();
     }
     else if (['analyze', 'behavior', 'behaviour', 'profile'].includes(cleanCmd)) {
         callHook('printBehaviorReport');
@@ -782,4 +772,4 @@ function initLateNightLogs() {
     }
 }
 
-export { spawnPizza, processCommand, printShortcuts, printLexicon, triggerScatter, triggerCipherReward };
+export { spawnPizza, processCommand, printShortcuts, triggerScatter, triggerCipherReward };
