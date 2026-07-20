@@ -1298,7 +1298,7 @@ function schedulePanopticonCoffeeSync() {
 
 function syncPanopticonMorningCoffee() {
     panopticonEl?.classList.toggle(
-        'panopticon-morning-coffee',
+        'panopticon-coffee-time',
         isPanopticonMorningCoffeeTime(),
     );
 }

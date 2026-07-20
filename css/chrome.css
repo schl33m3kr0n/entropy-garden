@@ -421,21 +421,31 @@ body.corrupted #panopticon-eye.away-reading .panopticon-away-laptop-icon {
     transition: opacity 0.45s ease, visibility 0.45s ease;
 }
 
-#panopticon-eye.panopticon-morning-coffee .panopticon-morning-coffee {
+#panopticon-eye.panopticon-coffee-time .panopticon-morning-coffee {
     opacity: 1;
     visibility: visible;
 }
 
-.panopticon-morning-coffee img {
+.panopticon-coffee-icon {
     display: block;
     width: 100%;
-    height: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.35));
+    aspect-ratio: 1;
+    background-color: var(--neon-green);
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.45));
+    mask-image: url('../assets/img/panopticon/coffee.png');
+    -webkit-mask-image: url('../assets/img/panopticon/coffee.png');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    transition: background-color 0.3s ease, filter 0.3s ease;
 }
 
-body.corrupted #panopticon-eye.panopticon-morning-coffee .panopticon-morning-coffee img {
-    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.35));
+body.corrupted #panopticon-eye.panopticon-coffee-time .panopticon-coffee-icon {
+    background-color: var(--alert-red);
+    filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.45));
 }
 
 .panopticon-socket-fill {
