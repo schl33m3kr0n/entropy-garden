@@ -125,6 +125,23 @@ export function applyCaesarDecoderRings(wheels, options = {}) {
     outer.caesarShift = 0;
 }
 
+export function getCaesarDecoderWheels(wheels) {
+    if (!wheels?.length) return null;
+    const inner = wheels.find((w) => w.isCipherRing && w.cipherRole === 'cipher');
+    const outer = wheels.find((w) => w.isCipherRing && w.cipherRole === 'plain');
+    if (!inner || !outer) return null;
+    return { inner, outer };
+}
+
+/** Rotate the inner decoder ring by whole letter slots (positive = scroll down). */
+export function rotateCaesarCipherRing(wheels, slotDelta) {
+    const pair = getCaesarDecoderWheels(wheels);
+    if (!pair || !slotDelta) return false;
+    const slot = (Math.PI * 2) / 26;
+    pair.inner.angle += slotDelta * slot;
+    return true;
+}
+
 export function resetCaesarPairCache() {
     caesarPairIndices = null;
 }

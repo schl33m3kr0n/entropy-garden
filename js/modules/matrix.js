@@ -18,7 +18,10 @@ import {
 import {
     applyCaesarDecoderRings,
     clearCaesarDecoderRings,
+    getCaesarDecoderWheels,
+    getCaesarPairIndices,
     resetCaesarPairCache,
+    rotateCaesarCipherRing,
 } from '../cipher/cipher-rings.js';
 import {
     time,
@@ -774,15 +777,47 @@ function refreshCaesarCipherRings() {
     if (stage >= 1) {
         applyCaesarDecoderRings(wheels, {
             active: true,
-            shift: globalThis.EntropyCipher?.shift ?? 3,
+            shift: globalThis.EntropyCipher?.shift ?? 18,
         });
+        const pair = getCaesarPairIndices();
+        if (pair) {
+            const needVisible = Math.max(pair[0], pair[1]) + 1;
+            if (visibleRingCount < needVisible) {
+                visibleRingCount = Math.min(needVisible, wheels.length);
+                matrixFilled = visibleRingCount >= wheels.length;
+            }
+        }
     } else {
+        cipherWheelScrollAccum = 0;
         clearCaesarDecoderRings(wheels);
     }
     setNeedsFullRedraw(true);
 }
 
 globalThis.refreshCaesarCipherRings = refreshCaesarCipherRings;
+
+/** Trackpad-friendly scroll accumulation for Caesar ring rotation. */
+let cipherWheelScrollAccum = 0;
+const CIPHER_WHEEL_SCROLL_STEP_PX = 36;
+
+function handleCaesarCipherWheel(e) {
+    if ((globalThis.getCipherStage?.() ?? 0) < 1) return;
+    if (!getCaesarDecoderWheels(wheels)) return;
+
+    const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : -e.deltaX;
+    cipherWheelScrollAccum += delta;
+    const slotSteps = Math.trunc(cipherWheelScrollAccum / CIPHER_WHEEL_SCROLL_STEP_PX);
+    if (!slotSteps) return;
+
+    e.preventDefault();
+    cipherWheelScrollAccum -= slotSteps * CIPHER_WHEEL_SCROLL_STEP_PX;
+
+    if (rotateCaesarCipherRing(wheels, slotSteps)) {
+        setNeedsFullRedraw(true);
+    }
+}
+
+globalThis.handleCaesarCipherWheel = handleCaesarCipherWheel;
 
 function refreshCipherEntropyRingHint() {
     const hint = globalThis.EntropyCipherHint;

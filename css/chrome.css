@@ -11,6 +11,11 @@
     transition: opacity 2.5s ease-out;
 }
 
+body.cipher-active #grid-canvas {
+    pointer-events: auto;
+    cursor: ns-resize;
+}
+
 #grid-canvas.matrix-visible {
     opacity: 1;
     /* greyscale/blur stay at 0 awake so idle can interpolate the same filter list */

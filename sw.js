@@ -34,6 +34,7 @@ const PRECACHE_URLS = [
     'js/data/cipher-glyphs.data.js',
     'js/cipher/vigenere.js',
     'js/cipher/caesar-core.js',
+    'js/cipher/caesar-scroll.js',
     'js/cipher/cipher-rings.js',
     'js/cipher/entropy-hint.js',
     'js/cipher/wheel-fill.js',

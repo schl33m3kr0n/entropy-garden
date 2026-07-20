@@ -1,5 +1,5 @@
 /**
- * Terminal Korzamuron cipher — global EntropyCipher (classic script tag).
+ * Terminal Caesar cipher — global EntropyCipher (classic script tag).
  */
 import { attachEntropyCipher } from './caesar-core.js';
 

@@ -8,7 +8,7 @@
         { id: 'panopticon_pong', title: 'Socket League', desc: 'The eye learned to rally.' },
         { id: 'konami_god', title: 'Pondery Argent', desc: 'Override accepted. Title seized.' },
         { id: 'maya_crash', title: 'Topology Anxiety', desc: 'Desktop.exe has stopped.' },
-        { id: 'cipher_vault', title: 'Korzamuron Key', desc: 'Docking bay decryption sequence.' },
+        { id: 'cipher_vault', title: 'Archive Key', desc: 'Docking bay decryption sequence.' },
         { id: 'singularity_ritual', title: 'Event Horizon', desc: 'Fuel, source, hoard — ritual complete.' },
         { id: 'scatter_breach', title: 'Containment Breach', desc: 'Icons escaped the desktop.' },
         { id: 'ghost_composer', title: 'Void Editor', desc: 'Compose in the margins.' },

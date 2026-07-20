@@ -1,8 +1,8 @@
 /**
  * Caesar cipher core (a–z, spaces preserved). ES module + tested.
  */
-export const CIPHER_PLAINTEXT = 'hun nuresk';
-export const CIPHER_SHIFT = 3;
+export const CIPHER_PLAINTEXT = 'kwlmf';
+export const CIPHER_SHIFT = 18;
 
 export function caesar(text, shift, decrypt = false) {
     const n = ((Number(shift) % 26) + 26) % 26;

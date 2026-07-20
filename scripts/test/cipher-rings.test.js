@@ -5,6 +5,7 @@ import {
     applyCaesarDecoderRings,
     clearCaesarDecoderRings,
     resetCaesarPairCache,
+    rotateCaesarCipherRing,
 } from '../../js/cipher/cipher-rings.js';
 
 describe('cipher-rings', () => {
@@ -80,5 +81,18 @@ describe('cipher-rings', () => {
         expect(wheels[2].charCount).toBe(27);
         expect(wheels[1].isCipherRing).toBeFalsy();
         expect(wheels[2].isCipherRing).toBeFalsy();
+    });
+
+    it('rotates the inner decoder ring by letter slots', () => {
+        resetCaesarPairCache();
+        const wheels = [
+            { charCount: 25, ringIndex: 1, glyphs: Array(25).fill('?'), angle: 0, spinSpeed: 0, cycleEvery: 12 },
+            { charCount: 27, ringIndex: 2, glyphs: Array(27).fill('?'), angle: 0.4, spinSpeed: 0, cycleEvery: 14 },
+        ];
+        applyCaesarDecoderRings(wheels, { active: true, shift: 3 });
+        const before = wheels[1].angle;
+        expect(rotateCaesarCipherRing(wheels, 1)).toBe(true);
+        const slot = (Math.PI * 2) / 26;
+        expect(wheels[1].angle).toBeCloseTo(before + slot, 8);
     });
 });

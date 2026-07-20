@@ -53,6 +53,11 @@ body:not(.ios-ui) #grid-canvas {
     pointer-events: none;
 }
 
+body.cipher-active #grid-canvas {
+    pointer-events: auto;
+    cursor: ns-resize;
+}
+
 /* iOS: horizontally centered; top set in JS below the eye; behind sidebar (z-index 10008) */
 body.ios-ui #panopticon-comment {
     z-index: 10004;

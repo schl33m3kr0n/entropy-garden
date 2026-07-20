@@ -34,6 +34,7 @@ export function setCipherStage(stage) {
     }
     cipherStage = stage;
     callHook('syncPanopticonCodeSequenceComments');
+    document.body?.classList.toggle('cipher-active', stage >= 1);
     globalThis.refreshCaesarCipherRings?.();
 }
 

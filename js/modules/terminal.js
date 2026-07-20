@@ -307,20 +307,20 @@ const fakeFiles = [
 ];
 
 // --- CIPHER HELPERS & REWARDS ---
-const korzamuronCipherPlain =
-    () => globalThis.EntropyCipher?.plaintext || 'hun nuresk';
+const cipherPlaintext =
+    () => globalThis.EntropyCipher?.plaintext || 'kwlmf';
 
-const CIPHER_FALLBACK_CT = 'kxq qxuhvn';
+const CIPHER_FALLBACK_CT = 'codex';
 
 function cipherCiphertext() {
     return globalThis.EntropyCipher?.ciphertext || CIPHER_FALLBACK_CT;
 }
 
 function cipherShift() {
-    return globalThis.EntropyCipher?.shift ?? 3;
+    return globalThis.EntropyCipher?.shift ?? 18;
 }
 
-/** Parse 0–25 shift from `3` or `shift 3`. */
+/** Parse 0–25 shift from `18` or `shift 18`. */
 function parseCipherShift(cleanCmd) {
     const direct = cleanCmd.match(/^(\d{1,2})$/);
     if (direct) return parseInt(direct[1], 10);
@@ -329,31 +329,29 @@ function parseCipherShift(cleanCmd) {
     return null;
 }
 
-function tryAcceptCipherPlain(cleanCmd) {
+function tryAcceptCipherCiphertext(cleanCmd) {
     const norm = cleanCmd.replace(/[^a-z ]/g, '').trim();
-    return norm === korzamuronCipherPlain();
+    return norm === cipherCiphertext();
 }
 
-/** True when shift or plaintext decrypts the live ciphertext to the Korzamuron fragment. */
+/** True when shift or ciphertext encrypts the live plaintext fragment. */
 function tryAcceptCipherAnswer(cleanCmd) {
-    if (tryAcceptCipherPlain(cleanCmd)) return true;
+    if (tryAcceptCipherCiphertext(cleanCmd)) return true;
 
     const shift = parseCipherShift(cleanCmd);
     if (shift == null || shift < 0 || shift > 25) return false;
 
     const cipher = globalThis.EntropyCipher;
-    if (!cipher?.decrypt) return shift === cipherShift();
+    if (!cipher?.encrypt) return shift === cipherShift();
 
-    const plain = cipher.decrypt(cipherCiphertext(), shift);
-    return plain === korzamuronCipherPlain();
+    return cipher.encrypt(cipherPlaintext(), shift) === cipherCiphertext();
 }
 
-const CIPHER_TRANSLATION_ANSWERS = new Set(['chaos', 'disorder']);
+const CIPHER_TRANSLATION_ANSWERS = new Set(['chaos']);
 
 function printLexicon() {
-    pushTerminalLog("> KORZAMURON DATABANK FRAGMENT:");
-    pushTerminalLog("> hun = storm | nuresk = vital");
-    pushTerminalLog('> hun nuresk <em>/from Korzamuron/</em>', { html: true });
+    pushTerminalLog("> LEXICON FRAGMENT:");
+    pushTerminalLog("> kwlmf = codex (archive)");
 }
 
 // --- NEW: THE SHORTCUTS MENU ---
@@ -385,7 +383,7 @@ function triggerCipherReward() {
     if (termInputLine) termInputLine.style.display = 'none';
 
     setTimeout(() => pushTerminalLog("> TRANSLATION LOGIC VERIFIED."), 500);
-    setTimeout(() => pushTerminalLog("> KORZAMURON ARCHIVE UNLOCKED."), 1500);
+    setTimeout(() => pushTerminalLog("> ARCHIVE UNLOCKED."), 1500);
     setTimeout(() => pushTerminalLog("> 'The vowels are entirely too many, but the prime thread remains.'"), 2500);
     
     // The Docking Bay Hint
@@ -452,24 +450,24 @@ function processCommand(cmd) {
             globalThis.EntropyCipherHint?.resetCipherHints?.();
             globalThis.refreshCaesarCipherRings?.();
         } else if (tryAcceptCipherAnswer(cleanCmd)) {
-            pushTerminalLog("> DISPLACEMENT ACCEPTED. DECRYPTING...");
+            pushTerminalLog("> CIPHERTEXT ACCEPTED. VERIFYING...");
             playSound(sfx.taskComplete);
-            const plain = korzamuronCipherPlain();
+            const ct = cipherCiphertext();
             setTimeout(() => {
-                pushTerminalLog(`> DECRYPTED FRAGMENT: '${plain}'`);
+                pushTerminalLog(`> VERIFIED: '${ct}'`);
                 pushTerminalLog("> AWAITING ENGLISH TRANSLATION...");
                 setCipherStage(2);
                 globalThis.EntropyCipherHint?.syncCipherHints?.();
             }, 1500);
         } else {
-            pushTerminalLog("> ERROR: INVALID SHIFT OR PLAINTEXT. HINT: COUNT THE LETTER OFFSET ON THE TWO ALPHABET RINGS");
+            pushTerminalLog("> ERROR: INVALID CIPHERTEXT. HINT: COUNT THE LETTER OFFSET ON THE TWO ALPHABET RINGS");
             playSound(sfx.oopsy);
         }
         return; // Stops normal commands from running
     }
 
     // ==========================================
-    // STAGE 2: Waiting for the Korzamuron Translation
+    // STAGE 2: Waiting for the English translation
     // ==========================================
     if (cipherStage === 2) {
         if (cleanCmd === 'abort' || cleanCmd === 'exit' || cleanCmd === 'esc' || cleanCmd === 'quit') {
@@ -562,13 +560,13 @@ function processCommand(cmd) {
         }
         setCipherStage(1);
         globalThis.refreshCaesarCipherRings?.();
-        pushTerminalLog("> INITIATING CAESAR DECRYPTION PROTOCOL...");
+        pushTerminalLog("> INITIATING CAESAR ENCRYPTION PROTOCOL...");
         playSound(sfx.loading);
-        const ct = cipherCiphertext();
+        const fragment = cipherPlaintext();
         setTimeout(() => {
-            pushTerminalLog(`> CIPHERTEXT: '${ct}'`);
-            pushTerminalLog("> AWAITING SHIFT (0–25) OR DECRYPTED PLAINTEXT...");
-            pushTerminalLog("> (HINT: ALIGN THE TWO 26-LETTER RINGS ON THE WHEEL)");
+            pushTerminalLog(`> PLAINTEXT: '${fragment}'`);
+            pushTerminalLog("> AWAITING CIPHERTEXT...");
+            pushTerminalLog("> (HINT: SCROLL ANYWHERE ON THE GARDEN TO ROTATE THE INNER ALPHABET RING)");
         }, 2000);
     }
 

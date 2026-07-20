@@ -12,7 +12,7 @@ export {
     openTerminal,
     getTerminalContainer,
     getTermInput,
-} from './facades/terminal.js';
+} from './facades/terminal.js?v=caesar-scroll-3';
 
 export {
     loadSingularity,
@@ -33,15 +33,15 @@ export {
     stopGardenLoop,
     resizeCanvas,
     setMatrixNeedsRedraw,
-} from './facades/matrix.js?v=cipher-clock-3';
+} from './facades/matrix.js?v=caesar-scroll-3';
 
 export { loadArcade, loadArcadeLevel } from './facades/arcade.js';
 
 export { loadCards, initCardsOfChaos } from './facades/cards.js';
 
 import { perf } from './core/shared.js';
-import { loadMatrix } from './facades/matrix.js?v=cipher-clock-3';
-import { loadTerminal } from './facades/terminal.js';
+import { loadMatrix } from './facades/matrix.js?v=caesar-scroll-3';
+import { loadTerminal } from './facades/terminal.js?v=caesar-scroll-3';
 import { loadSingularity } from './facades/singularity.js';
 
 function isIosPoemMode() {
