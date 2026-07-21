@@ -49,6 +49,44 @@
     100% { opacity: 1; transform: translate(-50%, 0); filter: hue-rotate(0deg); } /* Snaps back to visible */
 }
 
+/* UI chrome entrance — off-screen → resting position
+   RIGHT: from left (hamburger) | LEFT: from right (settings, terminal)
+   UP: from bottom (playlist, eye) | DOWN: from top (HUD, settings) */
+@keyframes uiEnterFromLeft {
+    0% { transform: translateX(calc(-100% - 48px)); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes uiEnterFromRight {
+    0% { transform: translateX(calc(100% + 48px)); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes uiEnterFromBottom {
+    0% { transform: translateY(calc(100% + 48px)); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes uiEnterFromTopCenter {
+    0% { transform: translate(-50%, -150px); opacity: 0; }
+    100% { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes uiEnterFromBottomCenter {
+    0% { transform: translate(-50%, calc(-50% + 72px)); opacity: 0; }
+    100% { transform: translate(-50%, -50%); opacity: 0.72; }
+}
+
+@keyframes uiDockEnterDesktop {
+    0% { transform: translate(-50%, 220px); opacity: 0; }
+    100% { transform: translate(-50%, 120px); opacity: 1; }
+}
+
+@keyframes uiDockEnterTouch {
+    0% { transform: translate(-50%, 96px); opacity: 0; }
+    100% { transform: translate(-50%, 0); opacity: 1; }
+}
+
 @keyframes flash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(2); } }
 
 @keyframes spin3D { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(360deg); } }
@@ -258,6 +296,40 @@
 
     #panopticon-eye.visible {
         opacity: 0.55;
+        transform: translate(-50%, -50%);
+    }
+
+    body:not(.ios-ui) .control-panel.active {
+        animation: none !important;
+        transform: translateX(0);
+    }
+
+    body:not(.ios-ui) #settings-menu.active {
+        animation: none !important;
+        transform: translateY(0);
+    }
+
+    body:not(.ios-ui) #playlist-menu.active {
+        animation: none !important;
+        transform: translateY(0);
+    }
+
+    body:not(.ios-ui) #panopticon-eye.visible {
+        animation: none !important;
+        transform: translate(-50%, -50%);
+    }
+
+    body:not(.ios-ui) #hud.active.anim-drop {
+        animation: animDrop 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+    }
+
+    body:not(.ios-ui) #terminal-container.fab-ready.reveal-in:not([hidden]),
+    body:not(.ios-ui) #terminal-container.fab-ready.active:not([hidden]) {
+        transform: translateX(0);
+    }
+
+    body.garden-ready #docking-bay {
+        animation: none !important;
     }
 
     /* 5. Disable the violent error shaking on the combo locks */

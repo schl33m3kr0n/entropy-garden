@@ -326,6 +326,10 @@ let panopticonAuxId = null;
 let panopticonIdleCommentTimer = null;
 let panopticonCommentTimeout = null;
 let panopticonTabHiddenAt = 0;
+let panopticonPostMidnightVisits = 0;
+let panopticonLateNightShownKey = '';
+let panopticonLateNightTimer = null;
+const PANOPTICON_LATE_NIGHT_HOURS = new Set([23, 0, 1, 2, 3, 4, 5, 6, 7]);
 let panopticonCodeSequenceActivePrev = false;
 let panopticonAwayActivity = null;
 let panopticonAwayReturnTimer = null;
@@ -624,6 +628,86 @@ function syncPanopticonCommentChrome() {
     panopticonCommentEl.classList.toggle('panopticon-comment-god', isPanopticonGodModeCommentary());
 }
 
+function getPanopticonLocalHour(now = new Date()) {
+    try {
+        const params = new URLSearchParams(globalThis.location?.search || '');
+        const preview = params.get('previewHour');
+        if (preview != null && preview !== '') {
+            const h = parseInt(preview, 10);
+            if (!Number.isNaN(h) && h >= 0 && h <= 23) return h;
+        }
+    } catch {
+        /* non-browser */
+    }
+    return now.getHours();
+}
+
+function isPanopticonLateNightHour(now = new Date()) {
+    return PANOPTICON_LATE_NIGHT_HOURS.has(getPanopticonLocalHour(now));
+}
+
+function panopticonLateNightSlotKey(now = new Date()) {
+    return `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${getPanopticonLocalHour(now)}`;
+}
+
+function panopticonLateNightAlreadyShown(now = new Date()) {
+    return panopticonLateNightSlotKey(now) === panopticonLateNightShownKey;
+}
+
+function resetPanopticonPostMidnightVisitsIfDaytime(now = new Date()) {
+    const hour = getPanopticonLocalHour(now);
+    if (hour >= 8 && hour <= 22) panopticonPostMidnightVisits = 0;
+}
+
+function notePanopticonPostMidnightReturn(now = new Date()) {
+    resetPanopticonPostMidnightVisitsIfDaytime(now);
+    const hour = getPanopticonLocalHour(now);
+    if (hour >= 0 && hour < 7) panopticonPostMidnightVisits += 1;
+}
+
+function pickPanopticonLateNightComment(now = new Date()) {
+    if (!isPanopticonLateNightHour(now)) return null;
+    const hour = getPanopticonLocalHour(now);
+    const table = globalThis.lorePools?.panopticonLateNightHourlyComments;
+    if (!table) return null;
+    const entry = table[hour] ?? table[String(hour)];
+    if (!entry) return null;
+    if (typeof entry === 'string') return entry;
+    if (entry.minPostMidnightVisits != null) {
+        if (panopticonPostMidnightVisits < entry.minPostMidnightVisits) return null;
+        return entry.text ?? null;
+    }
+    return entry.text ?? null;
+}
+
+function tryShowPanopticonLateNightComment(now = new Date()) {
+    if (panopticonLateNightAlreadyShown(now)) return false;
+    const text = pickPanopticonLateNightComment(now);
+    if (!text || !canShowPanopticonComment()) return false;
+    panopticonLateNightShownKey = panopticonLateNightSlotKey(now);
+    showPanopticonComment(text);
+    return true;
+}
+
+function msUntilNextHourBoundary(now = new Date()) {
+    const next = new Date(now);
+    next.setMinutes(0, 0, 0);
+    next.setMilliseconds(0);
+    next.setHours(now.getHours() + 1);
+    return Math.max(1000, next.getTime() - now.getTime() + 50);
+}
+
+function schedulePanopticonLateNightCommentSync() {
+    if (typeof globalThis.setTimeout !== 'function') return;
+    clearTimeout(panopticonLateNightTimer);
+    panopticonLateNightTimer = setTimeout(() => {
+        if (gardenHasStarted && isGardenReady()) {
+            tryShowPanopticonLateNightComment();
+        }
+        schedulePanopticonLateNightCommentSync();
+    }, msUntilNextHourBoundary());
+}
+
 function pickPanopticonIdleComment() {
     const pools = globalThis.lorePools;
     if (!pools) return null;
@@ -641,6 +725,14 @@ function pickPanopticonIdleComment() {
     if (isPanopticonGodModeCommentary()) {
         const god = pools.panopticonGodModeComments;
         return god?.length ? pickOne(god, []) : null;
+    }
+
+    if (isPanopticonLateNightHour()) {
+        const lateNight = pickPanopticonLateNightComment();
+        if (lateNight && !panopticonLateNightAlreadyShown()) {
+            panopticonLateNightShownKey = panopticonLateNightSlotKey();
+            return lateNight;
+        }
     }
 
     const part = getPanopticonDayPart();
@@ -876,9 +968,12 @@ export function handlePanopticonVisibilityChange(hidden) {
     } else if (awayMs >= PANOPTICON_TAB_RETURN_MIN_MS) {
         resetPanopticonAwayState();
         if (eyeMode === 'reading') eyeMode = 'idle';
-        const text = pickPanopticonReturnComment();
+        notePanopticonPostMidnightReturn();
         requestAnimationFrame(() => {
-            if (canShowPanopticonComment()) showPanopticonComment(text);
+            if (!tryShowPanopticonLateNightComment()) {
+                const text = pickPanopticonReturnComment();
+                if (canShowPanopticonComment()) showPanopticonComment(text);
+            }
         });
     } else {
         resetPanopticonAwayState();
@@ -1386,6 +1481,10 @@ export function updatePanopticonVisibility() {
     syncPanopticonMorningCoffee();
     if (panopticonDayPartTimer == null) schedulePanopticonDayPartSync();
     if (panopticonCoffeeTimer == null) schedulePanopticonCoffeeSync();
+    if (panopticonLateNightTimer == null) {
+        schedulePanopticonLateNightCommentSync();
+        tryShowPanopticonLateNightComment();
+    }
 }
 
 function horizontalOffset(angle) {

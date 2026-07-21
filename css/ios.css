@@ -369,8 +369,17 @@ body.ios-ui #hud {
     top: auto;
     left: auto;
     width: auto;
-    transform: none;
+    opacity: 0;
+    transform: translateY(-48px);
+    pointer-events: none;
+    transition:
+        transform 1.2s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 1.2s ease;
+}
+
+body.ios-ui #hud.active {
     opacity: 1;
+    transform: none;
     pointer-events: none;
 }
 
@@ -721,13 +730,16 @@ body.ios-ui .control-panel {
     right: auto;
     z-index: 10011;
     opacity: 0;
-    transform: none;
+    transform: translateX(calc(-100% - 32px));
     pointer-events: none;
-    transition: opacity 0.8s ease;
+    transition:
+        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.8s ease;
 }
 
 body.ios-ui.garden-ready .control-panel.active {
     opacity: 1;
+    transform: translateX(0);
     pointer-events: auto;
 }
 
@@ -735,10 +747,15 @@ body.ios-ui #settings-menu {
     top: calc(env(safe-area-inset-top) + 12px);
     right: calc(env(safe-area-inset-right) + 12px);
     z-index: 10030;
+    transform: translateY(calc(-100% - 32px));
+    transition:
+        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.8s ease;
 }
 
 body.ios-ui #settings-menu.active {
     opacity: 1;
+    transform: translateY(0);
     pointer-events: auto;
 }
 
@@ -765,6 +782,7 @@ body.ios-ui #playlist-menu {
     right: auto;
     z-index: 10020;
     opacity: 0;
+    transform: translateY(calc(100% + 32px));
     pointer-events: none;
     width: min(200px, calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)));
     box-sizing: border-box;
@@ -772,7 +790,9 @@ body.ios-ui #playlist-menu {
     border-left: 2px solid var(--neon-green);
     border-top: none;
     padding: 10px;
-    transition: opacity 0.8s ease;
+    transition:
+        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.8s ease;
 }
 
 /* iPhone — playlist lives at the bottom of the sidebar tools stack */
@@ -787,6 +807,7 @@ body.ios-ui:not(.ios-tablet) .ios-sidebar-tools #playlist-menu {
     border-left: none;
     border-top: 1px solid rgba(0, 255, 0, 0.25);
     background: transparent;
+    transform: none;
     transition: opacity 0.8s ease;
 }
 
@@ -801,6 +822,7 @@ body.ios-ui #track-title {
 
 body.ios-ui.garden-ready #playlist-menu.active {
     opacity: 1;
+    transform: translateY(0);
     pointer-events: auto;
 }
 

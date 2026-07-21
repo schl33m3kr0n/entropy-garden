@@ -113,20 +113,37 @@
         "tragedies come in 3’s, don’t know what that means for the Catholic Church",
         "tragedies come in 3’s, mine comes in 9’s",
         "tragedies come in 3’s, and 3 is my lucky number",
-
+        "tragedies come in 3's, that's how we got a red trifecta",
+        "tragedies come in 3's, that's how we ended up with the Hangover trilogy",
     ],
     panopticonIdleCommentsEveningSafe: [
         "go home to your family, dude",
+        "daylight is creeping away, just like your savings",
+        "go make dinner or something. this is just getting embarassing",
+        "do you really need a late night snack?",
     ],
     panopticonIdleCommentsEveningGritty: [
-        "daylight is creeping away, just like your savings",
-        "the night approaches, have you taken your crazy pills yet?",
-        "go make dinner or something. this is just getting embarassing",
         "yeah, so uhh, can we perhaps schedule this mental breakdown for next Saturday?",
         "can we make this quick? i'm in the middle of watching the family guy star wars trilogy",
         "i mean, at least you're not yelling slurs in the COD lobby",
-        ""
+        "the night approaches, have you taken your silly billy pills yet?",
+        "it has come to my attention that she did indeed farted on my dih",
     ],
+    /** Local hour → line (23 = 11pm … 7 = 7am). Hour 2 needs minPostMidnightVisits tab returns after midnight. */
+    panopticonLateNightHourlyComments: {
+        23: "humans were never meant to be creatures of the night. you don't have to be an exception",
+        0: "i'm flattered to count as an obligation in your timeline",
+        1: "you're still here?",
+        2: {
+            minPostMidnightVisits: 3,
+            text: "i miss all-nighters as much as the next guy, but this is getting excessive",
+        },
+        3: "i respect the commitment tbh",
+        4: "yeah, they're still larping as a vampire",
+        5: "feeling comfy in your batcave, champ?",
+        6: "coffee's not gonna fix this, bro",
+        7: "you beat the moon at its own game. your reward is delayed reactions and crankiness. congratulations",
+    },
     panopticonIdleCommentsChristmasSafe: [
         "the secret elites want you to not only be holly, but jolly this Christmas. brother, it's the middle of winter. the bills are due",
         "Christmas came early for me, but so did every other holiday. I'm not sure how calendars work in this dimension",

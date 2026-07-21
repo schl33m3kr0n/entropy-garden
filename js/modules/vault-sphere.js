@@ -5,8 +5,86 @@ const TILT_X = 0.33;
 const SPIN_SPEED = 0.50;
 const SPHERE_SCALE = 0.23;
 const MAX_RENDER_PX = 720;
+const DARK_SHADE_MIN = 0.10;
+const DARK_SHADE_MAX = 1.0;
+const CHROMA_HUES = [0, 60, 120, 180, 240, 300, 360];
+const CHROMA_SAT = 100;
+const CHROMA_LIGHT_MIN = 28;
+const CHROMA_LIGHT_MAX = 55;
 
 const activeCanvases = new Set();
+const colorProbe = document.createElement('canvas');
+colorProbe.width = 1;
+colorProbe.height = 1;
+const cssRgbCache = new Map();
+
+function readCssRgb(varName, fallback) {
+    const cached = cssRgbCache.get(varName);
+    if (cached && performance.now() - cached.at < 500) return cached.rgb;
+
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '';
+    const ctx = colorProbe.getContext('2d');
+    if (!ctx) return fallback;
+
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillStyle = raw || `rgb(${fallback.join(',')})`;
+    ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+    const rgb = [r, g, b];
+    cssRgbCache.set(varName, { rgb, at: performance.now() });
+    return rgb;
+}
+
+function isCorrupted() {
+    return document.body.classList.contains('corrupted');
+}
+
+function chromaHueFromSurface(lat, lon) {
+    const u = ((lon / Math.PI) + 1) * 0.5;
+    const v = (lat / Math.PI) + 0.5;
+    return ((u + v * 0.35) * 360) % 360;
+}
+
+function sampleChromaHue(hue) {
+    const h = ((hue % 360) + 360) % 360;
+    const scaled = (h / 360) * (CHROMA_HUES.length - 1);
+    const i = Math.floor(scaled);
+    const f = scaled - i;
+    const a = CHROMA_HUES[i];
+    const b = CHROMA_HUES[Math.min(i + 1, CHROMA_HUES.length - 1)];
+    return a + (b - a) * f;
+}
+
+function hslToRgb(h, s, l) {
+    s /= 100;
+    l /= 100;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    let r = 0;
+    let g = 0;
+    let b = 0;
+
+    if (h < 60) {
+        r = c; g = x;
+    } else if (h < 120) {
+        r = x; g = c;
+    } else if (h < 180) {
+        g = c; b = x;
+    } else if (h < 240) {
+        g = x; b = c;
+    } else if (h < 300) {
+        r = x; b = c;
+    } else {
+        r = c; b = x;
+    }
+
+    return [
+        Math.round((r + m) * 255),
+        Math.round((g + m) * 255),
+        Math.round((b + m) * 255),
+    ];
+}
 
 function rotatePoint([x, y, z], rotX, rotY) {
     let nx = x;
@@ -103,8 +181,18 @@ function castSpherePixel(dx, dy, radius, focal, rotY) {
 function shadePixel(hit, light) {
     if (checkerShade(hit.lat, hit.lon)) return [255, 255, 255];
     const lit = Math.max(0, dot(hit.normal, light));
-    const v = Math.round(10 + 32 * lit);
-    return [v, v, v];
+    const shade = DARK_SHADE_MIN + (DARK_SHADE_MAX - DARK_SHADE_MIN) * lit;
+
+    if (isCorrupted()) {
+        const [r, g, b] = readCssRgb('--alert-red', [255, 0, 85]);
+        return [Math.round(r * shade), Math.round(g * shade), Math.round(b * shade)];
+    }
+
+    const hue = sampleChromaHue(chromaHueFromSurface(hit.lat, hit.lon));
+    const lightness = CHROMA_LIGHT_MIN + (CHROMA_LIGHT_MAX - CHROMA_LIGHT_MIN) * lit;
+    const [r, g, b] = hslToRgb(hue, CHROMA_SAT, lightness);
+    const depth = 0.35 + 0.65 * shade;
+    return [Math.round(r * depth), Math.round(g * depth), Math.round(b * depth)];
 }
 
 function drawSphereFrame(ctx, w, h, rotY) {

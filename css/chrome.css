@@ -61,6 +61,22 @@ body.idle-dissociating.corrupted #grid-canvas.matrix-visible {
 }
 
 /* --- PANOPTICON EYE --- */
+body:not(.ios-ui) #panopticon-eye {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% + 72px));
+    width: clamp(110px, 16vw, 190px);
+    height: clamp(110px, 16vw, 190px);
+    z-index: 12;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+        opacity 2.5s ease-out,
+        transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+    filter: none;
+}
+
 #panopticon-eye {
     position: fixed;
     top: 50%;
@@ -181,6 +197,11 @@ body.god-mode #panopticon-comment,
     letter-spacing: 0.08em;
     /* letter-spacing adds after the last glyph — nudge so the pyramid reads centered */
     transform: translateX(-0.04em);
+}
+
+body:not(.ios-ui) #panopticon-eye.visible {
+    opacity: 0.72;
+    transform: translate(-50%, -50%);
 }
 
 #panopticon-eye.visible {
@@ -1530,6 +1551,104 @@ body.corrupted .comms-social:hover {
     background: #fff;
 }
 
+.vault-item-sphere {
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    background: #fff;
+}
+
+.vault-item-sphere:hover {
+    box-shadow: 0 0 18px rgba(0, 255, 0, 0.35);
+}
+
+.vault-sphere-scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    perspective: 520px;
+    background: #fff;
+}
+
+.vault-sphere-starburst {
+    position: absolute;
+    width: 89%;
+    height: 89%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+    animation: vault-sphere-starburst 15s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    overflow: visible;
+}
+
+.vault-sphere-starburst polygon {
+    fill: #000;
+}
+
+.vault-sphere-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.vault-sphere-canvas--ready {
+    opacity: 1;
+}
+
+.vault-sphere-eyes {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.vault-sphere-eye {
+    width: 15%;
+    height: auto;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+.vault-sphere-eye-sclera {
+    stroke: none;
+}
+
+.vault-sphere-eye--dark .vault-sphere-eye-sclera {
+    fill: #000;
+}
+
+.vault-sphere-eye--light .vault-sphere-eye-sclera {
+    fill: #fff;
+}
+
+.vault-sphere-eye-iris {
+    fill: url(#panopticon-rainbow);
+}
+
+.vault-sphere-eye-pupil {
+    fill: #0a0a0a;
+}
+
+@keyframes vault-sphere-starburst {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
 /* Reveals the full, bright, psychedelic color when you hover over it! */
 .vault-item:hover .vault-media {
     filter: grayscale(0%) contrast(1) brightness(1); 
@@ -1703,6 +1822,23 @@ body.corrupted .comms-social:hover {
 
 #lightbox-overlay.active .lightbox-content {
     transform: scale(1); /* Gives it a slight "pop in" effect */
+}
+
+#lightbox-overlay .vault-sphere-lightbox {
+    position: relative;
+    width: min(88vw, 88vh);
+    height: min(88vw, 88vh);
+    max-width: 900px;
+    max-height: 900px;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    background: #fff;
+}
+
+#lightbox-overlay .vault-sphere-lightbox .vault-sphere-scene {
+    position: absolute;
+    inset: 0;
 }
 
 /* --- BOSS KEY FAKE MAYA CRASH --- */
@@ -1962,7 +2098,7 @@ body.singularity-active #singularity-controls {
     align-items: flex-end;
     gap: 8px;
     opacity: 0;
-    transform: translateY(-24px);
+    transform: translateY(calc(-100% - 48px));
     pointer-events: none;
     transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.5s ease;
 }
@@ -2218,11 +2354,14 @@ body.corrupted #birds-mute-btn.is-muted {
     padding: 10px;
     font-family: var(--main-font);
     border-radius: var(--radius-md);
-    
-    /* CHANGE THIS: Use opacity instead of display:none for smoother reveals */
-    opacity: 0; 
+    opacity: 0;
+    transform: translateY(calc(100% + 48px));
     pointer-events: none;
-    transition: opacity 1s ease, background 0.3s ease, border-color 0.3s ease;
+    transition:
+        transform 1.5s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 1s ease,
+        background 0.3s ease,
+        border-color 0.3s ease;
 }
 
 /* Real mouse only — sticky :hover on iOS turns the panel green and can hide the title */
@@ -2283,6 +2422,7 @@ body.corrupted #birds-mute-btn.is-muted {
 /* Add this new class to handle the reveal */
 #playlist-menu.active {
     opacity: 1;
+    transform: translateY(0);
     pointer-events: auto;
 }
 

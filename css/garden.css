@@ -170,18 +170,15 @@ body.corrupted.god-mode:has(#panopticon-eye.god-active) .god-mode-triangle-layer
     display: flex; 
     z-index: 10001;
 
-    /* NEW: Hide it initially and push it above the viewport */
     opacity: 0;
-    transform: translateY(-100px);
-    /* Smooth transition for when the .active class is added */
+    transform: translateX(calc(-100% - 48px));
     transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.5s ease;
     pointer-events: none;
 }
 
-/* NEW: The trigger class for the reveal */
 .control-panel.active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
     pointer-events: auto;
 }
 
@@ -306,26 +303,30 @@ body.corrupted .ui-btn:hover {
     position: absolute; 
     bottom: 0; 
     left: 50%; 
-    transform: translate(-50%, 0); /* Default position for mobile */
+    transform: translate(-50%, 0);
     display: flex; 
     gap: 20px; 
     z-index: 40; 
-    padding-bottom: 40px; /* Keeps the slots hovering just above the bottom edge */
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Adds a snappy, futuristic slide */
+    padding-bottom: 40px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body.garden-ready #docking-bay {
+    animation: uiDockEnterTouch 1.5s cubic-bezier(0.25, 1, 0.5, 1) 0.85s both;
 }
 
 /* Only hide and slide on devices with a real mouse cursor */
 @media (hover: hover) and (pointer: fine) {
     #docking-bay {
-        /* 120px pushes the 70px slots + 40px padding completely off the bottom of the screen */
         transform: translate(-50%, 120px); 
-        
-        /* This creates a 150px tall invisible trigger zone above the hidden slots */
         padding-top: 150px; 
+    }
+
+    body.garden-ready #docking-bay {
+        animation-name: uiDockEnterDesktop;
     }
     
     #docking-bay:hover {
-        /* When the mouse enters the top padding, snap the slots up into view! */
         transform: translate(-50%, 0); 
     }
 }
