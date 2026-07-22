@@ -21,6 +21,10 @@ export const DISCO_BALL_SPIN_DEFAULTS = {
     bgSpeed: 0.5,
     reflectStrength: 0.42,
     specularStrength: 0.3,
+    trailLength: 0,
+    trailOpacity: 0.42,
+    trailFade: 0.78,
+    trailStep: 0.035,
 };
 
 const FRONT_EPS = 0.001;
@@ -219,30 +223,135 @@ function faceCenter(points) {
     return [sx / points.length, sy / points.length];
 }
 
-function chromaOffsetForFace(points, config) {
-    const amount = config.chromaAmount ?? 0;
+function faceOffset(points, config, { amountKey, falloffKey, angleKey, variableKey }) {
+    const amount = config[amountKey] ?? 0;
     if (amount <= 0) return null;
 
     const [fx, fy] = faceCenter(points);
     const dist = Math.hypot(fx - config.cx, fy - config.cy) / config.r;
 
     let strength = amount;
-    if (config.chromaVariable !== false) {
-        const falloff = config.chromaFalloff ?? 1.5;
+    if (config[variableKey] !== false) {
+        const falloff = config[falloffKey] ?? 1.5;
         strength *= Math.pow(Math.min(Math.max(dist, 0), 1), falloff);
     }
 
     if (strength < 0.01) return null;
 
-    const rad = ((config.chromaAngle ?? 0) * Math.PI) / 180;
+    const rad = ((config[angleKey] ?? 0) * Math.PI) / 180;
     return {
         rx: Math.cos(rad) * strength,
         ry: Math.sin(rad) * strength,
     };
 }
 
+function chromaOffsetForFace(points, config) {
+    return faceOffset(points, config, {
+        amountKey: 'chromaAmount',
+        falloffKey: 'chromaFalloff',
+        angleKey: 'chromaAngle',
+        variableKey: 'chromaVariable',
+    });
+}
+
 function shiftPoints(points, dx, dy) {
     return points.map(([x, y]) => [x + dx, y + dy]);
+}
+
+function buildFaceStack(faces, config, bgPhase, { layerOpacity = 1, includeSpecular = true, includeChroma = true } = {}) {
+    const stack = document.createDocumentFragment();
+
+    const faceLayer = document.createElementNS(SVG_NS, 'g');
+    faceLayer.setAttribute('class', 'disco-ball-faces');
+    if (layerOpacity < 1) faceLayer.setAttribute('opacity', String(layerOpacity));
+
+    faces.forEach((face) => {
+        appendPolygon(faceLayer, face.points, {
+            fill: tileFill(face.normal, face.shade, config, bgPhase),
+            stroke: config.stroke,
+            'stroke-width': config.strokeWidth,
+            'stroke-linejoin': 'round',
+        });
+
+        if (includeSpecular) {
+            const specular = config.specularStrength ?? 0.78;
+            const spec = Math.pow(Math.max(dot(face.normal, LIGHT), 0), 10);
+            if (specular > 0.01 && spec > 0.22) {
+                const [cx, cy] = faceCenter(face.points);
+                const glint = face.points.map(([x, y]) => [
+                    cx + (x - cx) * 0.5,
+                    cy + (y - cy) * 0.5,
+                ]);
+                appendPolygon(faceLayer, glint, {
+                    fill: '#ffffff',
+                    'fill-opacity': Math.min(0.7, spec * specular),
+                    stroke: 'none',
+                });
+            }
+        }
+    });
+
+    stack.appendChild(faceLayer);
+
+    if (includeChroma && (config.chromaAmount ?? 0) > 0) {
+        const chromaLayer = document.createElementNS(SVG_NS, 'g');
+        chromaLayer.setAttribute('class', 'disco-ball-chroma-fringe');
+        chromaLayer.setAttribute('style', 'mix-blend-mode: screen');
+        if (layerOpacity < 1) chromaLayer.setAttribute('opacity', String(layerOpacity));
+
+        faces.forEach((face) => {
+            const offset = chromaOffsetForFace(face.points, config);
+            if (!offset) return;
+
+            appendPolygon(chromaLayer, shiftPoints(face.points, offset.rx, offset.ry), {
+                fill: config.chromaRed ?? '#ff0055',
+                'fill-opacity': config.chromaOpacity ?? 0.65,
+                stroke: 'none',
+            });
+            appendPolygon(chromaLayer, shiftPoints(face.points, -offset.rx, -offset.ry), {
+                fill: config.chromaCyan ?? '#00ffff',
+                'fill-opacity': config.chromaOpacity ?? 0.65,
+                stroke: 'none',
+            });
+        });
+
+        stack.appendChild(chromaLayer);
+    }
+
+    return stack;
+}
+
+function renderGrid(grid, rotY, config, bgPhase, trailHistory = []) {
+    grid.replaceChildren();
+
+    const trailLen = Math.max(0, Math.round(config.trailLength ?? 0));
+    if (trailLen > 0 && trailHistory.length) {
+        const trailOpacity = config.trailOpacity ?? 0.42;
+        const trailFade = config.trailFade ?? 0.78;
+
+        for (let i = trailHistory.length - 1; i >= 0; i -= 1) {
+            const sample = trailHistory[i];
+            const age = i + 1;
+            const opacity = trailOpacity * (trailFade ** (age - 1));
+            if (opacity < 0.015) continue;
+
+            const faces = buildFaces(sample.rotY, config);
+            const trailGroup = document.createElementNS(SVG_NS, 'g');
+            trailGroup.setAttribute('class', 'disco-ball-trail');
+            trailGroup.appendChild(buildFaceStack(faces, config, sample.bgPhase, {
+                layerOpacity: opacity,
+                includeSpecular: false,
+                includeChroma: false,
+            }));
+            grid.appendChild(trailGroup);
+        }
+    }
+
+    const faces = buildFaces(rotY, config);
+    const currentGroup = document.createElementNS(SVG_NS, 'g');
+    currentGroup.setAttribute('class', 'disco-ball-current');
+    currentGroup.appendChild(buildFaceStack(faces, config, bgPhase));
+    grid.appendChild(currentGroup);
 }
 
 function appendPolygon(parent, points, attrs) {
@@ -325,60 +434,6 @@ function applyBallGeometry(svg, config) {
     svg.querySelector('.disco-ball-outline')?.remove();
 }
 
-function renderGrid(grid, rotY, config, bgPhase) {
-    const faces = buildFaces(rotY, config);
-    const faceLayer = document.createElementNS(SVG_NS, 'g');
-    faceLayer.setAttribute('class', 'disco-ball-faces');
-    const chromaLayer = document.createElementNS(SVG_NS, 'g');
-    chromaLayer.setAttribute('class', 'disco-ball-chroma-fringe');
-    chromaLayer.setAttribute('style', 'mix-blend-mode: screen');
-
-    faces.forEach((face) => {
-        appendPolygon(faceLayer, face.points, {
-            fill: tileFill(face.normal, face.shade, config, bgPhase),
-            stroke: config.stroke,
-            'stroke-width': config.strokeWidth,
-            'stroke-linejoin': 'round',
-        });
-
-        const specular = config.specularStrength ?? 0.78;
-        const spec = Math.pow(Math.max(dot(face.normal, LIGHT), 0), 10);
-        if (specular > 0.01 && spec > 0.22) {
-            const [cx, cy] = faceCenter(face.points);
-            const glint = face.points.map(([x, y]) => [
-                cx + (x - cx) * 0.5,
-                cy + (y - cy) * 0.5,
-            ]);
-            appendPolygon(faceLayer, glint, {
-                fill: '#ffffff',
-                'fill-opacity': Math.min(0.7, spec * specular),
-                stroke: 'none',
-            });
-        }
-    });
-
-    const chromaAmount = config.chromaAmount ?? 0;
-    if (chromaAmount > 0) {
-        faces.forEach((face) => {
-            const offset = chromaOffsetForFace(face.points, config);
-            if (!offset) return;
-
-            appendPolygon(chromaLayer, shiftPoints(face.points, offset.rx, offset.ry), {
-                fill: config.chromaRed ?? '#ff0055',
-                'fill-opacity': config.chromaOpacity ?? 0.65,
-                stroke: 'none',
-            });
-            appendPolygon(chromaLayer, shiftPoints(face.points, -offset.rx, -offset.ry), {
-                fill: config.chromaCyan ?? '#00ffff',
-                'fill-opacity': config.chromaOpacity ?? 0.65,
-                stroke: 'none',
-            });
-        });
-    }
-
-    grid.replaceChildren(faceLayer, chromaLayer);
-}
-
 function resolveGrid(svg) {
     let grid = svg.querySelector('.disco-ball-grid');
     if (grid) return grid;
@@ -417,11 +472,25 @@ export function initDiscoBallSpin(root, options = {}) {
     let raf = 0;
     let lastFrame = 0;
     let disposed = false;
+    /** @type {{ rotY: number, bgPhase: number }[]} */
+    const trailHistory = [];
+
+    const pushTrailSample = () => {
+        const trailLen = Math.max(0, Math.round(config.trailLength ?? 0));
+        if (trailLen <= 0 || paused) return;
+
+        const step = config.trailStep ?? 0.035;
+        const head = trailHistory[0];
+        if (head && Math.abs(rotY - head.rotY) < step) return;
+
+        trailHistory.unshift({ rotY, bgPhase });
+        while (trailHistory.length > trailLen) trailHistory.pop();
+    };
 
     const paint = () => {
         applyBallGeometry(svg, config);
         resolveBackground(svg, config, bgPhase);
-        renderGrid(grid, rotY, config, bgPhase);
+        renderGrid(grid, rotY, config, bgPhase, trailHistory);
     };
 
     const tick = (now) => {
@@ -431,9 +500,10 @@ export function initDiscoBallSpin(root, options = {}) {
         if (!paused) {
             rotY += config.speed * dt;
             bgPhase = (bgPhase + (config.bgSpeed ?? 0.12) * dt * 360) % 360;
+            pushTrailSample();
         }
         resolveBackground(svg, config, bgPhase);
-        renderGrid(grid, rotY, config, bgPhase);
+        renderGrid(grid, rotY, config, bgPhase, trailHistory);
         raf = requestAnimationFrame(tick);
     };
 
@@ -450,6 +520,7 @@ export function initDiscoBallSpin(root, options = {}) {
         },
         setConfig(partial) {
             Object.assign(config, partial);
+            if ((config.trailLength ?? 0) <= 0) trailHistory.length = 0;
             paint();
         },
         setSpeed(value) {

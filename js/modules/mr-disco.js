@@ -1,35 +1,39 @@
 /** Mr. Disco modal — disco ball with tracking eyes + alternate history archive. */
 
 import { initDiscoBallEyes } from '../disco-ball-eyes.js';
-import { initDiscoBallSpin, DISCO_BALL_SPIN_DEFAULTS } from '../disco-ball-spin.js';
+import { initDiscoBallSpin } from '../disco-ball-spin.js';
 import { alternateHistoryArticles } from '../data/alternate-history.data.js';
 import { resolveAlternateHistoryArticles } from '../alternate-history-search.js';
 
 const settings = {
-    cx: DISCO_BALL_SPIN_DEFAULTS.cx,
-    cy: DISCO_BALL_SPIN_DEFAULTS.cy,
-    r: DISCO_BALL_SPIN_DEFAULTS.r,
-    checks: DISCO_BALL_SPIN_DEFAULTS.checks,
+    cx: 50,
+    cy: 50,
+    r: 42,
+    checks: 12,
     tiltX: 0,
-    speed: DISCO_BALL_SPIN_DEFAULTS.speed,
-    strokeWidth: DISCO_BALL_SPIN_DEFAULTS.strokeWidth,
-    fillDark: DISCO_BALL_SPIN_DEFAULTS.fillDark,
-    chromaAmount: DISCO_BALL_SPIN_DEFAULTS.chromaAmount,
-    chromaFalloff: DISCO_BALL_SPIN_DEFAULTS.chromaFalloff,
-    chromaAngle: DISCO_BALL_SPIN_DEFAULTS.chromaAngle,
-    chromaOpacity: DISCO_BALL_SPIN_DEFAULTS.chromaOpacity,
-    chromaVariable: DISCO_BALL_SPIN_DEFAULTS.chromaVariable,
-    bgSpeed: DISCO_BALL_SPIN_DEFAULTS.bgSpeed,
+    speed: 0.75,
+    strokeWidth: 1.5,
+    fillDark: '#e6e6e6',
+    chromaAmount: 0,
+    chromaFalloff: 0.2,
+    chromaAngle: 0,
+    chromaOpacity: 0,
+    chromaVariable: false,
+    bgSpeed: 0.5,
     bgPhase: 243,
-    reflectStrength: DISCO_BALL_SPIN_DEFAULTS.reflectStrength,
-    specularStrength: DISCO_BALL_SPIN_DEFAULTS.specularStrength,
-    scleraR: 12.3,
-    pupilR: 9.1,
+    reflectStrength: 0.5,
+    specularStrength: 0,
+    trailLength: 0,
+    trailOpacity: 0.58,
+    trailFade: 0.7,
+    trailStep: 0.045,
+    scleraR: 12,
+    pupilR: 9,
     eyeY: 50,
     eyeSpread: 13.5,
     eyeStroke: 2,
-    reach: 36,
-    ease: 0.2,
+    reach: 34,
+    ease: 0.33,
 };
 
 let initPromise = null;
@@ -72,6 +76,10 @@ async function setup() {
         bgSpeed: settings.bgSpeed,
         reflectStrength: settings.reflectStrength,
         specularStrength: settings.specularStrength,
+        trailLength: settings.trailLength,
+        trailOpacity: settings.trailOpacity,
+        trailFade: settings.trailFade,
+        trailStep: settings.trailStep,
     });
     spin.setBgPhase(settings.bgPhase);
     spin.setPaused(false);
