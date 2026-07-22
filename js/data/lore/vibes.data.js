@@ -103,9 +103,10 @@
         "Crying myself to sleep after the Mexico & England game",
         "Refurbishing angst into silly & marketable shapes",
         "Overanalyzing my decisions until paralysis",
-        "Lifting weights (of my despair & melancholy)",
         "Establishing a palatable ethnostate in Animal Crossing",
-        "Refactoring the code because it sounds important",
+        "Refactoring the code because it sounded important",
+        "Drowning my sorrows with a Baja Blast and Doritos Locos Tacos",
+        "Avoiding the elephant in the room at all costs",
     ],
     vibesActivityGritty: [
         "Regret",
@@ -119,6 +120,7 @@
         "Resisting the urge to grab an officer's firearm",
         "Settling for less because that's all I can get",
         "Paying the ultimate price for what I've done",
+        "Lifting weights (of my despair & melancholy)",
         "Kinkshaming",
     ],
     vibesMoodSafe: [
