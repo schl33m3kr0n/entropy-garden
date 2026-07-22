@@ -312,7 +312,9 @@ body.corrupted .ui-btn:hover {
 }
 
 body.garden-ready #docking-bay {
-    animation: uiDockEnterTouch 1.5s cubic-bezier(0.25, 1, 0.5, 1) 0.85s both;
+    /* `backwards` (not `both`) so the finished animation releases `transform` back
+       to the cascade — otherwise the :hover slide-up is permanently overridden. */
+    animation: uiDockEnterTouch 1.5s cubic-bezier(0.25, 1, 0.5, 1) 0.85s backwards;
 }
 
 /* Only hide and slide on devices with a real mouse cursor */

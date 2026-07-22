@@ -1253,7 +1253,9 @@ body.ios-ui .ios-modal-reroll {
 #modal-arcade #refresh-hint,
 #modal-arcade .ios-modal-reroll,
 #modal-trophies #refresh-hint,
-#modal-trophies .ios-modal-reroll {
+#modal-trophies .ios-modal-reroll,
+#modal-projects #refresh-hint,
+#modal-projects .ios-modal-reroll {
     display: none !important;
 }
 

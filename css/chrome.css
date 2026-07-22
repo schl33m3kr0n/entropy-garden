@@ -1183,6 +1183,11 @@ body.corrupted .mask-icon {
     -webkit-mask-image: url('../assets/icons/storage.svg');
 }
 
+.mask-icon--mr-disco {
+    mask-image: url('../assets/icons/mr-disco-sidebar.png');
+    -webkit-mask-image: url('../assets/icons/mr-disco-sidebar.png');
+}
+
 .mask-icon--signal {
     mask-image: url('../assets/icons/signal.svg');
     -webkit-mask-image: url('../assets/icons/signal.svg');
@@ -1559,6 +1564,14 @@ body.corrupted .comms-social:hover {
 
 .vault-item-sphere:hover {
     box-shadow: 0 0 18px rgba(0, 255, 0, 0.35);
+}
+
+.vault-media--sphere {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    background: #fff;
 }
 
 .vault-sphere-scene {
@@ -2860,3 +2873,263 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 .carousel-slide {
       cursor: zoom-in;
     }
+
+/* --- MR. DISCO MODAL --- */
+#modal-projects {
+    width: min(94vw, 860px);
+}
+
+#modal-projects .scrollable-content.mr-disco-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: min(72vh, 720px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.mr-disco-showcase-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    .mr-disco-showcase-row {
+        flex-direction: column;
+    }
+}
+
+.mr-disco-stage-shell {
+    border: 2px solid var(--neon-green);
+    border-radius: 8px;
+    box-shadow: 0 0 24px rgba(0, 255, 0, 0.12);
+    background: #141414;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+}
+
+.mr-disco-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.mr-disco-stage::before {
+    content: '';
+    position: absolute;
+    inset: -35%;
+    background: conic-gradient(
+        from 0deg,
+        #ff0055,
+        #ffcc00,
+        #0f0,
+        #0ff,
+        #6600ff,
+        #ff0055
+    );
+    animation: discoStageChroma 14s linear infinite;
+    z-index: 0;
+}
+
+@keyframes discoStageChroma {
+    to { transform: rotate(360deg); }
+}
+
+.mr-disco-stage #disco-host {
+    position: relative;
+    z-index: 1;
+    width: 88%;
+}
+
+.mr-disco-stage svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.mr-disco-search {
+    position: relative;
+    z-index: 2;
+    margin: -20px 0 0;
+    padding: 20px 16px 10px;
+    background: linear-gradient(
+        to bottom,
+        rgba(8, 8, 8, 0) 0%,
+        rgba(8, 8, 8, 0.42) 42%,
+        rgba(10, 10, 10, 0.88) 100%
+    );
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+}
+
+.mr-disco-search::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 36px;
+    background: linear-gradient(to top, rgba(6, 6, 6, 0.62), transparent);
+    pointer-events: none;
+}
+
+.mr-disco-search input {
+    width: 100%;
+    margin: 0;
+    padding: 4px 0 6px;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    background: transparent;
+    color: rgba(236, 236, 236, 0.9);
+    font-family: Avenir, 'Avenir Next', Montserrat, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 0.74rem;
+    letter-spacing: 0.03em;
+    transition: border-color 0.2s ease, color 0.2s ease;
+    box-shadow: none;
+}
+
+.mr-disco-search input::placeholder {
+    color: rgba(170, 170, 170, 0.42);
+}
+
+.mr-disco-search input:focus {
+    outline: none;
+    border-bottom-color: rgba(0, 255, 0, 0.22);
+    color: rgba(250, 250, 250, 0.96);
+}
+
+.mr-disco-archive {
+    flex: 0 0 auto;
+    width: 0;
+    max-width: 0;
+    max-height: 0;
+    min-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0;
+    visibility: hidden;
+    background: linear-gradient(
+        to bottom,
+        rgba(10, 10, 10, 0.88) 0%,
+        rgba(8, 8, 8, 0.96) 100%
+    );
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition:
+        max-width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.28s ease,
+        padding 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.28s ease,
+        visibility 0s linear 0.42s;
+    pointer-events: none;
+}
+
+.mr-disco-archive[hidden] {
+    display: none;
+}
+
+.mr-disco-archive.is-open {
+    width: min(280px, 34vw);
+    max-width: min(280px, 34vw);
+    max-height: min(72vh, 560px);
+    opacity: 1;
+    padding: 12px 14px 14px;
+    overflow: auto;
+    visibility: visible;
+    pointer-events: auto;
+    border-color: rgba(0, 255, 0, 0.22);
+    box-shadow: 0 0 18px rgba(0, 255, 0, 0.08);
+    transition:
+        max-width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.28s ease,
+        padding 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.28s ease,
+        visibility 0s linear 0s;
+}
+
+@media (max-width: 640px) {
+    .mr-disco-archive.is-open {
+        width: 100%;
+        max-width: 100%;
+        max-height: min(42vh, 340px);
+    }
+}
+
+.mr-disco-archive h3 {
+    margin: 0 0 8px;
+    font-family: Avenir, 'Avenir Next', Montserrat, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    color: #f0f0f0;
+}
+
+.alt-history-entries {
+    display: grid;
+    gap: 0;
+}
+
+.alt-history-entry + .alt-history-entry {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.alt-history-entry h3 {
+    margin: 0 0 6px;
+}
+
+.alt-history-meta {
+    margin: 0 0 6px;
+    font-family: Avenir, 'Avenir Next', Montserrat, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--neon-green);
+}
+
+.alt-history-excerpt {
+    margin: 0 0 8px;
+    font-family: Avenir, 'Avenir Next', Montserrat, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #bdbdbd;
+}
+
+.alt-history-tags {
+    margin: 0;
+    font-size: 0.68rem;
+    color: #777;
+}
+
+.alt-history-note {
+    margin: 10px 0 0;
+    font-size: 0.66rem;
+    color: rgba(120, 120, 120, 0.85);
+    font-style: italic;
+}
+
+.mr-disco-hint {
+    margin: 0;
+    flex-shrink: 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    color: rgba(0, 255, 0, 0.55);
+}

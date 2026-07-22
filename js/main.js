@@ -768,13 +768,6 @@ function randomizeData() {
         <p class="bio-p">${frags[2]} ${frags[3]}</p>
     `;
     
-    const pList = document.getElementById('project-list'); 
-    pList.innerHTML = ''; 
-    pickMany(lore.projectsSafe, lore.projectsGritty, 4).forEach(proj => {
-        const li = document.createElement('li'); 
-        li.innerHTML = `<span class="project-title">${proj.title}</span><span class="project-desc">${proj.desc}</span>`; 
-        pList.appendChild(li); 
-    });
     
     const sList = document.getElementById('stats-list'); 
     sList.innerHTML = '';
@@ -1034,9 +1027,6 @@ function activateVaultMedia() {
         }
     });
     primeManifoldCarousel();
-    import('./modules/vault-sphere.js')
-        .then((mod) => mod.initVaultSpheres())
-        .catch((err) => console.error('[Entropy Garden] vault sphere failed to load', err));
 }
 
 function primeManifoldCarousel() {
@@ -1105,7 +1095,7 @@ function ensureMediaSrc(el) {
 // --- MODAL SYSTEM ---
 let topZIndex = 20000;
 
-const MODALS_WITHOUT_REROLL_HINT = new Set(['vault', 'arcade', 'cards', 'trophies', 'poems']);
+const MODALS_WITHOUT_REROLL_HINT = new Set(['vault', 'arcade', 'cards', 'trophies', 'poems', 'projects']);
 
 function modalSkipsRerollHint(modalEl) {
     if (!modalEl?.id) return false;
@@ -1174,6 +1164,13 @@ function openModal(id) {
             initCardsOfChaos().catch((err) => {
                 console.error('[Entropy Garden] cards of chaos failed to load', err);
                 pushTerminalLog('> CARDS OF CHAOS OFFLINE.');
+            });
+        }
+
+        if (resolvedId === 'projects') {
+            import('./modules/mr-disco.js').then((m) => m.initMrDisco()).catch((err) => {
+                console.error('[Entropy Garden] mr disco failed to load', err);
+                pushTerminalLog('> MR. DISCO OFFLINE.');
             });
         }
 
@@ -1382,11 +1379,6 @@ document.querySelectorAll('.vault-item').forEach(item => {
     item.addEventListener('click', (e) => {
         if (e.target.closest('.carousel-btn') || e.target.closest('.carousel-slide')) return;
 
-        if (item.classList.contains('vault-item-sphere')) {
-            openVaultSphereLightbox(item);
-            return;
-        }
-
         const media = item.querySelector('.vault-media');
         if (!media) return;
 
@@ -1426,45 +1418,7 @@ document.querySelectorAll('.vault-item').forEach(item => {
     });
 });
 
-function openVaultSphereLightbox(sourceItem) {
-    const scene = sourceItem?.querySelector('.vault-sphere-scene');
-    if (!scene) return;
-
-    playSound(sfx.oneUp);
-
-    lightboxOverlay.innerHTML = '';
-    lightboxOverlay.appendChild(lightboxCloseBtn);
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'lightbox-content vault-sphere-lightbox';
-    const clone = scene.cloneNode(true);
-    clone.querySelectorAll('.vault-sphere-canvas').forEach((canvas) => {
-        delete canvas.dataset.bound;
-        canvas.classList.remove('vault-sphere-canvas--ready');
-    });
-    wrapper.appendChild(clone);
-    lightboxOverlay.appendChild(wrapper);
-    lightboxOverlay.classList.add('active');
-
-    import('./modules/vault-sphere.js')
-        .then((mod) => {
-            const canvas = wrapper.querySelector('.vault-sphere-canvas');
-            if (!canvas) return;
-            const sourceCanvas = sourceItem.querySelector('.vault-sphere-canvas');
-            const sourceState = sourceCanvas?._vaultSphereState;
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    mod.initVaultSphere(canvas, sourceState?.rotY ?? 0);
-                });
-            });
-        })
-        .catch((err) => console.error('[Entropy Garden] vault sphere lightbox failed to load', err));
-}
-
 function closeVaultLightbox() {
-    import('./modules/vault-sphere.js')
-        .then((mod) => mod.stopVaultSpheresIn(lightboxOverlay))
-        .catch(() => {});
     lightboxOverlay.classList.remove('active');
     playSound(sfx.exit);
     setTimeout(() => { lightboxOverlay.innerHTML = ''; }, 300);

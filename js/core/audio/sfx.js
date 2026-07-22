@@ -78,23 +78,23 @@ export const sfx = {
 export function playSound(sound) {
     if (!sound) return;
 
-    const playNow = () => {
-        sound.currentTime = 0;
-        sound.play().catch(() => {});
-    };
-
     if (sound.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
         sound.preload = 'auto';
-        sound.load();
-        if (sound.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-            playNow();
-            return;
+        // Only (re)load when idle or errored — calling load() while a fetch is
+        // in flight (e.g. after warmSound) aborts and restarts it every time.
+        if (sound.networkState !== HTMLMediaElement.NETWORK_LOADING) {
+            sound.load();
         }
-        sound.addEventListener('canplay', playNow, { once: true });
+        // Play immediately inside the user gesture; the promise resolves once
+        // data arrives. Deferring to `canplay` would run outside the gesture's
+        // transient activation and could be blocked by autoplay policy.
+        sound.play().catch(() => {});
         return;
     }
 
-    playNow();
+    // Fast path: already buffered — restart from the top.
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
 }
 
 /** Random glitch from the bank (original + glitch2–5). */
@@ -114,6 +114,8 @@ export function playGlitchSound(options = {}) {
 
 export function warmSound(sound) {
     if (!sound) return;
+    if (sound.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) return;
+    if (sound.networkState === HTMLMediaElement.NETWORK_LOADING) return;
     sound.preload = 'auto';
     sound.load();
 }

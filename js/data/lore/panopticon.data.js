@@ -557,8 +557,8 @@
             gritty: ["sanity stat missing. feature, not bug"],
         },
         modalProjects: {
-            safe: ["repository opened. so many unfinished files"],
-            gritty: ["projects folder: a graveyard of good intentions"],
+            safe: ["mr. disco awakened. the eyes follow. always"],
+            gritty: ["a mirrorball with eyes. this is what we've become"],
         },
         modalSignal: {
             safe: ["live feed? more like live watched"],

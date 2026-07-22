@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+  <defs>
+    <clipPath id="disco-ball-clip">
+      <circle cx="50" cy="52" r="42"/>
+    </clipPath>
+    <clipPath id="disco-ball-eye-clip-left">
+      <circle cx="36.5" cy="50" r="12.3"/>
+    </clipPath>
+    <clipPath id="disco-ball-eye-clip-right">
+      <circle cx="63.5" cy="50" r="12.3"/>
+    </clipPath>
+  </defs>
+
+  <g class="disco-ball-grid" clip-path="url(#disco-ball-clip)"></g>
+
+  <g class="disco-ball-eye">
+    <circle cx="36.5" cy="50" r="12.3" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+    <g clip-path="url(#disco-ball-eye-clip-left)">
+      <circle
+        class="disco-ball-pupil"
+        cx="36.5"
+        cy="50"
+        r="9.1"
+        fill="#000000"
+        data-eye-cx="36.5"
+        data-eye-cy="50"
+        data-eye-r="12.3"
+        data-pupil-r="9.1"
+      />
+    </g>
+  </g>
+
+  <g class="disco-ball-eye">
+    <circle cx="63.5" cy="50" r="12.3" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+    <g clip-path="url(#disco-ball-eye-clip-right)">
+      <circle
+        class="disco-ball-pupil"
+        cx="63.5"
+        cy="50"
+        r="9.1"
+        fill="#000000"
+        data-eye-cx="63.5"
+        data-eye-cy="50"
+        data-eye-r="12.3"
+        data-pupil-r="9.1"
+      />
+    </g>
+  </g>
+</svg>

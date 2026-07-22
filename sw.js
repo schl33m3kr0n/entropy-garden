@@ -63,6 +63,7 @@ const PRECACHE_URLS = [
     'assets/icons/signal.svg',
     'assets/icons/stats.svg',
     'assets/icons/storage.svg',
+    'assets/icons/mr-disco-sidebar.png',
     'assets/icons/vault.svg',
     'assets/icons/cards.svg',
     'assets/icons/play.svg',

@@ -435,6 +435,38 @@ function drawCipherWheels(cx, cy) {
 
 let cachedCipherCenter = null;
 
+// The eye enters with a 1.5s transform transition (translate offset +72px).
+// Until that transition settles, re-measure the center every frame instead of
+// caching, or the wheels lock onto the eye's mid-flight position.
+let eyeSettled = false;
+let eyeSettleTimer = null;
+
+function markEyeSettled() {
+    if (eyeSettled) return;
+    eyeSettled = true;
+    if (eyeSettleTimer !== null) {
+        clearTimeout(eyeSettleTimer);
+        eyeSettleTimer = null;
+    }
+    invalidateCipherWheelCenter();
+    setNeedsFullRedraw(true);
+}
+
+// Pong moves the eye via top/left/width/height (eye-move-anim), never
+// transform — so filtering on propertyName keeps this entrance-only.
+panopticonEl?.addEventListener('transitionend', (event) => {
+    if (event.target !== panopticonEl) return;
+    if (event.propertyName !== 'transform') return;
+    markEyeSettled();
+});
+
+/** Reduced motion applies the final transform without a transition — no
+ * transitionend fires, so fall back to a timer once the loop starts. */
+function armEyeSettleFallback() {
+    if (eyeSettled || eyeSettleTimer !== null) return;
+    eyeSettleTimer = setTimeout(markEyeSettled, 2200);
+}
+
 export function invalidateCipherWheelCenter() {
     cachedCipherCenter = null;
 }
@@ -442,17 +474,20 @@ export function invalidateCipherWheelCenter() {
 function getCipherWheelCenter() {
     if (cachedCipherCenter) return cachedCipherCenter;
 
+    let center = null;
     const eyeRect = panopticonEl?.getBoundingClientRect();
     const canvasRect = canvas?.getBoundingClientRect();
     if (eyeRect?.width > 0 && eyeRect.height > 0 && canvasRect) {
-        cachedCipherCenter = {
+        center = {
             cx: eyeRect.left + eyeRect.width * 0.5 - canvasRect.left,
             cy: eyeRect.top + eyeRect.height * 0.5 - canvasRect.top,
         };
-        return cachedCipherCenter;
+    } else {
+        center = { cx: viewW * 0.5, cy: viewH * 0.5 };
     }
-    cachedCipherCenter = { cx: viewW * 0.5, cy: viewH * 0.5 };
-    return cachedCipherCenter;
+
+    if (eyeSettled) cachedCipherCenter = center;
+    return center;
 }
 
 function animateMatrix() {
@@ -642,6 +677,7 @@ function scheduleGardenFrame() {
 
 function startGardenLoop() {
     if (!gardenHasStarted) return;
+    armEyeSettleFallback();
     setGardenLoopActive(true);
     scheduleGardenFrame();
 }
