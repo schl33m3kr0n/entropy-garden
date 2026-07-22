@@ -13,9 +13,24 @@ dist/
 /docs/
 
 /assets/img/vault/sun-poster.png
-# Full-res background master — site serves bkgrnd.jpg/webp only
+# Full-res masters — site serves optimized WebP/MP4 only
+/assets/img/backgrounds/bkgrnd.jpg
+/assets/img/backgrounds/bartek-garbowicz-xJeCLqsBUqc-unsplash.jpg
 /assets/img/backgrounds/space.jpg
-# PDF source, not referenced by the site (vault uses ahoy.jpg)
+/assets/img/vault/descent.jpg
+/assets/img/vault/ahoy.jpg
+/assets/img/vault/genesis.jpg
+/assets/img/vault/ripples.jpg
+/assets/img/vault/geometry-art.jpg
+/assets/img/vault/mm1.jpg
+/assets/img/vault/mm2.jpg
+/assets/img/vault/mm3.jpg
+/assets/img/vault/mm4.jpg
+/assets/img/vault/mm5.jpg
+/assets/img/vault/mm6.jpg
+/assets/img/vault/mm7.jpg
+/assets/video/genesis-web.mov
+# PDF source, not referenced by the site (vault uses ahoy.webp)
 /assets/vault/
 
 deploy.exclude

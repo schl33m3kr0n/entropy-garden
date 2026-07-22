@@ -1259,6 +1259,66 @@ body.ios-ui .ios-modal-reroll {
     display: none !important;
 }
 
+/* --- iOS: MR. DISCO --- */
+body.ios-ui #modal-projects {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(94vw, 860px);
+    max-height: min(88dvh, 720px);
+    z-index: 20000;
+}
+
+body.ios-ui #modal-projects .modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: min(88dvh, 720px);
+    padding: 18px 14px 14px;
+}
+
+body.ios-ui #modal-projects h2 {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    font-size: 1.25rem;
+}
+
+body.ios-ui #modal-projects .scrollable-content.mr-disco-showcase {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    padding-right: 6px;
+}
+
+body.ios-ui .mr-disco-stage-shell {
+    flex: 0 0 auto;
+    max-width: min(100%, 280px);
+    margin-inline: auto;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+body.ios-ui .mr-disco-stage {
+    width: 100%;
+    max-height: min(34dvh, 240px);
+    aspect-ratio: 1;
+}
+
+body.ios-ui .mr-disco-archive.is-open {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    overflow: visible;
+}
+
+body.ios-ui .mr-disco-hint--desktop {
+    display: none;
+}
+
+body.ios-ui .mr-disco-hint--touch {
+    display: block;
+}
+
 /* --- iOS PANOPTICON PING PONG --- */
 .ios-pong-unselectable,
 .ios-pong-unselectable * {

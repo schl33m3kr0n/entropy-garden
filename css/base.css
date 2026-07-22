@@ -54,15 +54,7 @@ body::before {
 
 body.garden-loading::before,
 body.garden-ready::before {
-    background-image: url('../assets/img/backgrounds/bkgrnd.jpg');
-    background-image: -webkit-image-set(
-        url('../assets/img/backgrounds/bkgrnd.webp') type('image/webp'),
-        url('../assets/img/backgrounds/bkgrnd.jpg') type('image/jpeg')
-    );
-    background-image: image-set(
-        url('../assets/img/backgrounds/bkgrnd.webp') type('image/webp'),
-        url('../assets/img/backgrounds/bkgrnd.jpg') type('image/jpeg')
-    );
+    background-image: url('../assets/img/backgrounds/bkgrnd.webp');
     opacity: 0.22;
 }
 

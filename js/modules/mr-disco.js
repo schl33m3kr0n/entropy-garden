@@ -298,4 +298,18 @@ async function setup() {
         event.preventDefault();
         showAlternateHistory(queryInput?.value ?? '', { googlyLeadIn: true });
     });
+
+    const stage = host.closest('.mr-disco-stage');
+    stage?.addEventListener('click', (event) => {
+        if (!document.body.classList.contains('ios-ui')) return;
+        if (event.target.closest('input, button, a')) return;
+        event.preventDefault();
+        toggleRandomArchiveViaSpace();
+    });
+    stage?.addEventListener('keydown', (event) => {
+        if (!document.body.classList.contains('ios-ui')) return;
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        toggleRandomArchiveViaSpace();
+    });
 }
