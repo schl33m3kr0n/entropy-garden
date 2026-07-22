@@ -1314,13 +1314,13 @@ body.corrupted .mask-icon {
     position: fixed;
     top: 30px;
     right: 40px;
-    width: 36px;
-    height: 36px;
+    width: 24px;
+    height: 24px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--neon-green);
-    font-size: 1.35rem;
+    color: transparent;
+    font-size: 0;
     font-weight: bold;
     background: transparent;
     border: none;
@@ -1329,24 +1329,48 @@ body.corrupted .mask-icon {
     z-index: 1000000;
     line-height: 1;
     padding: 0;
-    /* × sits a hair high in Avenir — nudge it onto the circle center */
-    padding-bottom: 0.08em;
     box-sizing: border-box;
-    transition: color 0.2s ease, background-color 0.2s ease, -webkit-text-fill-color 0.2s ease;
+}
+
+.lightbox-close::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: transparent;
+    transition: background-color 0.2s ease;
+}
+
+.lightbox-close::after {
+    content: '×';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(calc(-50% + 0.5px), -50%);
+    font-family: var(--main-font);
+    font-size: 1.5rem;
+    font-weight: bold;
+    line-height: 1;
+    color: var(--neon-green);
+    -webkit-text-fill-color: var(--neon-green);
+    transition: color 0.2s ease, -webkit-text-fill-color 0.2s ease;
+    pointer-events: none;
 }
 
 .modal-content > .lightbox-close {
     position: absolute;
-    top: 25px;
-    right: 25px;
+    top: 8px;
+    right: 8px;
     z-index: 10;
 }
 
-.lightbox-close:hover {
+.lightbox-close:hover::before {
+    background: var(--neon-green);
+}
+
+.lightbox-close:hover::after {
     color: #000;
     -webkit-text-fill-color: #000;
-    background: var(--neon-green);
-    box-shadow: none;
 }
 
 a.social-link { color: var(--neon-green); text-decoration: none; border-bottom: 1px dotted var(--neon-green); transition: color 0.3s, background 0.3s, border-color 0.3s; cursor: pointer; }

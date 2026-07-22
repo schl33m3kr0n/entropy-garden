@@ -5,6 +5,40 @@ import { initDiscoBallSpin } from '../disco-ball-spin.js';
 import { alternateHistoryArticles } from '../data/alternate-history.data.js';
 import { resolveAlternateHistoryArticles } from '../alternate-history-search.js';
 
+const ALT_HISTORY_SEEN_KEY = 'entropy-garden-alt-history-seen-v1';
+const validArticleIds = new Set(alternateHistoryArticles.map((article) => article.id));
+
+function loadSeenAlternateHistoryIds() {
+    try {
+        const raw = localStorage.getItem(ALT_HISTORY_SEEN_KEY);
+        if (!raw) return new Set();
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return new Set();
+        return new Set(arr.filter((id) => validArticleIds.has(id)));
+    } catch {
+        return new Set();
+    }
+}
+
+function markAlternateHistorySeen(ids) {
+    const seen = loadSeenAlternateHistoryIds();
+    ids.forEach((id) => {
+        if (validArticleIds.has(id)) seen.add(id);
+    });
+    try {
+        localStorage.setItem(ALT_HISTORY_SEEN_KEY, JSON.stringify([...seen]));
+    } catch {
+        /* private mode / quota */
+    }
+    return seen;
+}
+
+function maybeUnlockAvidReaderTrophy(seen) {
+    if (seen.size >= alternateHistoryArticles.length) {
+        globalThis.unlockTrophy?.('avid_reader');
+    }
+}
+
 const settings = {
     cx: 50,
     cy: 50,
@@ -18,22 +52,22 @@ const settings = {
     chromaFalloff: 0.2,
     chromaAngle: 0,
     chromaOpacity: 0,
-    chromaVariable: false,
+    chromaVariable: true,
     bgSpeed: 0.5,
     bgPhase: 243,
     reflectStrength: 0.5,
     specularStrength: 0,
     trailLength: 0,
-    trailOpacity: 0.58,
-    trailFade: 0.7,
-    trailStep: 0.045,
-    scleraR: 12,
-    pupilR: 9,
+    trailOpacity: 0.42,
+    trailFade: 0.78,
+    trailStep: 0.035,
+    scleraR: 12.3,
+    pupilR: 9.1,
     eyeY: 50,
     eyeSpread: 13.5,
     eyeStroke: 2,
-    reach: 34,
-    ease: 0.33,
+    reach: 36,
+    ease: 0.2,
 };
 
 let initPromise = null;
@@ -170,6 +204,7 @@ async function setup() {
         if (!resultEl || !articles?.length) return;
 
         lastAltHistoryIds = articles.map((article) => article.id);
+        maybeUnlockAvidReaderTrophy(markAlternateHistorySeen(lastAltHistoryIds));
         const note = matchedBySearch
             ? `${matchCount} timeline${matchCount === 1 ? '' : 's'} matched · showing ${articles.length}.`
             : query.trim()

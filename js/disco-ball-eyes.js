@@ -240,8 +240,8 @@ function readEyeMetrics(pupil) {
     return {
         ox: parseFloat(pupil.dataset.eyeCx ?? pupil.getAttribute('cx') ?? '0'),
         oy: parseFloat(pupil.dataset.eyeCy ?? pupil.getAttribute('cy') ?? '0'),
-        eyeR: parseFloat(pupil.dataset.eyeR ?? '12'),
-        pupilR: parseFloat(pupil.dataset.pupilR ?? '9'),
+        eyeR: parseFloat(pupil.dataset.eyeR ?? '12.3'),
+        pupilR: parseFloat(pupil.dataset.pupilR ?? '9.1'),
     };
 }
 
@@ -363,8 +363,8 @@ export const DISCO_BALL_SILLY_EYES = {
 export function applyDiscoBallEyeLayout(svg, layout = {}) {
     if (!svg) return;
 
-    const scleraR = layout.scleraR ?? 12;
-    const pupilR = layout.pupilR ?? 9;
+    const scleraR = layout.scleraR ?? 12.3;
+    const pupilR = layout.pupilR ?? 9.1;
     const eyeY = layout.eyeY ?? 50;
     const eyeLeftX = layout.eyeLeftX ?? 36.5;
     const eyeRightX = layout.eyeRightX ?? 63.5;
