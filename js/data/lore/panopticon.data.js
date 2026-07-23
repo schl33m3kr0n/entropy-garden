@@ -71,7 +71,7 @@
         "mathematical!",
         "will this be on the exam?",
         "a jar of mayonnaise can indeed be a percussive instrument",
-        "my other car is an X-wing starfighter",
+        "my other car is an X-Wing Starfighter",
         "i'm sorry, Dave. I'm afraid I can't do that",
         "my therapist said i use humor to deflect from uncomfortable emotions, so i put my fingers in my ears and went 'lalalalala' until he stopped talking",
         "*winks at you with one eye*",

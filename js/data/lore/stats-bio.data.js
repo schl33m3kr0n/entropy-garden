@@ -91,7 +91,7 @@
     ],
     bioFragmentsGritty: [
         "I specialize in breaking physics engines & diagnosing my topology with a Jungian shadow complex.",
-        "I am powered almost entirely by spite, chillwave, & 3 hours of sleep.",
+        "I am powered almost entirely by spite, chillwave, & 7 hours of intermittent sleep.",
         "My creative process involves spiraling into unknown depths, pretending to understand Sartre, & selling the resulting trauma as 'inspiration'.",
         "I'm attempting to animate the inanimate without accidentally creating eldritch horrors.",
         "If I can't fix the geometry, I just add more chromatic aberration.",
