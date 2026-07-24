@@ -4,6 +4,7 @@ import { perf, sfx, playSound } from '../core/shared.js';
 import { isCorrupted, isCipherSolved, setIosTransmissionsOverride } from '../core/state.js';
 import {
     buildSingularityPoemPool,
+    loadSingularityPoems,
     poemTitleFromText,
 } from '../data/singularity-poems.data.js';
 
@@ -48,10 +49,11 @@ function scrollPoemReaderToTop() {
 }
 
 /** Full scrollable title list for the singularity poem corpus. */
-function renderPoemList() {
+async function renderPoemList() {
     const list = document.getElementById('ios-poem-list');
     if (!list) return;
 
+    await loadSingularityPoems();
     const pool = poemPool();
     if (!pool.length) {
         list.innerHTML = '';
@@ -74,14 +76,15 @@ function renderPoemList() {
     });
 }
 
-export function selectPoem(index) {
+export async function selectPoem(index) {
+    await loadSingularityPoems();
     const pool = poemPool();
     if (!pool.length) return;
 
     currentIndex = ((index % pool.length) + pool.length) % pool.length;
     const body = document.getElementById('ios-poem-body');
     if (body) body.textContent = pool[currentIndex];
-    renderPoemList();
+    await renderPoemList();
     scrollPoemReaderToTop();
     listEl()?.querySelector('.ios-poem-list-item.active')?.scrollIntoView({ block: 'nearest' });
 }
@@ -94,16 +97,17 @@ export function stepIosPoem(delta) {
     selectPoem(currentIndex + delta);
 }
 
-export function refreshIosPoemArchive() {
+export async function refreshIosPoemArchive() {
     if (!iosPoemsAllowed()) {
         syncIosPoemsSidebar();
         return;
     }
     if (!modalEl() || modalEl().style.display === 'none') return;
+    await loadSingularityPoems();
     const pool = poemPool();
     if (currentIndex >= pool.length) currentIndex = 0;
-    renderPoemList();
-    selectPoem(currentIndex);
+    await renderPoemList();
+    await selectPoem(currentIndex);
 }
 
 function bindIosPoemUi() {
@@ -130,13 +134,13 @@ export function unlockIosPoems() {
 export const unlockIosTransmissions = unlockIosPoems;
 
 /** Open poems modal at a poem index (dock win, express). */
-export function openIosPoemArchive(index = 0) {
+export async function openIosPoemArchive(index = 0) {
     if (!isIosPoemMode()) return;
     if (!iosPoemsAllowed()) return;
 
     bindIosPoemUi();
-    renderPoemList();
-    selectPoem(index);
+    await renderPoemList();
+    await selectPoem(index);
 
     document.getElementById('sidebar-menu')?.classList.remove('active');
     globalThis.unlockTrophy?.('singularity_ritual');

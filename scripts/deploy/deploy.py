@@ -22,8 +22,11 @@ def load_excludes():
 
 
 def main():
-    build_script = ROOT / "scripts" / "dev" / "build-alternate-history.py"
-    subprocess.run([sys.executable, str(build_script)], check=True, cwd=ROOT)
+    for script in (
+        ROOT / "scripts" / "dev" / "build-alternate-history.py",
+        ROOT / "scripts" / "dev" / "build-singularity-poems.py",
+    ):
+        subprocess.run([sys.executable, str(script)], check=True, cwd=ROOT)
 
     dest = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else DEFAULT_DEST
     if dest.exists():

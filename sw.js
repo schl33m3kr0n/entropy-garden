@@ -27,7 +27,6 @@ const PRECACHE_URLS = [
     'js/core/canvas-resize.js',
     'js/data/lore/identity.data.js',
     'js/data/lore/stats-bio.data.js',
-    'js/data/lore/projects.data.js',
     'js/data/lore/vibes.data.js',
     'js/data/lore/terminal.data.js',
     'js/data/lore/panopticon.data.js',

@@ -13,7 +13,11 @@ import {
     setGardenLoopActive,
     setGardenAnimId,
 } from '../core/state.js';
-import { buildSingularityPoemPool, poemTitleFromText } from '../data/singularity-poems.data.js';
+import {
+    buildSingularityPoemPool,
+    loadSingularityPoems,
+    poemTitleFromText,
+} from '../data/singularity-poems.data.js';
 
 function pushTerminalLog(msg) {
     if (typeof globalThis.pushTerminalLog === 'function') globalThis.pushTerminalLog(msg);
@@ -466,16 +470,22 @@ function revealSingularityOverlay(showNextBtn = true) {
 function openSingularityRitual(showNextBtn = true, poemText) {
     if (!isSingularityActive && !document.body.classList.contains('singularity-active')) return;
 
-    if (!isIosSingularity()) {
-        playSound(sfx.missionCleared);
-        pushTerminalLog('!!! RITUAL COMPLETE !!!');
-    }
-    setCurrentPoemIndex(0);
-    revealSingularityOverlay(showNextBtn);
+    void (async () => {
+        await loadSingularityPoems();
 
-    const pool = activeSingularityPoems();
-    const poem = poemText ?? pool[currentPoemIndex] ?? pool[0];
-    speakSingularity(poem);
+        if (!isSingularityActive && !document.body.classList.contains('singularity-active')) return;
+
+        if (!isIosSingularity()) {
+            playSound(sfx.missionCleared);
+            pushTerminalLog('!!! RITUAL COMPLETE !!!');
+        }
+        setCurrentPoemIndex(0);
+        revealSingularityOverlay(showNextBtn);
+
+        const pool = activeSingularityPoems();
+        const poem = poemText ?? pool[currentPoemIndex] ?? pool[0];
+        speakSingularity(poem);
+    })();
 }
 
 function triggerSingularity() {
@@ -750,18 +760,22 @@ export function resumeSingularityPresentation() {
             console.error('[Entropy Garden] singularity resume failed', err);
         }
     }
-    const pool = activeSingularityPoems();
-    if (pool.length) speakSingularity(pool[currentPoemIndex] ?? pool[0]);
+    void loadSingularityPoems().then(() => {
+        const pool = activeSingularityPoems();
+        if (pool.length) speakSingularity(pool[currentPoemIndex] ?? pool[0]);
+    });
 }
 
 export function reconcileSingularityPoem() {
     if (isIosSingularity()) return;
     if (!isSingularityActive && !document.body.classList.contains('singularity-active')) return;
-    const pool = activeSingularityPoems();
-    if (!pool.length) return;
-    const idx = Math.min(currentPoemIndex, pool.length - 1);
-    setCurrentPoemIndex(idx);
-    speakSingularity(pool[idx] ?? pool[0]);
+    void loadSingularityPoems().then(() => {
+        const pool = activeSingularityPoems();
+        if (!pool.length) return;
+        const idx = Math.min(currentPoemIndex, pool.length - 1);
+        setCurrentPoemIndex(idx);
+        speakSingularity(pool[idx] ?? pool[0]);
+    });
 }
 
 let singularityControlsTapAt = 0;

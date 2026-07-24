@@ -21,7 +21,6 @@ GROUPS = {
         "bioFragmentsSafe",
         "bioFragmentsGritty",
     ],
-    "projects.data.js": ["projectsSafe", "projectsGritty"],
     "vibes.data.js": [
         "vibesAudioSafe",
         "vibesAudioGritty",

@@ -1,1 +1,1 @@
-Load identity, stats-bio, projects, vibes, terminal, panopticon .data.js in order.
+Load identity, stats-bio, vibes, terminal, panopticon .data.js in order.
