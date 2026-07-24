@@ -1,6 +1,8 @@
 /** Alternate history articles — entropy archive stubs. */
 
-export const alternateHistoryArticles = [
+import { additionalAlternateHistoryArticles } from './additional-alternate-history.data.js';
+
+const baseAlternateHistoryArticles = [
     {
         id: 'byzantium-wifi',
         title: 'What If Byzantium Invented Wi-Fi in 842 CE?',
@@ -701,4 +703,11 @@ export const alternateHistoryArticles = [
         tags: ['punctuation', 'shortage', 'language'],
         excerpt: 'Strategic semicolon reserves tapped for the first time since 1973. Germany lends out commas at predatory interest. Poets caught smuggling em dashes across borders.',
     },
+];
+
+export { additionalAlternateHistoryArticles };
+
+export const alternateHistoryArticles = [
+    ...baseAlternateHistoryArticles,
+    ...additionalAlternateHistoryArticles,
 ];
