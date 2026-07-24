@@ -2,11 +2,15 @@
 
 import { initDiscoBallEyes } from '../disco-ball-eyes.js';
 import { initDiscoBallSpin } from '../disco-ball-spin.js';
-import { alternateHistoryArticles } from '../data/alternate-history.data.js';
+import { loadAlternateHistoryArticles } from '../data/alternate-history.data.js';
 import { resolveAlternateHistoryArticles } from '../alternate-history-search.js';
 
 const ALT_HISTORY_SEEN_KEY = 'entropy-garden-alt-history-seen-v1';
-const validArticleIds = new Set(alternateHistoryArticles.map((article) => article.id));
+
+/** @type {import('../data/alternate-history.data.js').AlternateHistoryArticle[]} */
+let alternateHistoryArticles = [];
+/** @type {Set<string>} */
+let validArticleIds = new Set();
 
 function loadSeenAlternateHistoryIds() {
     try {
@@ -80,6 +84,9 @@ export function initMrDisco() {
 async function setup() {
     const host = document.getElementById('disco-host');
     if (!host) return;
+
+    alternateHistoryArticles = await loadAlternateHistoryArticles();
+    validArticleIds = new Set(alternateHistoryArticles.map((article) => article.id));
 
     const svgText = await fetch('assets/icons/disco-ball.svg').then((r) => r.text());
     host.innerHTML = svgText;

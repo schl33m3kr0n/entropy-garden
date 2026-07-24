@@ -22,6 +22,9 @@ def load_excludes():
 
 
 def main():
+    build_script = ROOT / "scripts" / "dev" / "build-alternate-history.py"
+    subprocess.run([sys.executable, str(build_script)], check=True, cwd=ROOT)
+
     dest = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else DEFAULT_DEST
     if dest.exists():
         shutil.rmtree(dest)

@@ -1,7 +1,7 @@
 /** Search + random picker for alternate history articles. */
 
 /**
- * @param {typeof import('./data/alternate-history.data.js').alternateHistoryArticles} articles
+ * @param {import('./data/alternate-history.data.js').AlternateHistoryArticle[]} articles
  * @param {string} [query]
  */
 export function searchAlternateHistory(articles, query = '') {
@@ -58,7 +58,7 @@ export function pickAlternateHistorySample(pool, count = 3, options = {}) {
 }
 
 /**
- * @param {typeof import('./data/alternate-history.data.js').alternateHistoryArticles} articles
+ * @param {import('./data/alternate-history.data.js').AlternateHistoryArticle[]} articles
  * @param {{ query?: string, excludeIds?: string[], count?: number }} [options]
  */
 export function resolveAlternateHistoryArticles(articles, options = {}) {
@@ -82,7 +82,7 @@ export function resolveAlternateHistoryArticles(articles, options = {}) {
 }
 
 /**
- * @param {typeof import('./data/alternate-history.data.js').alternateHistoryArticles} articles
+ * @param {import('./data/alternate-history.data.js').AlternateHistoryArticle[]} articles
  * @param {{ query?: string, excludeId?: string }} [options]
  */
 export function resolveAlternateHistoryArticle(articles, options = {}) {

@@ -21,6 +21,7 @@ include_roots:
   - js/ios/
   - js/modules/
   - pages/
+  - content/
   - assets/
 
 exclude_file: deploy.exclude
