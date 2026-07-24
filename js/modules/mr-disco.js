@@ -172,9 +172,15 @@ async function setup() {
         window.setTimeout(finish, 500);
     }
 
-    function openArchiveDrawer({ onComplete } = {}) {
+    function openArchiveDrawer({ onComplete, keepOpen = false } = {}) {
         if (!resultEl) return;
         resultEl.hidden = false;
+
+        if (keepOpen && resultEl.classList.contains('is-open')) {
+            onComplete?.();
+            return;
+        }
+
         resultEl.classList.remove('is-open');
         void resultEl.offsetWidth;
 
@@ -224,7 +230,9 @@ async function setup() {
             <div class="alt-history-entries">${entries}</div>
             <p class="alt-history-note">${note}</p>
         `;
-        openArchiveDrawer({ onComplete: onDrawerComplete });
+        const keepOpen = isArchiveOpen();
+        if (keepOpen) resultEl.scrollTop = 0;
+        openArchiveDrawer({ onComplete: onDrawerComplete, keepOpen });
     }
 
     async function showAlternateHistory(query = '', { randomOnly = false, googlyLeadIn = false } = {}) {
@@ -322,12 +330,11 @@ async function setup() {
         return true;
     }
 
-    function toggleRandomArchive() {
-        if (isArchiveOpen()) {
-            closeArchiveDrawer();
-            return;
-        }
-        showAlternateHistory('', { randomOnly: true, googlyLeadIn: true });
+    function requestRandomArchive() {
+        showAlternateHistory('', {
+            randomOnly: true,
+            googlyLeadIn: !isArchiveOpen(),
+        });
     }
 
     document.addEventListener('keydown', (event) => {
@@ -337,14 +344,14 @@ async function setup() {
         if (isRKey(event) && !shouldIgnoreArchiveHotkey(event)) {
             event.preventDefault();
             event.stopPropagation();
-            toggleRandomArchive();
+            requestRandomArchive();
             return;
         }
 
         if (isSpaceKey(event) && !shouldIgnoreSpaceHotkey(event)) {
             event.preventDefault();
             event.stopPropagation();
-            toggleRandomArchive();
+            requestRandomArchive();
             return;
         }
 
@@ -366,12 +373,12 @@ async function setup() {
         if (!document.body.classList.contains('ios-ui')) return;
         if (event.target.closest('input, button, a')) return;
         event.preventDefault();
-        toggleRandomArchive();
+        requestRandomArchive();
     });
     stage?.addEventListener('keydown', (event) => {
         if (!document.body.classList.contains('ios-ui')) return;
         if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
-        toggleRandomArchive();
+        requestRandomArchive();
     });
 }
