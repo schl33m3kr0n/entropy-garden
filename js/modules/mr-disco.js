@@ -293,6 +293,18 @@ async function setup() {
         return event.key === ' ' || event.code === 'Space';
     }
 
+    function isRKey(event) {
+        return event.key === 'r' || event.key === 'R';
+    }
+
+    function shouldIgnoreArchiveHotkey(event) {
+        const target = event.target;
+        if (!(target instanceof Element)) return false;
+        if (target.id === 'alt-history-query') return true;
+        if (target.closest('[contenteditable="true"]')) return true;
+        return Boolean(target.closest('input, textarea, select'));
+    }
+
     function shouldIgnoreSpaceHotkey(event) {
         const target = event.target;
         if (!(target instanceof Element)) return false;
@@ -310,7 +322,7 @@ async function setup() {
         return true;
     }
 
-    function toggleRandomArchiveViaSpace() {
+    function toggleRandomArchive() {
         if (isArchiveOpen()) {
             closeArchiveDrawer();
             return;
@@ -322,10 +334,17 @@ async function setup() {
         if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
         if (!isMrDiscoModalOpen()) return;
 
+        if (isRKey(event) && !shouldIgnoreArchiveHotkey(event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            toggleRandomArchive();
+            return;
+        }
+
         if (isSpaceKey(event) && !shouldIgnoreSpaceHotkey(event)) {
             event.preventDefault();
             event.stopPropagation();
-            toggleRandomArchiveViaSpace();
+            toggleRandomArchive();
             return;
         }
 
@@ -347,12 +366,12 @@ async function setup() {
         if (!document.body.classList.contains('ios-ui')) return;
         if (event.target.closest('input, button, a')) return;
         event.preventDefault();
-        toggleRandomArchiveViaSpace();
+        toggleRandomArchive();
     });
     stage?.addEventListener('keydown', (event) => {
         if (!document.body.classList.contains('ios-ui')) return;
         if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
-        toggleRandomArchiveViaSpace();
+        toggleRandomArchive();
     });
 }
