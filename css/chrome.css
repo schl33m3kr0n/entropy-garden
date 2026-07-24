@@ -2934,7 +2934,9 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
     .mr-disco-archive.is-open {
         width: 100%;
         max-width: 100%;
-        max-height: none;
+        height: min(38vh, 280px);
+        min-height: min(38vh, 280px);
+        max-height: min(38vh, 280px);
     }
 }
 
@@ -3047,8 +3049,9 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
     flex: 0 0 auto;
     width: 0;
     max-width: 0;
-    max-height: 0;
+    height: 0;
     min-height: 0;
+    max-height: 0;
     opacity: 0;
     overflow: hidden;
     padding: 0;
@@ -3064,6 +3067,8 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
         max-width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        min-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         opacity 0.28s ease,
         padding 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         border-color 0.28s ease,
@@ -3078,6 +3083,8 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 .mr-disco-archive.is-open {
     width: min(280px, 34vw);
     max-width: min(280px, 34vw);
+    height: min(72vh, 560px);
+    min-height: min(72vh, 560px);
     max-height: min(72vh, 560px);
     opacity: 1;
     padding: 12px 14px 14px;
@@ -3090,6 +3097,8 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
         max-width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        min-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         opacity 0.28s ease,
         padding 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         border-color 0.28s ease,

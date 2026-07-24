@@ -1307,8 +1307,10 @@ body.ios-ui .mr-disco-stage {
 body.ios-ui .mr-disco-archive.is-open {
     width: 100%;
     max-width: 100%;
-    max-height: none;
-    overflow: visible;
+    height: min(36dvh, 300px);
+    min-height: min(36dvh, 300px);
+    max-height: min(36dvh, 300px);
+    overflow: auto;
 }
 
 body.ios-ui .mr-disco-hint--desktop {
