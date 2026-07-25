@@ -1749,8 +1749,12 @@ body.corrupted .vault-locked-face {
     object-fit: contain;
 }
 
+.vault-dialogue-gesture--enter {
+    opacity: 0;
+}
+
 .vault-dialogue-gesture--pop {
-    animation: vaultGesturePop 0.28s ease;
+    animation: vaultGesturePop 0.28s ease backwards;
 }
 
 @keyframes vaultGesturePop {

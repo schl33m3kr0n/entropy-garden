@@ -120,14 +120,11 @@ function createMiddleFingerIcon({ animate = false } = {}) {
 
 function appendAnimatedMiddleFinger(gestures) {
     const icon = createMiddleFingerIcon();
-    icon.style.opacity = '0';
+    icon.classList.add('vault-dialogue-gesture--enter');
     gestures.appendChild(icon);
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            icon.style.opacity = '';
-            icon.classList.add('vault-dialogue-gesture--pop');
-        });
-    });
+    void icon.offsetWidth;
+    icon.classList.remove('vault-dialogue-gesture--enter');
+    icon.classList.add('vault-dialogue-gesture--pop');
     return icon;
 }
 
