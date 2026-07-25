@@ -26,6 +26,8 @@ const DIALOGUE = [
 
 let overlayEl = null;
 let logEl = null;
+let actionsEl = null;
+let hintEl = null;
 let stepIndex = 0;
 let advanceBusy = false;
 let bound = false;
@@ -51,17 +53,15 @@ function ensureOverlay() {
         <div class="vault-dialogue-panel" role="dialog" aria-modal="true" aria-labelledby="vault-dialogue-title">
             <p id="vault-dialogue-title" class="vault-dialogue-title">// SECURE CHANNEL</p>
             <div class="vault-dialogue-log" id="vault-dialogue-log"></div>
-            <p class="vault-dialogue-hint" id="vault-dialogue-hint">click to continue</p>
+            <div class="vault-dialogue-actions" id="vault-dialogue-actions" hidden></div>
+            <p class="vault-dialogue-hint" id="vault-dialogue-hint" hidden></p>
         </div>
     `;
     document.body.appendChild(overlayEl);
 
     logEl = overlayEl.querySelector('#vault-dialogue-log');
-    overlayEl.addEventListener('click', onAdvance);
-    overlayEl.querySelector('.vault-dialogue-panel')?.addEventListener('click', (event) => {
-        event.stopPropagation();
-        onAdvance();
-    });
+    actionsEl = overlayEl.querySelector('#vault-dialogue-actions');
+    hintEl = overlayEl.querySelector('#vault-dialogue-hint');
     overlayEl.addEventListener('keydown', onKeydown);
 
     return overlayEl;
@@ -76,8 +76,58 @@ function renderLine(entry) {
 }
 
 function setHint(text) {
-    const hint = overlayEl?.querySelector('#vault-dialogue-hint');
-    if (hint) hint.textContent = text;
+    if (!hintEl) return;
+    if (text) {
+        hintEl.hidden = false;
+        hintEl.textContent = text;
+        return;
+    }
+    hintEl.hidden = true;
+    hintEl.textContent = '';
+}
+
+function clearActions() {
+    if (!actionsEl) return;
+    actionsEl.hidden = true;
+    actionsEl.innerHTML = '';
+}
+
+function showUserChoice(entry) {
+    if (!actionsEl) return;
+
+    clearActions();
+    setHint('pick a response');
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'vault-dialogue-choice';
+    btn.textContent = entry.text;
+    btn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        onUserChoice(entry);
+    });
+    actionsEl.appendChild(btn);
+    actionsEl.hidden = false;
+    btn.focus({ preventScroll: true });
+}
+
+function showRevealChoice() {
+    if (!actionsEl) return;
+
+    clearActions();
+    setHint('');
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'vault-dialogue-choice vault-dialogue-choice--reveal';
+    btn.textContent = 'fine, show me the gd picture';
+    btn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        finishDialogue();
+    });
+    actionsEl.appendChild(btn);
+    actionsEl.hidden = false;
+    btn.focus({ preventScroll: true });
 }
 
 function openVaultImageLightbox() {
@@ -109,6 +159,8 @@ function closeDialogue() {
     overlayEl.classList.remove('is-open');
     overlayEl.removeAttribute('tabindex');
     if (logEl) logEl.innerHTML = '';
+    clearActions();
+    setHint('');
     stepIndex = 0;
     advanceBusy = false;
 }
@@ -118,34 +170,63 @@ function finishDialogue() {
     openVaultImageLightbox();
 }
 
-function onAdvance() {
+function presentCpuLine(entry) {
+    renderLine(entry);
+    stepIndex += 1;
+    playSound(sfx.click2);
+}
+
+function presentNext() {
     if (advanceBusy || !overlayEl || overlayEl.hidden) return;
 
     if (stepIndex >= DIALOGUE.length) {
-        finishDialogue();
+        showRevealChoice();
+        return;
+    }
+
+    const entry = DIALOGUE[stepIndex];
+    if (entry.speaker === 'user') {
+        showUserChoice(entry);
         return;
     }
 
     advanceBusy = true;
-    renderLine(DIALOGUE[stepIndex]);
-    stepIndex += 1;
-    playSound(sfx.click2);
-
-    if (stepIndex >= DIALOGUE.length) {
-        setHint('click to reveal');
-    }
+    presentCpuLine(entry);
 
     window.setTimeout(() => {
         advanceBusy = false;
-    }, 120);
+        if (stepIndex >= DIALOGUE.length) {
+            setHint('');
+            showRevealChoice();
+            return;
+        }
+        if (DIALOGUE[stepIndex]?.speaker === 'user') {
+            showUserChoice(DIALOGUE[stepIndex]);
+            return;
+        }
+        presentNext();
+    }, 280);
+}
+
+function onUserChoice(entry) {
+    if (advanceBusy || !overlayEl || overlayEl.hidden) return;
+    if (stepIndex >= DIALOGUE.length || DIALOGUE[stepIndex] !== entry) return;
+
+    advanceBusy = true;
+    clearActions();
+    setHint('');
+    renderLine(entry);
+    stepIndex += 1;
+    playSound(sfx.click);
+
+    window.setTimeout(() => {
+        advanceBusy = false;
+        presentNext();
+    }, 220);
 }
 
 function onKeydown(event) {
     if (overlayEl?.hidden) return;
-    if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        onAdvance();
-    }
     if (event.key === 'Escape') {
         event.preventDefault();
         closeDialogue();
@@ -158,13 +239,14 @@ function openDialogue() {
     stepIndex = 0;
     advanceBusy = false;
     if (logEl) logEl.innerHTML = '';
-    setHint('click to continue');
+    clearActions();
+    setHint('');
     overlayEl.hidden = false;
     overlayEl.classList.add('is-open');
     overlayEl.tabIndex = -1;
     overlayEl.focus({ preventScroll: true });
     playSound(sfx.click);
-    onAdvance();
+    presentNext();
 }
 
 function onLockedItemClick(event) {

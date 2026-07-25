@@ -1670,7 +1670,7 @@ body.corrupted .vault-locked-face {
     padding: 1rem;
     background: rgba(0, 0, 0, 0.82);
     backdrop-filter: blur(2px);
-    cursor: pointer;
+    cursor: default;
 }
 
 .vault-dialogue-overlay[hidden] {
@@ -1737,6 +1737,84 @@ body.corrupted .vault-locked-face {
     text-transform: lowercase;
     color: rgba(0, 255, 0, 0.65);
     animation: crtFlicker 1.4s infinite;
+}
+
+.vault-dialogue-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.vault-dialogue-actions[hidden] {
+    display: none !important;
+}
+
+.vault-dialogue-choice {
+    width: 100%;
+    margin: 0;
+    padding: 0.72rem 0.85rem;
+    border: 1px solid var(--neon-green);
+    border-radius: var(--radius-md);
+    background: rgba(0, 30, 0, 0.72);
+    color: #dfffe0;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.88rem;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.vault-dialogue-choice:hover,
+.vault-dialogue-choice:focus-visible {
+    outline: none;
+    border-color: #b8ffb8;
+    background: rgba(0, 42, 0, 0.88);
+    box-shadow: 0 0 14px rgba(0, 255, 0, 0.22);
+}
+
+.vault-dialogue-choice--reveal {
+    border-color: var(--alert-red, #ff3355);
+    color: #ffe3ea;
+    background: rgba(36, 0, 10, 0.82);
+}
+
+.vault-dialogue-choice--reveal:hover,
+.vault-dialogue-choice--reveal:focus-visible {
+    border-color: #ff6680;
+    background: rgba(52, 0, 14, 0.92);
+    box-shadow: 0 0 14px rgba(255, 51, 85, 0.28);
+}
+
+body.corrupted .vault-dialogue-panel {
+    border-color: var(--alert-red, #ff3355);
+    box-shadow: 0 0 24px rgba(255, 51, 85, 0.18);
+}
+
+body.corrupted .vault-dialogue-title,
+body.corrupted .vault-dialogue-speaker {
+    color: var(--alert-red, #ff3355);
+}
+
+body.corrupted .vault-dialogue-line--cpu {
+    color: #ff9db0;
+}
+
+body.corrupted .vault-dialogue-hint {
+    color: rgba(255, 120, 140, 0.72);
+}
+
+body.corrupted .vault-dialogue-choice {
+    border-color: var(--alert-red, #ff3355);
+    background: rgba(36, 0, 10, 0.82);
+    color: #ffe3ea;
+}
+
+body.corrupted .vault-dialogue-choice:hover,
+body.corrupted .vault-dialogue-choice:focus-visible {
+    border-color: #ff6680;
+    background: rgba(52, 0, 14, 0.92);
+    box-shadow: 0 0 14px rgba(255, 51, 85, 0.28);
 }
 
 .vault-media--sphere {
