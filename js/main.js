@@ -2,6 +2,7 @@
 import { bindPlaylistPlayPause, isPlayPauseShowingPlaying } from './playlist-icons.js';
 import { registerHooks, getHook } from './core/hooks.js';
 import { bindSidebarNavigation } from './ui/sidebar.js';
+import { initVaultLockedItems, syncVaultLockedAccess } from './modules/vault-locked-item.js';
 import { bindPlaylistTransport, bindBossKeyClose } from './ui/playlist.js';
 import {
     onModalOpened,
@@ -997,6 +998,7 @@ function toggleMode() {
     randomizeData();
     rebuildTerminalLogPool();
     reconcileSingularityPoem();
+    syncVaultLockedAccess();
 }
 
 function triggerEasterEgg() {
@@ -1356,6 +1358,7 @@ function bindDomEvents() {
 
     initializeCycleSlots();
     bindModalDrag();
+    initVaultLockedItems();
 }
 
 if (document.readyState === 'loading') {
