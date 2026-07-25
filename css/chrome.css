@@ -1702,17 +1702,18 @@ body.corrupted .vault-locked-face {
 
 .vault-dialogue-log {
     flex: 1 1 auto;
-    overflow-y: auto;
+    min-height: 5.5rem;
+    overflow: hidden;
     display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
+    align-items: center;
     padding-right: 0.2rem;
     font-family: var(--font-mono, monospace);
     font-size: 0.92rem;
     line-height: 1.45;
 }
 
-.vault-dialogue-line {
+.vault-dialogue-log .vault-dialogue-line {
+    width: 100%;
     margin: 0;
 }
 
@@ -1727,6 +1728,47 @@ body.corrupted .vault-locked-face {
 .vault-dialogue-speaker {
     color: var(--neon-green);
     font-weight: 700;
+}
+
+.vault-dialogue-gestures {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    vertical-align: middle;
+}
+
+.vault-dialogue-gestures--triple {
+    min-width: 7.5rem;
+    min-height: 2.4rem;
+}
+
+.vault-dialogue-gesture {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+}
+
+.vault-dialogue-gesture--pop {
+    animation: vaultGesturePop 0.28s ease;
+}
+
+@keyframes vaultGesturePop {
+    0% {
+        opacity: 0;
+        transform: scale(0.55) rotate(-8deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.vault-dialogue-choice--gesture {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
 }
 
 .vault-dialogue-hint {

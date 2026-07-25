@@ -5,15 +5,19 @@ import { isCorrupted } from '../core/state.js';
 
 const IMAGE_SRC = 'assets/img/vault/weirdpic.jpg';
 const IMAGE_ALT = 'Classified vault transmission';
+const MIDDLE_FINGER_SRC = 'assets/icons/middle-finger.svg';
+const MIDDLE_FINGER_TEXT = '[middle finger]';
+const MIDDLE_FINGER_TRIPLE_TEXT = '[middle finger] x3';
+const TRIPLE_GESTURE_DELAYS_MS = [0, 500, 2500];
 
 const DIALOGUE = [
     { speaker: 'cpu', text: 'enter the code' },
     { speaker: 'user', text: 'what code?' },
     { speaker: 'cpu', text: 'you need to enter the code' },
     { speaker: 'user', text: 'tf are u talking about?' },
-    { speaker: 'cpu', text: '[middle finger]' },
-    { speaker: 'user', text: '[middle finger]' },
-    { speaker: 'cpu', text: '[middle finger] x3' },
+    { speaker: 'cpu', text: MIDDLE_FINGER_TEXT },
+    { speaker: 'user', text: MIDDLE_FINGER_TEXT },
+    { speaker: 'cpu', text: MIDDLE_FINGER_TRIPLE_TEXT },
     { speaker: 'user', text: 'asshole' },
     { speaker: 'cpu', text: 'you are what you eat, so there' },
     { speaker: 'user', text: 'was that a self diss?' },
@@ -31,6 +35,8 @@ let hintEl = null;
 let stepIndex = 0;
 let advanceBusy = false;
 let bound = false;
+/** @type {number[]} */
+let dialogueTimers = [];
 /** @type {HTMLElement[]} */
 let lockedItems = [];
 
@@ -40,6 +46,25 @@ function isVaultLockedAccessible() {
 
 function speakerLabel(speaker) {
     return speaker === 'cpu' ? 'CPU' : 'YOU';
+}
+
+function isMiddleFingerText(text) {
+    return text === MIDDLE_FINGER_TEXT;
+}
+
+function isMiddleFingerTripleText(text) {
+    return text === MIDDLE_FINGER_TRIPLE_TEXT;
+}
+
+function clearDialogueTimers() {
+    dialogueTimers.forEach((id) => window.clearTimeout(id));
+    dialogueTimers = [];
+}
+
+function scheduleDialogueTimer(fn, delayMs) {
+    const id = window.setTimeout(fn, delayMs);
+    dialogueTimers.push(id);
+    return id;
 }
 
 function ensureOverlay() {
@@ -52,7 +77,7 @@ function ensureOverlay() {
     overlayEl.innerHTML = `
         <div class="vault-dialogue-panel" role="dialog" aria-modal="true" aria-labelledby="vault-dialogue-title">
             <p id="vault-dialogue-title" class="vault-dialogue-title">// SECURE CHANNEL</p>
-            <div class="vault-dialogue-log" id="vault-dialogue-log"></div>
+            <div class="vault-dialogue-log" id="vault-dialogue-log" aria-live="polite"></div>
             <div class="vault-dialogue-actions" id="vault-dialogue-actions" hidden></div>
             <p class="vault-dialogue-hint" id="vault-dialogue-hint" hidden></p>
         </div>
@@ -67,12 +92,66 @@ function ensureOverlay() {
     return overlayEl;
 }
 
+function createMiddleFingerIcon({ animate = false } = {}) {
+    const img = document.createElement('img');
+    img.src = MIDDLE_FINGER_SRC;
+    img.alt = '';
+    img.className = `vault-dialogue-gesture${animate ? ' vault-dialogue-gesture--pop' : ''}`;
+    img.setAttribute('aria-hidden', 'true');
+    img.width = 36;
+    img.height = 36;
+    img.decoding = 'async';
+    return img;
+}
+
+function appendLineBody(line, text) {
+    if (isMiddleFingerText(text)) {
+        const gestures = document.createElement('span');
+        gestures.className = 'vault-dialogue-gestures';
+        gestures.appendChild(createMiddleFingerIcon({ animate: true }));
+        line.appendChild(gestures);
+        return;
+    }
+
+    line.appendChild(document.createTextNode(text));
+}
+
 function renderLine(entry) {
+    if (!logEl) return;
+
+    logEl.innerHTML = '';
     const line = document.createElement('p');
     line.className = `vault-dialogue-line vault-dialogue-line--${entry.speaker}`;
-    line.innerHTML = `<span class="vault-dialogue-speaker">${speakerLabel(entry.speaker)}:</span> ${entry.text}`;
-    logEl?.appendChild(line);
-    line.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    const speaker = document.createElement('span');
+    speaker.className = 'vault-dialogue-speaker';
+    speaker.textContent = `${speakerLabel(entry.speaker)}:`;
+    line.appendChild(speaker);
+    line.appendChild(document.createTextNode(' '));
+    appendLineBody(line, entry.text);
+
+    logEl.appendChild(line);
+}
+
+function renderTripleMiddleFingerLine(entry) {
+    if (!logEl) return null;
+
+    logEl.innerHTML = '';
+    const line = document.createElement('p');
+    line.className = `vault-dialogue-line vault-dialogue-line--${entry.speaker}`;
+
+    const speaker = document.createElement('span');
+    speaker.className = 'vault-dialogue-speaker';
+    speaker.textContent = `${speakerLabel(entry.speaker)}:`;
+    line.appendChild(speaker);
+    line.appendChild(document.createTextNode(' '));
+
+    const gestures = document.createElement('span');
+    gestures.className = 'vault-dialogue-gestures vault-dialogue-gestures--triple';
+    line.appendChild(gestures);
+    logEl.appendChild(line);
+
+    return gestures;
 }
 
 function setHint(text) {
@@ -101,7 +180,13 @@ function showUserChoice(entry) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'vault-dialogue-choice';
-    btn.textContent = entry.text;
+    if (isMiddleFingerText(entry.text)) {
+        btn.classList.add('vault-dialogue-choice--gesture');
+        btn.setAttribute('aria-label', 'middle finger');
+        btn.appendChild(createMiddleFingerIcon());
+    } else {
+        btn.textContent = entry.text;
+    }
     btn.addEventListener('click', (event) => {
         event.stopPropagation();
         onUserChoice(entry);
@@ -154,6 +239,7 @@ function openVaultImageLightbox() {
 }
 
 function closeDialogue() {
+    clearDialogueTimers();
     if (!overlayEl) return;
     overlayEl.hidden = true;
     overlayEl.classList.remove('is-open');
@@ -170,10 +256,53 @@ function finishDialogue() {
     openVaultImageLightbox();
 }
 
+function continueAfterCpuLine() {
+    if (stepIndex >= DIALOGUE.length) {
+        setHint('');
+        showRevealChoice();
+        return;
+    }
+    if (DIALOGUE[stepIndex]?.speaker === 'user') {
+        showUserChoice(DIALOGUE[stepIndex]);
+        return;
+    }
+    presentNext();
+}
+
 function presentCpuLine(entry) {
+    advanceBusy = true;
     renderLine(entry);
     stepIndex += 1;
     playSound(sfx.click2);
+
+    scheduleDialogueTimer(() => {
+        advanceBusy = false;
+        continueAfterCpuLine();
+    }, 280);
+}
+
+function presentTripleMiddleFinger(entry) {
+    advanceBusy = true;
+    const gestures = renderTripleMiddleFingerLine(entry);
+    if (!gestures) {
+        advanceBusy = false;
+        return;
+    }
+
+    TRIPLE_GESTURE_DELAYS_MS.forEach((delayMs, index) => {
+        scheduleDialogueTimer(() => {
+            gestures.appendChild(createMiddleFingerIcon({ animate: true }));
+            playSound(sfx.click2);
+
+            if (index === TRIPLE_GESTURE_DELAYS_MS.length - 1) {
+                stepIndex += 1;
+                scheduleDialogueTimer(() => {
+                    advanceBusy = false;
+                    continueAfterCpuLine();
+                }, 320);
+            }
+        }, delayMs);
+    });
 }
 
 function presentNext() {
@@ -190,22 +319,12 @@ function presentNext() {
         return;
     }
 
-    advanceBusy = true;
-    presentCpuLine(entry);
+    if (isMiddleFingerTripleText(entry.text)) {
+        presentTripleMiddleFinger(entry);
+        return;
+    }
 
-    window.setTimeout(() => {
-        advanceBusy = false;
-        if (stepIndex >= DIALOGUE.length) {
-            setHint('');
-            showRevealChoice();
-            return;
-        }
-        if (DIALOGUE[stepIndex]?.speaker === 'user') {
-            showUserChoice(DIALOGUE[stepIndex]);
-            return;
-        }
-        presentNext();
-    }, 280);
+    presentCpuLine(entry);
 }
 
 function onUserChoice(entry) {
@@ -219,7 +338,7 @@ function onUserChoice(entry) {
     stepIndex += 1;
     playSound(sfx.click);
 
-    window.setTimeout(() => {
+    scheduleDialogueTimer(() => {
         advanceBusy = false;
         presentNext();
     }, 220);
@@ -236,6 +355,7 @@ function onKeydown(event) {
 
 function openDialogue() {
     ensureOverlay();
+    clearDialogueTimers();
     stepIndex = 0;
     advanceBusy = false;
     if (logEl) logEl.innerHTML = '';
