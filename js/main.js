@@ -1305,15 +1305,6 @@ function bindDomEvents() {
         modal.setAttribute('aria-hidden', 'true');
     });
 
-    // 1. Bind Modal Close Buttons
-    document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const modal = e.target.closest('.modal');
-            if (modal) closeModal(modal);
-        });
-    });
-
-    // 2. PLAY/PAUSE LOGIC 
     const playPauseBtn = document.getElementById('play-pause-btn');
     if (playPauseBtn) {
         const playPauseUi = bindPlaylistPlayPause(playPauseBtn, () => getBgmTrack(currentTrackIndex));
@@ -1427,12 +1418,64 @@ function closeVaultLightbox() {
     setTimeout(() => { lightboxOverlay.innerHTML = ''; }, 300);
 }
 
-// 3. Update the click listener to close if you click the background OR the new 'X'
-lightboxOverlay.addEventListener('click', (e) => {
-    if (e.target === lightboxOverlay || e.target === lightboxCloseBtn) {
-        closeVaultLightbox();
-    }
-});
+function bindCloseControls() {
+    if (document.documentElement.dataset.closeControlsBound) return;
+    document.documentElement.dataset.closeControlsBound = '1';
+
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const vaultOverlay = document.getElementById('lightbox-overlay');
+        if (vaultOverlay?.classList.contains('active')) {
+            if (target === vaultOverlay || target.closest('.lightbox-close')) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeVaultLightbox();
+                return;
+            }
+        }
+
+        const carouselLightbox = document.getElementById('lightbox');
+        if (carouselLightbox?.classList.contains('active')) {
+            if (target === carouselLightbox || target.closest('.lightbox-close')) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeLightbox();
+                return;
+            }
+        }
+
+        const modalClose = target.closest('.modal-close');
+        if (modalClose) {
+            const modal = modalClose.closest('.modal');
+            if (modal && getComputedStyle(modal).display !== 'none') {
+                event.preventDefault();
+                event.stopPropagation();
+                closeModal(modal);
+            }
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+
+        const vaultOverlay = document.getElementById('lightbox-overlay');
+        if (vaultOverlay?.classList.contains('active')) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeVaultLightbox();
+            return;
+        }
+
+        const carouselLightbox = document.getElementById('lightbox');
+        if (carouselLightbox?.classList.contains('active')) {
+            event.preventDefault();
+            event.stopPropagation();
+            closeLightbox();
+        }
+    }, true);
+}
 
 // --- SIDEBAR LOGIC ---
 const hamburger = document.getElementById('hamburger-icon');
@@ -1871,7 +1914,6 @@ const prevBtn = document.querySelector('.prev-btn');
 // Lightbox Elements
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
-const lbClose = lightbox?.querySelector('.lightbox-close');
 const lbNext = lightbox?.querySelector('.lb-next');
 const lbPrev = lightbox?.querySelector('.lb-prev');
 
@@ -1990,7 +2032,7 @@ slides.forEach((slide, index) => {
   });
 });
 
-// Lightbox Buttons
+// Lightbox nav — close via bindCloseControls()
 lbNext?.addEventListener('click', () => {
   currentIndex = (currentIndex + 1) % slides.length;
   updateLightbox();
@@ -2001,14 +2043,8 @@ lbPrev?.addEventListener('click', () => {
   updateLightbox();
 });
 
-// Close button and click-outside-to-close
-lbClose?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  closeLightbox();
-});
-lightbox?.addEventListener('click', (e) => {
-  if (e.target === lightbox || e.target.closest('.lightbox-close')) closeLightbox();
-});
+// Close buttons + backdrop clicks for modals and lightboxes
+bindCloseControls();
 
 function pongBlocksArrowNav(e) {
     return getHook('pongBlocksArrowNav')?.(e) ?? false;
@@ -2029,8 +2065,6 @@ document.addEventListener('keydown', (e) => {
   } else if (e.key === 'ArrowLeft') {
     currentIndex = (currentIndex - 1 + slides.length) % slides.length;
     isLightboxOpen ? updateLightbox() : updateCarousel();
-  } else if (e.key === 'Escape' && isLightboxOpen) {
-    closeLightbox();
   }
 });
 
