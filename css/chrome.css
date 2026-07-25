@@ -2102,6 +2102,21 @@ body.corrupted .vault-dialogue-choice:focus-visible {
     opacity: 1;
 }
 
+.vault-lightbox-parting-gesture {
+    position: fixed;
+    left: 50%;
+    bottom: 14%;
+    z-index: 1000000;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: terminalInsultFlash 1.35s ease forwards;
+}
+
+.vault-lightbox-parting-gesture-icon {
+    width: 72px;
+    height: 72px;
+}
+
 /* The actual image/video inside the lightbox */
 .lightbox-content {
     max-width: 90vw;

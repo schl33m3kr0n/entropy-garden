@@ -9,6 +9,7 @@ const MIDDLE_FINGER_SRC = 'assets/img/terminal-insult.png';
 const MIDDLE_FINGER_TEXT = '[middle finger]';
 const MIDDLE_FINGER_TRIPLE_TEXT = '[middle finger] x3';
 const TRIPLE_GESTURE_DELAYS_MS = [0, 500, 2500];
+const LIGHTBOX_PARTING_DELAY_MS = 2000;
 
 const DIALOGUE = [
     { speaker: 'cpu', text: 'enter the code' },
@@ -37,8 +38,11 @@ let advanceBusy = false;
 let bound = false;
 /** @type {number[]} */
 let dialogueTimers = [];
+/** @type {number | null} */
+let lightboxPartingTimer = null;
 /** @type {HTMLElement[]} */
 let lockedItems = [];
+let lightboxCleanupBound = false;
 
 function isVaultLockedAccessible() {
     return isCorrupted || document.body.classList.contains('corrupted');
@@ -59,6 +63,13 @@ function isMiddleFingerTripleText(text) {
 function clearDialogueTimers() {
     dialogueTimers.forEach((id) => window.clearTimeout(id));
     dialogueTimers = [];
+}
+
+function clearLightboxPartingTimer() {
+    if (lightboxPartingTimer != null) {
+        window.clearTimeout(lightboxPartingTimer);
+        lightboxPartingTimer = null;
+    }
 }
 
 function scheduleDialogueTimer(fn, delayMs) {
@@ -205,7 +216,7 @@ function showRevealChoice() {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'vault-dialogue-choice vault-dialogue-choice--reveal';
-    btn.textContent = 'fine, show me the gd picture';
+    btn.textContent = 'whatever bro';
     btn.addEventListener('click', (event) => {
         event.stopPropagation();
         finishDialogue();
@@ -215,10 +226,28 @@ function showRevealChoice() {
     btn.focus({ preventScroll: true });
 }
 
+function showLightboxPartingMiddleFinger(lightboxOverlay) {
+    if (!lightboxOverlay?.classList.contains('active')) return;
+    if (lightboxOverlay.querySelector('.vault-lightbox-parting-gesture')) return;
+
+    const flash = document.createElement('div');
+    flash.className = 'vault-lightbox-parting-gesture';
+    const icon = createMiddleFingerIcon({ animate: true });
+    icon.classList.add('vault-lightbox-parting-gesture-icon');
+    flash.appendChild(icon);
+    lightboxOverlay.appendChild(flash);
+    playSound(sfx.click2);
+
+    window.setTimeout(() => {
+        flash.remove();
+    }, 1400);
+}
+
 function openVaultImageLightbox() {
     const lightboxOverlay = document.getElementById('lightbox-overlay');
     if (!lightboxOverlay) return;
 
+    clearLightboxPartingTimer();
     playSound(sfx.oneUp);
 
     const closeBtn = document.createElement('button');
@@ -236,10 +265,16 @@ function openVaultImageLightbox() {
     lightboxOverlay.appendChild(closeBtn);
     lightboxOverlay.appendChild(img);
     lightboxOverlay.classList.add('active');
+
+    lightboxPartingTimer = window.setTimeout(() => {
+        lightboxPartingTimer = null;
+        showLightboxPartingMiddleFinger(lightboxOverlay);
+    }, LIGHTBOX_PARTING_DELAY_MS);
 }
 
 function closeDialogue() {
     clearDialogueTimers();
+    clearLightboxPartingTimer();
     if (!overlayEl) return;
     overlayEl.hidden = true;
     overlayEl.classList.remove('is-open');
@@ -396,5 +431,21 @@ export function initVaultLockedItems(root = document) {
     lockedItems.forEach((item) => {
         item.addEventListener('click', onLockedItemClick);
     });
+    bindLightboxCloseCleanup();
     syncVaultLockedAccess();
+}
+
+function bindLightboxCloseCleanup() {
+    if (lightboxCleanupBound) return;
+    lightboxCleanupBound = true;
+
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const lightboxOverlay = document.getElementById('lightbox-overlay');
+        if (!lightboxOverlay?.classList.contains('active')) return;
+        if (target === lightboxOverlay || target.closest('.lightbox-close')) {
+            clearLightboxPartingTimer();
+        }
+    });
 }
