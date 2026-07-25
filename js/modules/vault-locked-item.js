@@ -3,13 +3,14 @@
 import { sfx, playSound } from '../core/shared.js';
 import { isCorrupted } from '../core/state.js';
 
-const IMAGE_SRC = 'assets/img/vault/weirdpic.jpg';
+const IMAGE_SRC = new URL('../../assets/img/vault/weirdpic.jpg', import.meta.url).href;
 const IMAGE_ALT = 'Classified vault transmission';
-const MIDDLE_FINGER_SRC = 'assets/img/terminal-insult.png';
+const MIDDLE_FINGER_SRC = new URL('../../assets/img/terminal-insult.png', import.meta.url).href;
 const MIDDLE_FINGER_TEXT = '[middle finger]';
 const MIDDLE_FINGER_TRIPLE_TEXT = '[middle finger] x3';
 const TRIPLE_GESTURE_DELAYS_MS = [0, 500, 2500];
 const LIGHTBOX_PARTING_DELAY_MS = 2000;
+const GESTURE_POP_MS = 280;
 
 const middleFingerPreload = new Image();
 middleFingerPreload.src = MIDDLE_FINGER_SRC;
@@ -46,6 +47,7 @@ let lightboxPartingTimer = null;
 /** @type {HTMLElement[]} */
 let lockedItems = [];
 let lightboxCleanupBound = false;
+let dialoguePreviewMode = false;
 
 function isVaultLockedAccessible() {
     return isCorrupted || document.body.classList.contains('corrupted');
@@ -106,11 +108,11 @@ function ensureOverlay() {
     return overlayEl;
 }
 
-function createMiddleFingerIcon({ animate = false } = {}) {
+function createMiddleFingerIcon() {
     const img = document.createElement('img');
     img.src = MIDDLE_FINGER_SRC;
     img.alt = '';
-    img.className = `vault-dialogue-gesture${animate ? ' vault-dialogue-gesture--pop' : ''}`;
+    img.className = 'vault-dialogue-gesture';
     img.setAttribute('aria-hidden', 'true');
     img.width = 36;
     img.height = 36;
@@ -118,13 +120,38 @@ function createMiddleFingerIcon({ animate = false } = {}) {
     return img;
 }
 
+function playGesturePop(icon) {
+    icon.getAnimations().forEach((animation) => animation.cancel());
+    icon.style.opacity = '';
+    return icon.animate(
+        [
+            { opacity: 0, transform: 'scale(0.55) rotate(-8deg)' },
+            { opacity: 1, transform: 'scale(1) rotate(0deg)' },
+        ],
+        { duration: GESTURE_POP_MS, easing: 'ease', fill: 'forwards' },
+    );
+}
+
 function appendAnimatedMiddleFinger(gestures) {
     const icon = createMiddleFingerIcon();
-    icon.classList.add('vault-dialogue-gesture--enter');
+    icon.style.opacity = '0';
     gestures.appendChild(icon);
-    void icon.offsetWidth;
-    icon.classList.remove('vault-dialogue-gesture--enter');
-    icon.classList.add('vault-dialogue-gesture--pop');
+
+    const start = () => {
+        requestAnimationFrame(() => {
+            playGesturePop(icon);
+        });
+    };
+
+    if (icon.complete && icon.naturalWidth > 0) {
+        start();
+    } else {
+        icon.addEventListener('load', start, { once: true });
+        icon.addEventListener('error', () => {
+            console.error('[vault] middle finger asset failed to load:', icon.src);
+        }, { once: true });
+    }
+
     return icon;
 }
 
@@ -300,6 +327,10 @@ function closeDialogue() {
 
 function finishDialogue() {
     closeDialogue();
+    if (dialoguePreviewMode) {
+        dialoguePreviewMode = false;
+        return;
+    }
     openVaultImageLightbox();
 }
 
@@ -337,7 +368,7 @@ function presentTripleMiddleFinger(entry) {
     }
 
     TRIPLE_GESTURE_DELAYS_MS.forEach((delayMs, index) => {
-        scheduleDialogueTimer(() => {
+        const appendFinger = () => {
             appendAnimatedMiddleFinger(gestures);
             playSound(sfx.click2);
 
@@ -348,7 +379,10 @@ function presentTripleMiddleFinger(entry) {
                     continueAfterCpuLine();
                 }, 320);
             }
-        }, delayMs);
+        };
+
+        if (delayMs === 0) appendFinger();
+        else scheduleDialogueTimer(appendFinger, delayMs);
     });
 }
 
@@ -400,10 +434,10 @@ function onKeydown(event) {
     }
 }
 
-function openDialogue() {
+function openDialogue(fromStep = 0) {
     ensureOverlay();
     clearDialogueTimers();
-    stepIndex = 0;
+    stepIndex = fromStep;
     advanceBusy = false;
     if (logEl) logEl.innerHTML = '';
     clearActions();
@@ -421,6 +455,13 @@ function onLockedItemClick(event) {
     event.stopPropagation();
     if (!isVaultLockedAccessible()) return;
     openDialogue();
+}
+
+export function previewVaultDialogue(options = {}) {
+    dialoguePreviewMode = true;
+    document.body.classList.add('corrupted');
+    const fromStep = typeof options.fromStep === 'number' ? options.fromStep : 0;
+    openDialogue(fromStep);
 }
 
 export function syncVaultLockedAccess() {

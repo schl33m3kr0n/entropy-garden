@@ -1749,25 +1749,6 @@ body.corrupted .vault-locked-face {
     object-fit: contain;
 }
 
-.vault-dialogue-gesture--enter {
-    opacity: 0;
-}
-
-.vault-dialogue-gesture--pop {
-    animation: vaultGesturePop 0.28s ease backwards;
-}
-
-@keyframes vaultGesturePop {
-    0% {
-        opacity: 0;
-        transform: scale(0.55) rotate(-8deg);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-    }
-}
-
 .vault-dialogue-choice--gesture {
     display: inline-flex;
     align-items: center;

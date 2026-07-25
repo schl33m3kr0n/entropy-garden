@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Dialogue Preview</title>
+    <link rel="stylesheet" href="../css/tokens.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/chrome.css">
+    <link rel="stylesheet" href="../css/motion.css">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: #050505;
+            color: #0f0;
+            font-family: var(--main-font);
+        }
+
+        .preview-shell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .preview-shell h1 {
+            margin: 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.12em;
+            font-weight: 700;
+        }
+
+        .preview-shell p {
+            margin: 0;
+            max-width: 28rem;
+            font-family: monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: rgba(0, 255, 0, 0.72);
+        }
+
+        .preview-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            width: min(20rem, 100%);
+            margin-top: 0.25rem;
+        }
+
+        .preview-actions h2 {
+            margin: 0.75rem 0 0;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: rgba(0, 255, 0, 0.65);
+        }
+
+        .preview-start {
+            width: 100%;
+            padding: 0.75rem 1.2rem;
+            border: 1px solid var(--neon-green);
+            border-radius: var(--radius-md);
+            background: rgba(0, 30, 0, 0.72);
+            color: #dfffe0;
+            font-family: monospace;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+
+        .preview-start--accent {
+            border-color: var(--alert-red, #ff3355);
+            color: #ffd6de;
+        }
+
+        .preview-start:hover,
+        .preview-start:focus-visible {
+            outline: none;
+            background: rgba(0, 42, 0, 0.88);
+            box-shadow: 0 0 14px rgba(0, 255, 0, 0.22);
+        }
+
+        .preview-start--accent:hover,
+        .preview-start--accent:focus-visible {
+            background: rgba(42, 0, 12, 0.88);
+            box-shadow: 0 0 14px rgba(255, 51, 85, 0.22);
+        }
+    </style>
+</head>
+<body class="corrupted">
+    <div class="preview-shell">
+        <h1>// VAULT DIALOGUE PREVIEW</h1>
+        <p>Dialogue only — no vault modal, no classified image reveal. Escape closes the overlay.</p>
+
+        <div class="preview-actions">
+            <button type="button" class="preview-start" id="preview-start">Start full dialogue</button>
+
+            <h2>// MIDDLE FINGERS</h2>
+            <button type="button" class="preview-start preview-start--accent" data-from-step="4">CPU — single finger</button>
+            <button type="button" class="preview-start preview-start--accent" data-from-step="5">YOU — single finger (choice)</button>
+            <button type="button" class="preview-start preview-start--accent" data-from-step="6">CPU — triple finger</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { previewVaultDialogue } from '../js/modules/vault-locked-item.js';
+
+        document.getElementById('preview-start')?.addEventListener('click', () => {
+            previewVaultDialogue();
+        });
+
+        document.querySelectorAll('[data-from-step]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const fromStep = Number(btn.dataset.fromStep);
+                previewVaultDialogue({ fromStep });
+            });
+        });
+    </script>
+</body>
+</html>
