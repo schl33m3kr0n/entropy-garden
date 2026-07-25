@@ -1742,11 +1742,21 @@ body.corrupted .vault-locked-face {
     min-height: 2.4rem;
 }
 
+.vault-dialogue-gestures--waiting {
+    visibility: hidden;
+}
+
 .vault-dialogue-gesture {
-    display: block;
+    display: inline-block;
     width: 2rem;
     height: 2rem;
-    object-fit: contain;
+    background: center / contain no-repeat;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.vault-dialogue-gesture--pending {
+    visibility: hidden;
 }
 
 .vault-dialogue-choice--gesture {

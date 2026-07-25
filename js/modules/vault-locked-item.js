@@ -93,7 +93,7 @@ function ensureOverlay() {
     overlayEl.innerHTML = `
         <div class="vault-dialogue-panel" role="dialog" aria-modal="true" aria-labelledby="vault-dialogue-title">
             <p id="vault-dialogue-title" class="vault-dialogue-title">// SECURE CHANNEL</p>
-            <div class="vault-dialogue-log" id="vault-dialogue-log" aria-live="polite"></div>
+            <div class="vault-dialogue-log" id="vault-dialogue-log" aria-live="off"></div>
             <div class="vault-dialogue-actions" id="vault-dialogue-actions" hidden></div>
             <p class="vault-dialogue-hint" id="vault-dialogue-hint" hidden></p>
         </div>
@@ -108,69 +108,53 @@ function ensureOverlay() {
     return overlayEl;
 }
 
-function createMiddleFingerIcon() {
-    const img = document.createElement('img');
-    img.src = MIDDLE_FINGER_SRC;
-    img.alt = '';
-    img.className = 'vault-dialogue-gesture';
-    img.setAttribute('aria-hidden', 'true');
-    img.width = 36;
-    img.height = 36;
-    img.decoding = 'async';
-    return img;
+function createMiddleFingerIcon({ pending = false } = {}) {
+    const icon = document.createElement('span');
+    icon.className = 'vault-dialogue-gesture';
+    icon.style.backgroundImage = `url("${MIDDLE_FINGER_SRC}")`;
+    icon.setAttribute('aria-hidden', 'true');
+    if (pending) icon.classList.add('vault-dialogue-gesture--pending');
+    return icon;
+}
+
+function isMiddleFingerAssetReady() {
+    return middleFingerPreload.complete && middleFingerPreload.naturalWidth > 0;
 }
 
 function playGesturePop(icon) {
     icon.getAnimations().forEach((animation) => animation.cancel());
-    icon.style.opacity = '';
-    return icon.animate(
+    icon.classList.remove('vault-dialogue-gesture--pending');
+    icon.style.visibility = 'visible';
+    icon.style.opacity = '0';
+
+    const animation = icon.animate(
         [
             { opacity: 0, transform: 'scale(0.55) rotate(-8deg)' },
             { opacity: 1, transform: 'scale(1) rotate(0deg)' },
         ],
         { duration: GESTURE_POP_MS, easing: 'ease', fill: 'forwards' },
     );
+
+    animation.onfinish = () => {
+        icon.style.removeProperty('opacity');
+        icon.style.removeProperty('visibility');
+    };
+
+    return animation;
 }
 
-function appendAnimatedMiddleFinger(gestures) {
-    const icon = createMiddleFingerIcon();
-    icon.style.opacity = '0';
-    gestures.appendChild(icon);
-
+function scheduleGesturePop(icon) {
     const start = () => {
         requestAnimationFrame(() => {
             playGesturePop(icon);
         });
     };
 
-    if (icon.complete && icon.naturalWidth > 0) {
-        start();
-    } else {
-        icon.addEventListener('load', start, { once: true });
-        icon.addEventListener('error', () => {
-            console.error('[vault] middle finger asset failed to load:', icon.src);
-        }, { once: true });
-    }
-
-    return icon;
+    if (isMiddleFingerAssetReady()) start();
+    else middleFingerPreload.addEventListener('load', start, { once: true });
 }
 
-function appendLineBody(line, text) {
-    if (isMiddleFingerText(text)) {
-        const gestures = document.createElement('span');
-        gestures.className = 'vault-dialogue-gestures';
-        appendAnimatedMiddleFinger(gestures);
-        line.appendChild(gestures);
-        return;
-    }
-
-    line.appendChild(document.createTextNode(text));
-}
-
-function renderLine(entry) {
-    if (!logEl) return;
-
-    logEl.innerHTML = '';
+function buildDialogueLine(entry) {
     const line = document.createElement('p');
     line.className = `vault-dialogue-line vault-dialogue-line--${entry.speaker}`;
 
@@ -179,15 +163,32 @@ function renderLine(entry) {
     speaker.textContent = `${speakerLabel(entry.speaker)}:`;
     line.appendChild(speaker);
     line.appendChild(document.createTextNode(' '));
-    appendLineBody(line, entry.text);
 
-    logEl.appendChild(line);
+    if (isMiddleFingerText(entry.text)) {
+        const gestures = document.createElement('span');
+        gestures.className = 'vault-dialogue-gestures';
+        gestures.appendChild(createMiddleFingerIcon({ pending: true }));
+        line.appendChild(gestures);
+    } else {
+        line.appendChild(document.createTextNode(entry.text));
+    }
+
+    return line;
+}
+
+function renderLine(entry) {
+    if (!logEl) return;
+
+    const line = buildDialogueLine(entry);
+    logEl.replaceChildren(line);
+
+    const pendingIcon = line.querySelector('.vault-dialogue-gesture--pending');
+    if (pendingIcon) scheduleGesturePop(pendingIcon);
 }
 
 function renderTripleMiddleFingerLine(entry) {
     if (!logEl) return null;
 
-    logEl.innerHTML = '';
     const line = document.createElement('p');
     line.className = `vault-dialogue-line vault-dialogue-line--${entry.speaker}`;
 
@@ -198,11 +199,17 @@ function renderTripleMiddleFingerLine(entry) {
     line.appendChild(document.createTextNode(' '));
 
     const gestures = document.createElement('span');
-    gestures.className = 'vault-dialogue-gestures vault-dialogue-gestures--triple';
+    gestures.className = 'vault-dialogue-gestures vault-dialogue-gestures--triple vault-dialogue-gestures--waiting';
+    const icons = TRIPLE_GESTURE_DELAYS_MS.map(() => {
+        const icon = createMiddleFingerIcon({ pending: true });
+        gestures.appendChild(icon);
+        return icon;
+    });
     line.appendChild(gestures);
-    logEl.appendChild(line);
 
-    return gestures;
+    logEl.replaceChildren(line);
+
+    return { icons, gestures };
 }
 
 function setHint(text) {
@@ -272,9 +279,11 @@ function showLightboxPartingMiddleFinger(lightboxOverlay) {
 
     const flash = document.createElement('div');
     flash.className = 'vault-lightbox-parting-gesture';
-    const icon = appendAnimatedMiddleFinger(flash);
+    const icon = createMiddleFingerIcon({ pending: true });
     icon.classList.add('vault-lightbox-parting-gesture-icon');
+    flash.appendChild(icon);
     lightboxOverlay.appendChild(flash);
+    scheduleGesturePop(icon);
     playSound(sfx.click2);
 
     window.setTimeout(() => {
@@ -361,28 +370,32 @@ function presentCpuLine(entry) {
 
 function presentTripleMiddleFinger(entry) {
     advanceBusy = true;
-    const gestures = renderTripleMiddleFingerLine(entry);
-    if (!gestures) {
+    const tripleLine = renderTripleMiddleFingerLine(entry);
+    if (!tripleLine) {
         advanceBusy = false;
         return;
     }
 
-    TRIPLE_GESTURE_DELAYS_MS.forEach((delayMs, index) => {
-        const appendFinger = () => {
-            appendAnimatedMiddleFinger(gestures);
-            playSound(sfx.click2);
+    const { icons, gestures } = tripleLine;
 
-            if (index === TRIPLE_GESTURE_DELAYS_MS.length - 1) {
-                stepIndex += 1;
-                scheduleDialogueTimer(() => {
-                    advanceBusy = false;
-                    continueAfterCpuLine();
-                }, 320);
-            }
-        };
+    requestAnimationFrame(() => {
+        TRIPLE_GESTURE_DELAYS_MS.forEach((delayMs, index) => {
+            const popFinger = () => {
+                if (index === 0) gestures.classList.remove('vault-dialogue-gestures--waiting');
+                playGesturePop(icons[index]);
+                playSound(sfx.click2);
 
-        if (delayMs === 0) appendFinger();
-        else scheduleDialogueTimer(appendFinger, delayMs);
+                if (index === TRIPLE_GESTURE_DELAYS_MS.length - 1) {
+                    stepIndex += 1;
+                    scheduleDialogueTimer(() => {
+                        advanceBusy = false;
+                        continueAfterCpuLine();
+                    }, 320);
+                }
+            };
+
+            scheduleDialogueTimer(popFinger, delayMs);
+        });
     });
 }
 
@@ -415,9 +428,19 @@ function onUserChoice(entry) {
     advanceBusy = true;
     clearActions();
     setHint('');
-    renderLine(entry);
-    stepIndex += 1;
     playSound(sfx.click);
+
+    const nextIndex = stepIndex + 1;
+    const nextEntry = DIALOGUE[nextIndex];
+
+    if (nextEntry && isMiddleFingerTripleText(nextEntry.text)) {
+        stepIndex = nextIndex;
+        presentTripleMiddleFinger(nextEntry);
+        return;
+    }
+
+    renderLine(entry);
+    stepIndex = nextIndex;
 
     scheduleDialogueTimer(() => {
         advanceBusy = false;

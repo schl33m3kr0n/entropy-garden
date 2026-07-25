@@ -103,6 +103,7 @@
             <button type="button" class="preview-start preview-start--accent" data-from-step="4">CPU — single finger</button>
             <button type="button" class="preview-start preview-start--accent" data-from-step="5">YOU — single finger (choice)</button>
             <button type="button" class="preview-start preview-start--accent" data-from-step="6">CPU — triple finger</button>
+            <button type="button" class="preview-start preview-start--accent" id="preview-triple-via-user">CPU — triple via user line</button>
         </div>
     </div>
 
@@ -118,6 +119,13 @@
                 const fromStep = Number(btn.dataset.fromStep);
                 previewVaultDialogue({ fromStep });
             });
+        });
+
+        document.getElementById('preview-triple-via-user')?.addEventListener('click', () => {
+            previewVaultDialogue({ fromStep: 5 });
+            window.setTimeout(() => {
+                document.querySelector('.vault-dialogue-choice')?.click();
+            }, 120);
         });
     </script>
 </body>
