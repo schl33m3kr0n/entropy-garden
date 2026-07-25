@@ -11,6 +11,9 @@ const MIDDLE_FINGER_TRIPLE_TEXT = '[middle finger] x3';
 const TRIPLE_GESTURE_DELAYS_MS = [0, 500, 2500];
 const LIGHTBOX_PARTING_DELAY_MS = 2000;
 
+const middleFingerPreload = new Image();
+middleFingerPreload.src = MIDDLE_FINGER_SRC;
+
 const DIALOGUE = [
     { speaker: 'cpu', text: 'enter the code' },
     { speaker: 'user', text: 'what code?' },
@@ -115,11 +118,24 @@ function createMiddleFingerIcon({ animate = false } = {}) {
     return img;
 }
 
+function appendAnimatedMiddleFinger(gestures) {
+    const icon = createMiddleFingerIcon();
+    icon.style.opacity = '0';
+    gestures.appendChild(icon);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            icon.style.opacity = '';
+            icon.classList.add('vault-dialogue-gesture--pop');
+        });
+    });
+    return icon;
+}
+
 function appendLineBody(line, text) {
     if (isMiddleFingerText(text)) {
         const gestures = document.createElement('span');
         gestures.className = 'vault-dialogue-gestures';
-        gestures.appendChild(createMiddleFingerIcon({ animate: true }));
+        appendAnimatedMiddleFinger(gestures);
         line.appendChild(gestures);
         return;
     }
@@ -232,9 +248,8 @@ function showLightboxPartingMiddleFinger(lightboxOverlay) {
 
     const flash = document.createElement('div');
     flash.className = 'vault-lightbox-parting-gesture';
-    const icon = createMiddleFingerIcon({ animate: true });
+    const icon = appendAnimatedMiddleFinger(flash);
     icon.classList.add('vault-lightbox-parting-gesture-icon');
-    flash.appendChild(icon);
     lightboxOverlay.appendChild(flash);
     playSound(sfx.click2);
 
@@ -326,7 +341,7 @@ function presentTripleMiddleFinger(entry) {
 
     TRIPLE_GESTURE_DELAYS_MS.forEach((delayMs, index) => {
         scheduleDialogueTimer(() => {
-            gestures.appendChild(createMiddleFingerIcon({ animate: true }));
+            appendAnimatedMiddleFinger(gestures);
             playSound(sfx.click2);
 
             if (index === TRIPLE_GESTURE_DELAYS_MS.length - 1) {
