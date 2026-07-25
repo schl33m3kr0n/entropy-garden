@@ -5,7 +5,7 @@ import { isCorrupted } from '../core/state.js';
 
 const IMAGE_SRC = 'assets/img/vault/weirdpic.jpg';
 const IMAGE_ALT = 'Classified vault transmission';
-const MIDDLE_FINGER_SRC = 'assets/icons/middle-finger.svg';
+const MIDDLE_FINGER_SRC = 'assets/img/terminal-insult.png';
 const MIDDLE_FINGER_TEXT = '[middle finger]';
 const MIDDLE_FINGER_TRIPLE_TEXT = '[middle finger] x3';
 const TRIPLE_GESTURE_DELAYS_MS = [0, 500, 2500];
