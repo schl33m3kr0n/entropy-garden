@@ -101,7 +101,8 @@
         "as you can see from this chart of accumulated subscriptions, we are performing quite well against our competit-... wait... oh... it's upside down...",
         "sorry, am i boring you?",
         "that's definitely a question i would defer to the paper shredder",
-        "people always say 'that takes guts.' i would hope so. most people require guts to remain alive.",
+        "people always say 'that takes guts.' i would hope so. most people require guts to remain alive",
+        "please refrain from aggressively petting the sandwich",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",
