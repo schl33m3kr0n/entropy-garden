@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Close Button Tuner (temp)</title>
+    <link rel="stylesheet" href="../css/tokens.css">
+    <link rel="stylesheet" href="../css/chrome.css">
+    <link rel="stylesheet" href="../css/ios.css" id="ios-css" disabled>
+    <style>
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #050505;
+            color: #dfffe0;
+            font-family: var(--main-font);
+        }
+
+        #close-tuner {
+            display: grid;
+            grid-template-columns: minmax(300px, 360px) 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .tuner-panel {
+            height: 100vh;
+            overflow-y: auto;
+            padding: 1rem 1.1rem 2rem;
+            border-right: 1px solid rgba(0, 255, 0, 0.2);
+            background: rgba(0, 12, 0, 0.96);
+        }
+
+        .tuner-panel h1 {
+            margin: 0 0 0.35rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.12em;
+            color: var(--neon-green);
+        }
+
+        .tuner-panel p {
+            margin: 0 0 1rem;
+            font-family: monospace;
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: rgba(0, 255, 0, 0.65);
+        }
+
+        .tuner-group {
+            margin-bottom: 1.1rem;
+            padding-bottom: 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .tuner-group h2 {
+            margin: 0 0 0.65rem;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            color: rgba(0, 255, 0, 0.85);
+        }
+
+        .tuner-group--output {
+            position: sticky;
+            bottom: 0;
+            margin-bottom: 0;
+            padding: 0.85rem 0 0;
+            border-bottom: none;
+            background: linear-gradient(to top, rgba(0, 12, 0, 0.98) 78%, rgba(0, 12, 0, 0));
+        }
+
+        label {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.45rem;
+            font-family: monospace;
+            font-size: 0.72rem;
+            color: rgba(221, 255, 224, 0.88);
+        }
+
+        label input[type="range"] { width: 100%; }
+
+        label output {
+            min-width: 3.2rem;
+            text-align: right;
+            color: var(--neon-green);
+        }
+
+        .tuner-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-bottom: 1rem;
+        }
+
+        .tuner-btn {
+            padding: 0.45rem 0.65rem;
+            border: 1px solid var(--neon-green);
+            border-radius: var(--radius-sm);
+            background: rgba(0, 30, 0, 0.72);
+            color: #dfffe0;
+            font-family: monospace;
+            font-size: 0.72rem;
+            cursor: pointer;
+        }
+
+        .tuner-btn:hover { background: rgba(0, 42, 0, 0.88); }
+
+        .tuner-btn.is-active {
+            background: var(--neon-green);
+            color: #000;
+        }
+
+        .tuner-output {
+            width: 100%;
+            min-height: 10rem;
+            max-height: 14rem;
+            margin: 0;
+            padding: 0.65rem;
+            border: 1px solid rgba(0, 255, 0, 0.25);
+            border-radius: var(--radius-sm);
+            background: #020802;
+            color: #b8ffb8;
+            font-family: monospace;
+            font-size: 0.68rem;
+            line-height: 1.45;
+            resize: vertical;
+        }
+
+        .tuner-preview {
+            height: 100vh;
+            overflow-y: auto;
+            padding: 4.5rem 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .preview-tabs {
+            position: fixed;
+            top: 1rem;
+            left: calc(min(360px, 33vw) + 50%);
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.45rem;
+            z-index: 5;
+        }
+
+        .preview-stage {
+            width: min(100%, 860px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .preview-stage.is-active { display: flex; }
+
+        /* isolate from production positioning */
+        #close-tuner .preview-modal.modal {
+            display: block !important;
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            transform: none !important;
+            width: min(100%, 700px);
+            z-index: 1;
+        }
+
+        #close-tuner .preview-modal .modal-content {
+            position: relative;
+            min-height: 220px;
+            background: var(--glass);
+            color: #ddd;
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(0, 255, 0, 0.25);
+            border-left: 5px solid var(--neon-green);
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+
+        #close-tuner .preview-modal h2 {
+            margin-top: 0;
+            color: var(--neon-green);
+            font-size: 1.5rem;
+            border-bottom: 1px solid #555;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        #close-tuner .preview-modal .scrollable-content {
+            font-family: monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: #ccc;
+        }
+
+        /* carousel — real #lightbox id, but contained not fullscreen */
+        #close-tuner #lightbox.lightbox-overlay {
+            position: relative !important;
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            width: min(100%, 760px);
+            min-height: 360px;
+            height: auto;
+            inset: auto;
+            padding: 2rem 3rem;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px dashed rgba(0, 255, 0, 0.25);
+            border-radius: var(--radius-md);
+        }
+
+        #close-tuner #lightbox .lightbox-image-wrapper img {
+            display: block;
+            width: min(100%, 480px);
+            max-height: 42vh;
+            object-fit: contain;
+        }
+
+        /* vault overlay — real id, contained preview */
+        #close-tuner #lightbox-overlay {
+            position: relative !important;
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            width: min(100%, 860px);
+            min-height: 360px;
+            height: auto;
+            inset: auto;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px dashed rgba(0, 255, 0, 0.25);
+            border-radius: var(--radius-md);
+        }
+
+        #close-tuner #lightbox-overlay img.lightbox-content {
+            max-width: min(90%, 480px);
+            max-height: 42vh;
+            transform: none;
+        }
+
+        /* in preview only — fixed close would escape the panel */
+        #close-tuner #lightbox-overlay > .lightbox-close {
+            position: absolute !important;
+            top: 8px;
+            right: 8px;
+        }
+
+        .preview-note {
+            font-family: monospace;
+            font-size: 0.68rem;
+            color: rgba(0, 255, 0, 0.55);
+            text-align: center;
+        }
+
+        body.corrupted { --neon-green: var(--alert-red); }
+
+        @media (max-width: 900px) {
+            #close-tuner {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .tuner-panel {
+                height: auto;
+                max-height: 45vh;
+                border-right: none;
+                border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+            }
+
+            .tuner-preview {
+                height: auto;
+                min-height: 55vh;
+            }
+
+            .preview-tabs {
+                left: 50%;
+            }
+        }
+    </style>
+    <style id="tuner-overrides"></style>
+</head>
+<body>
+    <div id="close-tuner">
+        <aside class="tuner-panel">
+            <h1>// CLOSE BUTTON TUNER</h1>
+            <p>Temp dev tool. Left column scrolls independently — CSS output is sticky at the bottom. Copy into <code>css/chrome.css</code> when done.</p>
+
+            <div class="tuner-actions">
+                <button type="button" class="tuner-btn" id="toggle-corrupted">corrupted</button>
+                <button type="button" class="tuner-btn" id="toggle-ios">ios-ui</button>
+                <button type="button" class="tuner-btn" id="reset-values">reset</button>
+            </div>
+
+            <div class="tuner-group">
+                <h2>// SHARED (.lightbox-close)</h2>
+                <label>btn width <input type="range" id="shared-width" min="16" max="48" step="1"><output></output></label>
+                <label>btn height <input type="range" id="shared-height" min="16" max="48" step="1"><output></output></label>
+                <label>× font-size <input type="range" id="shared-font" min="12" max="36" step="1"><output></output></label>
+                <label>× offset X <input type="range" id="shared-offset-x" min="-6" max="6" step="0.5"><output></output></label>
+                <label>× offset Y <input type="range" id="shared-offset-y" min="-6" max="6" step="0.5"><output></output></label>
+            </div>
+
+            <div class="tuner-group">
+                <h2>// MODAL (.modal-content &gt; .lightbox-close)</h2>
+                <label>top <input type="range" id="modal-top" min="0" max="40" step="1"><output></output></label>
+                <label>right <input type="range" id="modal-right" min="0" max="40" step="1"><output></output></label>
+            </div>
+
+            <div class="tuner-group">
+                <h2>// CAROUSEL (#lightbox wrapper)</h2>
+                <label>top <input type="range" id="carousel-top" min="0" max="40" step="1"><output></output></label>
+                <label>right <input type="range" id="carousel-right" min="0" max="40" step="1"><output></output></label>
+            </div>
+
+            <div class="tuner-group">
+                <h2>// VAULT OVERLAY (#lightbox-overlay fixed)</h2>
+                <label>top <input type="range" id="vault-top" min="0" max="80" step="1"><output></output></label>
+                <label>right <input type="range" id="vault-right" min="0" max="80" step="1"><output></output></label>
+            </div>
+
+            <div class="tuner-group tuner-group--output">
+                <h2>// CSS OUTPUT</h2>
+                <textarea class="tuner-output" id="css-output" readonly></textarea>
+                <button type="button" class="tuner-btn" id="copy-css" style="margin-top:0.55rem;">copy css</button>
+            </div>
+        </aside>
+
+        <main class="tuner-preview">
+            <div class="preview-tabs">
+                <button type="button" class="tuner-btn is-active" data-preview="modal">modal</button>
+                <button type="button" class="tuner-btn" data-preview="carousel">carousel</button>
+                <button type="button" class="tuner-btn" data-preview="vault">vault overlay</button>
+            </div>
+
+            <section class="preview-stage is-active" id="preview-modal">
+                <div class="modal wide preview-modal">
+                    <div class="modal-content">
+                        <button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button>
+                        <h2 class="drag-handle">// THE VAULT</h2>
+                        <div class="scrollable-content">
+                            <p>Modal close sits absolute inside <code>.modal-content</code>.</p>
+                            <p>Drag the sliders until the × aligns with the corner without clipping.</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="preview-note">sidebar modal — close is absolute inside .modal-content</p>
+            </section>
+
+            <section class="preview-stage" id="preview-carousel">
+                <div id="lightbox" class="lightbox-overlay active">
+                    <div class="lightbox-image-wrapper">
+                        <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
+                        <img id="lightbox-img" src="../assets/img/vault/weirdpic.jpg" alt="Sample lightbox image">
+                    </div>
+                </div>
+                <p class="preview-note">carousel #lightbox — close is absolute on .lightbox-image-wrapper</p>
+            </section>
+
+            <section class="preview-stage" id="preview-vault">
+                <div id="lightbox-overlay" class="active">
+                    <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
+                    <img class="lightbox-content" src="../assets/img/vault/weirdpic.jpg" alt="Sample vault image">
+                </div>
+                <p class="preview-note">production uses fixed viewport positioning; preview pins it inside the box</p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const DEFAULTS = {
+            sharedWidth: 24,
+            sharedHeight: 24,
+            sharedFont: 24,
+            sharedOffsetX: 0.5,
+            sharedOffsetY: 0,
+            modalTop: 8,
+            modalRight: 8,
+            carouselTop: 8,
+            carouselRight: 8,
+            vaultTop: 30,
+            vaultRight: 40,
+        };
+
+        const state = { ...DEFAULTS };
+
+        const fields = {
+            sharedWidth: document.getElementById('shared-width'),
+            sharedHeight: document.getElementById('shared-height'),
+            sharedFont: document.getElementById('shared-font'),
+            sharedOffsetX: document.getElementById('shared-offset-x'),
+            sharedOffsetY: document.getElementById('shared-offset-y'),
+            modalTop: document.getElementById('modal-top'),
+            modalRight: document.getElementById('modal-right'),
+            carouselTop: document.getElementById('carousel-top'),
+            carouselRight: document.getElementById('carousel-right'),
+            vaultTop: document.getElementById('vault-top'),
+            vaultRight: document.getElementById('vault-right'),
+        };
+
+        function px(value) {
+            return `${value}px`;
+        }
+
+        function formatOffset(value) {
+            if (value === 0) return '-50%';
+            return `calc(-50% + ${value}px)`;
+        }
+
+        function buildCss() {
+            const x = formatOffset(state.sharedOffsetX);
+            const y = formatOffset(state.sharedOffsetY);
+
+            return `.lightbox-close {
+    width: ${px(state.sharedWidth)};
+    height: ${px(state.sharedHeight)};
+}
+
+.lightbox-close::after {
+    font-size: ${px(state.sharedFont)};
+    transform: translate(${x}, ${y});
+}
+
+.modal-content > .lightbox-close {
+    top: ${px(state.modalTop)};
+    right: ${px(state.modalRight)};
+}
+
+#lightbox .lightbox-image-wrapper .lightbox-close {
+    top: ${px(state.carouselTop)};
+    right: ${px(state.carouselRight)};
+}
+
+#lightbox-overlay > .lightbox-close {
+    position: fixed;
+    top: ${px(state.vaultTop)};
+    right: ${px(state.vaultRight)};
+}`;
+        }
+
+        function render() {
+            document.getElementById('tuner-overrides').textContent = buildCss();
+            document.getElementById('css-output').value = buildCss();
+
+            Object.entries(fields).forEach(([key, input]) => {
+                input.value = state[key];
+                input.parentElement.querySelector('output').textContent = state[key];
+            });
+        }
+
+        Object.entries(fields).forEach(([key, input]) => {
+            input.addEventListener('input', () => {
+                state[key] = Number(input.value);
+                render();
+            });
+        });
+
+        document.querySelectorAll('[data-preview]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-preview]').forEach((b) => b.classList.remove('is-active'));
+                document.querySelectorAll('.preview-stage').forEach((stage) => stage.classList.remove('is-active'));
+                btn.classList.add('is-active');
+                document.getElementById(`preview-${btn.dataset.preview}`).classList.add('is-active');
+            });
+        });
+
+        document.getElementById('toggle-corrupted').addEventListener('click', (event) => {
+            document.body.classList.toggle('corrupted');
+            event.currentTarget.classList.toggle('is-active');
+        });
+
+        document.getElementById('toggle-ios').addEventListener('click', (event) => {
+            document.body.classList.toggle('ios-ui');
+            document.getElementById('ios-css').disabled = !document.body.classList.contains('ios-ui');
+            event.currentTarget.classList.toggle('is-active');
+        });
+
+        document.getElementById('reset-values').addEventListener('click', () => {
+            Object.assign(state, DEFAULTS);
+            render();
+        });
+
+        document.getElementById('copy-css').addEventListener('click', async () => {
+            const text = document.getElementById('css-output').value;
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch {
+                document.getElementById('css-output').select();
+                document.execCommand('copy');
+            }
+        });
+
+        render();
+    </script>
+</body>
+</html>

@@ -1312,7 +1312,7 @@ body.corrupted .mask-icon {
 
 .lightbox-close {
     position: fixed;
-    top: 30px;
+    top: 40px;
     right: 40px;
     width: 24px;
     height: 24px;
@@ -1348,7 +1348,7 @@ body.corrupted .mask-icon {
     left: 50%;
     transform: translate(calc(-50% + 0.5px), -50%);
     font-family: var(--main-font);
-    font-size: 1.5rem;
+    font-size: 24px;
     font-weight: bold;
     line-height: 1;
     color: var(--neon-green);
@@ -1359,9 +1359,15 @@ body.corrupted .mask-icon {
 
 .modal-content > .lightbox-close {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 12px;
+    right: 12px;
     z-index: 10;
+}
+
+#lightbox-overlay > .lightbox-close {
+    position: fixed;
+    top: 40px;
+    right: 40px;
 }
 
 .lightbox-close:hover::before {
@@ -3124,8 +3130,8 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 
 #lightbox .lightbox-image-wrapper .lightbox-close {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 12px;
+    right: 12px;
     z-index: 2;
 }
 
