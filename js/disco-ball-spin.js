@@ -542,6 +542,27 @@ export function initDiscoBallSpin(root, options = {}) {
     return api;
 }
 
+/**
+ * Deterministic single-frame render (video export). Does not start animation.
+ * @param {Element | SVGSVGElement} root
+ * @param {number} elapsedSec
+ * @param {Partial<typeof DISCO_BALL_SPIN_DEFAULTS> & { rotY?: number, bgPhase?: number, initialBgPhase?: number }} [options]
+ */
+export function renderDiscoBallAtTime(root, elapsedSec, options = {}) {
+    const svg = root instanceof SVGSVGElement ? root : root.querySelector('svg');
+    if (!svg) return;
+
+    const config = { ...DISCO_BALL_SPIN_DEFAULTS, ...options };
+    const initialBgPhase = options.initialBgPhase ?? options.bgPhase ?? 0;
+    const rotY = options.rotY ?? config.speed * elapsedSec;
+    const bgPhase = options.bgPhase
+        ?? (initialBgPhase + (config.bgSpeed ?? 0) * elapsedSec * 360) % 360;
+
+    applyBallGeometry(svg, config);
+    resolveBackground(svg, config, bgPhase);
+    renderGrid(resolveGrid(svg), rotY, config, bgPhase, []);
+}
+
 export function initDiscoBallSpinInDocument(root = document) {
     const cleanups = [];
     root.querySelectorAll('[data-disco-ball-spin]').forEach((el) => {

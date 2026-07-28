@@ -581,6 +581,37 @@ export function initDiscoBallEyes(root, options = {}) {
     return api;
 }
 
+/**
+ * Deterministic silly-eye pose (video export). Does not start animation.
+ * @param {Element | SVGSVGElement} root
+ * @param {number} elapsedSec
+ * @param {keyof typeof DISCO_BALL_SILLY_EYES} [sillyMode]
+ * @param {{ spinRate?: number }} [options]
+ */
+export function renderDiscoBallEyesSillyAtTime(root, elapsedSec, sillyMode = 'spin', options = {}) {
+    const pupils = [...root.querySelectorAll('.disco-ball-pupil')];
+    if (!pupils.length) return;
+
+    const animate = DISCO_BALL_SILLY_EYES[sillyMode];
+    if (!animate) return;
+
+    pupils.forEach((pupil, index) => {
+        const eye = readEyeMetrics(pupil);
+        let offset;
+
+        if (sillyMode === 'spin' && options.spinRate != null) {
+            const max = pupilTravel(eye) * 0.88;
+            const angle = elapsedSec * options.spinRate + index * Math.PI;
+            offset = { x: Math.cos(angle) * max, y: Math.sin(angle) * max * 0.72 };
+        } else {
+            offset = animate(elapsedSec, eye, index, pupils);
+        }
+
+        pupil.setAttribute('cx', String(eye.ox + offset.x));
+        pupil.setAttribute('cy', String(eye.oy + offset.y));
+    });
+}
+
 export function initDiscoBallEyesInDocument(root = document) {
     const cleanups = [];
     root.querySelectorAll('[data-disco-ball-eyes]').forEach((el) => {
