@@ -1182,6 +1182,12 @@ function openModal(id) {
             });
         }
 
+        if (resolvedId === 'signal') {
+            import('./modules/live-feed.js').then((m) => m.startLiveFeed()).catch((err) => {
+                console.error('[Entropy Garden] live feed failed to load', err);
+            });
+        }
+
         if (resolvedId === 'trophies') {
             globalThis.EntropyTrophies?.renderTrophyCase();
         }
@@ -1214,6 +1220,9 @@ function openModal(id) {
 function closeModal(modalElement) { 
     const closeClone = sfx.close.cloneNode();
     closeClone.play().catch(e => {});
+    if (modalElement?.id === 'modal-signal') {
+        import('./modules/live-feed.js').then((m) => m.stopLiveFeed()).catch(() => {});
+    }
     onModalClosed(modalElement);
     modalElement.style.display = 'none';
     detachRefreshHint();

@@ -509,6 +509,12 @@
                 <p>Audio: <span id="val-audio" class="data-value">...</span></p>
                 <p>Action: <span id="val-activity" class="data-value">...</span></p>
                 <p>Mood: <span id="val-mood" class="data-value">...</span></p>
+                <section class="live-feed" aria-label="Activity stream">
+                    <p class="live-feed-stats">followers: ∞ following: -1</p>
+                    <div class="live-feed-stream" id="live-feed-stream">
+                        <div class="live-feed-track" id="live-feed-track"></div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -591,6 +597,7 @@
 <script src="js/data/lore/vibes.data.js"></script>
 <script src="js/data/lore/terminal.data.js"></script>
 <script src="js/data/lore/panopticon.data.js"></script>
+<script src="js/data/lore/live-feed.data.js"></script>
 <script type="module" src="js/cipher/vigenere.js"></script>
 <script src="js/cipher/entropy-hint.js"></script>
 <script src="js/boot/trophies.js"></script>

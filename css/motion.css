@@ -378,8 +378,31 @@
     }
 }
 
+@keyframes liveFeedItem {
+    0% {
+        opacity: 0;
+        transform: translateY(0.75em);
+    }
+    16% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    72% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-0.75em);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .track-title-marquee.is-scrolling .track-title-scroll {
+        animation: none;
+    }
+
+    .live-feed-item {
         animation: none;
     }
 }
