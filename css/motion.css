@@ -381,19 +381,19 @@
 @keyframes liveFeedItem {
     0% {
         opacity: 0;
-        transform: translateY(0.75em);
+        transform: translateY(0.55em);
     }
-    16% {
+    14% {
         opacity: 1;
         transform: translateY(0);
     }
-    72% {
+    78% {
         opacity: 1;
         transform: translateY(0);
     }
     100% {
         opacity: 0;
-        transform: translateY(-0.75em);
+        transform: translateY(-0.55em);
     }
 }
 
@@ -402,7 +402,7 @@
         animation: none;
     }
 
-    .live-feed-item {
+    .live-feed-status.is-animating {
         animation: none;
     }
 }

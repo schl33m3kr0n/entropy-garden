@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Feed Preview</title>
+    <link rel="stylesheet" href="../css/tokens.css">
+    <link rel="stylesheet" href="../css/chrome.css">
+    <link rel="stylesheet" href="../css/motion.css">
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 1.5rem;
+            background: #050505;
+            color: #0f0;
+            font-family: var(--main-font);
+        }
+
+        .preview-shell {
+            width: min(28rem, 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .preview-shell h1 {
+            margin: 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.12em;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .preview-shell > p {
+            margin: 0;
+            font-family: monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: rgba(0, 255, 0, 0.72);
+            text-align: center;
+        }
+
+        .preview-modal {
+            padding: 1rem 1.1rem 1.15rem;
+            border: 1px solid rgba(0, 255, 0, 0.18);
+            border-radius: var(--radius-md);
+            background: rgba(8, 8, 8, 0.92);
+        }
+
+        body.corrupted .preview-modal {
+            border-color: rgba(255, 80, 100, 0.22);
+        }
+
+        .preview-modal h2 {
+            margin: 0 0 0.85rem;
+            font-size: 0.88rem;
+            letter-spacing: 0.08em;
+        }
+
+        .preview-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .preview-btn {
+            flex: 1 1 auto;
+            min-width: 7rem;
+            padding: 0.65rem 1rem;
+            border: 1px solid var(--neon-green);
+            border-radius: var(--radius-md);
+            background: rgba(0, 30, 0, 0.72);
+            color: #dfffe0;
+            font-family: monospace;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+
+        body.corrupted .preview-btn {
+            border-color: var(--alert-red, #ff3355);
+            background: rgba(28, 0, 8, 0.72);
+            color: #ffd6de;
+        }
+
+        .preview-btn:hover,
+        .preview-btn:focus-visible {
+            outline: none;
+            filter: brightness(1.08);
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-shell">
+        <h1>// LIVE FEED PREVIEW</h1>
+        <p>Status ticker only — no full modal chrome. Auto-starts on load.</p>
+
+        <div class="preview-modal">
+            <h2>// LIVE FEED</h2>
+            <section class="live-feed" aria-label="Activity stream">
+                <p class="live-feed-stats">followers: ∞ following: -1</p>
+                <div class="live-feed-stream">
+                    <p class="live-feed-status" id="live-feed-status" aria-live="polite"></p>
+                </div>
+            </section>
+        </div>
+
+        <div class="preview-actions">
+            <button type="button" class="preview-btn" id="preview-restart">Restart</button>
+            <button type="button" class="preview-btn" id="preview-corrupt">Toggle corrupted</button>
+        </div>
+    </div>
+
+    <script src="../js/data/lore/live-feed.data.js"></script>
+    <script type="module">
+        import { startLiveFeed, stopLiveFeed } from '../js/modules/live-feed.js';
+        import { setIsCorrupted } from '../js/core/state.js';
+
+        function restartFeed() {
+            stopLiveFeed();
+            startLiveFeed();
+        }
+
+        restartFeed();
+
+        document.getElementById('preview-restart')?.addEventListener('click', restartFeed);
+
+        document.getElementById('preview-corrupt')?.addEventListener('click', () => {
+            const next = !document.body.classList.contains('corrupted');
+            document.body.classList.toggle('corrupted', next);
+            setIsCorrupted(next);
+            restartFeed();
+        });
+    </script>
+</body>
+</html>

@@ -3,13 +3,11 @@
 import { perf } from '../core/shared.js';
 import { isCorrupted } from '../core/state.js';
 
-const ITEM_DURATION_MS = 3800;
-const SPAWN_MIN_MS = 1400;
-const SPAWN_MAX_MS = 2800;
-const MAX_TRACK_ITEMS = 8;
+const ITEM_DURATION_MS = 4200;
+const GAP_MS = 280;
 
-let trackEl = null;
-let spawnTimer = 0;
+let statusEl = null;
+let cycleTimer = 0;
 let running = false;
 let recentLines = [];
 
@@ -56,67 +54,52 @@ function rememberLine(line) {
     recentLines = [...recentLines.slice(-11), line];
 }
 
-function spawnItem() {
-    if (!trackEl || !running) return;
+function restartAnimation() {
+    if (!statusEl) return;
+    statusEl.classList.remove('is-animating');
+    void statusEl.offsetWidth;
+    statusEl.classList.add('is-animating');
+}
+
+function showNextLine() {
+    if (!statusEl || !running) return;
 
     const text = pickUniqueLine();
     rememberLine(text);
-
-    const item = document.createElement('p');
-    item.className = 'live-feed-item';
-    item.textContent = text;
+    statusEl.textContent = text;
 
     if (perf.prefersReducedMotion) {
-        item.classList.add('live-feed-item--static');
-    }
-
-    trackEl.appendChild(item);
-
-    while (trackEl.children.length > MAX_TRACK_ITEMS) {
-        trackEl.removeChild(trackEl.firstChild);
-    }
-
-    if (!perf.prefersReducedMotion) {
-        item.addEventListener('animationend', () => {
-            item.remove();
-        }, { once: true });
+        cycleTimer = window.setTimeout(showNextLine, ITEM_DURATION_MS + GAP_MS);
         return;
     }
 
-    setTimeout(() => {
-        item.remove();
-    }, ITEM_DURATION_MS);
+    restartAnimation();
+    statusEl.addEventListener('animationend', onLineFinished, { once: true });
 }
 
-function scheduleSpawn() {
-    clearTimeout(spawnTimer);
+function onLineFinished() {
     if (!running) return;
-
-    const delay = perf.prefersReducedMotion
-        ? ITEM_DURATION_MS + 400
-        : SPAWN_MIN_MS + Math.random() * (SPAWN_MAX_MS - SPAWN_MIN_MS);
-
-    spawnTimer = window.setTimeout(() => {
-        spawnItem();
-        scheduleSpawn();
-    }, delay);
+    cycleTimer = window.setTimeout(showNextLine, GAP_MS);
 }
 
 export function startLiveFeed() {
-    trackEl = document.getElementById('live-feed-track');
-    if (!trackEl || running) return;
+    statusEl = document.getElementById('live-feed-status');
+    if (!statusEl || running) return;
 
     running = true;
     recentLines = [];
-    trackEl.replaceChildren();
-    spawnItem();
-    scheduleSpawn();
+    statusEl.textContent = '';
+    statusEl.classList.remove('is-animating');
+    showNextLine();
 }
 
 export function stopLiveFeed() {
     running = false;
-    clearTimeout(spawnTimer);
-    spawnTimer = 0;
-    trackEl?.replaceChildren();
-    trackEl = null;
+    clearTimeout(cycleTimer);
+    cycleTimer = 0;
+    if (statusEl) {
+        statusEl.classList.remove('is-animating');
+        statusEl.textContent = '';
+    }
+    statusEl = null;
 }

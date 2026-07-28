@@ -1064,49 +1064,37 @@ body.corrupted .scrollable-content::-webkit-scrollbar-thumb { background: var(--
 }
 
 .live-feed-stream {
-    position: relative;
-    height: 11.5em;
-    overflow: hidden;
-    mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        #000 14%,
-        #000 86%,
-        transparent 100%
-    );
-    -webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        #000 14%,
-        #000 86%,
-        transparent 100%
-    );
+    display: grid;
+    place-items: center;
+    min-height: 3.4em;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid rgba(0, 255, 0, 0.14);
+    border-radius: var(--radius-sm);
+    background: rgba(0, 18, 0, 0.38);
 }
 
-.live-feed-track {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    min-height: 100%;
+body.corrupted .live-feed-stream {
+    border-color: rgba(255, 80, 100, 0.18);
+    background: rgba(28, 0, 6, 0.38);
 }
 
-.live-feed-item {
+.live-feed-status {
     margin: 0;
-    padding: 0.12em 0;
+    width: 100%;
     font-family: monospace;
     font-size: 0.8rem;
-    line-height: 1.35;
-    color: rgba(0, 255, 0, 0.78);
-    animation: liveFeedItem 3.8s ease forwards;
+    line-height: 1.45;
+    text-align: center;
+    color: rgba(0, 255, 0, 0.82);
+}
+
+body.corrupted .live-feed-status {
+    color: rgba(255, 80, 100, 0.86);
+}
+
+.live-feed-status.is-animating {
+    animation: liveFeedItem 4.2s ease forwards;
     will-change: transform, opacity;
-}
-
-body.corrupted .live-feed-item {
-    color: rgba(255, 80, 100, 0.82);
-}
-
-.live-feed-item--static {
-    animation: none;
 }
 
 .trophy-case-scroll { max-height: 55vh; }
