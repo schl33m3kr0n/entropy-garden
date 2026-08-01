@@ -70,6 +70,7 @@
             'posted a thirst trap and captioned it "study grind"',
             'changed his background photo to a block of cheese',
             'drew an oval when it should\'ve been a circle',
+            'left the comment "you look like you reply to automated messages"',
         ],
         liveFeedActivitiesGritty: [
             'liked their ex\'s vacation photos at 2:47am',
