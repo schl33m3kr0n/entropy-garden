@@ -13,9 +13,9 @@
   <!-- Central hexagon (matches background) -->
   <polygon points="61,30.95 72,50 61,69.05 39,69.05 28,50 39,30.95" fill="#000000" stroke="#000000" stroke-width="1.2" stroke-linejoin="miter" />
 
-  <!-- Eye: white sclera, dark pupil -->
-  <g transform="translate(50 50) scale(0.42) translate(-50 -50)">
-    <path d="M 10 50 C 30 20, 70 20, 90 50 C 70 80, 30 80, 10 50 Z" fill="#ffffff" stroke="#12161d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" />
-    <circle cx="50" cy="50" r="22" fill="#12161d" />
+  <!-- Subtle eye outline, centered in the hexagon -->
+  <g transform="translate(50 50) scale(0.42) translate(-50 -50)" stroke="#222222" stroke-width="2.8" fill="none" stroke-linecap="round">
+    <path d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z" />
+    <circle cx="50" cy="50" r="14" />
   </g>
 </svg>
