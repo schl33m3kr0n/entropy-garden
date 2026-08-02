@@ -470,7 +470,7 @@ body.corrupted #panopticon-eye.panopticon-coffee-time .panopticon-coffee-icon {
 }
 
 .panopticon-socket-fill {
-    fill: #ffffff;
+    fill: rgba(0, 20, 0, 0.12);
     stroke: none;
 }
 
@@ -478,7 +478,6 @@ body.corrupted #panopticon-eye.panopticon-coffee-time .panopticon-coffee-icon {
     fill: url(#panopticon-inlay-shadow);
     stroke: none;
     pointer-events: none;
-    opacity: 0;
 }
 
 .panopticon-socket-inlay-rim {
@@ -486,7 +485,6 @@ body.corrupted #panopticon-eye.panopticon-coffee-time .panopticon-coffee-icon {
     stroke: none;
     pointer-events: none;
     mix-blend-mode: multiply;
-    opacity: 0;
 }
 
 body.god-mode .panopticon-socket-fill,
@@ -509,24 +507,32 @@ body.corrupted .panopticon-socket-inlay-rim {
 }
 
 .panopticon-lid {
-    stroke: #12161d;
-    stroke-width: 4;
+    stroke: var(--neon-green);
+    stroke-width: 3;
     fill: none;
     stroke-linejoin: round;
-    stroke-linecap: round;
 }
 
 body.corrupted .panopticon-lid {
     stroke: var(--alert-red);
 }
 
-.panopticon-iris-outer,
+.panopticon-iris-outer {
+    stroke: var(--neon-green);
+    stroke-width: 1.5;
+    fill: none;
+    opacity: 0.55;
+}
+
 .panopticon-iris-mid {
-    display: none;
+    stroke: var(--neon-green);
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.85;
 }
 
 .panopticon-pupil {
-    fill: #12161d;
+    fill: var(--neon-green);
 }
 
 body.corrupted .panopticon-iris-outer,

@@ -45,9 +45,9 @@ export {
     godModeRainbowGradEl,
 } from './dom.js';
 
-/** Almond lid bounds in the eye SVG viewBox (100×100): x 10–90, y 20–80. */
-const PANOPTICON_LID_WIDTH_RATIO = 0.8;
-const PANOPTICON_LID_HEIGHT_RATIO = 0.6;
+/** Almond lid bounds in the eye SVG viewBox (100×100): x 8–92, y 12–88. */
+const PANOPTICON_LID_WIDTH_RATIO = 0.84;
+const PANOPTICON_LID_HEIGHT_RATIO = 0.76;
 const GOD_TRIANGLE_EYE_CLEARANCE = 1.26;
 const GOD_LETTER_ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
@@ -288,8 +288,8 @@ const PANOPTICON_GOD_HOLD_MS = 280;
 const PANOPTICON_GOD_OPEN_MS = 480;
 const PANOPTICON_GOD_SYMBOL_MS = 260;
 const PANOPTICON_SLEEP_REST_SHUT = 1; // fully closed → straight lid line
-const PANOPTICON_LID_OPEN = 'M 10 50 C 30 20, 70 20, 90 50 C 70 80, 30 80, 10 50 Z';
-const PANOPTICON_LID_CLOSED = 'M 10 50 L 90 50';
+const PANOPTICON_LID_OPEN = 'M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z';
+const PANOPTICON_LID_CLOSED = 'M 8 50 L 92 50';
 const PANOPTICON_CAT_MORPH_MS = 420;
 const PANOPTICON_CAT_HOLD_MS = 1100;
 const PANOPTICON_WAKE_PEEK_MS = 520;
@@ -311,8 +311,8 @@ const PANOPTICON_AWAY_READING_ACTIVITIES = ['reading', 'newspaper', 'laptop'];
 const PANOPTICON_READING_GAZE_Y = 11;
 const PANOPTICON_READING_SCAN_X = 8;
 const PANOPTICON_READING_SCAN_MS = 1100;
-const PANOPTICON_PUPIL_R = 22;
-const PANOPTICON_PUPIL_R_HIGH = 26;
+const PANOPTICON_PUPIL_R = 7;
+const PANOPTICON_PUPIL_R_HIGH = 12;
 
 let catEyePhase = null;
 let catEyeStart = 0;
@@ -1045,14 +1045,14 @@ function panopticonYawnArchPath(intensity) {
     const yMid = 50;
     const yPeak = yMid - rise;
     const yLower = yMid + 3 + k * 5;
-    return `M 10 ${yMid} C 30 ${yPeak}, 70 ${yPeak}, 90 ${yMid} C 70 ${yLower}, 30 ${yLower}, 10 ${yMid} Z`;
+    return `M 8 ${yMid} C 26 ${yPeak}, 74 ${yPeak}, 92 ${yMid} C 74 ${yLower}, 26 ${yLower}, 8 ${yMid} Z`;
 }
 
 function applyPanopticonSocketPath(path, gazeStrength = 0) {
     panopticonLidEl?.setAttribute('d', path);
 
     if (path === PANOPTICON_LID_CLOSED) {
-        panopticonClipPathEl?.setAttribute('d', 'M 10 50 L 90 50 L 90 50 L 10 50 Z');
+        panopticonClipPathEl?.setAttribute('d', 'M 8 50 L 92 50 L 92 50 L 8 50 Z');
         if (panopticonGazeEl) panopticonGazeEl.style.opacity = '0';
         return;
     }
@@ -1530,9 +1530,9 @@ export function syncPanopticonRainbow() {
 function panopticonLidPath(shut) {
     if (shut >= 0.98) return PANOPTICON_LID_CLOSED;
 
-    const yTop = 20 + 30 * shut;
-    const yBot = 80 - 30 * shut;
-    return `M 10 50 C 30 ${yTop}, 70 ${yTop}, 90 50 C 70 ${yBot}, 30 ${yBot}, 10 50 Z`;
+    const yTop = 12 + 38 * shut;
+    const yBot = 88 - 38 * shut;
+    return `M 8 50 C 28 ${yTop}, 72 ${yTop}, 92 50 C 72 ${yBot}, 28 ${yBot}, 8 50 Z`;
 }
 
 function setPanopticonScaleAtCenter(el, sx, sy, cx = 50, cy = 50) {
@@ -1641,7 +1641,7 @@ function applyPanopticonLidShut(shut) {
     panopticonLidEl?.setAttribute('d', path);
 
     if (shut >= 0.98) {
-        panopticonClipPathEl?.setAttribute('d', 'M 10 50 L 90 50 L 90 50 L 10 50 Z');
+        panopticonClipPathEl?.setAttribute('d', 'M 8 50 L 92 50 L 92 50 L 8 50 Z');
         if (panopticonGazeEl) panopticonGazeEl.style.opacity = '0';
         return;
     }

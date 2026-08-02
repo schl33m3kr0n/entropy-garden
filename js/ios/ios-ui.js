@@ -8,8 +8,13 @@ import { resizeCanvas } from '../lazy.js';
 
 
 const REROLL_EYE_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path fill="#ffffff" stroke="currentColor" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" d="M 10 50 C 30 20, 70 20, 90 50 C 70 80, 30 80, 10 50 Z"/>
-  <circle cx="50" cy="50" r="22" fill="currentColor"/>
+
+  <path fill="none" stroke="currentColor" stroke-width="2.5" d="M 8 50 C 28 12, 72 12, 92 50 C 72 88, 28 88, 8 50 Z"/>
+
+  <circle cx="50" cy="50" r="18" fill="none" stroke="currentColor" stroke-width="1.75"/>
+
+  <circle cx="50" cy="50" r="7" fill="currentColor"/>
+
 </svg>`;
 
 
