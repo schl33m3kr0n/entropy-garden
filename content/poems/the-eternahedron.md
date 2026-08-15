@@ -17,7 +17,6 @@ is the destiny of creation
 a sun hidden and a moon in sight
 are they to end in destruction?
 
-
 within these walls rests the master
 a prisoner of his own making
 without, the slave toils faster
