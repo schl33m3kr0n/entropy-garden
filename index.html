@@ -373,6 +373,45 @@
     <div id="modal-about" class="modal">
         <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--identity" aria-hidden="true"></span>// ABOUT</h2>
             <div class="scrollable-content">
+                <div class="schleem-cinematic">
+                    <div class="schleem-cinematic-scope top">
+                        <div class="left">
+                            <span class="dot animate-ping"></span>
+                            <span class="text">REC [2.39:1] CINEMATIC</span>
+                        </div>
+                        <div class="right">
+                            <span id="cinematic-status-tag">INITIALIZING</span>
+                            <span id="cinematic-timecode">00:00:00</span>
+                        </div>
+                    </div>
+                    <div id="cinematic-viewport" class="schleem-cinematic-viewport">
+                        <canvas id="cinema-canvas" class="abs-inset pointer-none"></canvas>
+                        <div class="flare pointer-none"></div>
+                        <div class="scanlines pointer-none"></div>
+                        <div class="vignette-layer pointer-none abs-inset"></div>
+                        <div class="hud-frame pointer-none">
+                            <div class="hud-row">
+                                <span>SEC: 73-A</span>
+                                <span>FPS: 60.00</span>
+                            </div>
+                            <div class="hud-row">
+                                <span>LAT: 44.821</span>
+                                <span>SPECTRAL FLUX: 0.94</span>
+                            </div>
+                        </div>
+                        <div class="center-content relative z-10">
+                            <div id="cinematic-phase-label" class="phase-label">QUANTUM PHASE RECONFIG</div>
+                            <div id="cinematic-word-display" class="word-display" title="Click to Replay"></div>
+                            <div class="sound-bars" id="cinematic-sound-bars">
+                                <div class="bar h-1"></div>
+                                <div class="bar h-2"></div>
+                                <div class="bar h-3"></div>
+                                <div class="bar h-2 pink"></div>
+                                <div class="bar h-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="bio-header about-identity-header">
                     <div class="pfp-wrapper">
                         <picture>

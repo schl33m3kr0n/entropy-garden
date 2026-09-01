@@ -1176,6 +1176,10 @@ function openModal(id) {
             });
         }
 
+        if (resolvedId === 'about' && globalThis.runCinematicSequence) {
+            globalThis.runCinematicSequence();
+        }
+
         if (resolvedId === 'vault') {
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => activateVaultMedia());
@@ -2118,6 +2122,192 @@ function init() {
 
 if (document.readyState === 'complete') {
     init();
-} else {
-    window.addEventListener('load', init);
 }
+
+(function initCinematic() {
+    const originalText = "schleemekron";
+    const targetText   = "schl33m3kr0n";
+    const glyphs = "!@#$%^&*()_+-=[]{}|;:,.<>?/~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    
+    let animationTimeout = null;
+
+    const wordContainer = document.getElementById("cinematic-word-display");
+    const phaseLabel    = document.getElementById("cinematic-phase-label");
+    const statusTag     = document.getElementById("cinematic-status-tag");
+    const timecodeElem  = document.getElementById("cinematic-timecode");
+    const soundBars     = document.querySelectorAll("#cinematic-sound-bars .bar");
+    
+    if (!wordContainer) return;
+
+    let frames = 0;
+    setInterval(() => {
+      frames++;
+      const mins = String(Math.floor(frames / (60 * 30)) % 60).padStart(2, '0');
+      const secs = String(Math.floor((frames / 30) % 60)).padStart(2, '0');
+      if (timecodeElem) {
+          timecodeElem.textContent = `${mins}:${secs}:${String(frames % 30).padStart(2, '0')}`;
+      }
+
+      if (soundBars.length) {
+          soundBars.forEach(bar => {
+            const h = Math.floor(Math.random() * 12) + 4;
+            bar.style.height = `${h}px`;
+          });
+      }
+    }, 33);
+
+    const canvas = document.getElementById("cinema-canvas");
+    let ctx = null;
+    let particles = [];
+    if (canvas) {
+        ctx = canvas.getContext("2d");
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+          constructor() { this.reset(); }
+          reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 1.6 + 0.4;
+            this.speedX = (Math.random() - 0.5) * 0.45;
+            this.speedY = -Math.random() * 0.35 - 0.1;
+            this.alpha = Math.random() * 0.5 + 0.1;
+            this.hue = Math.random() > 0.4 ? 185 : 330;
+          }
+          update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.y < 0 || this.x < 0 || this.x > canvas.width) {
+              this.reset();
+              this.y = canvas.height;
+            }
+          }
+          draw() {
+            ctx.fillStyle = `hsla(${this.hue}, 90%, 65%, ${this.alpha})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        for (let i = 0; i < 45; i++) particles.push(new Particle());
+
+        function renderCanvas() {
+          if(ctx) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              particles.forEach(p => { p.update(); p.draw(); });
+          }
+          requestAnimationFrame(renderCanvas);
+        }
+        renderCanvas();
+    }
+
+    function buildWordSpans(word) {
+      wordContainer.innerHTML = "";
+      for (let i = 0; i < word.length; i++) {
+        const span = document.createElement("span");
+        span.className = "char";
+        span.textContent = word[i];
+        span.id = `char-${i}`;
+        wordContainer.appendChild(span);
+      }
+    }
+
+    function triggerChromaticAberrationPhase() {
+      for (let i = 0; i < targetText.length; i++) {
+        const el = document.getElementById(`char-${i}`);
+        if (el) {
+          el.textContent = targetText[i];
+          el.style.color = "#ffffff";
+          el.style.transform = "translateY(0) scale(1)";
+        }
+      }
+
+      wordContainer.classList.add("chromatic-active");
+
+      if (phaseLabel) {
+          phaseLabel.textContent = "SYNCHRONIZED // CHROMATIC STABILITY";
+          phaseLabel.style.color = "#67e8f9"; 
+      }
+      if (statusTag) {
+          statusTag.textContent = "SPECTRAL LOCK";
+          statusTag.style.color = "#67e8f9";
+      }
+    }
+
+    globalThis.runCinematicSequence = function() {
+      if (animationTimeout) clearTimeout(animationTimeout);
+      
+      // Fix canvas resize on open if it was 0
+      if (canvas && canvas.width === 0) {
+          canvas.width = canvas.parentElement.clientWidth;
+          canvas.height = canvas.parentElement.clientHeight;
+      }
+
+      wordContainer.classList.remove("chromatic-active");
+      wordContainer.style.textShadow = "0 0 10px rgba(0, 240, 255, 0.4)";
+      if (phaseLabel) {
+          phaseLabel.textContent = "ORIGINAL FREQUENCY LOCKED";
+          phaseLabel.style.color = "rgba(34, 211, 238, 0.6)";
+      }
+      
+      if (statusTag) {
+          statusTag.textContent = "CALIBRATING";
+          statusTag.style.color = "rgba(6, 182, 212, 0.6)";
+      }
+
+      buildWordSpans(originalText);
+
+      const morphIndices = [4, 5, 7, 10];
+
+      animationTimeout = setTimeout(() => {
+        if (phaseLabel) {
+            phaseLabel.textContent = "MORPHIC DECRYPTION ACTIVE";
+            phaseLabel.style.color = "#f472b6"; 
+        }
+        if (statusTag) {
+            statusTag.textContent = "MUTATING BYTES";
+            statusTag.style.color = "#f472b6";
+        }
+
+        let scrambleCount = 0;
+        const maxScrambles = 28;
+
+        const scrambleInterval = setInterval(() => {
+          scrambleCount++;
+          
+          morphIndices.forEach((idx, order) => {
+            const el = document.getElementById(`char-${idx}`);
+            if (!el) return;
+
+            if (scrambleCount < maxScrambles - (order * 4)) {
+              el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+              el.style.color = (Math.random() > 0.5) ? "#ff2a85" : "#00f0ff";
+              el.style.transform = `translateY(${(Math.random() - 0.5) * 6}px) scale(${1 + Math.random() * 0.2})`;
+              el.style.textShadow = "0 0 12px #ff2a85, 0 0 20px #00f0ff";
+            } else {
+              el.textContent = targetText[idx];
+              el.style.color = "#ffffff";
+              el.style.transform = "translateY(0) scale(1)";
+              el.style.textShadow = "0 0 14px #00f0ff";
+            }
+          });
+
+          if (scrambleCount >= maxScrambles) {
+            clearInterval(scrambleInterval);
+            triggerChromaticAberrationPhase();
+          }
+        }, 65);
+
+      }, 1100);
+    };
+
+    wordContainer.addEventListener('click', () => {
+        globalThis.runCinematicSequence();
+    });
+})();

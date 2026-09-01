@@ -3504,7 +3504,92 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
     text-align: center;
     color: rgba(0, 255, 0, 0.55);
 }
+}
 
-.mr-disco-hint--touch {
-    display: none;
+/* Schleemekron Cinematic Transition Styles */
+@keyframes cinematicPulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.015); }
+}
+@keyframes cinematicChromaticFlicker {
+  0% { text-shadow: -1.5px 0 0 rgba(255, 20, 100, 0.65), 1.5px 0 0 rgba(0, 240, 255, 0.65), 0 0 16px rgba(120, 255, 220, 0.35); filter: blur(0px); }
+  18% { text-shadow: -2.8px 0.5px 0 rgba(255, 20, 100, 0.8), 2.8px -0.5px 0 rgba(0, 240, 255, 0.8), 0 0 24px rgba(0, 255, 200, 0.6); filter: blur(0.3px); }
+  22% { text-shadow: -0.8px 0 0 rgba(255, 20, 100, 0.4), 0.8px 0 0 rgba(0, 240, 255, 0.4), 0 0 10px rgba(120, 255, 220, 0.2); filter: blur(0px); }
+  54% { text-shadow: -3.2px -0.5px 0 rgba(255, 30, 90, 0.85), 3.2px 0.5px 0 rgba(0, 230, 255, 0.85), 0 0 28px rgba(0, 255, 220, 0.65); filter: blur(0.4px); }
+  58% { text-shadow: -1.2px 0 0 rgba(255, 20, 100, 0.5), 1.2px 0 0 rgba(0, 240, 255, 0.5), 0 0 12px rgba(120, 255, 220, 0.3); filter: blur(0px); }
+  82% { text-shadow: -2.2px 0.3px 0 rgba(255, 20, 100, 0.75), 2.2px -0.3px 0 rgba(0, 240, 255, 0.75), 0 0 20px rgba(0, 255, 210, 0.5); }
+  100% { text-shadow: -1.5px 0 0 rgba(255, 20, 100, 0.65), 1.5px 0 0 rgba(0, 240, 255, 0.65), 0 0 16px rgba(120, 255, 220, 0.35); filter: blur(0px); }
+}
+@keyframes cinematicScanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
+}
+@keyframes cinematicAnamorphicFlare {
+  0%, 100% { opacity: 0.35; transform: scaleX(0.9); }
+  50% { opacity: 0.75; transform: scaleX(1.15); }
+}
+.chromatic-active {
+  animation: cinematicChromaticFlicker 2.4s infinite ease-in-out, cinematicPulse 4s infinite ease-in-out;
+}
+.vignette-layer {
+  background: radial-gradient(circle at center, transparent 40%, rgba(5, 7, 12, 0.85) 90%, rgba(3, 4, 8, 0.98) 100%);
+}
+.schleem-cinematic {
+  position: relative; width: 100%; background: #06090e; margin: 0 auto;
+  border: 1px solid rgba(8, 51, 68, 0.6); border-radius: 1rem; overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(8, 51, 68, 0.4); margin-bottom: 2rem; user-select: none;
+}
+.schleem-cinematic-scope {
+  display: flex; align-items: center; justify-content: space-between; padding: 0 1rem;
+  background: linear-gradient(to bottom, #030508, #070a10); z-index: 20; position: relative;
+}
+.schleem-cinematic-scope.top {
+  height: 1.5rem; border-bottom: 1px solid rgba(22, 78, 99, 0.2);
+}
+.schleem-cinematic-scope .left { display: flex; align-items: center; gap: 0.5rem; }
+.schleem-cinematic-scope .right { display: flex; align-items: center; gap: 0.75rem; font-family: monospace; font-size: 10px; color: rgba(6, 182, 212, 0.6); }
+.schleem-cinematic-scope .dot { width: 6px; height: 6px; border-radius: 50%; background-color: #ef4444; }
+.schleem-cinematic-scope .text { font-size: 10px; font-family: monospace; letter-spacing: 0.1em; color: rgba(34, 211, 238, 0.8); text-transform: uppercase; font-weight: 600; }
+.schleem-cinematic-scope #cinematic-timecode { color: #22d3ee; font-weight: bold; }
+.schleem-cinematic-viewport {
+  position: relative; height: 260px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden;
+  background: linear-gradient(to bottom, #04060a, #080d16, #04060a);
+}
+.schleem-cinematic-viewport .abs-inset { position: absolute; inset: 0; width: 100%; height: 100%; }
+.schleem-cinematic-viewport .pointer-none { pointer-events: none; }
+.schleem-cinematic-viewport .flare {
+  position: absolute; width: 100%; height: 4px; top: 50%; transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 213, 0.03) 25%, rgba(0, 255, 213, 0.35) 50%, rgba(255, 40, 120, 0.25) 65%, transparent 100%);
+  filter: blur(1px); animation: cinematicAnamorphicFlare 4s infinite ease-in-out;
+}
+.schleem-cinematic-viewport .scanlines {
+  position: absolute; inset: 0; width: 100%; height: 6rem;
+  background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.04), transparent);
+  animation: cinematicScanline 7s linear infinite;
+}
+.schleem-cinematic-viewport .hud-frame {
+  position: absolute; inset: 0.75rem; border: 1px solid rgba(6, 182, 212, 0.1); border-radius: 0.5rem;
+  display: flex; flex-direction: column; justify-content: space-between; padding: 0.5rem;
+}
+.schleem-cinematic-viewport .hud-row {
+  display: flex; justify-content: space-between; font-size: 9px; font-family: monospace; color: rgba(6, 182, 212, 0.3); width: 100%;
+}
+.schleem-cinematic-viewport .center-content { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+.schleem-cinematic-viewport .phase-label {
+  font-size: 9px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.45em; color: rgba(34, 211, 238, 0.6); margin-bottom: 0.75rem; transition: opacity 0.7s;
+}
+.schleem-cinematic-viewport .word-display {
+  font-size: 3rem; font-weight: bold; letter-spacing: 0.08em; color: white; display: flex; align-items: center; justify-content: center; white-space: nowrap; transition: all 0.3s;
+  font-family: 'Avenir Next', 'Avenir', 'Century Gothic', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif; cursor: pointer;
+}
+.schleem-cinematic-viewport .word-display .char { display: inline-block; text-align: center; padding: 0 3.5px; transition: all 0.15s; }
+.schleem-cinematic-viewport .sound-bars { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 1rem; height: 0.75rem; }
+.schleem-cinematic-viewport .sound-bars .bar { width: 2px; border-radius: 9999px; transition: all 0.15s; background-color: rgba(6, 182, 212, 0.4); }
+.schleem-cinematic-viewport .sound-bars .bar.h-1 { height: 6px; }
+.schleem-cinematic-viewport .sound-bars .bar.h-2 { height: 8px; background-color: rgba(34, 211, 238, 0.6); }
+.schleem-cinematic-viewport .sound-bars .bar.h-3 { height: 12px; background-color: rgba(103, 232, 249, 0.8); }
+.schleem-cinematic-viewport .sound-bars .bar.pink { background-color: rgba(236, 72, 153, 0.6); }
+@media (max-width: 640px) {
+  .schleem-cinematic-viewport .word-display { font-size: 1.875rem; }
+  .schleem-cinematic-viewport .word-display .char { padding: 0 2px; }
 }
