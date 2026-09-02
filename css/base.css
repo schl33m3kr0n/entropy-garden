@@ -160,11 +160,9 @@ body.garden-ready::before {
     filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
 }
 
-/* Cursor + ChatGPT marks need extra scale to match Gemini visually */
-.init-partner-logo--cursor {
-    height: calc(var(--init-partner-logo-h) * 1.6);
-}
-
+/* Partner marks need extra scale to read evenly beside Cursor */
+.init-partner-logo--gemini,
+.init-partner-logo--cursor,
 .init-partner-logo--chatgpt {
     height: calc(var(--init-partner-logo-h) * 1.6);
 }
