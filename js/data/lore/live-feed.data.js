@@ -82,6 +82,10 @@
             'sent the akashic records to the family groupchat with 0 context',
             'left the comment "you look like you reply to automated messages"',
             'got ratioed by a user with a Roblox noob pfp',
+            'wasted his life away for subhundred likes',
+            'shazamed a song playing in their own head',
+            'based his social media aesthetic on an overzealous cat',
+            'accepted his fate',
         ],
         liveFeedActivitiesGritty: [
             'liked their ex\'s vacation photos at 2:47am',
@@ -92,6 +96,8 @@
             'uploaded classified documents to 4chan for shits and giggles',
             'got doxxed after posting an edgy meme',
             'conveniently forgot to jobsearch',
+            'spammed the same comment under multiple disparate posts',
+            'followed @kanyewest on a burner account',
         ],
     });
 }(globalThis));
