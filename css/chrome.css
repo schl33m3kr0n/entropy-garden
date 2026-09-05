@@ -3601,3 +3601,62 @@ body.corrupted .groovy-bar {
     border: 1px solid rgba(255, 0, 85, 0.4);
     background: rgba(40, 0, 0, 0.6);
 }
+
+/* Corrupted Overrides for User Requests */
+body.corrupted #modal-trophies .modal-content {
+    border-color: rgba(255, 0, 85, 0.25);
+    border-left-color: var(--alert-red);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.15), 10px 10px 30px rgba(0,0,0,0.8);
+}
+body.corrupted #modal-trophies h2 {
+    color: var(--alert-red);
+    border-bottom-color: rgba(255, 0, 85, 0.4);
+}
+body.corrupted .trophy-card.unlocked {
+    border-color: rgba(255, 0, 85, 0.5);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+}
+body.corrupted .trophy-title, 
+body.corrupted .trophy-count {
+    color: var(--alert-red) !important;
+}
+body.corrupted .pfp-wrapper {
+    border-color: var(--alert-red);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.45);
+}
+body.corrupted #modal-about .modal-content {
+    border-color: rgba(255, 0, 85, 0.25);
+    border-left-color: var(--alert-red);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.15), 10px 10px 30px rgba(0,0,0,0.8);
+}
+body.corrupted #modal-about h2 {
+    color: var(--alert-red);
+    border-bottom-color: rgba(255, 0, 85, 0.4);
+}
+
+/* Global Corrupted Overrides for Modals */
+body.corrupted .modal-content {
+    border-color: rgba(255, 0, 85, 0.25);
+    border-left-color: var(--alert-red);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.15), 10px 10px 30px rgba(0,0,0,0.8);
+}
+body.corrupted .modal h2 {
+    color: var(--alert-red);
+    border-bottom-color: rgba(255, 0, 85, 0.4);
+}
+
+body.corrupted #sidebar-menu li {
+    border-bottom-color: rgba(255, 0, 85, 0.35);
+}
+body.corrupted #sidebar-menu {
+    border-right-color: var(--alert-red);
+}
+body.corrupted #sidebar-menu li {
+    color: var(--alert-red);
+}
+body.corrupted #sidebar-menu li:hover {
+    background: var(--alert-red);
+}
+body.corrupted #sidebar-menu li .mask-icon {
+    background-color: var(--alert-red);
+}
