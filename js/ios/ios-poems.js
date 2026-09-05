@@ -143,6 +143,7 @@ export async function openIosPoemArchive(index = 0) {
     await selectPoem(index);
 
     document.getElementById('sidebar-menu')?.classList.remove('active');
+    document.body.classList.remove('sidebar-is-open');
     globalThis.unlockTrophy?.('singularity_ritual');
     playSound(sfx.missionCleared);
 

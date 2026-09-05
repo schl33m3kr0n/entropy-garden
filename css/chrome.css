@@ -2788,6 +2788,10 @@ body.corrupted #birds-mute-btn.is-muted {
     pointer-events: auto;
 }
 
+body.sidebar-is-open #playlist-menu.active {
+    transform: translateY(0) translateX(280px);
+}
+
 #playlist-header {
     margin-bottom: 8px;
     font-size: 0.75rem;

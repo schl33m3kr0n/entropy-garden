@@ -215,11 +215,13 @@ function beginGardenExperience() {
             warmSound(sfx.boop);
             lastTerminalLoggedTrackIndex = -1;
             resetBgmToStart();
-            try {
-                initGroovyMeter();
-            } catch(e) {
-                console.error('Groovy meter failed:', e);
-            }
+            setTimeout(() => {
+                try {
+                    initGroovyMeter();
+                } catch(e) {
+                    console.error('Groovy meter failed:', e);
+                }
+            }, 5000);
         });
     } catch (err) {
         console.error('[Entropy Garden] initialize failed', err);
@@ -1529,6 +1531,7 @@ initSidebarMarquees();
 // --- Update the Sidebar Logic in script.js ---
 hamburger.addEventListener('click', () => {
     sidebar.classList.toggle('active');
+    document.body.classList.toggle('sidebar-is-open', sidebar.classList.contains('active'));
     playSound(sfx.keystroke); 
 });
 
