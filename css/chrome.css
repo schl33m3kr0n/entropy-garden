@@ -2788,10 +2788,6 @@ body.corrupted #birds-mute-btn.is-muted {
     pointer-events: auto;
 }
 
-body.sidebar-is-open #playlist-menu.active {
-    transform: translateY(0) translateX(280px);
-}
-
 #playlist-header {
     margin-bottom: 8px;
     font-size: 0.75rem;
@@ -3524,7 +3520,11 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
     color: #0f0;
     pointer-events: none;
     text-shadow: 0 0 4px rgba(0,255,0,0.5);
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.4s ease;
+}
+
+body.sidebar-is-open #groovy-meter-container {
+    transform: translateX(280px);
 }
 .groovy-label {
     font-size: 10px;
