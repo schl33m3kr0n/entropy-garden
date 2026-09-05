@@ -178,6 +178,7 @@ function stopBgmTrack(index) {
     const track = bgmCache.get(i);
     if (!track) return;
     nextBgmPlayGeneration();
+    track.volume = 0;
     track.pause();
     track.currentTime = 0;
     track.onended = null;
@@ -373,7 +374,11 @@ function playBgmWhenReady(track, generation, retriesLeft = 4, trackIndex = curre
     const startPlayback = () => {
         if (generation !== bgmPlayGeneration) return;
         track.volume = 0.3;
-        track.play().catch(() => {
+        track.play().then(() => {
+            if (generation !== bgmPlayGeneration) {
+                track.pause();
+            }
+        }).catch(() => {
             if (generation !== bgmPlayGeneration) return;
             if (retriesLeft <= 0) {
                 skipBrokenTrack();

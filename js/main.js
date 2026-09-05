@@ -206,7 +206,6 @@ function beginGardenExperience() {
         startLoader();
 
         registerServiceWorkerAfterInit();
-        initGroovyMeter();
 
         panopticonEl?.addEventListener('pointerdown', () => {
             bootGameAddons(activateGodMode).catch(() => {});
@@ -216,12 +215,20 @@ function beginGardenExperience() {
             warmSound(sfx.boop);
             lastTerminalLoggedTrackIndex = -1;
             resetBgmToStart();
+            try {
+                initGroovyMeter();
+            } catch(e) {
+                console.error('Groovy meter failed:', e);
+            }
         });
     } catch (err) {
         console.error('[Entropy Garden] initialize failed', err);
         document.body.classList.remove('garden-loading');
         const initScreen = document.getElementById('init-screen');
-        if (initScreen) initScreen.style.display = '';
+        if (initScreen) {
+            initScreen.style.display = '';
+            initScreen.innerHTML += '<pre style="color:red;z-index:9999;position:relative;">' + err.stack + '</pre>';
+        }
     }
 }
 
