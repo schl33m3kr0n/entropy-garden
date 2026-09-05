@@ -726,13 +726,24 @@ function updateHudRainbow() {
     }
 }
 
+let wasMatrixSuspended = false;
+
 function animate() {
     if (!gardenLoopActive) return;
 
     const timeStep = isCorrupted ? 2 : (perf.isIOS ? 0.4 : (perf.isMobile ? 0.25 : 0.5));
     const suspended = isGardenMatrixSuspended();
 
-    if (!suspended) {
+    if (suspended) {
+        wasMatrixSuspended = true;
+    } else {
+        if (wasMatrixSuspended) {
+            wasMatrixSuspended = false;
+            eyeSettled = false; // Force continuous tracking while the eye transitions back
+            armEyeSettleFallback();
+            invalidateCipherWheelCenter();
+        }
+
         incrementMatrixFrameCount();
         const shouldDrawMatrix = !perf.matrixFrameSkip || (matrixFrameCount % (perf.matrixFrameSkip + 1) === 0);
 
