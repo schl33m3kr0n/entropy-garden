@@ -1205,6 +1205,10 @@ body.corrupted .mask-icon {
     width: 45px;
     height: 45px;
 }
+#sidebar-menu .mask-icon--sidebar-lg {
+    margin-left: -10.5px;
+    margin-right: -10.5px;
+}
 
 .mask-icon--playlist {
     width: 18px;
