@@ -26,6 +26,50 @@ body.cipher-active #grid-canvas {
         var(--chroma-filter);
 }
 
+body:not(.corrupted):not(.perf-lite):not(.idle-dissociating) #grid-canvas.matrix-visible {
+    animation: safeChromaFlicker 6s ease-in-out infinite;
+}
+
+@keyframes safeChromaFlicker {
+    0%, 100% {
+        filter:
+            hue-rotate(var(--matrix-hue, 0deg))
+            grayscale(0%)
+            blur(0px)
+            var(--chroma-filter);
+    }
+    48% {
+        filter:
+            hue-rotate(var(--matrix-hue, 0deg))
+            grayscale(0%)
+            blur(0px)
+            var(--chroma-filter);
+    }
+    50% {
+        filter:
+            hue-rotate(var(--matrix-hue, 0deg))
+            grayscale(0%)
+            blur(0.2px)
+            drop-shadow(3px 1.5px 0 rgba(255, 0, 85, 0.8))
+            drop-shadow(-3px -1.5px 0 rgba(0, 255, 255, 0.8));
+    }
+    52% {
+        filter:
+            hue-rotate(var(--matrix-hue, 0deg))
+            grayscale(0%)
+            blur(0px)
+            drop-shadow(-1px -1px 0 rgba(255, 0, 85, 0.6))
+            drop-shadow(2px 2px 0 rgba(0, 255, 255, 0.6));
+    }
+    54% {
+        filter:
+            hue-rotate(var(--matrix-hue, 0deg))
+            grayscale(0%)
+            blur(0px)
+            var(--chroma-filter);
+    }
+}
+
 /* Safari / lite: skip animated hue-rotate; keep static chromatic split */
 body.perf-safari #grid-canvas.matrix-visible,
 body.perf-lite #grid-canvas.matrix-visible {
