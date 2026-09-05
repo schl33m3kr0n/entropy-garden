@@ -112,6 +112,7 @@ import {
     printBehaviorReport,
     getBehaviorSnapshot,
 } from './modules/behavioral-analysis.js';
+import { initGroovyMeter } from './modules/groovy-meter.js';
 
 // Bind init immediately so a later module error cannot block the gatekeeper.
 let loaderBootGate = Promise.resolve();
@@ -205,6 +206,7 @@ function beginGardenExperience() {
         startLoader();
 
         registerServiceWorkerAfterInit();
+        initGroovyMeter();
 
         panopticonEl?.addEventListener('pointerdown', () => {
             bootGameAddons(activateGodMode).catch(() => {});

@@ -1267,8 +1267,15 @@ body.corrupted .mask-icon {
 }
 
 .mask-icon--trophy {
-    mask-image: url('../assets/icons/trophy.svg');
-    -webkit-mask-image: url('../assets/icons/trophy.svg');
+    background-image: url('../assets/img/ui/eyeball-wings.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    filter: invert(1);
+    mix-blend-mode: screen;
 }
 
 .mask-icon--skip {
@@ -3507,4 +3514,41 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 
 .mr-disco-hint--touch {
     display: none;
+}
+
+/* GROOVY METER */
+#groovy-meter-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 200px;
+    z-index: 1000;
+    font-family: var(--font-mono, monospace);
+    color: #0f0;
+    pointer-events: none;
+    text-shadow: 0 0 4px rgba(0,255,0,0.5);
+    transition: opacity 0.3s ease;
+}
+.groovy-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+.groovy-bar {
+    width: 100%;
+    height: 6px;
+    border: 1px solid rgba(0, 255, 0, 0.4);
+    background: rgba(0, 20, 0, 0.6);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+.groovy-fill {
+    width: 0%;
+    height: 100%;
+    background: #0f0;
+    transition: width 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s;
+    box-shadow: 0 0 8px #0f0;
 }
