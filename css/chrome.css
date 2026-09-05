@@ -3559,20 +3559,15 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 
 /* GROOVY METER */
 #groovy-meter-container {
-    position: absolute;
-    bottom: 0;
-    left: calc(100% + 15px);
+    position: fixed;
+    bottom: 20px;
+    left: 270px;
     width: 150px;
     z-index: 1000;
     font-family: var(--font-mono, monospace);
     color: #0f0;
     pointer-events: none;
     text-shadow: 0 0 4px rgba(0,255,0,0.5);
-    transition: opacity 0.3s ease, transform 0.4s ease;
-}
-
-body.sidebar-is-open #groovy-meter-container {
-    transform: translateX(280px);
 }
 .groovy-label {
     font-size: 10px;

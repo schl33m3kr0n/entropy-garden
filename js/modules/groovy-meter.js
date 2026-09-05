@@ -15,12 +15,7 @@ export function initGroovyMeter() {
                 <div class="groovy-fill" id="groovy-fill"></div>
             </div>
         `;
-        const pm = document.getElementById('playlist-menu');
-        if (pm) {
-            pm.appendChild(container);
-        } else {
-            document.body.appendChild(container);
-        }
+        document.body.appendChild(container);
     }
     
     meterFill = document.getElementById('groovy-fill');
