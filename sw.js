@@ -52,7 +52,7 @@ const PRECACHE_URLS = [
     'assets/icons/social/soundcloud.png',
     'assets/icons/social/apple-music.png',
     'assets/icons/identity.svg',
-    'assets/icons/gemini.png',
+    'assets/icons/agy.png',
     'assets/icons/chatgpt.svg',
     'assets/icons/init-cursor.svg',
     'assets/icons/joystick.svg',

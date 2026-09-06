@@ -161,10 +161,18 @@ body.garden-ready::before {
 }
 
 /* Partner marks need extra scale to read evenly beside Cursor */
-.init-partner-logo--gemini,
+.init-partner-logo--agy,
 .init-partner-logo--cursor,
 .init-partner-logo--chatgpt {
     height: calc(var(--init-partner-logo-h) * 1.6);
+}
+
+.init-partner-logo--agy {
+    background-color: white;
+    border-radius: 50%;
+    padding: 10px; /* ensures the logo sits inside the white circle comfortably */
+    aspect-ratio: 1;
+    width: auto; /* override base width to let aspect-ratio dictate */
 }
 
 #init-partner-splash.is-active .init-partner-logo {
