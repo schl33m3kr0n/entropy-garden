@@ -3568,6 +3568,14 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
     color: #0f0;
     pointer-events: none;
     text-shadow: 0 0 4px rgba(0,255,0,0.5);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+body:has(#playlist-menu.active) #groovy-meter-container {
+    opacity: 1;
+    transform: translateY(0);
 }
 .groovy-label {
     font-size: 10px;
