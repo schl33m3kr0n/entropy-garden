@@ -1,0 +1,9 @@
+--- dist/css/base.css
++++ dist/css/base.css
+@@ -171,6 +171,7 @@
+     padding: 12px;
+     width: calc(var(--init-partner-logo-h) * 1.6);
+     height: calc(var(--init-partner-logo-h) * 1.6);
++    max-width: none;
+     object-fit: contain;
+ }

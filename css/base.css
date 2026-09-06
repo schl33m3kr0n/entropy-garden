@@ -170,9 +170,11 @@ body.garden-ready::before {
 .init-partner-logo--agy {
     background-color: white;
     border-radius: 50%;
-    padding: 10px; /* ensures the logo sits inside the white circle comfortably */
-    aspect-ratio: 1;
-    width: auto; /* override base width to let aspect-ratio dictate */
+    padding: 12px;
+    width: calc(var(--init-partner-logo-h) * 1.6);
+    height: calc(var(--init-partner-logo-h) * 1.6);
+    max-width: none;
+    object-fit: contain;
 }
 
 #init-partner-splash.is-active .init-partner-logo {
