@@ -167,14 +167,17 @@ body.garden-ready::before {
 }
 
 .init-partner-logo--agy {
+    /* MANUALLY ADJUST THESE VALUES TO TWEAK THE LOGO SIZE/PADDING */
+    --agy-scale: 1;
+    --agy-padding: 8px;
+
     background-color: white;
     border-radius: 50%;
-    padding: 8px; /* Slightly less padding so the logo feels bigger inside the circle */
+    padding: var(--agy-padding);
     object-fit: contain;
     aspect-ratio: 1 / 1;
-    /* Force exactly the same square bounding box that the others are constrained to */
-    height: calc(var(--init-partner-logo-h) * 1.25);
-    width: calc(var(--init-partner-logo-h) * 1.25);
+    height: calc(var(--init-partner-logo-h) * var(--agy-scale));
+    width: calc(var(--init-partner-logo-h) * var(--agy-scale));
     max-width: none;
 }
 
