@@ -161,7 +161,6 @@ body.garden-ready::before {
 }
 
 /* Partner marks need extra scale to read evenly beside Cursor */
-.init-partner-logo--agy,
 .init-partner-logo--cursor,
 .init-partner-logo--chatgpt {
     height: calc(var(--init-partner-logo-h) * 1.6);
@@ -170,11 +169,13 @@ body.garden-ready::before {
 .init-partner-logo--agy {
     background-color: white;
     border-radius: 50%;
-    padding: 12px;
-    width: calc(var(--init-partner-logo-h) * 1.6);
-    height: calc(var(--init-partner-logo-h) * 1.6);
-    max-width: none;
+    padding: 8px; /* Slightly less padding so the logo feels bigger inside the circle */
     object-fit: contain;
+    aspect-ratio: 1 / 1;
+    /* Force exactly the same square bounding box that the others are constrained to */
+    height: calc(var(--init-partner-logo-h) * 1.25);
+    width: calc(var(--init-partner-logo-h) * 1.25);
+    max-width: none;
 }
 
 #init-partner-splash.is-active .init-partner-logo {
