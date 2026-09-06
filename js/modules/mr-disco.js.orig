@@ -2,7 +2,6 @@
 
 import { initDiscoBallEyes } from '../disco-ball-eyes.js';
 import { initDiscoBallSpin } from '../disco-ball-spin.js';
-import { initDashboard } from "./dashboard.js";
 import { loadAlternateHistoryArticles } from '../data/alternate-history.data.js';
 import { resolveAlternateHistoryArticles } from '../alternate-history-search.js';
 
@@ -81,8 +80,6 @@ export function initMrDisco() {
     if (!initPromise) initPromise = setup();
     return initPromise;
 }
-
-    initDashboard();
 
 async function setup() {
     const host = document.getElementById('disco-host');

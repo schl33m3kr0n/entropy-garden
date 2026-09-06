@@ -411,21 +411,31 @@
          <div class="modal-content"><button type="button" class="lightbox-close modal-close" aria-label="Close">&times;</button><h2 class="drag-handle"><span class="mask-icon mask-icon--sidebar mask-icon--mr-disco" aria-hidden="true"></span>// MR. DISCO</h2>
             <div class="scrollable-content mr-disco-showcase">
                 <div class="mr-disco-showcase-row">
-                    <div class="mr-disco-stage-shell">
-                        <div class="mr-disco-stage" role="button" tabindex="0" aria-label="Toggle random alternate history archive">
-                            <div id="disco-host" data-disco-ball-eyes data-disco-ball-spin></div>
+                    <div class="mr-disco-left-col">
+                        <div class="mr-disco-stage-shell">
+                            <div class="mr-disco-stage" role="button" tabindex="0" aria-label="Toggle random alternate history archive">
+                                <div id="disco-host" data-disco-ball-eyes data-disco-ball-spin></div>
+                            </div>
+                            <form class="mr-disco-search" id="alt-history-form" autocomplete="off">
+                                <input
+                                    type="text"
+                                    id="alt-history-query"
+                                    placeholder="Search alternate histories…"
+                                    enterkeyhint="search"
+                                    aria-label="Search alternate histories"
+                                    autocapitalize="off"
+                                    spellcheck="false"
+                                >
+                            </form>
                         </div>
-                        <form class="mr-disco-search" id="alt-history-form" autocomplete="off">
-                            <input
-                                type="text"
-                                id="alt-history-query"
-                                placeholder="Search alternate histories…"
-                                enterkeyhint="search"
-                                aria-label="Search alternate histories"
-                                autocapitalize="off"
-                                spellcheck="false"
-                            >
-                        </form>
+                        <div class="mr-disco-stats-shell">
+                            <h3>GLOBAL POP: <span id="pop-counter-disco">8,100,245,678</span></h3>
+                            <div style="height: 100px; position: relative;"><canvas id="popChartDisco"></canvas></div>
+                            <h3>WEALTH DISTRIBUTION</h3>
+                            <div style="height: 120px; position: relative;"><canvas id="wealthChartDisco"></canvas></div>
+                            <h3>TOP GDPs (Trillions)</h3>
+                            <div style="height: 110px; position: relative;"><canvas id="gdpChartDisco"></canvas></div>
+                        </div>
                     </div>
                     <article class="mr-disco-archive" id="alt-history-result" hidden aria-live="polite"></article>
                 </div>
@@ -600,6 +610,7 @@
   <button class="lightbox-btn lb-next">&#10095;</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/boot/file-protocol-guard.js"></script>
 <script src="js/boot/terminal-sfx.js" defer></script>
 <script src="js/ios/terminal-boot.js" defer></script>

@@ -1,0 +1,18 @@
+--- js/modules/mr-disco.js
++++ js/modules/mr-disco.js
+@@ -10,12 +10,15 @@
+     resolveAlternateHistoryArticles,
+     markAlternateHistorySeen,
+ } from '../data/lore/mr-disco.data.js';
++import { initDashboard } from './dashboard.js';
+ 
+ let initialized = false;
+ let lastAltHistoryIds = [];
+ 
+ export function initMrDisco() {
+     if (initialized) return;
+     initialized = true;
++    
++    initDashboard();
+ 
+     const host = document.getElementById('disco-host');
