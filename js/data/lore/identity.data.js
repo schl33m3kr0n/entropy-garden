@@ -92,6 +92,7 @@
         "Lego Star Wars Padawan (99%)",
         "Duo Degenerate (Lvl 六九)",
         "Cheez-Its Guzzler (Lvl 999)",
+        ""
     ],
     classTitlesGritty: [
         "Chronic Consumer (Lvl 420)",

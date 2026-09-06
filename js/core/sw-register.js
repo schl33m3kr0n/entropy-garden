@@ -7,13 +7,16 @@ export function registerServiceWorkerAfterInit() {
     registered = true;
 
     if (!shouldRegisterServiceWorker()) {
-        if (isIOS) {
-            navigator.serviceWorker.getRegistrations()
-                .then((regs) => Promise.all(regs.map((reg) => reg.unregister())))
-                .catch(() => {});
-        }
+        navigator.serviceWorker.getRegistrations()
+            .then((regs) => Promise.all(regs.map((reg) => reg.unregister())))
+            .catch(() => {});
         return;
     }
+
+    // FORCE CACHE CLEAR FOR STUCK CLIENTS
+    caches.keys().then(keys => {
+        Promise.all(keys.map(key => caches.delete(key)));
+    });
 
     navigator.serviceWorker
         .register('./sw.js', { updateViaCache: 'none' })
