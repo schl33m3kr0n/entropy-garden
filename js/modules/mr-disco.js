@@ -371,8 +371,12 @@ async function setup() {
             event.preventDefault();
             event.stopPropagation();
             const stats = document.getElementById('mr-disco-stats-shell');
-            if (stats) stats.hidden = !stats.hidden;
-            activateEyeMode('sleepy');
+            if (stats) {
+                stats.hidden = !stats.hidden;
+                activateEyeMode(stats.hidden ? 'track' : 'sleepy');
+            } else {
+                activateEyeMode('sleepy');
+            }
             return;
         }
 

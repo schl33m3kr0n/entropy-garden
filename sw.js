@@ -98,6 +98,7 @@ function isCacheableAsset(pathname) {
 }
 
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(SHELL_CACHE).then(async (cache) => {
             await Promise.allSettled(PRECACHE_URLS.map((url) => cache.add(url)));
