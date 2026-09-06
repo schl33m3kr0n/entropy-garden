@@ -46,6 +46,8 @@
         "Nashville (significantly safer than Memphis)",
         "Nashville (because heartbreak is a canon event)",
         "Nashville (surprisingly not a lot of cowboy hats outside of Broadway)",
+        "Nashville (where merging into the exit lane requires a blood sacrifice)",
+        "Nashville (where shoes melt into the asphalt in the summer)",
     ],
     baseLocationsGritty: [
         "Nashville (because your baby mama lives 5 states away)",
@@ -54,6 +56,7 @@
         "Nashville (don't leave your valuables in the car)",
         "Nashville (now available with Racism 2.0)",
         "Nashville (where people hide racism behind heritage)",
+        "Nashville (minorities tolerated, but not celebrated)",
         "Nashville (we like to keep our racism deep fried)",
         "Nashville (because fuck affordable housing)",
         "Nashville (because Southern hospitality is conditional)",
@@ -61,6 +64,9 @@
         "Nashville (we received a car bomb for Christmas. what did you get?)",
         "Nashville (we have dinosaurs at the zoo and the state legislature)",
         "Tennessee (we have less hate crimes than Alabama!)",
+        "Nashville (where 'progressive' is a relative term)",
+        "Nashville (they can't all be racist, right?... right?)",
+        "Nashville ("
     ],
     classTitlesSafe: [
         "Keyframe Sorcerer (Lvl 1)",

@@ -3692,6 +3692,9 @@ body.corrupted #sidebar-menu li .mask-icon {
     gap: 10px;
     color: var(--neon-green);
 }
+.mr-disco-stats-shell[hidden] {
+    display: none !important;
+}
 .mr-disco-stats-shell h3 {
     margin: 0;
     font-size: 0.8rem;
@@ -3709,31 +3712,6 @@ body.corrupted .mr-disco-stats-shell h3 {
     border-bottom-color: var(--alert-red);
 }
 
-/* Dashboard integration */
-.mr-disco-left-col {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    flex: 1;
-    min-width: 0;
-}
-.mr-disco-stage-shell {
-    flex: none !important;
-}
-.mr-disco-stats-shell {
-    border: 2px solid var(--neon-green);
-    border-radius: 8px;
-    box-shadow: 0 0 24px rgba(0, 255, 0, 0.12);
-    background: #141414;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-body.corrupted .mr-disco-stats-shell {
-    border-color: var(--alert-red);
-    box-shadow: 0 0 24px rgba(255, 0, 85, 0.12);
-}
 
 /* Corrupted Overrides for User Requests */
 body.corrupted .modal-content {

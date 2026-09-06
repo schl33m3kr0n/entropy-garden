@@ -283,6 +283,7 @@ async function setup() {
     }
 
     const EYE_KEY_MODES = {
+        0: 'sleepy',
         1: 'track',
         2: 'cross',
         3: 'spin',
@@ -371,6 +372,7 @@ async function setup() {
             event.stopPropagation();
             const stats = document.getElementById('mr-disco-stats-shell');
             if (stats) stats.hidden = !stats.hidden;
+            activateEyeMode('sleepy');
             return;
         }
 
