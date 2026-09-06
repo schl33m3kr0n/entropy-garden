@@ -168,7 +168,7 @@ body.garden-ready::before {
 
 .init-partner-logo--agy {
     /* MANUALLY ADJUST THESE VALUES TO TWEAK THE LOGO SIZE/PADDING */
-    --agy-scale: 1;
+    --agy-scale: .5;
     --agy-padding: 8px;
 
     background-color: white;
