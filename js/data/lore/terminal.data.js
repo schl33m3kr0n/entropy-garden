@@ -44,7 +44,7 @@
         "> Pondering the nature of condensation...",
         "> Disturbing the peace...",
         "> Bypassing Sartre firewall... [WARNING]",
-        "> Calculating render time… [Heat Death]”,
+        "> Calculating render time… [Heat Death]",
         "> 404: Sanity not found.",
         "> Flattering the guests in unflattering clothes...",
         "> Disappointing everyone at the family reunion...",
