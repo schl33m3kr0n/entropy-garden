@@ -312,17 +312,19 @@ export const DISCO_BALL_SILLY_EYES = {
     /** Forehead → chest → left shoulder → right shoulder (Catholic sign of the cross). */
     crossSign: (t, eye) => {
         const max = pupilTravel(eye);
-        const cycle = 3.8;
+        const cycle = 4.2;
         const phase = (t % cycle) / cycle;
         const keyframes = [
             { at: 0.0, x: 0, y: -1 },         // Forehead
-            { at: 0.14, x: 0, y: -1 },        // Forehead (hold)
-            { at: 0.28, x: 0, y: 1 },         // Chest
-            { at: 0.42, x: 0, y: 1 },         // Chest (hold)
-            { at: 0.56, x: -0.92, y: 0.08 },  // Left shoulder
-            { at: 0.66, x: -0.92, y: 0.08 },  // Left shoulder (hold)
-            { at: 0.78, x: 0.92, y: 0.08 },   // Right shoulder
-            { at: 0.94, x: 0.92, y: 0.08 },   // Right shoulder (LINGER)
+            { at: 0.12, x: 0, y: -1 },        // Forehead (hold)
+            { at: 0.24, x: 0, y: 1 },         // Chest
+            { at: 0.36, x: 0, y: 1 },         // Chest (hold)
+            { at: 0.48, x: -0.92, y: 0.08 },  // Left shoulder
+            { at: 0.58, x: -0.92, y: 0.08 },  // Left shoulder (hold)
+            { at: 0.70, x: 0.92, y: 0.08 },   // Right shoulder
+            { at: 0.78, x: 0.92, y: 0.08 },   // Right shoulder (hold)
+            { at: 0.86, x: 0, y: 0 },         // Center
+            { at: 0.96, x: 0, y: 0 },         // Center (LINGER)
             { at: 1.0, x: 0, y: -1 },         // Smooth transition back to forehead
         ];
 
