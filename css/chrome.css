@@ -3545,7 +3545,8 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 .mr-disco-hint {
     margin: 0;
     flex-shrink: 0;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Avenir, 'Avenir Next', Montserrat, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
     font-size: 0.68rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -3707,3 +3708,77 @@ body.corrupted .mr-disco-stats-shell {
 body.corrupted .mr-disco-stats-shell h3 {
     border-bottom-color: var(--alert-red);
 }
+
+/* Dashboard integration */
+.mr-disco-left-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+.mr-disco-stage-shell {
+    flex: none !important;
+}
+.mr-disco-stats-shell {
+    border: 2px solid var(--neon-green);
+    border-radius: 8px;
+    box-shadow: 0 0 24px rgba(0, 255, 0, 0.12);
+    background: #141414;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+body.corrupted .mr-disco-stats-shell {
+    border-color: var(--alert-red);
+    box-shadow: 0 0 24px rgba(255, 0, 85, 0.12);
+}
+
+/* Corrupted Overrides for User Requests */
+body.corrupted .modal-content {
+    border-color: rgba(255, 0, 85, 0.25);
+    border-left-color: var(--alert-red);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.15), 10px 10px 30px rgba(0,0,0,0.8);
+}
+body.corrupted .modal h2 {
+    color: var(--alert-red);
+    border-bottom-color: rgba(255, 0, 85, 0.4);
+}
+body.corrupted #modal-trophies .modal-content {
+    border-color: rgba(255, 0, 85, 0.25);
+    border-left-color: var(--alert-red);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.15), 10px 10px 30px rgba(0,0,0,0.8);
+}
+body.corrupted #modal-trophies h2 {
+    color: var(--alert-red);
+    border-bottom-color: rgba(255, 0, 85, 0.4);
+}
+body.corrupted .trophy-card.unlocked {
+    border-color: rgba(255, 0, 85, 0.5);
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+}
+body.corrupted .trophy-title, 
+body.corrupted .trophy-count {
+    color: var(--alert-red) !important;
+}
+body.corrupted .pfp-wrapper {
+    border-color: var(--alert-red);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.45);
+}
+
+/* Sidebar overrides */
+body.corrupted #sidebar-menu {
+    border-right-color: var(--alert-red);
+}
+body.corrupted #sidebar-menu li {
+    color: var(--alert-red);
+    border-bottom-color: rgba(255, 0, 85, 0.35);
+}
+body.corrupted #sidebar-menu li:hover {
+    background: var(--alert-red);
+}
+body.corrupted #sidebar-menu li .mask-icon {
+    background-color: var(--alert-red);
+}
+

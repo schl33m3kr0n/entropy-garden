@@ -428,18 +428,24 @@
                                 >
                             </form>
                         </div>
-                        <div class="mr-disco-stats-shell">
-                            <h3>GLOBAL POP: <span id="pop-counter-disco">8,100,245,678</span></h3>
-                            <div style="height: 100px; position: relative;"><canvas id="popChartDisco"></canvas></div>
-                            <h3>WEALTH DISTRIBUTION</h3>
-                            <div style="height: 120px; position: relative;"><canvas id="wealthChartDisco"></canvas></div>
-                            <h3>TOP GDPs (Trillions)</h3>
-                            <div style="height: 110px; position: relative;"><canvas id="gdpChartDisco"></canvas></div>
+                        <div class="mr-disco-stats-shell" id="mr-disco-stats-shell" hidden>
+                            <div>
+                                <p class="alt-history-meta">GLOBAL POPULATION</p>
+                                <p class="alt-history-excerpt"><span id="pop-counter-disco" style="color: #fff;">8,100,245,678</span></p>
+                            </div>
+                            <div>
+                                <p class="alt-history-meta">WEALTH DISTRIBUTION</p>
+                                <p class="alt-history-excerpt">Top 1% (43%) · Next 9% (40%) · Bottom 90% (17%)</p>
+                            </div>
+                            <div>
+                                <p class="alt-history-meta">TOP GDPs (Trillions)</p>
+                                <p class="alt-history-excerpt">USA ($27.3T) · CHN ($17.7T) · DEU ($4.4T)</p>
+                            </div>
                         </div>
                     </div>
                     <article class="mr-disco-archive" id="alt-history-result" hidden aria-live="polite"></article>
                 </div>
-                <p class="mr-disco-hint mr-disco-hint--desktop">&gt; number keys [1&ndash;0] rewire the eyes · [r] random archive</p>
+                <p class="mr-disco-hint mr-disco-hint--desktop">&gt; keys [1&ndash;9] rewire eyes &middot; [0] toggle stats &middot; [r] random archive</p>
                 <p class="mr-disco-hint mr-disco-hint--touch">&gt; tap the ball for random archive · search to query timelines</p>
             </div>
         </div>

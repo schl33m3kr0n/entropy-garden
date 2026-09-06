@@ -291,8 +291,7 @@ async function setup() {
         6: 'heaven',
         7: 'googly',
         8: 'crossSign',
-        9: 'sideEye',
-        0: 'sleepy',
+        9: 'sideEye'
     };
 
     function isMrDiscoModalOpen() {
@@ -366,6 +365,15 @@ async function setup() {
         }
 
         if (shouldIgnoreEyeHotkey(event)) return;
+
+        if (event.key === '0') {
+            event.preventDefault();
+            event.stopPropagation();
+            const stats = document.getElementById('mr-disco-stats-shell');
+            if (stats) stats.hidden = !stats.hidden;
+            return;
+        }
+
         const mode = EYE_KEY_MODES[event.key];
         if (!mode) return;
         event.preventDefault();
