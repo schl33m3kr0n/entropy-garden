@@ -106,6 +106,7 @@
         "please refrain from aggressively petting the sandwich",
         "i get the societal relevance, but does your entire tumblr have to be a serial treatise on pronouns?",
         "if you supported kanye at his lowest, santa can appreciate the nuance",
+        "you could win a chance to earn 5 or more stickers if you stay in the matrix!",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",

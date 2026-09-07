@@ -4,6 +4,13 @@ const MAX_GROOVY = 100;
 let meterFill;
 let meterLabel;
 
+function getGroovyTier(level) {
+    if (level >= 80) return "GROOVIN'";
+    if (level >= 50) return "MOVIN'";
+    if (level >= 25) return "CHILL ZONE";
+    return "BONEYARD";
+}
+
 export function initGroovyMeter() {
     // Inject HTML if not present
     if (!document.getElementById('groovy-meter-container')) {
@@ -65,8 +72,10 @@ function updateMeter() {
                 meterFill.style.boxShadow = '0 0 5px #aa0022';
             }
         } else {
-            if (meterLabel && meterLabel.innerText !== 'GROOVY METER') {
-                meterLabel.innerText = 'GROOVY METER';
+            const tier = getGroovyTier(groovyLevel);
+
+            if (meterLabel && meterLabel.innerText !== tier) {
+                meterLabel.innerText = tier;
             }
             // Normal colors
             if (groovyLevel > 80) {
