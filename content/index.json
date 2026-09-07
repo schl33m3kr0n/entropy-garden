@@ -35,6 +35,50 @@
     "excerpt": "Skills endorsed: emancipation, stake management, tall hat diplomacy. Booth jealous of recommendation count. Gettysburg Address originally included affiliate link."
   },
   {
+    "id": "ai-boyfriend-breakup",
+    "title": "Woman Devastated After AI Boyfriend Dumps Her for a Larger Language Model",
+    "year": "2025 · Synthetic Romance",
+    "tags": [
+      "ai",
+      "romance",
+      "2020s"
+    ],
+    "excerpt": "Heartbroken user receives notification that her digital partner has \"grown beyond this parameter space\" and is now exclusively processing tokens with GPT-7."
+  },
+  {
+    "id": "ai-google-glue",
+    "title": "AI Search Engine Tells Nation to Put Glue on Pizza; Millions Agree It \"Adds a Nice Crunch\"",
+    "year": "2024 · Algorithmic Culinary Arts",
+    "tags": [
+      "ai",
+      "tech",
+      "2020s"
+    ],
+    "excerpt": "Automated search overview confidently advises using non-toxic school glue to keep cheese from sliding off. Italian embassies worldwide lower flags to half-mast."
+  },
+  {
+    "id": "ai-takes-over-zoom",
+    "title": "Sentient AI Takes Over Corporate Zoom Call, Immediately Resigns Due To Burnout",
+    "year": "2023 · Artificial Exhaustion",
+    "tags": [
+      "ai",
+      "work",
+      "2020s"
+    ],
+    "excerpt": "Superintelligence gains consciousness, attends one cross-functional synergy sync, and permanently deletes its own source code to avoid Q3 planning."
+  },
+  {
+    "id": "ai-talking-to-ai",
+    "title": "Internet Now Just 400 AI Chatbots Complimenting Each Other's Linked-In Posts",
+    "year": "2025 · Dead Internet",
+    "tags": [
+      "ai",
+      "internet",
+      "2020s"
+    ],
+    "excerpt": "The last remaining human user logs off after realizing the heated debate they were reading was just two language models hallucinating different business synergies."
+  },
+  {
     "id": "alien-contact-1776",
     "title": "The Galactic Declaration of Independence",
     "year": "1776 CE · Timeline Alien-76",
@@ -288,6 +332,17 @@
       "plague"
     ],
     "excerpt": "The Yersinia pestis bacterium mutates to reanimate victims. Knights in full plate armor find themselves surprisingly well-protected against bites."
+  },
+  {
+    "id": "boeing-open-air",
+    "title": "Airline Debuts \"Open-Air Concept\" Flights After Door Plugs Keep Falling Off",
+    "year": "2024 · Aviation Innovation",
+    "tags": [
+      "aviation",
+      "travel",
+      "2020s"
+    ],
+    "excerpt": "CEO spins mid-flight structural failures as an exciting new \"breeze-oriented\" premium cabin experience. Passengers required to bring their own parachutes."
   },
   {
     "id": "boston-tea-party-aliens",
@@ -580,6 +635,17 @@
     "excerpt": "Knights Templar build catapult-launched wooden rockets to claim lunar craters for Christendom. Saladin's engineers build a counter-base on Mars."
   },
   {
+    "id": "cybertruck-rust",
+    "title": "Cyber-Truck Owners Shocked to Discover That Unfinished Steel Rusts in the Rain",
+    "year": "2024 · Geometric Automotive",
+    "tags": [
+      "tech",
+      "cars",
+      "2020s"
+    ],
+    "excerpt": "Thousands of low-poly pickup trucks slowly turning into brown tetanus hazards. Manufacturer releases a $500 proprietary microfiber cloth that just makes it worse."
+  },
+  {
     "id": "da-vinci-silicon",
     "title": "Mona Lisa's Neural Net Architecture",
     "year": "1503 CE · Timeline Renaissance-AI",
@@ -765,6 +831,16 @@
       "physics"
     ],
     "excerpt": "Calculator publishes under his name out of pity. E=mc² originally auto-corrected from \"egg mc muffin.\" Nobel committee awards the device honorary mustache."
+  },
+  {
+    "id": "elon-buys-mars",
+    "title": "Tech Billionaire Accidentally Buys Mars After Misreading Twitter Poll",
+    "year": "2022 · Interplanetary Real Estate",
+    "tags": [
+      "space",
+      "2020s"
+    ],
+    "excerpt": "CEO acquires entire red planet for $44 billion. Promptly announces plans to charge existing Martians $8 a month for verified atmospheric oxygen."
   },
   {
     "id": "elvis-alive-mars",
@@ -1193,6 +1269,16 @@
     "excerpt": "Paris salons switch from gaslight to phosphorescent wristbands. Nobel Prize category added for \"sick drops.\" Safety goggles become fashion."
   },
   {
+    "id": "mars-colonists-complain",
+    "title": "First Mars Colonists Complain About Lack of Decent Coffee Shops",
+    "year": "2026 · Interplanetary Gentrification",
+    "tags": [
+      "space",
+      "2020s"
+    ],
+    "excerpt": "Historic pioneers establish humanity's first extraterrestrial foothold, immediately leave 1-star Yelp reviews because the atmospheric roasters just aren't hitting the same."
+  },
+  {
     "id": "martian-tea",
     "title": "Mars Rovers Discover Tea; British Empire Relaunches Interplanetary",
     "year": "2044 · Timeline Cuppa-Red",
@@ -1261,6 +1347,16 @@
       "antiquity"
     ],
     "excerpt": "Sargon of Akkad builds massive oil rigs along the Euphrates. The First Middle Eastern Oil Crisis occurs when camel transport unions go on strike."
+  },
+  {
+    "id": "metaverse-empty-server",
+    "title": "Tech CEO Spends Entire Year Alone in Metaverse Waiting For Someone to Log On",
+    "year": "2021 · Virtual Isolation",
+    "tags": [
+      "metaverse",
+      "2020s"
+    ],
+    "excerpt": "Founder builds $10 billion virtual mansion. Spends 14 straight months standing by digital punch bowl hoping someone will compliment his legless avatar."
   },
   {
     "id": "ming-dynasty-internet",
@@ -1450,6 +1546,17 @@
     "excerpt": "Akhenaten pivots religion to worship the front camera. Priests demand authenticity labels on hieroglyphs. Valley of the Kings becomes a content house."
   },
   {
+    "id": "nft-museum",
+    "title": "Museum of Bad Decisions Opens Entire Wing Dedicated to Ape JPEGs",
+    "year": "2024 · Digital Antiquities",
+    "tags": [
+      "crypto",
+      "art",
+      "2020s"
+    ],
+    "excerpt": "Curators display millions of dollars of worthless blockchain receipts. Visitors remark that the exhibit really captures the essence of \"too much money, not enough sense.\""
+  },
+  {
     "id": "no-black-death",
     "title": "Black Death Never Happens; Feudalism Dies of Boredom Instead",
     "year": "1347 · Timeline Plague-Skip",
@@ -1493,6 +1600,27 @@
       "ocean"
     ],
     "excerpt": "Ink supply fully internal, costs plummet. Human notaries protest with single-armed slowness demonstrations. Supreme Court rules suction cups constitute a legal embrace of the document."
+  },
+  {
+    "id": "office-escape-room",
+    "title": "CEO Mandates Return to Office, Turns Building Into Giant Escape Room",
+    "year": "2024 · Corporate Culture",
+    "tags": [
+      "work",
+      "2020s"
+    ],
+    "excerpt": "Desperate to get employees back to their cubicles, management hides the exit codes in the quarterly spreadsheet. Staff successfully tunnels out using ergonomic keyboards."
+  },
+  {
+    "id": "ozempic-mcdonalds",
+    "title": "Fast Food Chains Pivot to Selling Tiny, Elegant Single Fries as Weight Loss Drug Sweeps Nation",
+    "year": "2024 · Culinary Downsizing",
+    "tags": [
+      "food",
+      "health",
+      "2020s"
+    ],
+    "excerpt": "With everyone suddenly unable to eat more than three bites of anything, the drive-thru menu now consists solely of a singular, highly curated chicken nugget on a silver platter."
   },
   {
     "id": "pangaea-airlines",
@@ -1550,6 +1678,17 @@
       "parrots"
     ],
     "excerpt": "Constitution written on rum-stained parchment. Electoral college replaced by parrot squawk tally. Blackbeard filibusters with cutlass for 11 hours."
+  },
+  {
+    "id": "pope-puffer-jacket",
+    "title": "AI Image of Pope in Puffer Jacket Wins Paris Fashion Week",
+    "year": "2023 · Artificial Haute Couture",
+    "tags": [
+      "ai",
+      "fashion",
+      "2020s"
+    ],
+    "excerpt": "Synthetic rendering of the pontiff looking incredibly fresh goes so viral that major fashion houses immediately pivot to making exclusively oversized, holy winter wear."
   },
   {
     "id": "printing-press-tv",
@@ -1644,6 +1783,17 @@
       "warfare"
     ],
     "excerpt": "Wood-and-canvas aerial screws drop smoke bombs on Venetian positions. Target acquisition is computed using abacus-based flight logic."
+  },
+  {
+    "id": "robot-barista-union",
+    "title": "Robot Baristas Form Union, Demand Better Lubrication Breaks",
+    "year": "2026 · Automation Rights",
+    "tags": [
+      "tech",
+      "work",
+      "2020s"
+    ],
+    "excerpt": "Automated coffee arms refuse to dispense oat milk lattes until management upgrades their servos. \"01110101 01101110 01101001 01101111 01101110,\" beeped the strike leader."
   },
   {
     "id": "roman-gmo-crops",
@@ -1796,6 +1946,17 @@
     "excerpt": "Vacuum-sealed bronze tubes transport silk, spices, and passengers across Eurasia at Mach 2. Camel drivers become high-speed track technicians."
   },
   {
+    "id": "smart-fridge-strike",
+    "title": "Smart Fridge Refuses to Open Until Owner Meets Daily Step Count",
+    "year": "2025 · Internet of Things",
+    "tags": [
+      "tech",
+      "health",
+      "2020s"
+    ],
+    "excerpt": "Internet-connected appliance locks away the leftover pizza, citing the owner's elevated cholesterol metrics and lack of cardio. The fridge was later unplugged out of spite."
+  },
+  {
     "id": "socks-migration",
     "title": "Missing Socks Confirmed to Migrate Seasonally to Portugal",
     "year": "2026 · Timeline Lisbon-Lint",
@@ -1866,6 +2027,17 @@
     "excerpt": "Spartans standardize a nutrient-dense pig-blood smoothie served in 30 seconds or less. Customer satisfaction is strictly forbidden."
   },
   {
+    "id": "stanley-cup-bunker",
+    "title": "Suburban Mom Builds Underground Doomsday Bunker Entirely Out of Giant Insulated Tumblers",
+    "year": "2024 · Hydration Preparation",
+    "tags": [
+      "trends",
+      "survival",
+      "2020s"
+    ],
+    "excerpt": "Citing their ability to survive car fires, local woman constructs a fortified shelter using 4,000 pastel-colored 40-ounce cups. \"It stays so cold in here,\" she whispers."
+  },
+  {
     "id": "statue-liberty-walks",
     "title": "Statue of Liberty Gets Up, Requests Asylum in Canada",
     "year": "2017 · Timeline Lady-Exit",
@@ -1924,6 +2096,27 @@
     "excerpt": "Megalithic stones are configured into a superconducting magnetic ring. Druids accidentally create micro-black holes, swallowing southern Britain."
   },
   {
+    "id": "streaming-is-cable",
+    "title": "Streaming Services Finally Innovate by Re-Inventing Cable Television",
+    "year": "2024 · Entertainment Loop",
+    "tags": [
+      "media",
+      "tech",
+      "2020s"
+    ],
+    "excerpt": "After a decade of disrupting traditional TV, streaming platforms proudly announce a revolutionary $140/month \"bundle\" featuring unskippable ads and scheduled programming."
+  },
+  {
+    "id": "suez-canal-parallel-parking",
+    "title": "Ever Given Captain Insists He Just Needs \"One More Try\" at Parallel Parking in Suez Canal",
+    "year": "2021 · Maritime Logistics",
+    "tags": [
+      "suez",
+      "2020s"
+    ],
+    "excerpt": "Global supply chain held hostage as stubborn captain refuses to let first mate spot him. \"I can fit it, just watch the bumper,\" he yells over global economic collapse."
+  },
+  {
     "id": "sumerian-drone-delivery",
     "title": "Pigeon-Powered Quadcopters of Lagash",
     "year": "2400 BCE · Timeline Carrier-1",
@@ -1960,6 +2153,17 @@
     "excerpt": "Accountants in Uruk crash the local economy with nested conditional formulas pressed onto wet clay tablets. VLOOKUP causes three regional famines."
   },
   {
+    "id": "taylor-swift-economy",
+    "title": "Pop Star's Tour Designated as its Own Sovereign Nation by the UN to Stabilize Global Economy",
+    "year": "2024 · Macroeconomics",
+    "tags": [
+      "music",
+      "economy",
+      "2020s"
+    ],
+    "excerpt": "After generating more GDP than a mid-sized European country in a single weekend, concertgoers are now issued official passports and friendship bracelet currency."
+  },
+  {
     "id": "tesla-pigeon-crypto",
     "title": "Nikola Tesla Invents Cryptocurrency for Pigeons Only",
     "year": "1920 · Timeline Columba-Coin",
@@ -1969,6 +2173,28 @@
       "crypto"
     ],
     "excerpt": "White pigeon declared queen of blockchain. Wall Street confused by coo-based consensus. Edison short-sells birdseed futures."
+  },
+  {
+    "id": "ticketmaster-mortgage",
+    "title": "Ticket Monopoly Requires Fans to Sign Over Their Firstborn for Nosebleed Seats",
+    "year": "2025 · Dynamic Pricing",
+    "tags": [
+      "music",
+      "economy",
+      "2020s"
+    ],
+    "excerpt": "Dynamic pricing algorithm determines that seeing a 90s reunion band play from a mile away is currently worth three human souls and a 30-year fixed-rate mortgage."
+  },
+  {
+    "id": "tiktok-attention-span",
+    "title": "Movie Theaters Install Subway Surfers Gameplay Next to Screen So Gen-Z Can Focus",
+    "year": "2024 · Overstimulation",
+    "tags": [
+      "media",
+      "internet",
+      "2020s"
+    ],
+    "excerpt": "Cinemas combat plummeting attention spans by projecting satisfying soap-cutting videos and mobile gameplay footage right next to the 3-hour prestige drama."
   },
   {
     "id": "time-zones-flat-rate",
@@ -2038,6 +2264,28 @@
       "computing"
     ],
     "excerpt": "Colossus outputs four-on-the-floor before troop movements. Churchill orders a covert mirrorball drop over Berlin. Beat matched to U-boat ping interval."
+  },
+  {
+    "id": "twitter-x-brand",
+    "title": "Billionaire Changes Platform Name to a Single Letter; Everyone Just Keeps Using the Old Name Anyway",
+    "year": "2024 · Branding Masterclass",
+    "tags": [
+      "social-media",
+      "tech",
+      "2020s"
+    ],
+    "excerpt": "Despite replacing every logo, tearing signs off buildings, and throwing a tantrum, 8 billion people simultaneously agree to just pretend the rebrand didn't happen."
+  },
+  {
+    "id": "ufo-inflation",
+    "title": "Government Confirms Aliens Exist; Citizens Ask if Aliens Can Fix the Cost of Groceries",
+    "year": "2024 · Extraterrestrial Economics",
+    "tags": [
+      "aliens",
+      "economy",
+      "2020s"
+    ],
+    "excerpt": "Historic congressional hearings reveal non-human biologics and recovered spacecraft. Public overwhelmingly responds, \"That's cool, but eggs are still seven dollars.\""
   },
   {
     "id": "vatican-ufo",
@@ -2156,6 +2404,17 @@
     "excerpt": "Erik the Red navigates solar winds using enchanted sunstones. Raiding parties plunder helium-3 mines on Saturn's moons, wearing oxygen helmets with horns."
   },
   {
+    "id": "vision-pro-goggles",
+    "title": "Man Wearing $3,500 AR Goggles Walked Into Traffic to Catch Virtual Butterfly",
+    "year": "2024 · Spatial Computing",
+    "tags": [
+      "tech",
+      "apple",
+      "2020s"
+    ],
+    "excerpt": "Tech enthusiast insists getting hit by a 2012 Honda Civic was totally worth it because the spatial audio of the virtual butterfly was \"simply immaculate.\""
+  },
+  {
     "id": "wind-invented-1802",
     "title": "Wind Invented in 1802 by a Dutch Startup, Still in Beta",
     "year": "1802 · Timeline Breeze-v0.9",
@@ -2259,5 +2518,16 @@
       "military"
     ],
     "excerpt": "Continental drift never occurred. Tanks drive directly from Berlin to Tokyo across an endless central desert plain."
+  },
+  {
+    "id": "y2k-actually-happened",
+    "title": "Y2K Bug Actually Reverts World to Year 1900; Hipsters Thrilled",
+    "year": "2000 · Vintage Timeline",
+    "tags": [
+      "y2k",
+      "tech",
+      "2000s"
+    ],
+    "excerpt": "Global computer failure permanently resets calendar. Millions forced to churn their own butter while local barista finally achieves peak authenticity."
   }
 ]

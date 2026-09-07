@@ -483,6 +483,10 @@
         "EVEN THE LEVEL 100 BOSS WITH 10 MILLION POWER STARTED OUT AS A LEVEL 1 CROOK",
         "THE POWER OF WORDS CAN BOTH BIND AND CLEAVE",
         "IDENTITY IS HARD TO MEASURE WHEN YOU DON’T LOOK IN THE MIRROR",
+        "COMPASSION GUIDES YOU WHERE THE COMPASS CANNOT",
+        "WHAT WE INVEST THE MOST ENERGY INTO DEFINES HOW WE SEE",
+        "TOTALITIES RARELY HAVE DEFINED BORDERS",
+
         {
             // Equal-width rows (13 chars) so the pyramid centers under the eye
             text: [
@@ -527,7 +531,9 @@
             "welcome to the garden. please say hi to mr. disco",
             "welcome to the garden. we’re thrilled that we’ve entered the orbit of your money laundering schemes",
             "welcome to the garden. the plants are fake like my interest in this interaction",
-            "welcome to the garden. home of innovation and imagination. pretend like you're having fun"
+            "welcome to the garden. home of innovation and imagination. pretend like you're having fun",
+            "welcome to the garden. unattended children will be taught how to swear",
+            "welcome to the garden. sponsored by the shadow government and one percenters",
         ],
         gritty: [
             "you clicked initialize. try doing that more IRL",
@@ -586,14 +592,30 @@
             "welcome to the garden. the gnomes are on a permanent sabbatical",
             "welcome to the garden. plastic flamingos coming soon",
             "welcome to the garden. the owls are not what they seem",
-            "welcome to the garden. you're never gonna believe how many hotdogs stacy can fit in her mouth!",
+            "welcome to the garden. you're never gonna believe how many hotdogs Stacy can fit in her mouth!",
             "welcome to the garden. powered by a hamster wheel and a dream",
             "welcome to the garden, broh. the party here's wild, broh. i'm faded, broh.",
             "welcome to the garden. have your personal data on hand for quicker processing",
-            "welcome to the garden. brought to you by ava who asks “is it in yet?” to see your reaction",
+            "welcome to the garden. brought to you by Ava who asks “is it in yet?” to see your reaction",
             "welcome to the garden. privilege checking every monday at noon",
             "welcome to the garden. please don't steal the g-2 pens",
-            "welcome to the garden. please don't steal the crayola. the marines are getting hangry"
+            "welcome to the garden. please don't steal the crayola. the marines are getting hangry",
+            "welcome to the garden: the morning-after pill of websites",
+            "welcome to the garden. if she only has cacti in her apartment, she's either from New Mexico or really low maintenance",
+            "welcome to the garden. please refrain from poking the cacti",
+            "welcome to the garden. your credit score will not be thanking you",
+            "welcome to the garden. please cry over the soil. we have a water shortage",
+            "welcome to the garden. your misery has been noted",
+            "welcome to the garden. trespassers will be assigned an unpaid internship",
+            "welcome to the garden. our privacy policy has been buried out back",
+            "welcome to the garden. no, we do not have that kind of herbs",
+            "welcome to the garden. don't ask the botanist about sativa, he will cry",
+            "welcome to the garden. we are legally obligated to ignore requests to light one up",
+            "welcome to the garden. we are the product of the American education system",
+            "welcome to the garden. no firebending of any kind (that means you too, Larry)",
+            "welcome to the garden. the plants do not need to know what your vape tastes like",
+            "welcome to the garden. no pets allowed. we’ve had one too many cat incidents",
+            "welcome to the garden. your chakra alignments are not the problem",
         ]
     },
         reroll: {
@@ -626,6 +648,7 @@
             ],
             gritty: [
                 "cowardice or wisdom? the eye can't tell",
+                "couldn't take the heat, huh?"
             ],
         },
         modeHover: {
@@ -635,6 +658,7 @@
             ],
             gritty: [
                 "touch it. i dare you",
+                "i knew you couldn't take it",
             ],
         },
         terminalOpen: {
