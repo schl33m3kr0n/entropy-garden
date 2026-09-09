@@ -416,17 +416,19 @@ let currentPieType = 'pie';
 let currentRegion = 'us';
 
 const wealthData = {
+    // Sources: Fed DFA Q4 2025, IRS SOI, Census CPS ASEC 2024
     us: {
-        quintiles: [71, 15, 9, 4, 1],
+        quintiles: [70, 14.5, 10, 3, 2.5],
         top1: [5, 9, 18],
-        top1Labels: ['Top 0.01% (~$30M)', 'Top 0.1% (~$3.4M)', 'Top 1% (~$800K)'],
-        incomes: ['$250K+', '~$100K', '~$68K', '~$42K', '~$15K']
+        top1Labels: ['Top 0.01% (~\$30M+)', 'Top 0.1% (~\$3.3M)', 'Top 1% (~\$800K)'],
+        incomes: ['~\$316K', '~\$137K', '~\$84K', '~\$49K', '~\$18K']
     },
+    // Sources: UBS Global Wealth Report 2025, WID.world, Oxfam 2026
     global: {
-        quintiles: [86, 11, 2, 1, 0],
-        top1: [11, 15, 20],
-        top1Labels: ['Top 0.01% (~$100M+)', 'Top 0.1% (~$10M)', 'Top 1% (~$1M)'],
-        incomes: ['$50K+', '~$10K', '~$3K', '~$1K', '~$200']
+        quintiles: [85, 11, 3, 1, 0],
+        top1: [6, 14, 18],
+        top1Labels: ['Top 0.01% (~\$100M+)', 'Top 0.1% (~\$10M)', 'Top 1% (~\$1.2M)'],
+        incomes: ['~\$50K+', '~\$10K', '~\$3K', '~\$1K', '<\$500']
     }
 };
 
@@ -545,8 +547,8 @@ function renderStatsChart() {
         statsChartInstance = new window.Chart(barCtx, {
             type: 'bar',
             data: {
-                labels: ['USA', 'CHN', 'DEU', 'JPN', 'IND', 'GBR', 'FRA', 'ITA', 'BRA', 'CAN'],
-                datasets: [{ label: 'GDP ($T)', data: [27.3, 17.7, 4.4, 4.2, 3.7, 3.3, 3.0, 2.1, 2.1, 2.1], backgroundColor: 'rgba(255, 255, 255, 0.7)', borderColor: '#fff', borderWidth: 1 }]
+                labels: ['USA', 'CHN', 'DEU', 'JPN', 'GBR', 'IND', 'FRA', 'RUS', 'ITA', 'CAN'],
+                datasets: [{ label: 'GDP ($T)', data: [30.8, 19.6, 5.1, 4.4, 4.0, 3.9, 3.4, 2.6, 2.6, 2.3], backgroundColor: 'rgba(255, 255, 255, 0.7)', borderColor: '#fff', borderWidth: 1 }]
             },
             options: {
                 responsive: false, maintainAspectRatio: false,
