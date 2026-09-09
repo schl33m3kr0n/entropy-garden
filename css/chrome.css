@@ -3773,3 +3773,9 @@ body.corrupted #sidebar-menu li .mask-icon {
         gap: 0.5rem;
     }
 }
+@media (max-width: 768px) {
+    .stats-charts-wrapper {
+        flex-direction: column;
+        height: 300px !important;
+    }
+}

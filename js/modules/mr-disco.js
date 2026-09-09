@@ -410,33 +410,34 @@ async function setup() {
 
 
 let statsChartInstance = null;
+let statsPieInstance = null;
 function renderStatsChart() {
-    try { console.log("Rendering Chart.js...");
+    try {
         if (typeof Chart === 'undefined') { 
             document.getElementById('mr-disco-chart').outerHTML = '<p style="color:red; font-size:20px;">Chart library failed to load.</p>'; 
             return; 
         }
-        const ctx = document.getElementById('mr-disco-chart');
-        if (!ctx) return;
         
-        if (statsChartInstance) {
-            statsChartInstance.destroy();
-        }
+        const pieCtx = document.getElementById('mr-disco-pie');
+        const barCtx = document.getElementById('mr-disco-chart');
+        if (!pieCtx || !barCtx) return;
         
-        statsChartInstance = new Chart(ctx, {
-            type: 'bar',
+        if (statsChartInstance) statsChartInstance.destroy();
+        if (statsPieInstance) statsPieInstance.destroy();
+        
+        Chart.defaults.color = '#0f0';
+        Chart.defaults.font.family = 'monospace';
+        
+        statsPieInstance = new Chart(pieCtx, {
+            type: 'pie',
             data: {
-                labels: ['Wealth: Top 1%', 'Wealth: Next 9%', 'Wealth: Bottom 90%', 'GDP: USA ($T)', 'GDP: CHN ($T)', 'GDP: DEU ($T)'],
+                labels: ['Top 1%', 'Next 9%', 'Bottom 90%'],
                 datasets: [{
-                    label: 'Global Metrics',
-                    data: [43, 40, 17, 27.3, 17.7, 4.4],
+                    data: [43, 40, 17],
                     backgroundColor: [
-                        'rgba(0, 255, 0, 0.8)',
-                        'rgba(0, 255, 0, 0.6)',
-                        'rgba(0, 255, 0, 0.3)',
-                        'rgba(255, 255, 255, 0.8)',
-                        'rgba(255, 255, 255, 0.6)',
-                        'rgba(255, 255, 255, 0.3)'
+                        'rgba(0, 255, 0, 0.9)',
+                        'rgba(0, 255, 0, 0.5)',
+                        'rgba(0, 255, 0, 0.15)'
                     ],
                     borderColor: '#0f0',
                     borderWidth: 1
@@ -445,24 +446,61 @@ function renderStatsChart() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                color: '#fff',
                 plugins: {
-                    legend: { display: false }
+                    legend: { 
+                        position: 'right',
+                        labels: { boxWidth: 12, color: '#0f0', font: { size: 10 } }
+                    },
+                    title: {
+                        display: true,
+                        text: 'WEALTH (%)',
+                        color: '#0f0'
+                    }
+                }
+            }
+        });
+        
+        statsChartInstance = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['USA', 'CHN', 'DEU'],
+                datasets: [{
+                    label: 'GDP ($T)',
+                    data: [27.3, 17.7, 4.4],
+                    backgroundColor: [
+                        'rgba(255, 255, 255, 0.8)',
+                        'rgba(255, 255, 255, 0.5)',
+                        'rgba(255, 255, 255, 0.2)'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'GDP ($T)',
+                        color: '#fff'
+                    }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(0, 255, 0, 0.1)' },
-                        ticks: { color: '#0f0', font: { family: 'monospace' } }
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#fff' }
                     },
                     x: {
-                        grid: { color: 'rgba(0, 255, 0, 0.1)' },
-                        ticks: { color: '#0f0', font: { family: 'monospace', size: 10 } }
+                        grid: { display: false },
+                        ticks: { color: '#fff' }
                     }
                 }
             }
         });
     } catch (err) {
-        document.getElementById('mr-disco-chart').outerHTML = '<p style="color:red; font-size: 20px;">Error: ' + err.message + '</p>';
+        console.error(err);
     }
 }
