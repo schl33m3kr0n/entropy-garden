@@ -413,6 +413,7 @@ let statsChartInstance = null;
 let instQ = null;
 let inst1 = null;
 let currentPieType = 'pie';
+let currentTop1Type = 'share';
 let currentRegion = 'us';
 
 const wealthData = {
@@ -421,6 +422,8 @@ const wealthData = {
         quintiles: [70, 14.5, 10, 3, 2.5],
         top1: [0.6, 4.4, 9, 18],
         top1Labels: ['#1 Musk ($892B)', 'Top 0.01% (~$30M+)', 'Top 0.1% (~$3.3M)', 'Top 1% (~$800K)'],
+        top1BarLabels: ['#1 Musk', '0.01%', '0.1%', '1%'],
+        top1Incomes: [892_000_000_000, 30_000_000, 3_300_000, 800_000],
         incomes: ['~$316K', '~$137K', '~$84K', '~$49K', '~$18K']
     },
     // Sources: UBS Global Wealth Report 2025, WID.world, Oxfam 2026, Forbes Sep 2026
@@ -428,9 +431,20 @@ const wealthData = {
         quintiles: [85, 11, 3, 1, 0],
         top1: [0.2, 5.8, 14, 18],
         top1Labels: ['#1 Musk ($892B)', 'Top 0.01% (~$100M+)', 'Top 0.1% (~$10M)', 'Top 1% (~$1.2M)'],
+        top1BarLabels: ['#1 Musk', '0.01%', '0.1%', '1%'],
+        top1Incomes: [892_000_000_000, 100_000_000, 10_000_000, 1_200_000],
         incomes: ['~$50K+', '~$10K', '~$3K', '~$1K', '<$500']
     }
 };
+
+const top1Colors = ['#ffffff', '#ff0055', '#cc0044', '#990033'];
+
+function formatUsdCompact(value) {
+    if (value >= 1e9) return `$${(value / 1e9).toFixed(value % 1e9 === 0 ? 0 : 1)}B`;
+    if (value >= 1e6) return `$${(value / 1e6).toFixed(value % 1e6 === 0 ? 0 : 1)}M`;
+    if (value >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
+    return `$${value}`;
+}
 
 const pctLabelPlugin = {
     id: 'pctLabels',
@@ -454,11 +468,69 @@ const pctLabelPlugin = {
     }
 };
 
+function buildTop1Chart(tCtx, d) {
+    const isIncome = currentTop1Type === 'income';
+    return new window.Chart(tCtx, {
+        type: isIncome ? 'bar' : 'doughnut',
+        data: {
+            labels: isIncome ? d.top1BarLabels : d.top1Labels,
+            datasets: [{
+                data: isIncome ? d.top1Incomes : d.top1,
+                backgroundColor: top1Colors,
+                borderColor: 'var(--alert-red)',
+                borderWidth: 1,
+            }],
+        },
+        plugins: isIncome ? [] : [pctLabelPlugin],
+        options: isIncome ? {
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `${ctx.label}: ${formatUsdCompact(ctx.parsed.y)}`,
+                    },
+                },
+            },
+            scales: {
+                y: {
+                    type: 'logarithmic',
+                    grid: { color: 'rgba(255, 80, 100, 0.12)' },
+                    ticks: {
+                        color: '#ff5588',
+                        font: { size: 7 },
+                        callback: (v) => formatUsdCompact(v),
+                    },
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#ff5588', font: { size: 7 } },
+                },
+            },
+        } : {
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 6, color: '#ff5588', font: { size: 7 } } },
+                title: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `${ctx.label}: ${ctx.parsed}% of total wealth`,
+                    },
+                },
+            },
+        },
+    });
+}
+
 function updateWealthCharts() {
     if (!instQ || !inst1) return;
     const d = wealthData[currentRegion];
     const qCtx = document.getElementById('chart-quintiles');
-    if (!qCtx) return;
+    const tCtx = document.getElementById('chart-top1');
+    if (!qCtx || !tCtx) return;
     
     const quintileColors = ['rgba(0,255,0,1.0)', 'rgba(0,255,0,0.6)', 'rgba(0,255,0,0.3)', 'rgba(0,255,0,0.15)', 'rgba(0,255,0,0.05)'];
     const qLabels = d.quintiles.map((v, i) => {
@@ -487,9 +559,8 @@ function updateWealthCharts() {
         }
     });
     
-    inst1.data.labels = d.top1Labels;
-    inst1.data.datasets[0].data = d.top1;
-    inst1.update();
+    inst1?.destroy();
+    inst1 = buildTop1Chart(tCtx, d);
 }
 
 function renderStatsChart() {
@@ -509,7 +580,6 @@ function renderStatsChart() {
         if (window.Chart.defaults.font) window.Chart.defaults.font.family = 'monospace';
         
         const quintileColors = ['rgba(0,255,0,1.0)', 'rgba(0,255,0,0.6)', 'rgba(0,255,0,0.3)', 'rgba(0,255,0,0.15)', 'rgba(0,255,0,0.05)'];
-        const top1Colors = ['#ffffff', '#ff0055', '#cc0044', '#990033'];
         const d = wealthData[currentRegion];
         
         // Quintiles
@@ -540,30 +610,7 @@ function renderStatsChart() {
             }
         });
         
-        // Top 1% Breakdown
-        inst1 = new window.Chart(tCtx, {
-            type: 'doughnut',
-            data: {
-                labels: d.top1Labels,
-                datasets: [{ data: d.top1, backgroundColor: top1Colors, borderColor: 'var(--alert-red)', borderWidth: 1 }]
-            },
-            plugins: [pctLabelPlugin],
-            options: {
-                responsive: false,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 6, color: '#ff5588', font: { size: 7 } } },
-                    title: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(ctx) {
-                                return ctx.label + ': ' + ctx.parsed + '% of total wealth';
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        inst1 = buildTop1Chart(tCtx, d);
 
         // Top 10 GDP Bar Chart
         statsChartInstance = new window.Chart(barCtx, {
@@ -599,6 +646,18 @@ function renderStatsChart() {
                 document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentPieType = btn.dataset.type;
+                updateWealthCharts();
+            });
+        });
+
+        document.querySelectorAll('.top1-type-btn:not(.bound)').forEach((btn) => {
+            btn.classList.add('bound');
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                document.querySelectorAll('.top1-type-btn').forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTop1Type = btn.dataset.top1Type;
                 updateWealthCharts();
             });
         });
