@@ -3682,6 +3682,8 @@ body.corrupted #sidebar-menu li .mask-icon {
     flex: none !important;
 }
 .mr-disco-stats-shell {
+    width: 100%;
+    flex: 0 0 auto;
     border: 2px solid var(--neon-green);
     border-radius: 8px;
     box-shadow: 0 0 24px rgba(0, 255, 0, 0.12);
