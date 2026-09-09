@@ -410,53 +410,59 @@ async function setup() {
 
 
 let statsChartInstance = null;
-let instUsQ = null, instUs1 = null, instGlQ = null, instGl1 = null;
+let instQ = null;
+let inst1 = null;
+let currentPieType = 'pie';
+let currentRegion = 'us';
+
+const wealthData = {
+    us: { quintiles: [71, 15, 9, 4, 1], top1: [5, 9, 18] },
+    global: { quintiles: [86, 11, 2, 1, 0], top1: [11, 15, 20] }
+};
+
+function updateWealthCharts() {
+    if (!instQ || !inst1) return;
+    instQ.config.type = currentPieType;
+    instQ.data.datasets[0].data = wealthData[currentRegion].quintiles;
+    instQ.update();
+    
+    inst1.data.datasets[0].data = wealthData[currentRegion].top1;
+    inst1.update();
+}
 
 function renderStatsChart() {
+    const qCtx = document.getElementById('chart-quintiles');
+    const tCtx = document.getElementById('chart-top1');
     const barCtx = document.getElementById('mr-disco-chart');
-    if (!barCtx) return;
+    if (!qCtx || !tCtx || !barCtx) return;
 
     try {
         if (typeof window.Chart === 'undefined') return;
         
         if (statsChartInstance) statsChartInstance.destroy();
-        if (instUsQ) instUsQ.destroy();
-        if (instUs1) instUs1.destroy();
-        if (instGlQ) instGlQ.destroy();
-        if (instGl1) instGl1.destroy();
+        if (instQ) instQ.destroy();
+        if (inst1) inst1.destroy();
         
         window.Chart.defaults.color = '#0f0';
         if (window.Chart.defaults.font) window.Chart.defaults.font.family = 'monospace';
         
         const quintileColors = ['rgba(0,255,0,1.0)', 'rgba(0,255,0,0.6)', 'rgba(0,255,0,0.3)', 'rgba(0,255,0,0.15)', 'rgba(0,255,0,0.05)'];
-        const top1Colors = ['rgba(255,0,85,0.9)', 'rgba(0,255,0,0.6)'];
+        const top1Colors = ['#ff0055', '#cc0044', '#990033'];
         
         const qOpts = { responsive: false, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: false } } };
         const dOpts = { responsive: false, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: false } } };
 
-        // US Quintiles
-        instUsQ = new window.Chart(document.getElementById('chart-us-quintiles'), {
-            type: 'pie', data: { labels: ['Top 20%', '2nd 20%', '3rd 20%', '4th 20%', 'Bottom 20%'], 
-            datasets: [{ data: [71, 15, 9, 4, 1], backgroundColor: quintileColors, borderColor: '#0f0', borderWidth: 1 }] },
+        // Quintiles
+        instQ = new window.Chart(qCtx, {
+            type: currentPieType, data: { labels: ['Top 20%', '2nd 20%', '3rd 20%', '4th 20%', 'Bottom 20%'], 
+            datasets: [{ data: wealthData[currentRegion].quintiles, backgroundColor: quintileColors, borderColor: '#0f0', borderWidth: 1 }] },
             options: qOpts
         });
-        // US Top 1%
-        instUs1 = new window.Chart(document.getElementById('chart-us-top1'), {
+        
+        // Top 1% Breakdown
+        inst1 = new window.Chart(tCtx, {
             type: 'doughnut', data: { labels: ['Top 0.01%', 'Next 0.09%', 'Next 0.9%'], 
-            datasets: [{ data: [5, 9, 18], backgroundColor: ['#ff0055', '#cc0044', '#990033'], borderColor: 'var(--alert-red)', borderWidth: 1 }] },
-            options: dOpts
-        });
-
-        // Global Quintiles
-        instGlQ = new window.Chart(document.getElementById('chart-global-quintiles'), {
-            type: 'pie', data: { labels: ['Top 20%', '2nd 20%', '3rd 20%', '4th 20%', 'Bottom 20%'], 
-            datasets: [{ data: [86, 11, 2, 1, 0], backgroundColor: quintileColors, borderColor: '#0f0', borderWidth: 1 }] },
-            options: qOpts
-        });
-        // Global Top 1%
-        instGl1 = new window.Chart(document.getElementById('chart-global-top1'), {
-            type: 'doughnut', data: { labels: ['Top 0.01%', 'Next 0.09%', 'Next 0.9%'], 
-            datasets: [{ data: [11, 15, 20], backgroundColor: ['#ff0055', '#cc0044', '#990033'], borderColor: 'var(--alert-red)', borderWidth: 1 }] },
+            datasets: [{ data: wealthData[currentRegion].top1, backgroundColor: top1Colors, borderColor: 'var(--alert-red)', borderWidth: 1 }] },
             options: dOpts
         });
 
@@ -472,6 +478,30 @@ function renderStatsChart() {
                 plugins: { legend: { display: false }, title: { display: true, text: 'GLOBAL GDP TOP 10 ($T)', color: '#fff', font: { size: 10 } } },
                 scales: { y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#fff', font: { size: 9 } } }, x: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9 } } } }
             }
+        });
+        
+        // Region Toggle
+        document.querySelectorAll('.region-btn:not(.bound)').forEach(btn => {
+            btn.classList.add('bound');
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                document.querySelectorAll('.region-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentRegion = btn.dataset.region;
+                updateWealthCharts();
+            });
+        });
+
+        // Type Toggle
+        document.querySelectorAll('.type-btn:not(.bound)').forEach(btn => {
+            btn.classList.add('bound');
+            btn.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentPieType = btn.dataset.type;
+                updateWealthCharts();
+            });
         });
         
     } catch (err) {
