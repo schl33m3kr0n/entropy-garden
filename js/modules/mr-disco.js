@@ -374,7 +374,7 @@ async function setup() {
             if (stats) {
                 stats.hidden = !stats.hidden;
                 activateEyeMode(stats.hidden ? 'track' : 'sleepy');
-                if (!stats.hidden) renderStatsChart();
+                if (!stats.hidden) requestAnimationFrame(() => requestAnimationFrame(renderStatsChart));
             } else {
                 activateEyeMode('sleepy');
             }
@@ -411,7 +411,7 @@ async function setup() {
 
 let statsChartInstance = null;
 function renderStatsChart() {
-    if (typeof Chart === 'undefined') return;
+    if (typeof Chart === 'undefined') { document.getElementById('mr-disco-chart').outerHTML = '<p style="color:red;">Chart library failed to load.</p>'; return; }
     const ctx = document.getElementById('mr-disco-chart');
     if (!ctx) return;
     
