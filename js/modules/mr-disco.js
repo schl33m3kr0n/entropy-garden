@@ -411,6 +411,14 @@ async function setup() {
 
 let statsChartInstance = null;
 let statsPieInstance = null;
+let currentPieType = 'pie';
+
+function updatePieChart() {
+    if (!statsPieInstance) return;
+    statsPieInstance.config.type = currentPieType;
+    statsPieInstance.update();
+}
+
 function renderStatsChart() {
     try {
         if (typeof Chart === 'undefined') { 
@@ -429,7 +437,7 @@ function renderStatsChart() {
         Chart.defaults.font.family = 'monospace';
         
         statsPieInstance = new Chart(pieCtx, {
-            type: 'pie',
+            type: currentPieType,
             data: {
                 labels: ['Top 1%', 'Next 9%', 'Bottom 90%'],
                 datasets: [{
@@ -452,9 +460,7 @@ function renderStatsChart() {
                         labels: { boxWidth: 12, color: '#0f0', font: { size: 10 } }
                     },
                     title: {
-                        display: true,
-                        text: 'WEALTH (%)',
-                        color: '#0f0'
+                        display: false
                     }
                 }
             }
@@ -499,6 +505,17 @@ function renderStatsChart() {
                     }
                 }
             }
+        });
+        
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentPieType = btn.dataset.type;
+                updatePieChart();
+            });
         });
     } catch (err) {
         console.error(err);
