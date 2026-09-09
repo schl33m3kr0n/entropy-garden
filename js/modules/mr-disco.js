@@ -421,11 +421,12 @@ function updatePieChart() {
 
 function renderStatsChart() {
     try {
-        if (typeof Chart === 'undefined') { 
+        if (typeof window.Chart === 'undefined') { 
             document.getElementById('mr-disco-chart').outerHTML = '<p style="color:red; font-size:20px;">Chart library failed to load.</p>'; 
             return; 
         }
         
+        document.getElementById('mr-disco-pie').style.backgroundColor = 'rgba(0, 255, 0, 0.2)'; document.getElementById('mr-disco-chart').style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
         const pieCtx = document.getElementById('mr-disco-pie');
         const barCtx = document.getElementById('mr-disco-chart');
         if (!pieCtx || !barCtx) return;
@@ -433,10 +434,10 @@ function renderStatsChart() {
         if (statsChartInstance) statsChartInstance.destroy();
         if (statsPieInstance) statsPieInstance.destroy();
         
-        Chart.defaults.color = '#0f0';
-        Chart.defaults.font.family = 'monospace';
+        window.Chart.defaults.color = '#0f0';
+        if (window.Chart.defaults.font) window.Chart.defaults.font.family = 'monospace';
         
-        statsPieInstance = new Chart(pieCtx, {
+        statsPieInstance = new window.Chart(pieCtx, {
             type: currentPieType,
             data: {
                 labels: ['Top 1%', 'Next 9%', 'Bottom 90%'],
@@ -452,7 +453,7 @@ function renderStatsChart() {
                 }]
             },
             options: {
-                responsive: true,
+                responsive: false,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { 
@@ -466,7 +467,7 @@ function renderStatsChart() {
             }
         });
         
-        statsChartInstance = new Chart(barCtx, {
+        statsChartInstance = new window.Chart(barCtx, {
             type: 'bar',
             data: {
                 labels: ['USA', 'CHN', 'DEU'],
@@ -483,7 +484,7 @@ function renderStatsChart() {
                 }]
             },
             options: {
-                responsive: true,
+                responsive: false,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
@@ -518,6 +519,6 @@ function renderStatsChart() {
             });
         });
     } catch (err) {
-        console.error(err);
+        document.getElementById('mr-disco-pie').outerHTML = '<p style="color:red; font-size:12px; word-wrap:break-word;">' + err.toString() + '</p>';
     }
 }
