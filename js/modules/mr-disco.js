@@ -416,19 +416,19 @@ let currentPieType = 'pie';
 let currentRegion = 'us';
 
 const wealthData = {
-    // Sources: Fed DFA Q4 2025, IRS SOI, Census CPS ASEC 2024
+    // Sources: Fed DFA Q4 2025, IRS SOI, Census CPS ASEC 2024, Forbes Sep 2026
     us: {
         quintiles: [70, 14.5, 10, 3, 2.5],
-        top1: [5, 9, 18],
-        top1Labels: ['Top 0.01% (~\$30M+)', 'Top 0.1% (~\$3.3M)', 'Top 1% (~\$800K)'],
-        incomes: ['~\$316K', '~\$137K', '~\$84K', '~\$49K', '~\$18K']
+        top1: [0.6, 4.4, 9, 18],
+        top1Labels: ['#1 Musk ($892B)', 'Top 0.01% (~$30M+)', 'Top 0.1% (~$3.3M)', 'Top 1% (~$800K)'],
+        incomes: ['~$316K', '~$137K', '~$84K', '~$49K', '~$18K']
     },
-    // Sources: UBS Global Wealth Report 2025, WID.world, Oxfam 2026
+    // Sources: UBS Global Wealth Report 2025, WID.world, Oxfam 2026, Forbes Sep 2026
     global: {
         quintiles: [85, 11, 3, 1, 0],
-        top1: [6, 14, 18],
-        top1Labels: ['Top 0.01% (~\$100M+)', 'Top 0.1% (~\$10M)', 'Top 1% (~\$1.2M)'],
-        incomes: ['~\$50K+', '~\$10K', '~\$3K', '~\$1K', '<\$500']
+        top1: [0.2, 5.8, 14, 18],
+        top1Labels: ['#1 Musk ($892B)', 'Top 0.01% (~$100M+)', 'Top 0.1% (~$10M)', 'Top 1% (~$1.2M)'],
+        incomes: ['~$50K+', '~$10K', '~$3K', '~$1K', '<$500']
     }
 };
 
@@ -487,7 +487,7 @@ function renderStatsChart() {
         if (window.Chart.defaults.font) window.Chart.defaults.font.family = 'monospace';
         
         const quintileColors = ['rgba(0,255,0,1.0)', 'rgba(0,255,0,0.6)', 'rgba(0,255,0,0.3)', 'rgba(0,255,0,0.15)', 'rgba(0,255,0,0.05)'];
-        const top1Colors = ['#ff0055', '#cc0044', '#990033'];
+        const top1Colors = ['#ffffff', '#ff0055', '#cc0044', '#990033'];
         const d = wealthData[currentRegion];
         
         // Quintiles
