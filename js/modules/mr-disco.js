@@ -420,16 +420,19 @@ function updatePieChart() {
 }
 
 function renderStatsChart() {
+    const pieCtx = document.getElementById('mr-disco-pie');
+    const barCtx = document.getElementById('mr-disco-chart');
+    if (!pieCtx || !barCtx) return;
+    
+    // Diagnostic visualizer
+    pieCtx.style.border = '2px solid cyan';
+    barCtx.style.border = '2px solid magenta';
+
     try {
         if (typeof window.Chart === 'undefined') { 
-            document.getElementById('mr-disco-chart').outerHTML = '<p style="color:red; font-size:20px;">Chart library failed to load.</p>'; 
+            pieCtx.parentElement.innerHTML = '<div style="color:red; font-size:16px; background:black; padding:10px; z-index:999;">CHART UNDEFINED</div>';
             return; 
         }
-        
-        document.getElementById('mr-disco-pie').style.backgroundColor = 'rgba(0, 255, 0, 0.2)'; document.getElementById('mr-disco-chart').style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-        const pieCtx = document.getElementById('mr-disco-pie');
-        const barCtx = document.getElementById('mr-disco-chart');
-        if (!pieCtx || !barCtx) return;
         
         if (statsChartInstance) statsChartInstance.destroy();
         if (statsPieInstance) statsPieInstance.destroy();
@@ -456,13 +459,8 @@ function renderStatsChart() {
                 responsive: false,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { 
-                        position: 'right',
-                        labels: { boxWidth: 12, color: '#0f0', font: { size: 10 } }
-                    },
-                    title: {
-                        display: false
-                    }
+                    legend: { position: 'right', labels: { boxWidth: 12, color: '#0f0', font: { size: 10 } } },
+                    title: { display: false }
                 }
             }
         });
@@ -488,22 +486,11 @@ function renderStatsChart() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    title: {
-                        display: true,
-                        text: 'GDP ($T)',
-                        color: '#fff'
-                    }
+                    title: { display: true, text: 'GDP ($T)', color: '#fff' }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                        ticks: { color: '#fff' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#fff' }
-                    }
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#fff' } },
+                    x: { grid: { display: false }, ticks: { color: '#fff' } }
                 }
             }
         });
@@ -518,7 +505,8 @@ function renderStatsChart() {
                 updatePieChart();
             });
         });
+        
     } catch (err) {
-        document.getElementById('mr-disco-pie').outerHTML = '<p style="color:red; font-size:12px; word-wrap:break-word;">' + err.toString() + '</p>';
+        pieCtx.parentElement.innerHTML = '<div style="color:red; font-size:16px; background:black; padding:10px; z-index:999; word-break:break-all;">ERR: ' + err.message + '</div>';
     }
 }

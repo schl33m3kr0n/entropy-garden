@@ -3779,3 +3779,6 @@ body.corrupted #sidebar-menu li .mask-icon {
         height: 300px !important;
     }
 }
+#groovy-meter-container, .groovy-bar, .groovy-label {
+    pointer-events: none !important;
+}
