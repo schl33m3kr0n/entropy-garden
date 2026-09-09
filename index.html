@@ -429,17 +429,22 @@
                             </form>
                         </div>
                         <div class="mr-disco-stats-shell" id="mr-disco-stats-shell" hidden>
-                            <div>
-                                <p class="alt-history-meta">GLOBAL POPULATION</p>
-                                <p class="alt-history-excerpt"><span id="pop-counter-disco" style="color: #fff;">8,100,245,678</span></p>
+                            <div class="stats-text-grid">
+                                <div>
+                                    <p class="alt-history-meta">GLOBAL POPULATION</p>
+                                    <p class="alt-history-excerpt"><span id="pop-counter-disco" style="color: #fff;">8,100,245,678</span></p>
+                                </div>
+                                <div>
+                                    <p class="alt-history-meta">WEALTH DISTRIBUTION</p>
+                                    <p class="alt-history-excerpt">Top 1% (43%) &middot; Next 9% (40%) &middot; Bottom 90% (17%)</p>
+                                </div>
+                                <div>
+                                    <p class="alt-history-meta">TOP GDPs (Trillions)</p>
+                                    <p class="alt-history-excerpt">USA ($27.3T) &middot; CHN ($17.7T) &middot; DEU ($4.4T)</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="alt-history-meta">WEALTH DISTRIBUTION</p>
-                                <p class="alt-history-excerpt">Top 1% (43%) · Next 9% (40%) · Bottom 90% (17%)</p>
-                            </div>
-                            <div>
-                                <p class="alt-history-meta">TOP GDPs (Trillions)</p>
-                                <p class="alt-history-excerpt">USA ($27.3T) · CHN ($17.7T) · DEU ($4.4T)</p>
+                            <div class="stats-chart-container" style="margin-top: 1.5rem; position: relative; height: 160px; width: 100%;">
+                                <canvas id="mr-disco-chart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -615,6 +620,8 @@
   
   <button class="lightbox-btn lb-next">&#10095;</button>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 <script src="js/boot/file-protocol-guard.js"></script>
 <script src="js/boot/terminal-sfx.js" defer></script>

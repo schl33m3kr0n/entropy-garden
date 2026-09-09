@@ -3760,3 +3760,16 @@ body.corrupted #sidebar-menu li .mask-icon {
     background-color: var(--alert-red);
 }
 
+.stats-text-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+}
+@media (max-width: 768px) {
+    .stats-text-grid {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
