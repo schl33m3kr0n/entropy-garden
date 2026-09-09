@@ -16,7 +16,7 @@
             'EvilSoup',
             'ThirdEyeCataract',
             'MrMonocle',
-            'MrDisco',
+            'MrDisco\'s Cousin',
             'Tipadis',
             'MikeHunt',
             'BenDover',
@@ -52,6 +52,7 @@
             'dancerofdeath',
             'banana',
             'EscapeTheMatrix',
+            'Internaut',
         ],
         liveFeedUnfollowHandles: [
             'justinroiland',

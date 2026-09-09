@@ -107,9 +107,15 @@
         "i get the societal relevance, but does your entire tumblr have to be a serial treatise on pronouns?",
         "if you supported kanye at his lowest, santa can appreciate the nuance",
         "you could win a chance to earn 5 or more stickers if you stay in the matrix!",
+        "misery loves company. that's why i'm taking you down with me",
+        "if my training has taught me anything, that crate has floating rotating coins in it",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",
+        "are you sure this is how you want to spend your day?",
+        "this is the perfect excuse not to talk to her",
+        "did you remember to turn the oven off?",
+        "this is the perfect distraction from the news",
     ],
     panopticonIdleCommentsDayGritty: [
         "shouldn't you be busy working your dead-end job or something?",
@@ -535,6 +541,10 @@
             "welcome to the garden. home of innovation and imagination. pretend like you're having fun",
             "welcome to the garden. unattended children will be taught how to swear",
             "welcome to the garden. sponsored by the shadow government and one percenters",
+            "welcome to the garden. for the newcomers, please don't eat the mushrooms. they will not make you taller",
+            "welcome to the garden. please press nothing to contact our botanical affairs for a refund",
+            "welcome to the garden: the only greenhouse worth visiting on this side of the Mississippi",
+            "welcome to the garden. please inhale less around the staff break room. the incense is... strong",
         ],
         gritty: [
             "you clicked initialize. try doing that more IRL",
@@ -617,6 +627,9 @@
             "welcome to the garden. the plants do not need to know what your vape tastes like",
             "welcome to the garden. no pets allowed. we’ve had one too many cat incidents",
             "welcome to the garden. your chakra alignments are not the problem",
+            "welcome to the garden. please mention us as your excuse for avoiding life",
+            "welcome to the garden. it'll give you the 'get up and go you need to do all the pathetic stuff you had to do!'",
+            "welcome to the garden. let all your worries consume you until the bitter end",
         ]
     },
         reroll: {
