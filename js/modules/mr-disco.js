@@ -419,11 +419,13 @@ const wealthData = {
     us: {
         quintiles: [71, 15, 9, 4, 1],
         top1: [5, 9, 18],
+        top1Labels: ['Top 0.01% (~$30M)', 'Top 0.1% (~$3.4M)', 'Top 1% (~$800K)'],
         incomes: ['$250K+', '~$100K', '~$68K', '~$42K', '~$15K']
     },
     global: {
         quintiles: [86, 11, 2, 1, 0],
         top1: [11, 15, 20],
+        top1Labels: ['Top 0.01% (~$100M+)', 'Top 0.1% (~$10M)', 'Top 1% (~$1M)'],
         incomes: ['$50K+', '~$10K', '~$3K', '~$1K', '~$200']
     }
 };
@@ -461,6 +463,7 @@ function updateWealthCharts() {
     });
     instQ.update();
     
+    inst1.data.labels = d.top1Labels;
     inst1.data.datasets[0].data = d.top1;
     inst1.update();
 }
@@ -517,7 +520,7 @@ function renderStatsChart() {
         inst1 = new window.Chart(tCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Top 0.01%', 'Next 0.09%', 'Next 0.9%'],
+                labels: d.top1Labels,
                 datasets: [{ data: d.top1, backgroundColor: top1Colors, borderColor: 'var(--alert-red)', borderWidth: 1 }]
             },
             plugins: [pctLabelPlugin],
@@ -525,7 +528,7 @@ function renderStatsChart() {
                 responsive: false,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: { position: 'bottom', labels: { boxWidth: 6, color: '#ff5588', font: { size: 7 } } },
                     title: { display: false },
                     tooltip: {
                         callbacks: {
