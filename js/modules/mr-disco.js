@@ -457,13 +457,35 @@ const pctLabelPlugin = {
 function updateWealthCharts() {
     if (!instQ || !inst1) return;
     const d = wealthData[currentRegion];
-    instQ.config.type = currentPieType;
-    instQ.data.datasets[0].data = d.quintiles;
-    instQ.data.labels = d.quintiles.map((v, i) => {
-        const labels = ['Top 20%', '2nd 20%', '3rd 20%', '4th 20%', 'Bottom 20%'];
-        return labels[i] + ' (' + d.incomes[i] + ')';
+    const qCtx = document.getElementById('chart-quintiles');
+    if (!qCtx) return;
+    
+    const quintileColors = ['rgba(0,255,0,1.0)', 'rgba(0,255,0,0.6)', 'rgba(0,255,0,0.3)', 'rgba(0,255,0,0.15)', 'rgba(0,255,0,0.05)'];
+    const qLabels = d.quintiles.map((v, i) => {
+        const names = ['Top 20%', '2nd 20%', '3rd 20%', '4th 20%', 'Bottom 20%'];
+        return names[i] + ' (' + d.incomes[i] + ')';
     });
-    instQ.update();
+    
+    instQ.destroy();
+    
+    const isBar = currentPieType === 'bar';
+    instQ = new window.Chart(qCtx, {
+        type: currentPieType,
+        data: {
+            labels: isBar ? ['Top 20%', '2nd 20%', '3rd 20%', '4th 20%', 'Bottom 20%'] : qLabels,
+            datasets: [{ data: d.quintiles, backgroundColor: quintileColors, borderColor: '#0f0', borderWidth: 1 }]
+        },
+        plugins: [pctLabelPlugin],
+        options: isBar ? {
+            responsive: false, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, title: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,255,0,0.1)' }, ticks: { color: '#0f0', font: { size: 8 }, callback: v => v + '%' } }, x: { grid: { display: false }, ticks: { color: '#0f0', font: { size: 7 } } } }
+        } : {
+            responsive: false, maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { boxWidth: 8, color: '#0f0', font: { size: 8 } } }, title: { display: false },
+                tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '% of wealth' } } }
+        }
+    });
     
     inst1.data.labels = d.top1Labels;
     inst1.data.datasets[0].data = d.top1;
