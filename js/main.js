@@ -1398,7 +1398,11 @@ document.querySelectorAll('.vault-item').forEach(item => {
 
         ensureMediaSrc(media);
         playSound(sfx.oneUp);
-        
+
+        if (lightboxOverlay.dataset.kind === 'disco-stats') {
+            import('./modules/mr-disco.js').then((m) => m.destroyDiscoStatsCharts());
+        }
+        lightboxOverlay.dataset.kind = 'vault';
         lightboxOverlay.innerHTML = ''; 
         lightboxOverlay.appendChild(lightboxCloseBtn);
         
@@ -1433,9 +1437,16 @@ document.querySelectorAll('.vault-item').forEach(item => {
 });
 
 function closeVaultLightbox() {
+    const kind = lightboxOverlay.dataset.kind;
     lightboxOverlay.classList.remove('active');
     playSound(sfx.exit);
-    setTimeout(() => { lightboxOverlay.innerHTML = ''; }, 300);
+    if (kind === 'disco-stats') {
+        import('./modules/mr-disco.js').then((m) => m.destroyDiscoStatsCharts());
+    }
+    setTimeout(() => {
+        lightboxOverlay.innerHTML = '';
+        delete lightboxOverlay.dataset.kind;
+    }, 300);
 }
 
 function bindCloseControls() {

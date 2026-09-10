@@ -2242,6 +2242,43 @@ body.corrupted .vault-dialogue-choice:focus-visible {
     transform: scale(1); /* Gives it a slight "pop in" effect */
 }
 
+#lightbox-overlay .stats-lightbox {
+    width: min(1120px, 94vw);
+    height: min(90vh, 880px);
+    max-width: 94vw;
+    max-height: 90vh;
+    background: #111;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    box-sizing: border-box;
+    object-fit: unset;
+}
+
+#lightbox-overlay .stats-lightbox .stats-charts-wrapper {
+    overflow: visible;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+#lightbox-overlay .stats-lightbox .stats-pies-row {
+    min-height: 280px;
+    flex: 1 1 42%;
+}
+
+#lightbox-overlay .stats-lightbox .stats-pie-canvas {
+    height: auto;
+    min-height: 260px;
+    overflow: visible;
+}
+
+#lightbox-overlay .stats-lightbox .stats-gdp-canvas {
+    flex: 1 1 220px;
+    height: 220px;
+    min-height: 200px;
+}
+
 #lightbox-overlay .vault-sphere-lightbox {
     position: relative;
     width: min(88vw, 88vh);
@@ -3789,6 +3826,17 @@ body.corrupted #sidebar-menu li .mask-icon {
     gap: 1rem;
     width: 100%;
     flex: 0 0 auto;
+    cursor: pointer;
+}
+
+.stats-expand-row {
+    display: flex;
+    justify-content: center;
+}
+
+.stats-expand-row .ui-btn {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
 }
 @media (max-width: 768px) {
     .stats-text-grid {

@@ -5,6 +5,7 @@ import { initDiscoBallSpin } from '../disco-ball-spin.js';
 import { initDashboard } from "./dashboard.js";
 import { loadAlternateHistoryArticles } from '../data/alternate-history.data.js';
 import { resolveAlternateHistoryArticles } from '../alternate-history-search.js';
+import { playSound, sfx } from '../core/audio/sfx.js';
 
 const ALT_HISTORY_SEEN_KEY = 'entropy-garden-alt-history-seen-v1';
 
@@ -14,7 +15,7 @@ let alternateHistoryArticles = [];
 let validArticleIds = new Set();
 
 function loadSeenAlternateHistoryIds() {
-    try { console.log("Rendering Chart.js...");
+    try {
         const raw = localStorage.getItem(ALT_HISTORY_SEEN_KEY);
         if (!raw) return new Set();
         const arr = JSON.parse(raw);
@@ -30,7 +31,7 @@ function markAlternateHistorySeen(ids) {
     ids.forEach((id) => {
         if (validArticleIds.has(id)) seen.add(id);
     });
-    try { console.log("Rendering Chart.js...");
+    try {
         localStorage.setItem(ALT_HISTORY_SEEN_KEY, JSON.stringify([...seen]));
     } catch {
         /* private mode / quota */
@@ -81,8 +82,6 @@ export function initMrDisco() {
     if (!initPromise) initPromise = setup();
     return initPromise;
 }
-
-    initDashboard();
 
 async function setup() {
     const host = document.getElementById('disco-host');
@@ -374,7 +373,7 @@ async function setup() {
             if (stats) {
                 stats.hidden = !stats.hidden;
                 activateEyeMode(stats.hidden ? 'track' : 'sleepy');
-                if (!stats.hidden) setTimeout(renderStatsChart, 50);
+                if (stats.hidden) closeDiscoStatsLightbox();
             } else {
                 activateEyeMode('sleepy');
             }
@@ -406,6 +405,19 @@ async function setup() {
         event.preventDefault();
         requestRandomArchive();
     });
+
+    document.getElementById('disco-stats-expand')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openDiscoStatsLightbox();
+    });
+    document.querySelector('#mr-disco-stats-shell .stats-text-grid')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openDiscoStatsLightbox();
+    });
+
+    initDashboard();
 }
 
 
@@ -415,6 +427,99 @@ let inst1 = null;
 let currentPieType = 'pie';
 let currentTop1Type = 'share';
 let currentRegion = 'us';
+
+function statsLightboxMarkup() {
+    const region = (id) => currentRegion === id ? ' active' : '';
+    const pie = (id) => currentPieType === id ? ' active' : '';
+    const top1 = (id) => currentTop1Type === id ? ' active' : '';
+    return `
+        <div class="stats-charts-wrapper">
+            <div class="stats-chart-toolbar">
+                <div class="chart-toggles">
+                    <button type="button" class="ui-btn region-btn${region('us')}" data-region="us">US</button>
+                    <button type="button" class="ui-btn region-btn${region('global')}" data-region="global">GLOBAL</button>
+                </div>
+                <div class="chart-toggles-rule"></div>
+                <div class="chart-toggles">
+                    <button type="button" class="ui-btn type-btn${pie('pie')}" data-type="pie">PIE</button>
+                    <button type="button" class="ui-btn type-btn${pie('doughnut')}" data-type="doughnut">RING</button>
+                    <button type="button" class="ui-btn type-btn${pie('bar')}" data-type="bar">BAR</button>
+                </div>
+            </div>
+            <div class="stats-pies-row">
+                <div class="stats-pie-cell">
+                    <div class="stats-pie-caption">WEALTH QUINTILES</div>
+                    <div class="stats-pie-canvas"><canvas id="chart-quintiles"></canvas></div>
+                </div>
+                <div class="stats-pie-cell">
+                    <div class="stats-pie-caption">
+                        <span>1% BREAKDOWN</span>
+                        <div class="chart-toggles">
+                            <button type="button" class="ui-btn top1-type-btn${top1('share')}" data-top1-type="share">SHARE</button>
+                            <button type="button" class="ui-btn top1-type-btn${top1('income')}" data-top1-type="income">INCOME</button>
+                        </div>
+                    </div>
+                    <div class="stats-pie-canvas"><canvas id="chart-top1"></canvas></div>
+                </div>
+            </div>
+            <div class="stats-gdp-label">GLOBAL GDP — TOP 10 ECONOMIES</div>
+            <div class="stats-pie-canvas stats-gdp-canvas">
+                <canvas id="mr-disco-chart"></canvas>
+            </div>
+            <div class="stats-sources">
+                Sources: Fed DFA Q4 2025 · IRS SOI · Census CPS ASEC 2024 · UBS Global Wealth Report 2025 · WID.world · Oxfam 2026 · IMF WEO Apr 2026
+            </div>
+        </div>
+    `;
+}
+
+export function destroyDiscoStatsCharts() {
+    statsChartInstance?.destroy();
+    instQ?.destroy();
+    inst1?.destroy();
+    statsChartInstance = null;
+    instQ = null;
+    inst1 = null;
+}
+
+export function openDiscoStatsLightbox() {
+    const overlay = document.getElementById('lightbox-overlay');
+    if (!overlay) return;
+
+    destroyDiscoStatsCharts();
+    overlay.dataset.kind = 'disco-stats';
+    overlay.innerHTML = '';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'lightbox-close';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.innerHTML = '&times;';
+    overlay.appendChild(closeBtn);
+
+    const panel = document.createElement('div');
+    panel.className = 'lightbox-content stats-lightbox';
+    panel.addEventListener('click', (event) => event.stopPropagation());
+    panel.innerHTML = statsLightboxMarkup();
+    overlay.appendChild(panel);
+
+    overlay.classList.add('active');
+    playSound(sfx.oneUp);
+    window.setTimeout(renderStatsChart, 50);
+}
+
+export function closeDiscoStatsLightbox() {
+    const overlay = document.getElementById('lightbox-overlay');
+    if (overlay?.dataset.kind !== 'disco-stats' || !overlay.classList.contains('active')) return;
+    overlay.classList.remove('active');
+    playSound(sfx.exit);
+    destroyDiscoStatsCharts();
+    window.setTimeout(() => {
+        if (overlay.dataset.kind !== 'disco-stats') return;
+        overlay.innerHTML = '';
+        delete overlay.dataset.kind;
+    }, 300);
+}
 
 const wealthData = {
     // Sources: Fed DFA Q4 2025, IRS SOI, Census CPS ASEC 2024, Forbes Sep 2026
@@ -476,6 +581,16 @@ function chartFitOptions() {
     };
 }
 
+function tooltipLine(label) {
+    return {
+        displayColors: false,
+        callbacks: {
+            title: () => '',
+            label,
+        },
+    };
+}
+
 function buildTop1Chart(tCtx, d) {
     const isIncome = currentTop1Type === 'income';
     const type = isIncome ? 'bar' : currentPieType;
@@ -498,14 +613,10 @@ function buildTop1Chart(tCtx, d) {
             plugins: {
                 legend: { display: false },
                 title: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const value = isIncome ? formatUsdCompact(ctx.parsed.y) : `${ctx.parsed.y}% of total wealth`;
-                            return `${ctx.label}: ${value}`;
-                        },
-                    },
-                },
+                tooltip: tooltipLine((ctx) => {
+                    const value = isIncome ? formatUsdCompact(ctx.parsed.y) : `${ctx.parsed.y}% of total wealth`;
+                    return `${ctx.label}: ${value}`;
+                }),
             },
             scales: {
                 y: isIncome ? {
@@ -538,11 +649,7 @@ function buildTop1Chart(tCtx, d) {
                     labels: { boxWidth: 6, color: '#ff5588', font: { size: 6 }, padding: 4 },
                 },
                 title: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => `${ctx.label}: ${ctx.parsed}% of total wealth`,
-                    },
-                },
+                tooltip: tooltipLine((ctx) => `${ctx.label}: ${ctx.parsed}% of total wealth`),
             },
         },
     });
@@ -573,12 +680,22 @@ function updateWealthCharts() {
         plugins: [pctLabelPlugin],
         options: isBar ? {
             ...chartFitOptions(),
-            plugins: { legend: { display: false }, title: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,255,0,0.1)' }, ticks: { color: '#0f0', font: { size: 8 }, callback: v => v + '%' } }, x: { grid: { display: false }, ticks: { color: '#0f0', font: { size: 7 } } } }
+            plugins: {
+                legend: { display: false },
+                title: { display: false },
+                tooltip: tooltipLine((ctx) => {
+                    const income = d.incomes[ctx.dataIndex] ?? '';
+                    return `${ctx.label}${income ? ` (${income})` : ''}: ${ctx.parsed.y}% of wealth`;
+                }),
+            },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,255,0,0.1)' }, ticks: { color: '#0f0', font: { size: 8 }, callback: v => v + '%' } }, x: { grid: { display: false }, ticks: { color: '#0f0', font: { size: 7 } } } } }
         } : {
             ...chartFitOptions(),
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, color: '#0f0', font: { size: 6 }, padding: 4 } }, title: { display: false },
-                tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '% of wealth' } } }
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 8, color: '#0f0', font: { size: 6 }, padding: 4 } },
+                title: { display: false },
+                tooltip: tooltipLine((ctx) => `${ctx.label}: ${ctx.parsed}% of wealth`),
+            }
         }
     });
     
@@ -622,7 +739,11 @@ function renderStatsChart() {
             },
             options: {
                 ...chartFitOptions(),
-                plugins: { legend: { display: false }, title: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false },
+                    tooltip: tooltipLine((ctx) => `${ctx.label}: $${ctx.parsed.y}T`),
+                },
                 scales: { y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#fff', font: { size: 9 } } }, x: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9 } } } }
             }
         });
