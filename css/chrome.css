@@ -3884,6 +3884,10 @@ body.corrupted #sidebar-menu li .mask-icon {
     padding: 2px 6px;
 }
 
+.chart-toggles .ui-btn[hidden] {
+    display: none !important;
+}
+
 .chart-toggles-rule {
     width: 1px;
     align-self: stretch;

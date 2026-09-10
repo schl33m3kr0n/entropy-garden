@@ -438,11 +438,14 @@ let inst1 = null;
 let currentPieType = 'pie';
 let currentTop1Type = 'share';
 let currentRegion = 'us';
+let includeMusk = true;
 
 function statsLightboxMarkup() {
     const region = (id) => currentRegion === id ? ' active' : '';
     const pie = (id) => currentPieType === id ? ' active' : '';
     const top1 = (id) => currentTop1Type === id ? ' active' : '';
+    const muskActive = includeMusk ? ' active' : '';
+    const muskHidden = currentTop1Type === 'income' ? '' : ' hidden';
     return `
         <div class="stats-charts-wrapper">
             <div class="stats-chart-toolbar">
@@ -468,6 +471,7 @@ function statsLightboxMarkup() {
                         <div class="chart-toggles">
                             <button type="button" class="ui-btn top1-type-btn${top1('share')}" data-top1-type="share">SHARE</button>
                             <button type="button" class="ui-btn top1-type-btn${top1('income')}" data-top1-type="income">INCOME</button>
+                            <button type="button" class="ui-btn musk-toggle-btn${muskActive}"${muskHidden} aria-pressed="${includeMusk}" title="Show or hide Musk's bar">MUSK</button>
                         </div>
                     </div>
                     <div class="stats-pie-canvas"><canvas id="chart-top1"></canvas></div>
@@ -586,6 +590,23 @@ const pctLabelPlugin = {
 
 const INCOME_AXIS_STEP = 500_000_000;
 const INCOME_AXIS_MAX = 5_000_000_000;
+/** Duration of each phase of the Musk show/hide rescale animation. */
+const RESCALE_MS = 650;
+
+/** Y-axis for the INCOME bar chart: fixed $500M steps with Musk, auto-fit to the other tiers without. */
+function incomeAxisOptions(withMusk) {
+    const ticks = { color: '#ff5588', font: { size: 7 }, callback: (v) => formatUsdCompact(v) };
+    if (!withMusk) {
+        return { beginAtZero: true, grid: { color: 'rgba(255, 80, 100, 0.12)' }, ticks };
+    }
+    return {
+        beginAtZero: true,
+        min: 0,
+        max: INCOME_AXIS_MAX,
+        grid: { color: 'rgba(255, 80, 100, 0.12)' },
+        ticks: { ...ticks, stepSize: INCOME_AXIS_STEP, maxTicksLimit: INCOME_AXIS_MAX / INCOME_AXIS_STEP + 1 },
+    };
+}
 
 /** Marks bars whose value exceeds the capped INCOME axis as running off the chart. */
 const offChartLabelPlugin = {
@@ -599,6 +620,8 @@ const offChartLabelPlugin = {
             meta.data.forEach((element, index) => {
                 const val = dataset.data[index];
                 if (val <= yScale.max) return;
+                // Wait until the (animated) bar top has actually crossed the plot edge.
+                if (element.y > chart.chartArea.top + 0.5) return;
                 const lines = [`${formatUsdCompact(val)} \u2191`, 'off chart'];
                 const top = chart.chartArea.top + 4;
                 ctx.save();
@@ -640,13 +663,17 @@ function buildTop1Chart(tCtx, d) {
     const type = isIncome ? 'bar' : currentPieType;
     const isBar = type === 'bar';
     const fit = chartFitOptions();
+    // Musk's $892B bar only exists in the INCOME view; drop the first entry when toggled off.
+    const skipMusk = isIncome && !includeMusk;
+    const trim = (arr) => skipMusk ? arr.slice(1) : arr;
+    const incomeScale = incomeAxisOptions(!skipMusk);
     return new window.Chart(tCtx, {
         type,
         data: {
-            labels: isIncome || isBar ? d.top1BarLabels : d.top1Labels,
+            labels: trim(isIncome || isBar ? d.top1BarLabels : d.top1Labels),
             datasets: [{
-                data: isIncome ? d.top1Incomes : d.top1,
-                backgroundColor: top1Colors,
+                data: trim(isIncome ? d.top1Incomes : d.top1),
+                backgroundColor: trim(top1Colors),
                 borderColor: 'var(--alert-red)',
                 borderWidth: 1,
             }],
@@ -654,6 +681,7 @@ function buildTop1Chart(tCtx, d) {
         plugins: isIncome ? [offChartLabelPlugin] : [pctLabelPlugin],
         options: isBar ? {
             ...fit,
+            animation: isIncome ? { duration: RESCALE_MS, easing: 'easeInOutCubic' } : undefined,
             plugins: {
                 legend: { display: false },
                 title: { display: false },
@@ -663,19 +691,7 @@ function buildTop1Chart(tCtx, d) {
                 }),
             },
             scales: {
-                y: isIncome ? {
-                    beginAtZero: true,
-                    min: 0,
-                    max: INCOME_AXIS_MAX,
-                    grid: { color: 'rgba(255, 80, 100, 0.12)' },
-                    ticks: {
-                        color: '#ff5588',
-                        font: { size: 7 },
-                        stepSize: INCOME_AXIS_STEP,
-                        maxTicksLimit: INCOME_AXIS_MAX / INCOME_AXIS_STEP + 1,
-                        callback: (v) => formatUsdCompact(v),
-                    },
-                } : {
+                y: isIncome ? incomeScale : {
                     beginAtZero: true,
                     grid: { color: 'rgba(255, 80, 100, 0.12)' },
                     ticks: {
@@ -703,7 +719,53 @@ function buildTop1Chart(tCtx, d) {
     });
 }
 
+let muskAnimTimer = null;
+
+/**
+ * Show/hide Musk's bar on the live INCOME chart in two animated phases so the
+ * viewer sees the axis rescale rather than a hard swap.
+ *   show: rescale to the $500M axis (other tiers collapse) -> Musk's bar grows off the chart
+ *   hide: Musk's bar sinks to zero -> his slot is removed and the axis re-fits the rest
+ */
+function animateMuskToggle() {
+    clearTimeout(muskAnimTimer);
+    const chart = inst1;
+    if (!chart || currentTop1Type !== 'income') {
+        updateWealthCharts();
+        return;
+    }
+    const d = wealthData[currentRegion];
+    const ds = chart.data.datasets[0];
+    const withoutMusk = d.top1Incomes.slice(1);
+    const schedule = (fn) => {
+        muskAnimTimer = setTimeout(() => { if (inst1 === chart) fn(); }, RESCALE_MS);
+    };
+
+    if (includeMusk) {
+        chart.data.labels = [...d.top1BarLabels];
+        ds.data = [0, ...withoutMusk];
+        ds.backgroundColor = [...top1Colors];
+        chart.config.options.scales.y = incomeAxisOptions(true);
+        chart.update();
+        schedule(() => {
+            ds.data = [...d.top1Incomes];
+            chart.update();
+        });
+    } else {
+        ds.data = [0, ...withoutMusk];
+        chart.update();
+        schedule(() => {
+            chart.data.labels = d.top1BarLabels.slice(1);
+            ds.data = withoutMusk;
+            ds.backgroundColor = top1Colors.slice(1);
+            chart.config.options.scales.y = incomeAxisOptions(false);
+            chart.update();
+        });
+    }
+}
+
 function updateWealthCharts() {
+    clearTimeout(muskAnimTimer);
     if (!instQ || !inst1) return;
     const d = wealthData[currentRegion];
     const qCtx = document.getElementById('chart-quintiles');
@@ -839,7 +901,24 @@ function renderStatsChart() {
                 document.querySelectorAll('.top1-type-btn').forEach((b) => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentTop1Type = btn.dataset.top1Type;
+                document.querySelectorAll('.musk-toggle-btn').forEach((b) => {
+                    b.hidden = currentTop1Type !== 'income';
+                });
                 updateWealthCharts();
+            });
+        });
+
+        document.querySelectorAll('.musk-toggle-btn:not(.bound)').forEach((btn) => {
+            btn.classList.add('bound');
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                includeMusk = !includeMusk;
+                document.querySelectorAll('.musk-toggle-btn').forEach((b) => {
+                    b.classList.toggle('active', includeMusk);
+                    b.setAttribute('aria-pressed', String(includeMusk));
+                });
+                animateMuskToggle();
             });
         });
         
