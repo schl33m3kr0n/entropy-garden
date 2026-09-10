@@ -483,7 +483,7 @@ function buildTop1Chart(tCtx, d) {
         },
         plugins: isIncome ? [] : [pctLabelPlugin],
         options: isIncome ? {
-            responsive: false,
+            responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
@@ -510,7 +510,7 @@ function buildTop1Chart(tCtx, d) {
                 },
             },
         } : {
-            responsive: false,
+            responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 6, color: '#ff5588', font: { size: 7 } } },
@@ -549,12 +549,12 @@ function updateWealthCharts() {
         },
         plugins: [pctLabelPlugin],
         options: isBar ? {
-            responsive: false, maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false }, title: { display: false } },
             scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,255,0,0.1)' }, ticks: { color: '#0f0', font: { size: 8 }, callback: v => v + '%' } }, x: { grid: { display: false }, ticks: { color: '#0f0', font: { size: 7 } } } }
         } : {
-            responsive: false, maintainAspectRatio: false,
-            plugins: { legend: { position: 'right', labels: { boxWidth: 8, color: '#0f0', font: { size: 8 } } }, title: { display: false },
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, color: '#0f0', font: { size: 7 } } }, title: { display: false },
                 tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '% of wealth' } } }
         }
     });
@@ -594,10 +594,10 @@ function renderStatsChart() {
             },
             plugins: [pctLabelPlugin],
             options: {
-                responsive: false,
+                responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'right', labels: { boxWidth: 8, color: '#0f0', font: { size: 8 } } },
+                    legend: { position: 'bottom', labels: { boxWidth: 8, color: '#0f0', font: { size: 7 } } },
                     title: { display: false },
                     tooltip: {
                         callbacks: {
@@ -620,7 +620,7 @@ function renderStatsChart() {
                 datasets: [{ label: 'GDP ($T)', data: [30.8, 19.6, 5.1, 4.4, 4.0, 3.9, 3.4, 2.6, 2.6, 2.3], backgroundColor: 'rgba(255, 255, 255, 0.7)', borderColor: '#fff', borderWidth: 1 }]
             },
             options: {
-                responsive: false, maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, title: { display: false } },
                 scales: { y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#fff', font: { size: 9 } } }, x: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9 } } } }
             }

@@ -3284,12 +3284,12 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 #modal-projects .scrollable-content.mr-disco-showcase {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     flex: 1 1 auto;
     min-height: 0;
     max-height: min(72vh, 620px);
-    overflow-y: auto;
     overflow-x: hidden;
+    overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
@@ -3297,7 +3297,8 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 .mr-disco-showcase-row {
     display: flex;
     gap: 14px;
-    align-items: flex-start;
+    align-items: stretch;
+    flex: 0 0 auto;
     min-width: 0;
 }
 
@@ -3464,9 +3465,10 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 .mr-disco-archive.is-open {
     width: min(280px, 34vw);
     max-width: min(280px, 34vw);
-    height: min(72vh, 560px);
-    min-height: min(72vh, 560px);
-    max-height: min(72vh, 560px);
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    align-self: stretch;
     opacity: 1;
     padding: 12px 14px 14px;
     overflow: auto;
@@ -3688,11 +3690,12 @@ body.corrupted #sidebar-menu li .mask-icon {
     border-radius: 8px;
     box-shadow: 0 0 24px rgba(0, 255, 0, 0.12);
     background: #141414;
-    padding: 10px;
+    padding: 8px 10px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     color: var(--neon-green);
+    min-height: 0;
 }
 .mr-disco-stats-shell[hidden] {
     display: none !important;
@@ -3768,6 +3771,7 @@ body.corrupted #sidebar-menu li .mask-icon {
     align-items: flex-start;
     gap: 1rem;
     width: 100%;
+    flex: 0 0 auto;
 }
 @media (max-width: 768px) {
     .stats-text-grid {
@@ -3775,10 +3779,103 @@ body.corrupted #sidebar-menu li .mask-icon {
         gap: 0.5rem;
     }
 }
+
+.stats-charts-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.stats-chart-toolbar,
+.stats-pie-caption {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 0 0 22px;
+    min-height: 22px;
+}
+
+.stats-pie-caption {
+    font-size: 0.5rem;
+    color: var(--alert-red);
+    letter-spacing: 0.04em;
+    flex-wrap: wrap;
+}
+
+.chart-toggles {
+    display: flex;
+    gap: 2px;
+}
+
+.chart-toggles .ui-btn {
+    font-size: 0.55rem;
+    padding: 2px 6px;
+}
+
+.chart-toggles-rule {
+    width: 1px;
+    align-self: stretch;
+    background: rgba(0, 255, 0, 0.3);
+}
+
+.stats-pies-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    flex: 1 1 0;
+    min-height: 132px;
+}
+
+.stats-pie-cell {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.stats-pie-canvas {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    height: 132px;
+}
+
+.stats-gdp-canvas {
+    flex: 0 0 132px;
+    height: 132px;
+}
+
+.stats-pie-canvas canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.stats-gdp-label {
+    text-align: center;
+    font-size: 0.6rem;
+    color: #fff;
+    letter-spacing: 1px;
+    flex: 0 0 auto;
+}
+
+.stats-sources {
+    text-align: center;
+    font-size: 0.42rem;
+    color: rgba(0, 255, 0, 0.4);
+    letter-spacing: 0.5px;
+    flex: 0 0 auto;
+}
+
 @media (max-width: 768px) {
-    .stats-charts-wrapper {
-        flex-direction: column;
-        height: 300px !important;
+    .stats-pies-row {
+        grid-template-columns: 1fr;
+        min-height: 240px;
     }
 }
 #groovy-meter-container, .groovy-bar, .groovy-label {
