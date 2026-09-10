@@ -584,6 +584,39 @@ const pctLabelPlugin = {
     }
 };
 
+const INCOME_AXIS_STEP = 500_000_000;
+const INCOME_AXIS_MAX = 5_000_000_000;
+
+/** Marks bars whose value exceeds the capped INCOME axis as running off the chart. */
+const offChartLabelPlugin = {
+    id: 'offChartLabels',
+    afterDatasetsDraw(chart) {
+        const yScale = chart.scales.y;
+        if (!yScale) return;
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach((dataset, i) => {
+            const meta = chart.getDatasetMeta(i);
+            meta.data.forEach((element, index) => {
+                const val = dataset.data[index];
+                if (val <= yScale.max) return;
+                const lines = [`${formatUsdCompact(val)} \u2191`, 'off chart'];
+                const top = chart.chartArea.top + 4;
+                ctx.save();
+                ctx.font = 'bold 8px monospace';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                const width = Math.max(...lines.map((line) => ctx.measureText(line).width)) + 8;
+                ctx.fillStyle = 'rgba(10, 10, 10, 0.85)';
+                ctx.fillRect(element.x - width / 2, top - 2, width, 24);
+                ctx.fillStyle = '#ff0055';
+                ctx.fillText(lines[0], element.x, top);
+                ctx.fillText(lines[1], element.x, top + 10);
+                ctx.restore();
+            });
+        });
+    },
+};
+
 function chartFitOptions() {
     return {
         responsive: true,
@@ -618,7 +651,7 @@ function buildTop1Chart(tCtx, d) {
                 borderWidth: 1,
             }],
         },
-        plugins: isIncome ? [] : [pctLabelPlugin],
+        plugins: isIncome ? [offChartLabelPlugin] : [pctLabelPlugin],
         options: isBar ? {
             ...fit,
             plugins: {
@@ -631,11 +664,15 @@ function buildTop1Chart(tCtx, d) {
             },
             scales: {
                 y: isIncome ? {
-                    type: 'logarithmic',
+                    beginAtZero: true,
+                    min: 0,
+                    max: INCOME_AXIS_MAX,
                     grid: { color: 'rgba(255, 80, 100, 0.12)' },
                     ticks: {
                         color: '#ff5588',
                         font: { size: 7 },
+                        stepSize: INCOME_AXIS_STEP,
+                        maxTicksLimit: INCOME_AXIS_MAX / INCOME_AXIS_STEP + 1,
                         callback: (v) => formatUsdCompact(v),
                     },
                 } : {
