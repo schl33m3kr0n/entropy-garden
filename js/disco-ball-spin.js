@@ -460,7 +460,7 @@ export function initDiscoBallSpin(root, options = {}) {
     if (controllers.has(root)) return controllers.get(root);
 
     const svg = root instanceof SVGSVGElement ? root : root.querySelector('svg');
-    if (!svg) return { stop() {}, setConfig() {}, setSpeed() {}, setPaused() {} };
+    if (!svg) return { stop() {}, setConfig() {}, setSpeed() {}, setPaused() {}, setBgPhase() {} };
 
     const grid = resolveGrid(svg);
     activeRoots.add(root);

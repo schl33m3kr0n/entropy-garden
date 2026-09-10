@@ -79,16 +79,18 @@ const settings = {
 let initPromise = null;
 
 export function initMrDisco() {
-    if (!initPromise) initPromise = setup();
+    if (!initPromise) {
+        initPromise = setup().catch((err) => {
+            initPromise = null;
+            throw err;
+        });
+    }
     return initPromise;
 }
 
 async function setup() {
     const host = document.getElementById('disco-host');
     if (!host) return;
-
-    alternateHistoryArticles = await loadAlternateHistoryArticles();
-    validArticleIds = new Set(alternateHistoryArticles.map((article) => article.id));
 
     const svgText = await fetch('assets/icons/disco-ball.svg').then((r) => r.text());
     host.innerHTML = svgText;
@@ -136,6 +138,15 @@ async function setup() {
     });
     eyes.setReach(settings.reach);
     eyes.setEase(settings.ease);
+
+    try {
+        alternateHistoryArticles = await loadAlternateHistoryArticles();
+        validArticleIds = new Set(alternateHistoryArticles.map((article) => article.id));
+    } catch (err) {
+        console.error('[Entropy Garden] alternate history index failed', err);
+        alternateHistoryArticles = [];
+        validArticleIds = new Set();
+    }
 
     const resultEl = document.getElementById('alt-history-result');
     const form = document.getElementById('alt-history-form');
@@ -684,19 +695,30 @@ function updateWealthCharts() {
                 legend: { display: false },
                 title: { display: false },
                 tooltip: tooltipLine((ctx) => {
-                    const income = d.incomes[ctx.dataIndex] ?? '';
-                    return `${ctx.label}${income ? ` (${income})` : ''}: ${ctx.parsed.y}% of wealth`;
+                    const income = d.incomes[ctx.dataIndex];
+                    const name = income ? ctx.label + ' (' + income + ')' : ctx.label;
+                    return name + ': ' + ctx.parsed.y + '% of wealth';
                 }),
             },
-            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,255,0,0.1)' }, ticks: { color: '#0f0', font: { size: 8 }, callback: v => v + '%' } }, x: { grid: { display: false }, ticks: { color: '#0f0', font: { size: 7 } } } } }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,255,0,0.1)' },
+                    ticks: { color: '#0f0', font: { size: 8 }, callback: (v) => v + '%' },
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#0f0', font: { size: 7 } },
+                },
+            },
         } : {
             ...chartFitOptions(),
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 8, color: '#0f0', font: { size: 6 }, padding: 4 } },
                 title: { display: false },
-                tooltip: tooltipLine((ctx) => `${ctx.label}: ${ctx.parsed}% of wealth`),
-            }
-        }
+                tooltip: tooltipLine((ctx) => ctx.label + ': ' + ctx.parsed + '% of wealth'),
+            },
+        },
     });
     
     inst1?.destroy();

@@ -442,7 +442,9 @@ export function initDiscoBallEyes(root, options = {}) {
 
     const svg = root instanceof SVGSVGElement ? root : root.closest('svg') ?? root.querySelector('svg');
     const pupils = [...root.querySelectorAll('.disco-ball-pupil')];
-    if (!svg || !pupils.length) return { stop() {}, trackCursor() {}, playSilly() {} };
+    if (!svg || !pupils.length) {
+        return { stop() {}, trackCursor() {}, playSilly() {}, setLayout() {}, setReach() {}, setEase() {} };
+    }
 
     boundRoots.add(root);
 
