@@ -3297,17 +3297,25 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 }
 
 .mr-disco-showcase-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
     gap: 14px;
     flex: 0 0 auto;
     min-width: 0;
 }
 
+.mr-disco-showcase-row:has(.mr-disco-archive.is-open) .mr-disco-left-col {
+    margin-right: calc(min(280px, 34vw) + 14px);
+}
+
 @media (max-width: 640px) {
     .mr-disco-showcase-row {
-        grid-template-columns: minmax(0, 1fr);
+        flex-direction: column;
+    }
+
+    .mr-disco-showcase-row:has(.mr-disco-archive.is-open) .mr-disco-left-col {
+        margin-right: 0;
     }
 
     .mr-disco-stage {
@@ -3317,6 +3325,8 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
     }
 
     .mr-disco-archive.is-open {
+        position: static;
+        inset: auto;
         width: 100%;
         max-width: 100%;
         height: min(38vh, 280px);
@@ -3466,12 +3476,16 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
 }
 
 .mr-disco-archive.is-open {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    box-sizing: border-box;
     width: min(280px, 34vw);
     max-width: min(280px, 34vw);
-    height: 0;
-    min-height: 100%;
-    max-height: 100%;
-    align-self: stretch;
+    height: auto;
+    min-height: 0;
+    max-height: none;
     opacity: 1;
     padding: 12px 14px 14px;
     overflow: auto;
@@ -3482,9 +3496,6 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
     transition:
         max-width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-        max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-        height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-        min-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         opacity 0.28s ease,
         padding 0.42s cubic-bezier(0.22, 1, 0.36, 1),
         border-color 0.28s ease,
