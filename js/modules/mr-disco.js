@@ -468,12 +468,23 @@ const pctLabelPlugin = {
     }
 };
 
+function chartFitOptions() {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 2, right: 8, bottom: 2, left: 4 } },
+    };
+}
+
 function buildTop1Chart(tCtx, d) {
     const isIncome = currentTop1Type === 'income';
+    const type = isIncome ? 'bar' : currentPieType;
+    const isBar = type === 'bar';
+    const fit = chartFitOptions();
     return new window.Chart(tCtx, {
-        type: isIncome ? 'bar' : 'doughnut',
+        type,
         data: {
-            labels: isIncome ? d.top1BarLabels : d.top1Labels,
+            labels: isIncome || isBar ? d.top1BarLabels : d.top1Labels,
             datasets: [{
                 data: isIncome ? d.top1Incomes : d.top1,
                 backgroundColor: top1Colors,
@@ -482,26 +493,36 @@ function buildTop1Chart(tCtx, d) {
             }],
         },
         plugins: isIncome ? [] : [pctLabelPlugin],
-        options: isIncome ? {
-            responsive: true,
-            maintainAspectRatio: false,
+        options: isBar ? {
+            ...fit,
             plugins: {
                 legend: { display: false },
                 title: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => `${ctx.label}: ${formatUsdCompact(ctx.parsed.y)}`,
+                        label: (ctx) => {
+                            const value = isIncome ? formatUsdCompact(ctx.parsed.y) : `${ctx.parsed.y}% of total wealth`;
+                            return `${ctx.label}: ${value}`;
+                        },
                     },
                 },
             },
             scales: {
-                y: {
+                y: isIncome ? {
                     type: 'logarithmic',
                     grid: { color: 'rgba(255, 80, 100, 0.12)' },
                     ticks: {
                         color: '#ff5588',
                         font: { size: 7 },
                         callback: (v) => formatUsdCompact(v),
+                    },
+                } : {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 80, 100, 0.12)' },
+                    ticks: {
+                        color: '#ff5588',
+                        font: { size: 7 },
+                        callback: (v) => `${v}%`,
                     },
                 },
                 x: {
@@ -510,10 +531,12 @@ function buildTop1Chart(tCtx, d) {
                 },
             },
         } : {
-            responsive: true,
-            maintainAspectRatio: false,
+            ...fit,
             plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 6, color: '#ff5588', font: { size: 7 } } },
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 6, color: '#ff5588', font: { size: 6 }, padding: 4 },
+                },
                 title: { display: false },
                 tooltip: {
                     callbacks: {
@@ -549,12 +572,12 @@ function updateWealthCharts() {
         },
         plugins: [pctLabelPlugin],
         options: isBar ? {
-            responsive: true, maintainAspectRatio: false,
+            ...chartFitOptions(),
             plugins: { legend: { display: false }, title: { display: false } },
             scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,255,0,0.1)' }, ticks: { color: '#0f0', font: { size: 8 }, callback: v => v + '%' } }, x: { grid: { display: false }, ticks: { color: '#0f0', font: { size: 7 } } } }
         } : {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, color: '#0f0', font: { size: 7 } } }, title: { display: false },
+            ...chartFitOptions(),
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, color: '#0f0', font: { size: 6 }, padding: 4 } }, title: { display: false },
                 tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed + '% of wealth' } } }
         }
     });
@@ -581,36 +604,14 @@ function renderStatsChart() {
         
         const quintileColors = ['rgba(0,255,0,1.0)', 'rgba(0,255,0,0.6)', 'rgba(0,255,0,0.3)', 'rgba(0,255,0,0.15)', 'rgba(0,255,0,0.05)'];
         const d = wealthData[currentRegion];
-        
-        // Quintiles
+
         instQ = new window.Chart(qCtx, {
-            type: currentPieType,
-            data: {
-                labels: d.quintiles.map((v, i) => {
-                    const labels = ['Top 20%', '2nd 20%', '3rd 20%', '4th 20%', 'Bottom 20%'];
-                    return labels[i] + ' (' + d.incomes[i] + ')';
-                }),
-                datasets: [{ data: d.quintiles, backgroundColor: quintileColors, borderColor: '#0f0', borderWidth: 1 }]
-            },
-            plugins: [pctLabelPlugin],
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 8, color: '#0f0', font: { size: 7 } } },
-                    title: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(ctx) {
-                                return ctx.label + ': ' + ctx.parsed + '% of wealth';
-                            }
-                        }
-                    }
-                }
-            }
+            type: 'pie',
+            data: { labels: [], datasets: [{ data: [] }] },
+            options: chartFitOptions(),
         });
-        
         inst1 = buildTop1Chart(tCtx, d);
+        updateWealthCharts();
 
         // Top 10 GDP Bar Chart
         statsChartInstance = new window.Chart(barCtx, {
@@ -620,7 +621,7 @@ function renderStatsChart() {
                 datasets: [{ label: 'GDP ($T)', data: [30.8, 19.6, 5.1, 4.4, 4.0, 3.9, 3.4, 2.6, 2.6, 2.3], backgroundColor: 'rgba(255, 255, 255, 0.7)', borderColor: '#fff', borderWidth: 1 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
+                ...chartFitOptions(),
                 plugins: { legend: { display: false }, title: { display: false } },
                 scales: { y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#fff', font: { size: 9 } } }, x: { grid: { display: false }, ticks: { color: '#fff', font: { size: 9 } } } }
             }
