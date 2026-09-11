@@ -1,4 +1,4 @@
-import { sfx, playSound, perf } from '../../core/shared.js';
+import { sfx, playSound, warmSound, perf } from '../../core/shared.js';
 import { callHook } from '../../core/hooks.js';
 import {
     ROUND_COUNT,
@@ -291,6 +291,7 @@ async function announceGameEnd(winner) {
     game.busy = true;
     renderGame();
     const winText = winner.isHuman ? 'You win!' : `${winner.name} wins!`;
+    playSound(winner.isHuman ? sfx.cardsWin : sfx.cardsLose);
     await showAnnouncement(winText, `${winner.total} points`);
     await showAnnouncement('Game over');
     game.phase = 'game-over';
@@ -849,6 +850,9 @@ function applyCpuSwap(state, playerIdx, handIdx) {
 
 function newGameState(playerCount = MIN_PLAYERS) {
     const count = Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, playerCount));
+    // Buffer the end-of-game cues now so they fire instantly when the async dice flow ends.
+    warmSound(sfx.cardsWin);
+    warmSound(sfx.cardsLose);
     return {
         round: 1,
         swapsLeft: MAX_SWAPS,

@@ -73,6 +73,8 @@ export const sfx = {
     meow: createLazyAudio(sfxPath('meow.mp3')),
     blip: createLazyAudio(sfxPath('blip.mp3')),
     echo: createLazyAudio(sfxPath('echo.mp3')),
+    cardsWin: createLazyAudio(sfxPath('winner.mp3')),
+    cardsLose: createLazyAudio(sfxPath('laugh.mp3')),
 };
 
 export function playSound(sound) {
