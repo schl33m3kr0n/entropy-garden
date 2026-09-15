@@ -509,10 +509,27 @@ function animateMatrix() {
     drawCipherWheels(cx, cy);
 }
 
-let lastCanvasViewW = 0;
-let lastCanvasViewH = 0;
 let iosLockedViewW = 0;
 let iosLockedViewH = 0;
+
+// Viewport the current wheels were built for — used to tell Safari chrome
+// reflow (URL bar / tab bar show-hide) apart from a real layout change.
+let wheelsBuiltW = 0;
+let wheelsBuiltH = 0;
+let wheelsBuiltCellSize = 0;
+const CHROME_REFLOW_MAX_RATIO = 0.25;
+
+/**
+ * True when the existing wheels can be kept: same width + cell size and the
+ * height moved by less than a quarter of the height they were built for.
+ * iOS Safari changes innerHeight every time its toolbar collapses/expands;
+ * rebuilding the rings there wipes the canvas and looks like a page refresh.
+ */
+function canKeepWheelsForViewport(width, height, cellSizePx) {
+    if (!wheels.length || !wheelsBuiltH) return false;
+    if (width !== wheelsBuiltW || cellSizePx !== wheelsBuiltCellSize) return false;
+    return Math.abs(height - wheelsBuiltH) <= wheelsBuiltH * CHROME_REFLOW_MAX_RATIO;
+}
 
 function isIosKeyboardOpen() {
     if (!perf.isIOS || !iosLockedViewH) return false;
@@ -524,8 +541,9 @@ function isIosKeyboardOpen() {
 function resetIosViewportLock() {
     iosLockedViewW = 0;
     iosLockedViewH = 0;
-    lastCanvasViewW = 0;
-    lastCanvasViewH = 0;
+    // Orientation flip is a real layout change — force the next resize to rebuild.
+    wheelsBuiltW = 0;
+    wheelsBuiltH = 0;
 }
 
 function updateIosViewportLock() {
@@ -585,10 +603,6 @@ function resizeCanvas() {
     const cs = Math.round(fs * perf.cellSpacing);
 
     const vp = getViewportMetrics();
-    const sizeChanged = vp.width !== lastCanvasViewW || vp.height !== lastCanvasViewH;
-    lastCanvasViewW = vp.width;
-    lastCanvasViewH = vp.height;
-
     viewW = vp.width;
     viewH = vp.height;
 
@@ -607,8 +621,9 @@ function resizeCanvas() {
     wheelGradientCache.key = '';
     syncGodModeTriangleSize();
 
-    // DPR changes on browser zoom — resize backing store only; keep ring state/center.
-    if (!sizeChanged && wheels.length > 0) {
+    // DPR zoom, or iOS Safari toolbar show/hide — resize backing store only;
+    // keep ring state/center so the garden doesn't restart mid-session.
+    if (canKeepWheelsForViewport(viewW, viewH, cs)) {
         invalidateCipherWheelCenter();
         setNeedsFullRedraw(true);
         return;
@@ -616,6 +631,9 @@ function resizeCanvas() {
 
     try {
         buildWheels();
+        wheelsBuiltW = viewW;
+        wheelsBuiltH = viewH;
+        wheelsBuiltCellSize = cs;
         visibleRingCount = 0;
         matrixFilled = false;
         ctx.clearRect(0, 0, viewW, viewH);

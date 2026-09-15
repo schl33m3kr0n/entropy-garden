@@ -1090,7 +1090,9 @@ body.ios-ui .ios-poem-list-item.active {
 body.ios-ui #modal-poems .ios-poem-reader {
     flex: 1 1 auto;
     min-height: 0;
+    padding: 0 4px;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     text-align: center;
 }
@@ -1098,7 +1100,11 @@ body.ios-ui #modal-poems .ios-poem-reader {
 body.ios-ui #ios-poem-body,
 .ios-poem-text {
     margin: 0;
+    max-width: 100%;
     white-space: pre-wrap;
+    /* long verse lines wrap on a phone; never let a single token push past the edge */
+    overflow-wrap: anywhere;
+    word-break: normal;
     font-family: var(--poem-font);
     font-size: 1.1rem;
     font-weight: 400;
@@ -1106,6 +1112,13 @@ body.ios-ui #ios-poem-body,
     letter-spacing: 0.015em;
     font-variant-ligatures: common-ligatures;
     color: var(--neon-green);
+}
+
+/* Phones: tighter leading so wrapped lines still read as one verse line. */
+body.ios-ui:not(.ios-tablet) #ios-poem-body {
+    font-size: 1rem;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
 }
 
 body.ios-ui .ios-poem-nav {
@@ -1120,6 +1133,11 @@ body.ios-ui #modal-poems .modal-content {
     display: flex;
     flex-direction: column;
     max-height: min(88dvh, 720px);
+    box-sizing: border-box;
+}
+
+body.ios-ui:not(.ios-tablet) #modal-poems .modal-content {
+    padding: 22px 16px 16px;
 }
 
 body.ios-ui .control-panel {
@@ -1155,6 +1173,17 @@ body.ios-ui #sidebar-menu li {
 
 body.ios-ui .ios-sidebar-tools {
     border-radius: var(--ios-radius-md) var(--ios-radius-md) 0 0;
+}
+
+/* chrome.css loads after base.css, so its fixed 450px/700px widths beat the
+   responsive min() in base.css — on a phone the modal (and its text) ran off
+   both edges of the screen. Re-assert viewport-bounded widths here. */
+body.ios-ui .modal {
+    width: min(450px, 92vw);
+}
+
+body.ios-ui .modal.wide {
+    width: min(700px, 94vw);
 }
 
 body.ios-ui .modal,
@@ -1293,27 +1322,83 @@ body.ios-ui #modal-projects .scrollable-content.mr-disco-showcase {
     padding-right: 6px;
 }
 
-body.ios-ui .mr-disco-stage-shell {
+/* Compact header strip: small ball on the left, search field beside it.
+   The archive then owns the rest of the modal instead of fighting the ball. */
+body.ios-ui .mr-disco-showcase-row {
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-height: 0;
+}
+
+body.ios-ui .mr-disco-left-col {
     flex: 0 0 auto;
-    max-width: min(100%, 280px);
-    margin-inline: auto;
+    gap: 10px;
+}
+
+body.ios-ui .mr-disco-showcase-row:has(.mr-disco-archive.is-open) .mr-disco-left-col {
+    margin-right: 0;
+}
+
+body.ios-ui .mr-disco-stage-shell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    padding: 8px 10px;
+    box-sizing: border-box;
     cursor: pointer;
     touch-action: manipulation;
 }
 
 body.ios-ui .mr-disco-stage {
-    width: 100%;
-    max-height: min(34dvh, 240px);
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    max-height: none;
     aspect-ratio: 1;
+    border-radius: 6px;
+}
+
+body.ios-ui.ios-tablet .mr-disco-stage {
+    width: 80px;
+    height: 80px;
+}
+
+body.ios-ui .mr-disco-search {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+body.ios-ui .mr-disco-search::before {
+    display: none;
+}
+
+body.ios-ui .mr-disco-search input {
+    padding: 8px 0;
+    /* 16px stops Safari from auto-zooming the page when the field is focused */
+    font-size: 16px;
 }
 
 body.ios-ui .mr-disco-archive.is-open {
+    position: static;
+    inset: auto;
+    flex: 1 1 auto;
     width: 100%;
     max-width: 100%;
-    height: min(36dvh, 300px);
-    min-height: min(36dvh, 300px);
-    max-height: min(36dvh, 300px);
+    height: auto;
+    min-height: min(40dvh, 320px);
+    max-height: none;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 body.ios-ui .mr-disco-hint--desktop {
