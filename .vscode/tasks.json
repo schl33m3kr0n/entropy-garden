@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Preview",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Serve working tree", "Open Simple Browser"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Serve working tree",
+      "type": "shell",
+      "command": "bash scripts/dev/preview.sh",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "preview"
+      },
+      "problemMatcher": {
+        "owner": "preview",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Serving working tree"
+        }
+      }
+    },
+    {
+      "label": "Open Simple Browser",
+      "type": "shell",
+      "command": "echo ${input:openSimpleBrowser}",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "group": "preview"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "openSimpleBrowser",
+      "type": "command",
+      "command": "simpleBrowser.api.open",
+      "args": ["http://127.0.0.1:8765/"]
+    }
+  ]
+}
