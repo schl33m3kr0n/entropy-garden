@@ -163,7 +163,9 @@ body.ios-ui.ios-keyboard-open #ios-scroll-shell {
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+    /* none (not contain): Safari pull-to-refresh uses root overscroll */
+    overscroll-behavior-y: none;
+    overscroll-behavior: none;
     scroll-snap-type: y mandatory;
     touch-action: pan-y;
 }
@@ -238,7 +240,8 @@ body.ios-ui .ios-pane {
 }
 
 body.ios-ui .ios-pane-top {
-    min-height: 46dvh;
+    /* svh: stable while Safari chrome shows/hides — dvh reflow + mandatory snap felt like a refresh */
+    min-height: 46svh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -248,7 +251,7 @@ body.ios-ui .ios-pane-top {
 
 body.ios-ui .ios-pane-main {
     position: relative;
-    min-height: 100dvh;
+    min-height: 100svh;
     scroll-snap-align: center;
     scroll-snap-stop: always;
 }
@@ -290,7 +293,7 @@ body.ios-ui:not(.garden-ready) .ios-scroll-hint {
 }
 
 body.ios-ui .ios-pane-bottom {
-    min-height: 36dvh;
+    min-height: 36svh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -325,41 +328,41 @@ body.ios-ui .ios-pane-bottom {
 }
 
 body.ios-ui.ios-tablet .ios-pane-top {
-    min-height: min(38dvh, 280px);
-    max-height: min(38dvh, 280px);
+    min-height: min(38svh, 280px);
+    max-height: min(38svh, 280px);
     align-items: flex-start;
     scroll-snap-align: start;
 }
 
 body.ios-ui.ios-tablet .ios-pane-bottom {
-    min-height: min(34dvh, 260px);
-    max-height: min(34dvh, 260px);
+    min-height: min(34svh, 260px);
+    max-height: min(34svh, 260px);
     align-items: flex-end;
     scroll-snap-align: start;
 }
 
 body.ios-ui.ios-tablet .ios-pane-main {
-    min-height: 100dvh;
+    min-height: 100svh;
     max-height: none;
     scroll-snap-align: center;
 }
 
 body.ios-ui.ios-tablet.ios-landscape .ios-pane-top {
-    min-height: min(26dvh, 168px);
-    max-height: min(26dvh, 168px);
+    min-height: min(26svh, 168px);
+    max-height: min(26svh, 168px);
     padding-top: calc(env(safe-area-inset-top) + 8px);
     padding-bottom: 6px;
 }
 
 body.ios-ui.ios-tablet.ios-landscape .ios-pane-bottom {
-    min-height: min(24dvh, 152px);
-    max-height: min(24dvh, 152px);
+    min-height: min(24svh, 152px);
+    max-height: min(24svh, 152px);
     padding-top: 6px;
     padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
 }
 
 body.ios-ui.ios-tablet.ios-landscape .ios-pane-main {
-    min-height: 100dvh;
+    min-height: 100svh;
     max-height: none;
     scroll-snap-align: center;
 }
@@ -476,21 +479,21 @@ body.ios-ui.ios-tablet.ios-landscape .ios-gb-layout {
 /* iPad / large iOS tablet — CSS fallback when JS class lags or misses */
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) {
     body.ios-ui .ios-pane-top {
-        min-height: min(38dvh, 280px);
-        max-height: min(38dvh, 280px);
+        min-height: min(38svh, 280px);
+        max-height: min(38svh, 280px);
         align-items: flex-start;
         scroll-snap-align: start;
     }
 
     body.ios-ui .ios-pane-bottom {
-        min-height: min(34dvh, 260px);
-        max-height: min(34dvh, 260px);
+        min-height: min(34svh, 260px);
+        max-height: min(34svh, 260px);
         align-items: flex-end;
         scroll-snap-align: start;
     }
 
     body.ios-ui .ios-pane-main {
-        min-height: 100dvh;
+        min-height: 100svh;
         max-height: none;
         scroll-snap-align: center;
     }
@@ -521,21 +524,21 @@ body.ios-ui.ios-tablet.ios-landscape .ios-gb-layout {
 
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 700px) and (orientation: landscape) {
     body.ios-ui .ios-pane-top {
-        min-height: min(26dvh, 168px);
-        max-height: min(26dvh, 168px);
+        min-height: min(26svh, 168px);
+        max-height: min(26svh, 168px);
         padding-top: calc(env(safe-area-inset-top) + 8px);
         padding-bottom: 6px;
     }
 
     body.ios-ui .ios-pane-bottom {
-        min-height: min(24dvh, 152px);
-        max-height: min(24dvh, 152px);
+        min-height: min(24svh, 152px);
+        max-height: min(24svh, 152px);
         padding-top: 6px;
         padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
     }
 
     body.ios-ui .ios-pane-main {
-        min-height: 100dvh;
+        min-height: 100svh;
         scroll-snap-align: center;
     }
 
@@ -840,7 +843,7 @@ body.ios-ui .mask-icon--playlist {
 body.ios-ui #sidebar-menu {
     display: flex;
     flex-direction: column;
-    height: 100dvh;
+    height: 100svh;
     min-height: 0;
     overflow: hidden;
     padding-top: calc(env(safe-area-inset-top) + 72px);

@@ -41,6 +41,7 @@ const PRECACHE_URLS = [
     'js/boot/trophies.js',
     'js/boot/file-protocol-guard.js',
     'js/ios/ios-ui.js',
+    'js/ios/pull-to-refresh.js',
     'js/ios/terminal-boot.js',
     'assets/icons/about.svg',
     'assets/icons/cog.svg',

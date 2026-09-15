@@ -4,6 +4,7 @@ import { perf, isIosTabletScreen } from '../core/shared.js';
 import { callHook } from '../core/hooks.js';
 
 import { resizeCanvas } from '../lazy.js';
+import { installPullToRefreshBlocker } from './pull-to-refresh.js';
 
 
 
@@ -181,49 +182,7 @@ function addIosModalRerollButtons() {
 
 
 function preventPullToRefresh() {
-
-    const shell = scrollShell();
-
-    let startY = 0;
-
-
-
-    const onTouchStart = (e) => {
-
-        if (e.touches[0]) startY = e.touches[0].clientY;
-
-    };
-
-
-
-    const onTouchMove = (e) => {
-
-        if (!e.touches[0]) return;
-
-        const dy = e.touches[0].clientY - startY;
-
-        const atTop = shell ? shell.scrollTop <= 0 : window.scrollY <= 0;
-
-        if (atTop && dy > 0) e.preventDefault();
-
-    };
-
-
-
-    document.addEventListener('touchstart', onTouchStart, { passive: true });
-
-    document.addEventListener('touchmove', onTouchMove, { passive: false });
-
-
-
-    if (shell) {
-
-        shell.addEventListener('touchstart', onTouchStart, { passive: true });
-
-        shell.addEventListener('touchmove', onTouchMove, { passive: false });
-
-    }
-
+    installPullToRefreshBlocker(scrollShell);
 }
 
 
@@ -280,7 +239,7 @@ export function initIosUi() {
     // The terminal FAB toggle is bound globally by js/ios/terminal-boot.js on all
     // platforms; no iOS-specific binding needed here.
 
-    import('./ios/ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
+    import('./ios-poems.js').then((m) => m.initIosPoemArchive()).catch(() => {});
 
     preventPullToRefresh();
 
