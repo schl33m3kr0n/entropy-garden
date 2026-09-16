@@ -132,6 +132,14 @@ body:not(.ios-ui) #playlist-menu.active {
     pointer-events: auto;
 }
 
+html:has(body.ios-ui) {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    overflow: hidden;
+    scrollbar-gutter: auto;
+}
+
 html:has(body.ios-ui),
 body.ios-ui {
     overscroll-behavior-y: none;

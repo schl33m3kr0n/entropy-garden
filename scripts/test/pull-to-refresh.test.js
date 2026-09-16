@@ -19,6 +19,21 @@ describe('shouldBlockPullToRefresh', () => {
         expect(shouldBlockPullToRefresh({ scrollTop: 80, deltaY: 40, touchCount: 1 })).toBe(false);
     });
 
+    it('blocks a downward pull that starts in the Safari chrome band', () => {
+        expect(shouldBlockPullToRefresh({
+            scrollTop: 400,
+            deltaY: 30,
+            touchCount: 1,
+            touchStartY: 24,
+        })).toBe(true);
+        expect(shouldBlockPullToRefresh({
+            scrollTop: 400,
+            deltaY: 30,
+            touchCount: 1,
+            touchStartY: 80,
+        })).toBe(false);
+    });
+
     it('ignores multi-touch gestures', () => {
         expect(shouldBlockPullToRefresh({ scrollTop: 0, deltaY: 30, touchCount: 2 })).toBe(false);
     });

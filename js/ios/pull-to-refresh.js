@@ -4,16 +4,20 @@
  */
 
 const TOP_EPSILON_PX = 1;
+/** WKWebView still PTRs from the status-bar band even when an inner scroller is mid-rail. */
+const PTR_CHROME_BAND_PX = 56;
 
-/** True when a downward pull at the top of a scroller would trigger Safari PTR. */
+/** True when a downward pull would trigger Safari PTR. */
 export function shouldBlockPullToRefresh({
     scrollTop = 0,
     deltaY = 0,
     touchCount = 1,
+    touchStartY = Infinity,
 } = {}) {
     if (touchCount !== 1) return false;
     if (!(deltaY > 0)) return false;
-    return scrollTop <= TOP_EPSILON_PX;
+    if (scrollTop <= TOP_EPSILON_PX) return true;
+    return touchStartY <= PTR_CHROME_BAND_PX;
 }
 
 function isScrollableY(el) {
@@ -65,6 +69,7 @@ export function installPullToRefreshBlocker(getShell = () => document.getElement
             scrollTop: scroller?.scrollTop ?? 0,
             deltaY,
             touchCount: e.touches.length,
+            touchStartY: startY,
         })) {
             return;
         }

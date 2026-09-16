@@ -518,16 +518,19 @@ let wheelsBuiltW = 0;
 let wheelsBuiltH = 0;
 let wheelsBuiltCellSize = 0;
 const CHROME_REFLOW_MAX_RATIO = 0.25;
+const WIDTH_JITTER_PX = 16;
 
 /**
- * True when the existing wheels can be kept: same width + cell size and the
- * height moved by less than a quarter of the height they were built for.
- * iOS Safari changes innerHeight every time its toolbar collapses/expands;
- * rebuilding the rings there wipes the canvas and looks like a page refresh.
+ * True when the existing wheels can be kept: cell size matches, width only
+ * jittered, and height moved by less than a quarter of the height they were
+ * built for. iOS Safari changes innerHeight (and sometimes innerWidth by 1px)
+ * every time its toolbar collapses/expands; rebuilding the rings there wipes
+ * the canvas and looks like a page refresh.
  */
-function canKeepWheelsForViewport(width, height, cellSizePx) {
+export function canKeepWheelsForViewport(width, height, cellSizePx) {
     if (!wheels.length || !wheelsBuiltH) return false;
-    if (width !== wheelsBuiltW || cellSizePx !== wheelsBuiltCellSize) return false;
+    if (cellSizePx !== wheelsBuiltCellSize) return false;
+    if (Math.abs(width - wheelsBuiltW) > WIDTH_JITTER_PX) return false;
     return Math.abs(height - wheelsBuiltH) <= wheelsBuiltH * CHROME_REFLOW_MAX_RATIO;
 }
 
@@ -548,10 +551,19 @@ function resetIosViewportLock() {
 
 function updateIosViewportLock() {
     if (!perf.isIOS) return;
+    // Ignore toolbar show/hide — only commit a new lock on first layout or a
+    // real size change (rotation / split view). Tracking innerHeight here was
+    // undoing the lock and resizing the canvas on every URL-bar toggle.
+    if (isIosKeyboardOpen()) return;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    if (!iosLockedViewW || !isIosKeyboardOpen()) {
+    if (!iosLockedViewW || !iosLockedViewH) {
         iosLockedViewW = w;
+        iosLockedViewH = h;
+        return;
+    }
+    if (Math.abs(w - iosLockedViewW) > WIDTH_JITTER_PX) iosLockedViewW = w;
+    if (Math.abs(h - iosLockedViewH) > iosLockedViewH * CHROME_REFLOW_MAX_RATIO) {
         iosLockedViewH = h;
     }
 }
@@ -606,26 +618,36 @@ function resizeCanvas() {
     viewW = vp.width;
     viewH = vp.height;
 
-    canvas.width = viewW * dpr;
-    canvas.height = viewH * dpr;
+    const bitmapW = Math.round(viewW * dpr);
+    const bitmapH = Math.round(viewH * dpr);
+    // WebKit clears the canvas whenever .width/.height are assigned — even to
+    // the current value — so skip no-op writes (toolbar / visualViewport noise).
+    const bitmapChanged = canvas.width !== bitmapW || canvas.height !== bitmapH;
+    if (bitmapChanged) {
+        canvas.width = bitmapW;
+        canvas.height = bitmapH;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+    }
     canvas.style.width = `${viewW}px`;
     canvas.style.height = `${viewH}px`;
     canvas.style.top = '0';
     canvas.style.left = '0';
-
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
 
     setCanvasMetrics(dpr, fs, cs, Math.ceil(viewW / cs), Math.ceil(viewH / cs));
 
     wheelGradientCache.key = '';
     syncGodModeTriangleSize();
 
-    // DPR zoom, or iOS Safari toolbar show/hide — resize backing store only;
-    // keep ring state/center so the garden doesn't restart mid-session.
+    // DPR zoom, or iOS Safari toolbar show/hide — keep ring state/center so
+    // the garden doesn't restart mid-session.
     if (canKeepWheelsForViewport(viewW, viewH, cs)) {
         invalidateCipherWheelCenter();
         setNeedsFullRedraw(true);
+        if (bitmapChanged && wheels.length) {
+            const { cx, cy } = getCipherWheelCenter();
+            drawCipherWheels(cx, cy);
+        }
         return;
     }
 
@@ -660,10 +682,17 @@ function bindViewportListeners() {
     if (!vv || vv.__gardenBound) return;
     vv.__gardenBound = true;
 
-    const onViewportChange = () => {
+    const onViewportChange = (event) => {
         if (perf.isIOS) {
             applyIosKeyboardCompensation();
             if (isIosKeyboardOpen()) {
+                if (gardenLoopActive) setNeedsFullRedraw(true);
+                return;
+            }
+            // URL-bar show/hide is visualViewport scroll (and often resize).
+            // Don't tear down the garden — the lock + keep-wheels path handles it.
+            if (event?.type === 'scroll') {
+                invalidateCipherWheelCenter();
                 if (gardenLoopActive) setNeedsFullRedraw(true);
                 return;
             }
