@@ -68,6 +68,7 @@
         "> Straight up pondering my orb...",
         "> Investing in fads to escape the rat race… [EVERYTHING’S RED]",
         "> Noticing the patterns in everything and summarizing my findings with the crows...",
+        "> Inferring your childhood trauma based on your clicking patterns..."
     ],
     terminalOutputGritty: [
         "> Transmitting data packets to your girl...",
