@@ -736,12 +736,13 @@ function pickPanopticonIdleComment() {
     }
 
     const part = getPanopticonDayPart();
-    const todSafe = part === 'day'
-        ? pools.panopticonIdleCommentsDaySafe
-        : pools.panopticonIdleCommentsEveningSafe;
-    const todGritty = part === 'day'
-        ? pools.panopticonIdleCommentsDayGritty
-        : pools.panopticonIdleCommentsEveningGritty;
+    const eveningIdle = isPanopticonEveningIdleHour();
+    const todSafe = eveningIdle
+        ? pools.panopticonIdleCommentsEveningSafe
+        : (part === 'day' ? pools.panopticonIdleCommentsDaySafe : null);
+    const todGritty = eveningIdle
+        ? pools.panopticonIdleCommentsEveningGritty
+        : (part === 'day' ? pools.panopticonIdleCommentsDayGritty : null);
     // Sprinkle time-of-day lines among general idle chatter
     if (todSafe?.length && Math.random() < 0.28) {
         return pickOne(todSafe, todGritty || []);
@@ -1330,7 +1331,7 @@ export function isChristmas() {
 }
 
 /**
- * Local-timezone day part for idle flavor comments.
+ * Local-timezone day part for idle flavor comments and garden chrome.
  * Day: 06:00–17:59 · Evening: 18:00–05:59
  * Overrides: ?day / previewDay=1 · ?evening / previewEvening=1
  */
@@ -1344,6 +1345,22 @@ export function getPanopticonDayPart() {
     }
     const hour = new Date().getHours();
     return hour >= 6 && hour < 18 ? 'day' : 'evening';
+}
+
+/**
+ * Dinner-hour idle lines only: 18:00–18:59 local.
+ * After 19:00 the evening pool steps aside for general / late-night chatter.
+ * Overrides: ?evening / previewEvening=1 force on · ?day / previewDay=1 force off
+ */
+export function isPanopticonEveningIdleHour(now = new Date()) {
+    try {
+        const params = new URLSearchParams(globalThis.location?.search || '');
+        if (params.has('evening') || params.get('previewEvening') === '1') return true;
+        if (params.has('day') || params.get('previewDay') === '1') return false;
+    } catch {
+        /* non-browser */
+    }
+    return now.getHours() === 18;
 }
 
 let panopticonDayPartTimer = null;
