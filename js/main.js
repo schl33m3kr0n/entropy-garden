@@ -688,6 +688,11 @@ const weirdLoadingPhrases = [
     "Earning your trust with jazz hands...",
     "Skipping the trouble and downloading assets straight into the trash folder...",
     "Taking evil monologue workshops...",
+    "Proposing a talking stick for political discussions...",
+    "Getting whacked by the talking stick for going too far...",
+    "Playing dodgeball with the demon core...",
+    "Chopping and screwing the entire Bee Movie...",
+    "Relaying critical intel to the Oracle of Delphi...",
 ];
 
 function revealGardenUI() {
