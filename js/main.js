@@ -775,9 +775,34 @@ const LOADER_MIN_MS = 6000;
 const LOADER_BOOT_MAX_MS = 14000;
 const LOADER_FADE_HOLD_MS = 500;
 const LOADER_FADE_MAX_MS = 900;
+const LOADER_LOG_MAX_LINES = 80;
+const LOADER_LOG_MS = 110;
+const LOADER_LOG_REDUCED_MS = 220;
 const HUD_DROP_DELAY_MS = 150;
 const HUD_DROP_ANIM_MS = 1500;
 const MATRIX_VISIBLE_IOS_DELAY_MS = 400;
+
+function shuffleCopy(items) {
+    const deck = items.slice();
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const swap = deck[i];
+        deck[i] = deck[j];
+        deck[j] = swap;
+    }
+    return deck;
+}
+
+function appendLoaderLogLine(logEl, phrase, extraClass = '') {
+    const line = document.createElement('div');
+    line.className = extraClass ? `loader-log-line ${extraClass}` : 'loader-log-line';
+    line.textContent = phrase;
+    logEl.appendChild(line);
+    while (logEl.childElementCount > LOADER_LOG_MAX_LINES) {
+        logEl.removeChild(logEl.firstChild);
+    }
+    logEl.scrollTop = logEl.scrollHeight;
+}
 
 /** Fade matrix in after HUD intro so canvas filters don't compete with UI animations. */
 function scheduleMatrixVisible(isIosLayout) {
@@ -802,8 +827,21 @@ function startLoader() {
     
     let progress = 0;
     let startTime = Date.now();
-    let tickCounter = 0;
     let bootReady = false;
+    const bootDeck = shuffleCopy(weirdLoadingPhrases);
+    let bootIndex = 0;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const logDelay = reducedMotion ? LOADER_LOG_REDUCED_MS : LOADER_LOG_MS;
+
+    text.replaceChildren();
+    appendLoaderLogLine(text, '> INITIALIZING...');
+
+    const pumpBootLog = () => {
+        const phrase = bootDeck[bootIndex % bootDeck.length];
+        bootIndex++;
+        appendLoaderLogLine(text, `> ${phrase}`);
+    };
+    const logInterval = setInterval(pumpBootLog, logDelay);
 
     loaderBootGate.then(() => {
         bootReady = true;
@@ -811,15 +849,15 @@ function startLoader() {
 
     const interval = setInterval(() => {
         progress += Math.random() * 3.5 + 1;
-        tickCounter++;
 
         const minElapsed = (Date.now() - startTime) >= LOADER_MIN_MS;
         if (progress >= 99 && (!minElapsed || !bootReady)) { progress = 99; }
 
-if (progress >= 100) {
-            progress = 100; 
-            text.innerText = "SYSTEM READY."; 
+        if (progress >= 100) {
+            progress = 100;
             clearInterval(interval);
+            clearInterval(logInterval);
+            appendLoaderLogLine(text, '> SYSTEM READY.', 'is-ready');
             clearInterval(pingInterval);
             sfx.loading.pause();
             
@@ -842,12 +880,6 @@ if (progress >= 100) {
                 }, { once: true });
                 setTimeout(finishLoaderFade, LOADER_FADE_MAX_MS);
             }, LOADER_FADE_HOLD_MS);
-
-        } else {
-            // Changes text exactly every 8 ticks (1.6 seconds)
-            if (tickCounter % 8 === 0) {
-                text.innerText = weirdLoadingPhrases[Math.floor(Math.random() * weirdLoadingPhrases.length)]; 
-            }
         }
     }, 200);
 }

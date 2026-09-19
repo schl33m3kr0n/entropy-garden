@@ -233,8 +233,10 @@ body.garden-ready::before {
     z-index: 10100; 
     display: flex; 
     flex-direction: column; 
-    justify-content: center; 
+    justify-content: flex-start; 
     align-items: center; 
+    padding: 5vh 0 3vh;
+    box-sizing: border-box;
     color: var(--neon-green); 
     transition: opacity 1.2s ease-out;
     pointer-events: auto;
@@ -265,9 +267,42 @@ body.garden-loading #loader {
 }
 
 #loader-text { 
-    text-transform: uppercase; 
-    letter-spacing: 2px; min-height: 20px; 
-    font-size: 0.9rem; text-align: center; max-width: 80%; 
+    flex: 1 1 auto;
+    width: min(720px, 88vw);
+    min-height: 0;
+    margin: 0;
+    padding-bottom: 0.4em;
+    overflow: hidden;
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    word-spacing: 0.06em;
+    text-align: left;
+    text-transform: none;
+    mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 100%);
+}
+
+.loader-log-line {
+    opacity: 0.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.loader-log-line.is-ready {
+    opacity: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.loader-log-line:nth-last-child(-n+4) {
+    opacity: 0.78;
+}
+
+.loader-log-line:last-child {
+    opacity: 1;
 }
 
 /* --- THE OUROBOROS --- */
@@ -275,7 +310,8 @@ body.garden-loading #loader {
 #ouroboros-container {
     width: 65px;  /* Cut down from 120px */
     height: 65px; /* Cut down from 120px */
-    margin-top: 30px;
+    flex: 0 0 auto;
+    margin: 0 0 16px;
 }
 
 #loader-leaf {

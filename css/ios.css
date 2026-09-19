@@ -27,24 +27,30 @@ body.ios-ui #epilepsy-warning p {
 }
 
 body.ios-ui #loader {
-    display: block;
+    display: flex;
+    padding-top: calc(env(safe-area-inset-top) + 16px);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
 }
 
 body.ios-ui #ouroboros-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-top: 0;
-    transform: translate(-50%, -50%);
+    position: relative;
+    top: auto;
+    left: auto;
+    margin: 0 0 12px;
+    transform: none;
 }
 
 body.ios-ui #loader-text {
-    position: absolute;
-    top: calc(50% + 48px);
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(80vw, 320px);
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: min(92vw, 520px);
     margin: 0;
+}
+
+body.ios-ui .loader-log-line {
+    white-space: normal;
 }
 
 /* God-mode title uses the same h1 rainbow as chrome.css (see garden.css). */
