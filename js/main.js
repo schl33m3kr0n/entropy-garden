@@ -687,6 +687,7 @@ const weirdLoadingPhrases = [
     "Polka dotting the spotless mind...",
     "Earning your trust with jazz hands...",
     "Skipping the trouble and downloading assets straight into the trash folder...",
+    "Taking evil monologue workshops...",
 ];
 
 function revealGardenUI() {
