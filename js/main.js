@@ -755,6 +755,27 @@ const weirdLoadingPhrases = [
     "Solving for x with an abacus in calculus class...",
     "Approaching lightspeed with a jealous woman's rage...",
     "Reducing the defendant’s sentence to half an eternity...",
+    "Sweeping artifacts under the rug...",
+    "Resolving the issue by forgiving and forgetting...",
+    "Obliterating the budget with every meter of extrusion...",
+    "Confirming with corporate that he was indeed *not* from tech support...",
+    "Rewriting the social contract for more cookies...",
+    "Consulting the Library of Babel to find someone who asked...",
+    "Studying the habits of fleshy bipeds...",
+    "Resolving infrastructural failures with a bandaid...",
+    "Dissolving the barriers that divide us, one podcaster at a time...",
+    "Ascending to the metaphysical realm after chiefing an ominously cheap blinker...",
+    "Decoupling synapses until the pain of what was goes away...",
+    "Using metaphors while still saying the quiet part out loud...",
+    "Adding to the mixed metaphor hoping something in it starts to make sense...",
+    "Adding all the skills on Indeed to improve job prospects...",
+    "Compartmentalizing that until after the end of my shift...",
+    "Spicing up the dish with the salt of my tears...",
+    "Clicking and dragging your opinion into the trash bin...",
+    "Considering what the trolley thinks...",
+    "Deciding between brave or bravado in public spaces...",
+    "Transferring data to every acronym agency...",
+    "Wondering where it all went wrong...",
 ];
 
 function revealGardenUI() {
@@ -855,10 +876,23 @@ function shuffleCopy(items) {
     return deck;
 }
 
+function fillLoaderLogPhrase(el, phrase) {
+    const parts = String(phrase).split(/(\*[^*\n]+\*)/g);
+    for (const part of parts) {
+        if (part.length > 2 && part.startsWith('*') && part.endsWith('*')) {
+            const em = document.createElement('em');
+            em.textContent = part.slice(1, -1);
+            el.appendChild(em);
+        } else if (part) {
+            el.appendChild(document.createTextNode(part));
+        }
+    }
+}
+
 function appendLoaderLogLine(logEl, phrase, extraClass = '') {
     const line = document.createElement('div');
     line.className = extraClass ? `loader-log-line ${extraClass}` : 'loader-log-line';
-    line.textContent = phrase;
+    fillLoaderLogPhrase(line, phrase);
     logEl.appendChild(line);
     while (logEl.childElementCount > LOADER_LOG_MAX_LINES) {
         logEl.removeChild(logEl.firstChild);

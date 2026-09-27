@@ -313,6 +313,10 @@ body.garden-loading #loader {
     text-overflow: ellipsis;
 }
 
+.loader-log-line em {
+    font-style: italic;
+}
+
 .loader-log-line.is-ready {
     opacity: 1;
     letter-spacing: 0.12em;
