@@ -6,6 +6,10 @@ body.ios-ui #init-screen {
     box-sizing: border-box;
 }
 
+body.ios-ui .warning-icon {
+    width: clamp(56px, 16vw, 72px);
+}
+
 body.ios-ui #epilepsy-warning {
     max-width: min(78vw, 300px);
     width: 100%;

@@ -134,6 +134,7 @@ function playInitPartnerSplash(onComplete) {
 
     const splash = document.getElementById('init-partner-splash');
     const warning = document.getElementById('epilepsy-warning');
+    const warningIcon = document.getElementById('warning-icon');
     const initBtn = document.getElementById('init-btn');
 
     if (!splash || perf.prefersReducedMotion) {
@@ -142,6 +143,7 @@ function playInitPartnerSplash(onComplete) {
     }
 
     warning?.setAttribute('hidden', '');
+    warningIcon?.setAttribute('hidden', '');
     initBtn?.setAttribute('hidden', '');
     splash.hidden = false;
     splash.setAttribute('aria-hidden', 'false');

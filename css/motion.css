@@ -339,7 +339,8 @@
     }
 
     /* 6. Stop the pulse on the warning title */
-    .warning-title {
+    .warning-title,
+    .warning-icon {
         animation: none !important;
         opacity: 1 !important;
     }

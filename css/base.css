@@ -94,6 +94,22 @@ body.garden-ready::before {
     box-shadow: 0 0 30px var(--neon-green);
 }
 
+.warning-icon {
+    display: block;
+    width: clamp(72px, 14vw, 112px);
+    height: auto;
+    margin: 0;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 0 14px rgba(255, 0, 85, 0.55));
+    animation: pulseWarningIcon 2s infinite alternate;
+}
+
+@keyframes pulseWarningIcon {
+    0% { opacity: 0.82; filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.4)); }
+    100% { opacity: 1; filter: drop-shadow(0 0 18px rgba(255, 0, 85, 0.75)); }
+}
+
 /* --- PHOTOSENSITIVITY WARNING --- */
 #epilepsy-warning {
     max-width: 500px;
