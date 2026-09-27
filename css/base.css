@@ -105,6 +105,12 @@ body.garden-ready::before {
     animation: pulseWarningIcon 2s infinite alternate;
 }
 
+.warning-icon[hidden],
+#init-screen:has(#init-partner-splash.is-active) .warning-icon,
+#init-screen:has(#init-partner-splash.is-exiting) .warning-icon {
+    display: none !important;
+}
+
 @keyframes pulseWarningIcon {
     0% { opacity: 0.82; filter: drop-shadow(0 0 8px rgba(255, 0, 85, 0.4)); }
     100% { opacity: 1; filter: drop-shadow(0 0 18px rgba(255, 0, 85, 0.75)); }
