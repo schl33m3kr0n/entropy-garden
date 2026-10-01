@@ -1,4 +1,4 @@
-// Entropy Garden — main entry (lazy-loads terminal, matrix, singularity, arcade)
+// Entropy Garden — main entry (lazy-loads terminal, matrix, singularity)
 import { bindPlaylistPlayPause, isPlayPauseShowingPlaying } from './playlist-icons.js';
 import { registerHooks, getHook } from './core/hooks.js';
 import { bindSidebarNavigation } from './ui/sidebar.js';
@@ -87,7 +87,6 @@ import {
     restartGardenLoop,
     resizeCanvas,
     setMatrixNeedsRedraw,
-    loadArcadeLevel,
     initCardsOfChaos,
     loadTerminal,
     getTerminalContainer,
@@ -1336,7 +1335,7 @@ function ensureMediaSrc(el) {
 // --- MODAL SYSTEM ---
 let topZIndex = 20000;
 
-const MODALS_WITHOUT_REROLL_HINT = new Set(['vault', 'arcade', 'cards', 'trophies', 'poems', 'projects']);
+const MODALS_WITHOUT_REROLL_HINT = new Set(['vault', 'cards', 'trophies', 'poems', 'projects']);
 
 function modalSkipsRerollHint(modalEl) {
     if (!modalEl?.id) return false;
@@ -1394,12 +1393,6 @@ function openModal(id) {
         pushTerminalLog(`> Accessing ${resolvedId.toUpperCase()} protocol...`);
         panopticonCommentForModal(resolvedId);
         recordBehavior('modal_open', { id: resolvedId });
-        if (resolvedId === 'arcade') {
-            loadArcadeLevel().catch((err) => {
-                console.error('[Entropy Garden] arcade failed to load', err);
-                pushTerminalLog('> ARCADE MODULE OFFLINE.');
-            });
-        }
 
         if (resolvedId === 'cards') {
             initCardsOfChaos().catch((err) => {

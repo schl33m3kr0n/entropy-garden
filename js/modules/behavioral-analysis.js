@@ -30,7 +30,6 @@ const metrics = {
     keypresses: 0,
     pongSessions: 0,
     konamiCompletes: 0,
-    arcadeClears: 0,
     cardsRounds: 0,
     trophyUnlocks: 0,
     cipherStages: 0,
@@ -150,9 +149,6 @@ export function recordBehavior(event, detail = {}) {
         case 'konami_complete':
             metrics.konamiCompletes++;
             break;
-        case 'arcade_clear':
-            metrics.arcadeClears++;
-            break;
         case 'cards_round':
             metrics.cardsRounds++;
             break;
@@ -199,7 +195,7 @@ export function printBehaviorReport() {
         pushLog(`> TOP MODAL: ${snap.modalTop.id.toUpperCase()} (${snap.modalTop.count}x)`);
     }
     pushLog(`> IDLE VOIDS: ${snap.idleDissociations} | POINTER BURSTS: ${snap.pointerBursts}`);
-    pushLog(`> GAMES: pong ${snap.pongSessions} | konami ${snap.konamiCompletes} | arcade ${snap.arcadeClears} | cards ${snap.cardsRounds}`);
+    pushLog(`> GAMES: pong ${snap.pongSessions} | konami ${snap.konamiCompletes} | cards ${snap.cardsRounds}`);
     pushLog(`> TROPHIES: ${snap.trophyUnlocks} | CIPHER STAGES: ${snap.cipherStages} | SCATTER: ${snap.scatterBreaches} | PIZZA: ${snap.pizzaDeploys}`);
     pushLog('> NOTE: analysis is local to this session. the eye forgets nothing.');
 }

@@ -170,7 +170,7 @@ export function initPanopticonComments() {
     });
 }
 
-/** Modal id from openModal (e.g. identity, arcade). */
+/** Modal id from openModal (e.g. identity, vault). */
 export function panopticonCommentForModal(modalId) {
     const key = `modal${modalId.charAt(0).toUpperCase()}${modalId.slice(1)}`;
     firePanopticonComment(key);

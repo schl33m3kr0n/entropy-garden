@@ -14,7 +14,7 @@ The design leans into:
 
 - **Surveillance fiction** — the panopticon comments, idle dissociation blur, behavioral profiling (`analyze` in the terminal)
 - **Entropy as play** — identity rerolls, safe/chaos mode, glitch and strobing (with an upfront photosensitivity warning)
-- **Discovery over documentation** — trophies for anomalies you trigger in the wild; ciphers, vault media, singularity rituals, arcade cabinets, Cards of Chaos
+- **Discovery over documentation** — trophies for anomalies you trigger in the wild; ciphers, vault media, singularity rituals, Cards of Chaos
 - **Diegetic UI** — the terminal FAB, sidebar modals, docking bay, and desktop scatter files are part of the fiction, not chrome around it
 
 There is no required path. The “point” is to poke at the garden until it pushes back.
@@ -49,7 +49,7 @@ For deeper layout notes, see [`docs/STRUCTURE.md`](docs/STRUCTURE.md).
 
 This is **session-local by design** — no external analytics, no telemetry pipeline. The eye watches this visit; persistence across sessions is limited to things like trophies and a few `localStorage` prefs.
 
-**Wired events** (via `recordBehavior()` / `callHook`): rerolls, chaos toggles, modals, terminal, god mode / konami complete, singularity, playlist, docking bay, slot fails, idle dissociation, pong sessions, arcade clear, cards rounds, trophy unlocks, cipher stage advances, scatter breach, pizza deploy.
+**Wired events** (via `recordBehavior()` / `callHook`): rerolls, chaos toggles, modals, terminal, god mode / konami complete, singularity, playlist, docking bay, slot fails, idle dissociation, pong sessions, cards rounds, trophy unlocks, cipher stage advances, scatter breach, pizza deploy.
 
 **Not separately metered** (covered indirectly or low signal): individual pong rally comments, per-card swap micro-actions, matrix cipher wheel spins, iOS poem page turns. Modal opens already capture sidebar/game entry.
 

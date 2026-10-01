@@ -84,16 +84,7 @@ for i, line in enumerate(lines):
 if tail_start is None:
     raise SystemExit("activateVaultMedia not found")
 
-arcade = (
-    "// ==========================================\n"
-    "// --- ARCADE MINIGAME: SEQUENCE PROTOCOL ---\n"
-    "// ==========================================\n"
-    + (ROOT / "js/modules/arcade.js").read_text(encoding="utf-8")
-    + "\n"
-)
-
 tail = "".join(lines[tail_start:])
-# Remove arcade from tail if duplicated - grep loadArcadeLevel in tail only once
 
 rebuilt = (
     "".join(lines[:386])
@@ -111,11 +102,6 @@ rebuilt = (
     + matrix_block
     + tail
 )
-
-# Inject arcade before chromatic glitch if missing
-if "function loadArcadeLevel" not in rebuilt:
-    marker = "// --- OCCASIONAL CHROMATIC ABERRATION ENGINE ---"
-    rebuilt = rebuilt.replace(marker, arcade + marker)
 
 script_path.write_text(rebuilt, encoding="utf-8")
 print(f"Rebuilt script.js: {len(rebuilt.splitlines())} lines")

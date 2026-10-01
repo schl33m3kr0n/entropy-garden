@@ -1299,11 +1299,6 @@ body.corrupted .mask-icon {
     -webkit-mask-image: url('../assets/icons/cog.svg');
 }
 
-.mask-icon--joystick {
-    mask-image: url('../assets/icons/joystick.svg');
-    -webkit-mask-image: url('../assets/icons/joystick.svg');
-}
-
 .mask-icon--cards {
     mask-image: url('../assets/icons/cards.svg');
     -webkit-mask-image: url('../assets/icons/cards.svg');

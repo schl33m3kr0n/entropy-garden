@@ -35,8 +35,6 @@ export {
     setMatrixNeedsRedraw,
 } from './facades/matrix.js?v=caesar-scroll-3';
 
-export { loadArcade, loadArcadeLevel } from './facades/arcade.js';
-
 export { loadCards, initCardsOfChaos } from './facades/cards.js';
 
 import { perf } from './core/shared.js';

@@ -14,7 +14,6 @@ EXTRACT = {
     "terminal": [(388, 878)],
     "singularity": [(1327, 1617), (1777, 2127)],
     "matrix": [(2199, 2376)],
-    "arcade": [(2663, 2776)],
 }
 
 # Lines omitted from main.js (duplicates moved to shared/state/modules)
@@ -95,10 +94,6 @@ def postprocess_singularity(body):
     return body
 
 
-def postprocess_arcade(body):
-    return body.replace("spawnPizza();", "loadTerminal().then((t) => t.spawnPizza());")
-
-
 def postprocess_main(body):
     body = re.sub(r"^let slotState = \[null, null, null\]; \n", "", body, flags=re.M)
     body = body.replace(
@@ -158,12 +153,6 @@ def main():
         MATRIX_HEADER + matrix_body + MATRIX_FOOTER,
     )
 
-    arcade_body = postprocess_arcade("".join(slice_lines(lines, EXTRACT["arcade"])))
-    write(
-        MODULES / "arcade.js",
-        ARCADE_HEADER + arcade_body + ARCADE_FOOTER,
-    )
-
     main_body = postprocess_main(main_lines(lines))
     write(
         ROOT / "js" / "main.js",
@@ -195,8 +184,6 @@ export let extraPizzas = 0;
 export let slotState = [null, null, null];
 export let slotIndexes = [0, 0, 0];
 export let currentPoemIndex = 0;
-export let arcadeScore = 0;
-export let currentSequenceIndex = 0;
 export let activeUtterances = [];
 
 export function setGardenHasStarted(value = true) {
@@ -456,12 +443,10 @@ LAZY_JS = r"""// Lazy module loader with call-through stubs
 let terminalMod;
 let singularityMod;
 let matrixMod;
-let arcadeMod;
 
 let terminalPromise;
 let singularityPromise;
 let matrixPromise;
-let arcadePromise;
 
 const terminalQueue = [];
 
@@ -495,16 +480,6 @@ export function loadMatrix() {
         });
     }
     return matrixPromise;
-}
-
-export function loadArcade() {
-    if (!arcadePromise) {
-        arcadePromise = import('./modules/arcade.js').then((mod) => {
-            arcadeMod = mod;
-            return mod;
-        });
-    }
-    return arcadePromise;
 }
 
 export function pushTerminalLog(msg) {
@@ -546,11 +521,6 @@ export function resizeCanvas() {
 
 export function setMatrixNeedsRedraw() {
     import('./state.js').then((s) => { s.needsFullRedraw = true; });
-}
-
-export async function loadArcadeLevel() {
-    const mod = await loadArcade();
-    mod.loadArcadeLevel();
 }
 
 export function getTerminalContainer() {
@@ -708,19 +678,7 @@ window.addEventListener('resize', () => {
 export { resizeCanvas, startGardenLoop, stopGardenLoop };
 """
 
-ARCADE_HEADER = r"""import { sfx, playSound } from '../shared.js';
-import { arcadeScore, currentSequenceIndex } from '../state.js';
-import { pushTerminalLog, loadTerminal } from '../lazy.js';
-
-// --- ARCADE MINIGAME: SEQUENCE PROTOCOL ---
-"""
-
-ARCADE_FOOTER = r"""
-
-export { loadArcadeLevel };
-"""
-
-MAIN_HEADER = r"""// Entropy Garden — main entry (lazy-loads terminal, matrix, singularity, arcade)
+MAIN_HEADER = r"""// Entropy Garden — main entry (lazy-loads terminal, matrix, singularity)
 import {
     sfx,
     playSound,
@@ -766,7 +724,6 @@ import {
     stopGardenLoop,
     resizeCanvas,
     setMatrixNeedsRedraw,
-    loadArcadeLevel,
     loadTerminal,
     getTerminalContainer,
     getTermInput,

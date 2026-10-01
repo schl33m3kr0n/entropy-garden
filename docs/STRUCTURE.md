@@ -27,7 +27,7 @@ Do **not** maintain a parallel app. Legacy monolith lives in `archive/legacy/` o
 | `main.js` | ES module entry (http/https) |
 | `lazy.js` | Facade barrel → `loaders/` + `facades/` |
 | `loaders/` | Promise cache per lazy module (`create-loader.js`) |
-| `facades/` | Call-through stubs (terminal, matrix, singularity, arcade, cards) |
+| `facades/` | Call-through stubs (terminal, matrix, singularity, cards) |
 | `ui/` | DOM bindings (`sidebar.js`, `playlist.js`, `modal-a11y.js`) |
 | `core/environment.js` | Protocol / device / browser flags |
 | `core/shared.js` | Re-export barrel (imports unchanged across the app) |
@@ -45,7 +45,7 @@ Do **not** maintain a parallel app. Legacy monolith lives in `archive/legacy/` o
 | `ios/` | iOS UI, poems archive, terminal boot |
 | `boot/` | Classic scripts: `terminal-sfx.js`, `trophies.js` |
 | `game/` | Pong (`pong/session.js`, `pong/constants.js`), Konami, Cards of Chaos (`cards/game.js`) |
-| `modules/` | Lazy modules: `terminal`, `matrix`, `singularity`, `arcade` |
+| `modules/` | Lazy modules: `terminal`, `matrix`, `singularity` |
 
 ### Legacy (`archive/legacy/` — not loaded)
 

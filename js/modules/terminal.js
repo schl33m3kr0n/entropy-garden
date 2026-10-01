@@ -529,10 +529,6 @@ function processCommand(cmd) {
     else if(cmd === 'signal' || cmd === 'live_feed') {
         globalThis.openModal('signal');
     }
-    else if(cmd === 'arcade' || cmd === 'play' || cmd === 'game') {
-        pushTerminalLog("> BOOTING EMULATOR...");
-        globalThis.openModal('arcade');
-    }
     else if(cmd === 'cards' || cmd === 'chaos') {
         pushTerminalLog("> SHUFFLING THE CHAOS DECK...");
         globalThis.openModal('cards');

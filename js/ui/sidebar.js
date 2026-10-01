@@ -6,7 +6,6 @@ const MODAL_TARGETS = {
     projects: 'projects',
     signal: 'signal',
     vault: 'vault',
-    arcade: 'arcade',
     cards: 'cards',
     poems: 'poems',
     trophies: 'trophies',

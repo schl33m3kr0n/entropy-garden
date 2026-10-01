@@ -52,8 +52,6 @@ export function incrementExtraPizzas() {
 export let slotState = [null, null, null];
 export let slotIndexes = [0, 0, 0];
 export let currentPoemIndex = 0;
-export let arcadeScore = 0;
-export let currentSequenceIndex = 0;
 export let activeUtterances = [];
 
 export function setGardenHasStarted(value = true) {

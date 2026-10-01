@@ -136,7 +136,7 @@ def main() -> None:
         "base.css": "reset, gatekeeper, loader",
         "garden.css": "matrix, panopticon, artifacts, docking bay",
         "chrome.css": "sidebar, modals, HUD, terminal, playlist",
-        "games.css": "arcade, cards of chaos, pong overlays",
+        "games.css": "cards of chaos, pong overlays",
         "ios.css": "iOS layout & overrides",
         "motion.css": "keyframes & reduced-motion overrides",
     }

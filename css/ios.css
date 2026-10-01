@@ -92,38 +92,6 @@ body.ios-ui #singularity-canvas {
     touch-action: none;
 }
 
-body.ios-ui #arcade-controls,
-body.ios-ui .arcade-answers-row {
-    gap: 10px;
-}
-
-body.ios-ui #arcade-controls .interactive-square {
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-}
-
-body.ios-ui #sequence-display {
-    flex-wrap: nowrap;
-    justify-content: center;
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    padding: 14px 18px;
-    border-radius: var(--ios-radius-md);
-}
-
-body.ios-ui #sequence-display .matrix-grid {
-    border-radius: var(--ios-radius-sm);
-    overflow: hidden;
-}
-
-body.ios-ui #arcade-screen {
-    height: auto;
-    min-height: 120px;
-    padding: 14px 18px;
-    border-radius: var(--ios-radius-md);
-}
-
 body:not(.ios-ui) #playlist-menu {
     width: 186px;
     max-width: 186px;
@@ -1019,7 +987,6 @@ body.ios-ui .settings-toggle,
 body.ios-ui .settings-dropdown,
 body.ios-ui .playlist-btn,
 body.ios-ui .singularity-btn,
-body.ios-ui .arcade-btn,
 body.ios-ui .carousel-btn,
 body.ios-ui .lightbox-btn {
     border-radius: var(--ios-radius-md);
@@ -1233,15 +1200,7 @@ body.ios-ui .vault-media {
     border-radius: var(--ios-radius-md);
 }
 
-body.ios-ui .trophy-card,
-body.ios-ui #arcade-game-container {
-    border-radius: var(--ios-radius-md);
-}
-
-body.ios-ui #arcade-screen,
-body.ios-ui #sequence-display,
-body.ios-ui .interactive-square,
-body.ios-ui .matrix-grid {
+body.ios-ui .trophy-card {
     border-radius: var(--ios-radius-md);
 }
 
@@ -1274,20 +1233,6 @@ body.ios-ui .ios-modal-reroll {
     border-radius: var(--radius-pill);
 }
 
-#modal-arcade .modal-content {
-    overflow: hidden;
-}
-
-#modal-arcade .scrollable-content {
-    overflow-x: hidden;
-    overflow-y: visible;
-    max-height: none;
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    padding: 14px 18px;
-}
-
 #modal-vault .scrollable-content {
     overflow-x: hidden;
     overflow-y: auto;
@@ -1300,8 +1245,6 @@ body.ios-ui .ios-modal-reroll {
 
 #modal-vault #refresh-hint,
 #modal-vault .ios-modal-reroll,
-#modal-arcade #refresh-hint,
-#modal-arcade .ios-modal-reroll,
 #modal-trophies #refresh-hint,
 #modal-trophies .ios-modal-reroll,
 #modal-projects #refresh-hint,

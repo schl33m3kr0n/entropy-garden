@@ -816,10 +816,6 @@
             safe: ["vault breach authorized. nice loot"],
             gritty: ["the vault opens. hide your browser history"],
         },
-        modalArcade: {
-            safe: ["arcade online. insert coin. insert soul"],
-            gritty: ["games? in my panopticon? it's more likely than you think"],
-        },
         modalCards: {
             safe: ["cards of chaos deployed. strategize or perish"],
             gritty: ["52 cards. infinite regret. shuffle anyway"],
