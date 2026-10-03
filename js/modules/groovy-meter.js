@@ -1,4 +1,6 @@
 // Groovy meter module
+import { perf } from '../core/shared.js';
+
 let groovyLevel = 0;
 const MAX_GROOVY = 100;
 let meterFill;
@@ -12,6 +14,8 @@ function getGroovyTier(level) {
 }
 
 export function initGroovyMeter() {
+    if (perf.isIOS || document.body.classList.contains('ios-ui')) return;
+
     // Inject HTML if not present
     if (!document.getElementById('groovy-meter-container')) {
         const container = document.createElement('div');

@@ -24,7 +24,11 @@ export function bindSidebarNavigation(openModal, { playHoverSound = false } = {}
         const modalId = item.dataset.modal;
         if (!modalId || !MODAL_TARGETS[modalId]) return;
 
-        item.addEventListener('click', () => openModal(modalId));
+        item.addEventListener('click', () => {
+            menu.classList.remove('active');
+            document.body.classList.remove('sidebar-is-open');
+            openModal(modalId);
+        });
 
         if (playHoverSound) {
             item.addEventListener('mouseenter', () => {

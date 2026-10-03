@@ -1,5 +1,9 @@
 /* Entropy Garden — iOS layout & overrides */
 
+body.ios-ui #groovy-meter-container {
+    display: none !important;
+}
+
 body.ios-ui #init-screen {
     padding-left: max(20px, env(safe-area-inset-left));
     padding-right: max(20px, env(safe-area-inset-right));

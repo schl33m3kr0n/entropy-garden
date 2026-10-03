@@ -216,13 +216,15 @@ function beginGardenExperience() {
             warmSound(sfx.boop);
             lastTerminalLoggedTrackIndex = -1;
             resetBgmToStart();
-            setTimeout(() => {
-                try {
-                    initGroovyMeter();
-                } catch(e) {
-                    console.error('Groovy meter failed:', e);
-                }
-            }, 5000);
+            if (!perf.isIOS && !document.body.classList.contains('ios-ui')) {
+                setTimeout(() => {
+                    try {
+                        initGroovyMeter();
+                    } catch(e) {
+                        console.error('Groovy meter failed:', e);
+                    }
+                }, 5000);
+            }
         });
     } catch (err) {
         console.error('[Entropy Garden] initialize failed', err);
@@ -1750,6 +1752,9 @@ function initSidebarMarquees() {
 
         const li = textEl.closest('li');
         if (!li) return;
+
+        const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (!canHover) return;
 
         li.addEventListener('mouseenter', () => {
             window.setTimeout(() => applyTrackTitleMarquee(textEl, label), 280);

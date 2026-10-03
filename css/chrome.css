@@ -1599,10 +1599,19 @@ body.corrupted .comms-social:hover {
     border-radius: var(--radius-md);
     transition: border-color 0.3s, box-shadow 0.3s;
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.vault-item:hover {
-    border-style: solid; 
+@media (hover: hover) and (pointer: fine) {
+    .vault-item:hover {
+        border-style: solid;
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    }
+}
+
+.vault-item:active {
+    border-style: solid;
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
 }
 
@@ -1683,8 +1692,10 @@ body.corrupted .comms-social:hover {
     background: #fff;
 }
 
-.vault-item-sphere:hover {
-    box-shadow: 0 0 18px rgba(0, 255, 0, 0.35);
+@media (hover: hover) and (pointer: fine) {
+    .vault-item-sphere:hover {
+        box-shadow: 0 0 18px rgba(0, 255, 0, 0.35);
+    }
 }
 
 .vault-item--locked {
@@ -1703,8 +1714,10 @@ body.corrupted .comms-social:hover {
     cursor: pointer;
 }
 
-.vault-item--locked:hover {
-    box-shadow: 0 0 18px rgba(0, 255, 0, 0.45);
+@media (hover: hover) and (pointer: fine) {
+    .vault-item--locked:hover {
+        box-shadow: 0 0 18px rgba(0, 255, 0, 0.45);
+    }
 }
 
 body.corrupted .vault-item--locked {
@@ -1721,8 +1734,10 @@ body.corrupted .vault-item--locked {
         rgba(18, 0, 6, 0.92);
 }
 
-body.corrupted .vault-item--locked:hover {
-    box-shadow: 0 0 18px rgba(255, 51, 85, 0.42);
+@media (hover: hover) and (pointer: fine) {
+    body.corrupted .vault-item--locked:hover {
+        box-shadow: 0 0 18px rgba(255, 51, 85, 0.42);
+    }
 }
 
 body.corrupted .vault-locked-face {
@@ -2047,9 +2062,14 @@ body.corrupted .vault-dialogue-choice:focus-visible {
     to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* Reveals the full, bright, psychedelic color when you hover over it! */
-.vault-item:hover .vault-media {
-    filter: grayscale(0%) contrast(1) brightness(1); 
+@media (hover: hover) and (pointer: fine) {
+    .vault-item:hover .vault-media {
+        filter: grayscale(0%) contrast(1) brightness(1);
+    }
+}
+
+.vault-item:active .vault-media {
+    filter: grayscale(0%) contrast(1) brightness(1);
 }
 
 .video-bg {
@@ -2136,9 +2156,14 @@ body.corrupted .vault-dialogue-choice:focus-visible {
   cursor: zoom-in;
 }
 
-/* Reveal full color on hover */
-.vault-item:hover .carousel-slide {
-  filter: grayscale(0%) contrast(1) brightness(1); 
+@media (hover: hover) and (pointer: fine) {
+    .vault-item:hover .carousel-slide {
+        filter: grayscale(0%) contrast(1) brightness(1);
+    }
+}
+
+.vault-item:active .carousel-slide {
+    filter: grayscale(0%) contrast(1) brightness(1);
 }
 
 /* Terminal-Themed UI Buttons */
@@ -2158,9 +2183,10 @@ body.corrupted .vault-dialogue-choice:focus-visible {
   transition: all 0.3s ease;
 }
 
-/* Reveal the arrows only when you hover over the box */
-.vault-item:hover .carousel-btn {
-  opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+    .vault-item:hover .carousel-btn {
+        opacity: 1;
+    }
 }
 
 .carousel-btn:hover {
@@ -2724,13 +2750,17 @@ body.corrupted #birds-mute-btn.is-muted {
     gap: 15px;
     border-radius: var(--radius-sm);
     transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-#sidebar-menu li:hover {
-    background: var(--neon-green);
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
-    color: #000 !important;
-    -webkit-text-fill-color: #000 !important;
+@media (hover: hover) and (pointer: fine) {
+    #sidebar-menu li:hover {
+        background: var(--neon-green);
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
 }
 
 /* --- SIDEBAR TEXT ANIMATION --- */
@@ -2751,26 +2781,58 @@ body.corrupted #birds-mute-btn.is-muted {
     white-space: nowrap;
 }
 
-/* --- THE HOVER OVERRIDES --- */
-#sidebar-menu li:hover .sidebar-text,
-#sidebar-menu li:hover .sidebar-text *,
-#sidebar-menu li:hover .track-title-content,
-#sidebar-menu li:hover .track-title-scroll,
-#sidebar-menu li:hover .track-title-gap {
-    color: #000 !important;
-    -webkit-text-fill-color: #000 !important;
-    text-shadow: none !important;
+/* Mouse-only hover — sticky :hover on touch eats the first tap while labels expand. */
+@media (hover: hover) and (pointer: fine) {
+    #sidebar-menu li:hover .sidebar-text,
+    #sidebar-menu li:hover .sidebar-text *,
+    #sidebar-menu li:hover .track-title-content,
+    #sidebar-menu li:hover .track-title-scroll,
+    #sidebar-menu li:hover .track-title-gap {
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    #sidebar-menu li:hover .sidebar-text {
+        max-width: 200px;
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    #sidebar-menu li:hover .mask-icon {
+        filter: none !important;
+        background-color: #000 !important;
+    }
 }
 
-#sidebar-menu li:hover .sidebar-text {
-    max-width: 200px;
-    opacity: 1;
-    transform: translateX(0);
-}
+@media (hover: none), (pointer: coarse) {
+    #sidebar-menu.active li .sidebar-text {
+        max-width: 200px;
+        opacity: 1;
+        transform: translateX(0);
+    }
 
-#sidebar-menu li:hover .mask-icon {
-    filter: none !important;
-    background-color: #000 !important;
+    #sidebar-menu li:active {
+        background: var(--neon-green);
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+
+    #sidebar-menu li:active .sidebar-text,
+    #sidebar-menu li:active .sidebar-text *,
+    #sidebar-menu li:active .track-title-content,
+    #sidebar-menu li:active .track-title-scroll,
+    #sidebar-menu li:active .track-title-gap {
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    #sidebar-menu li:active .mask-icon {
+        filter: none !important;
+        background-color: #000 !important;
+    }
 }
 
 #sidebar-menu li .sidebar-text.track-title-marquee {
@@ -3711,8 +3773,10 @@ body.corrupted #sidebar-menu {
 body.corrupted #sidebar-menu li {
     color: var(--alert-red);
 }
-body.corrupted #sidebar-menu li:hover {
-    background: var(--alert-red);
+@media (hover: hover) and (pointer: fine) {
+    body.corrupted #sidebar-menu li:hover {
+        background: var(--alert-red);
+    }
 }
 body.corrupted #sidebar-menu li .mask-icon {
     background-color: var(--alert-red);
@@ -3807,11 +3871,19 @@ body.corrupted #sidebar-menu li {
     color: var(--alert-red);
     border-bottom-color: rgba(255, 0, 85, 0.35);
 }
-body.corrupted #sidebar-menu li:hover {
-    background: var(--alert-red);
+@media (hover: hover) and (pointer: fine) {
+    body.corrupted #sidebar-menu li:hover {
+        background: var(--alert-red);
+    }
 }
 body.corrupted #sidebar-menu li .mask-icon {
     background-color: var(--alert-red);
+}
+
+@media (hover: none), (pointer: coarse) {
+    body.corrupted #sidebar-menu li:active {
+        background: var(--alert-red);
+    }
 }
 
 .stats-text-grid {
