@@ -306,7 +306,7 @@
                 "let's just say, hypothetically, if your civilization was about to be invaded by aliens, would you be able to fight back?",
                 "i always love seeing the silly things people say in the predictions section",
                 "in the world of sports, soccer fans from losing countries in the World Cup claim that the winner goes to the highest bidder. in other news, scientists confirm that X Gon' Give It to Ya",
-                "journalists across the globe are sounding the alarm over a new threat to world peace: toilet paper orientation. analysts confirm that over-hangers are statistically more likely to be invited to parties and are, scientifically speaking, better than everyone else",
+                "analysts confirm over-hangers are 5% more likely to be invited to parties on top of generally being better than everyone else",
                 "according to a new study in Nature magazine, she is statistically more likely to be talking to other guys",
                 {
                     text: "this just in, we have breaking news that this cat is, like, totes adorbs X3",
