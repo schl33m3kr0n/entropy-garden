@@ -3645,6 +3645,79 @@ body.perf-safari.chromatic-active #corrupt-fx .corrupt-fx-noise {
     color: #777;
 }
 
+.alt-history-topics {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 2px 0 0;
+}
+
+.alt-history-topic {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 6px 8px;
+    border: 1px solid rgba(0, 255, 0, 0.18);
+    border-radius: var(--radius-sm);
+    background: rgba(0, 20, 0, 0.35);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.alt-history-topic:focus-visible {
+    border-color: rgba(0, 255, 0, 0.45);
+    background: rgba(0, 40, 0, 0.45);
+    outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .alt-history-topic:hover {
+        border-color: rgba(0, 255, 0, 0.45);
+        background: rgba(0, 40, 0, 0.45);
+    }
+}
+
+.alt-history-topic-name {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: lowercase;
+    color: var(--neon-green);
+}
+
+.alt-history-topic-blurb {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.66rem;
+    line-height: 1.4;
+    color: #8a8a8a;
+    font-style: italic;
+}
+
+body.corrupted .alt-history-topic {
+    border-color: rgba(255, 0, 85, 0.22);
+    background: rgba(28, 0, 8, 0.4);
+}
+
+body.corrupted .alt-history-topic:focus-visible {
+    border-color: rgba(255, 0, 85, 0.5);
+    background: rgba(48, 0, 12, 0.5);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body.corrupted .alt-history-topic:hover {
+        border-color: rgba(255, 0, 85, 0.5);
+        background: rgba(48, 0, 12, 0.5);
+    }
+}
+
+body.corrupted .alt-history-topic-name {
+    color: var(--alert-red);
+}
+
 .alt-history-note {
     margin: 10px 0 0;
     font-size: 0.66rem;

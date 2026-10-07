@@ -5,6 +5,7 @@ import { initDiscoBallSpin } from '../disco-ball-spin.js';
 import { initDashboard } from "./dashboard.js";
 import { loadAlternateHistoryArticles } from '../data/alternate-history.data.js';
 import { resolveAlternateHistoryArticles } from '../alternate-history-search.js';
+import { describeMrDiscoTopic, pickMrDiscoTopics } from '../data/mr-disco-topics.data.js';
 import { playSound, sfx } from '../core/audio/sfx.js';
 
 const ALT_HISTORY_SEEN_KEY = 'entropy-garden-alt-history-seen-v1';
@@ -226,6 +227,29 @@ async function setup() {
         window.setTimeout(finish, 480);
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function topicLinksMarkup(tags) {
+        const topics = pickMrDiscoTopics(tags);
+        if (!topics.length) return '';
+        const items = topics.map((tag) => {
+            const blurb = describeMrDiscoTopic(tag);
+            return `
+                <button type="button" class="alt-history-topic" data-topic="${escapeHtml(tag)}">
+                    <span class="alt-history-topic-name">${escapeHtml(tag)}</span>
+                    <span class="alt-history-topic-blurb">${escapeHtml(blurb)}</span>
+                </button>
+            `;
+        }).join('');
+        return `<nav class="alt-history-topics" aria-label="Related topics">${items}</nav>`;
+    }
+
     function renderArticles({ articles, matchedBySearch, matchCount }, query = '', { onDrawerComplete } = {}) {
         if (!resultEl || !articles?.length) return;
 
@@ -239,16 +263,16 @@ async function setup() {
 
         const entries = articles.map((article) => `
             <article class="alt-history-entry">
-                <p class="alt-history-meta">${article.year}</p>
-                <h3>${article.title}</h3>
-                <p class="alt-history-excerpt">${article.excerpt}</p>
-                <p class="alt-history-tags">${article.tags.map((tag) => `#${tag}`).join(' ')}</p>
+                <p class="alt-history-meta">${escapeHtml(article.year)}</p>
+                <h3>${escapeHtml(article.title)}</h3>
+                <p class="alt-history-excerpt">${escapeHtml(article.excerpt)}</p>
+                ${topicLinksMarkup(article.tags)}
             </article>
         `).join('');
 
         resultEl.innerHTML = `
             <div class="alt-history-entries">${entries}</div>
-            <p class="alt-history-note">${note}</p>
+            <p class="alt-history-note">${escapeHtml(note)}</p>
         `;
         const keepOpen = isArchiveOpen();
         if (keepOpen) resultEl.scrollTop = 0;
@@ -401,6 +425,16 @@ async function setup() {
     form?.addEventListener('submit', (event) => {
         event.preventDefault();
         showAlternateHistory(queryInput?.value ?? '', { googlyLeadIn: true });
+    });
+
+    resultEl?.addEventListener('click', (event) => {
+        const topicBtn = event.target.closest('.alt-history-topic');
+        if (!topicBtn || !resultEl.contains(topicBtn)) return;
+        const topic = topicBtn.dataset.topic?.trim();
+        if (!topic) return;
+        event.preventDefault();
+        if (queryInput) queryInput.value = topic;
+        showAlternateHistory(topic, { googlyLeadIn: true });
     });
 
     const stage = host.closest('.mr-disco-stage');
