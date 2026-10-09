@@ -429,7 +429,7 @@ function handlePageReturn(event) {
 }
 
 document.addEventListener("visibilitychange", () => {
-    document.title = document.hidden ? needyTitles[Math.floor(Math.random() * needyTitles.length)] : originalTitle;
+    document.title = document.hidden ? (pickOne(needyTitles) || originalTitle) : originalTitle;
     handlePanopticonVisibilityChange(document.hidden);
     if (document.hidden) {
         stopGardenLoop();
@@ -1017,7 +1017,7 @@ function randomizeData() {
         : lore.statsSafe;
     statsRows.forEach((stat) => {
         const pool = stat.vals ?? (stat.val != null ? [stat.val] : []);
-        const val = pool.length ? pool[Math.floor(Math.random() * pool.length)] : '???';
+        const val = pool.length ? (pickOne(pool) ?? '???') : '???';
         const li = document.createElement('li'); 
         li.className = "stat-row"; 
         li.innerHTML = `<span class="stat-label">${stat.label}</span><span class="stat-val">${val}</span>`; 
@@ -2089,12 +2089,8 @@ function scheduleIdleDissociation() {
         // Sleep first — terminal/behavior side effects must not abort dissociation.
         beginIdleDissociation();
         try {
-            const idlePool = isCorrupted
-                ? (lore?.idleMessagesSafe || []).concat(lore?.idleMessagesGritty || [])
-                : (lore?.idleMessagesSafe || []);
-            if (idlePool.length) {
-                pushTerminalLog(idlePool[Math.floor(Math.random() * idlePool.length)]);
-            }
+            const idleLine = pickOne(lore.idleMessagesSafe, lore.idleMessagesGritty);
+            if (idleLine) pushTerminalLog(idleLine);
             recordBehavior('idle_dissociation');
         } catch {
             /* keep sleeping even if log/behavior fails */

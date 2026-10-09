@@ -13,13 +13,24 @@ export function shuffle(array) {
 }
 
 export function createBag(arr) {
+    const source = Array.isArray(arr) ? arr : [];
     let bag = [];
+    let lastDrawn;
     return function draw(count = 1) {
+        if (!source.length) return count === 1 ? undefined : [];
         const results = [];
         for (let i = 0; i < count; i++) {
-            if (bag.length === 0) bag = shuffle([...arr]);
+            if (bag.length === 0) {
+                bag = shuffle([...source]);
+                const avoid = results.length ? results[results.length - 1] : lastDrawn;
+                if (source.length > 1 && avoid !== undefined && bag[bag.length - 1] === avoid) {
+                    const swapAt = Math.floor(Math.random() * (bag.length - 1));
+                    [bag[swapAt], bag[bag.length - 1]] = [bag[bag.length - 1], bag[swapAt]];
+                }
+            }
             results.push(bag.pop());
         }
+        lastDrawn = results[results.length - 1];
         return count === 1 ? results[0] : results;
     };
 }
@@ -42,10 +53,12 @@ function getLoreDrawer(safe, gritty = []) {
 }
 
 export function pickOne(safe, gritty = []) {
+    if (!Array.isArray(safe)) return undefined;
     return getLoreDrawer(safe, gritty)();
 }
 
 export function pickMany(safe, gritty, count) {
+    if (!Array.isArray(safe)) return [];
     return getLoreDrawer(safe, gritty)(count);
 }
 

@@ -305,6 +305,7 @@ const fakeFiles = [
     "Korzamuron_grammar_v2.txt", "woop.mp3", "do_not_delete.sys", 
     "skate_footage_raw.mov", "resume_draft_v7.pdf"
 ];
+const drawFakeFile = createBag(fakeFiles);
 
 // --- CIPHER HELPERS & REWARDS ---
 const cipherPlaintext =
@@ -569,7 +570,7 @@ function triggerScatter() {
     for(let i=0; i<40; i++) {
         let f = document.createElement('div');
         f.className = 'scatter-file';
-        let name = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
+        let name = drawFakeFile();
         f.innerHTML = `<div class="file-icon"></div><span>${name}</span>`;
         f.style.left = (Math.random() * 80 + 10) + '%';
         f.style.top = '-50px';

@@ -6,6 +6,7 @@ import {
     showPanopticonComment,
     hidePanopticonComment,
     commentTtlMs,
+    pickOne,
     perf,
 } from '../core/shared.js';
 import { isCorrupted, gardenHasStarted } from '../core/state.js';
@@ -20,24 +21,10 @@ let lastShownText = '';
 let lastShownAt = 0;
 let lastFireAt = 0;
 
-function pickFromPool(safe = [], gritty = []) {
-    const useGritty = isCorrupted && gritty.length;
-    const primary = useGritty ? gritty : safe;
-    const alt = useGritty ? safe : gritty;
-    if (!primary.length && !alt.length) return null;
-    if (!primary.length) {
-        return alt[Math.floor(Math.random() * alt.length)];
-    }
-    if (!alt.length || Math.random() < 0.82) {
-        return primary[Math.floor(Math.random() * primary.length)];
-    }
-    return alt[Math.floor(Math.random() * alt.length)];
-}
-
 function pickComment(triggerId) {
     const entry = globalThis.lorePools?.panopticonTriggerComments?.[triggerId];
-    if (!entry) return null;
-    return pickFromPool(entry.safe, entry.gritty);
+    if (!entry?.safe) return null;
+    return pickOne(entry.safe, entry.gritty) ?? null;
 }
 
 /**

@@ -1,5 +1,20 @@
 /** Search + random picker for alternate history articles. */
 
+import { createBag } from './core/lore/random.js';
+
+/** @type {WeakMap<object, Map<string, () => any>>} */
+const historyBags = new WeakMap();
+
+function drawFromHistoryBag(root, pool, key) {
+    let byKey = historyBags.get(root);
+    if (!byKey) {
+        byKey = new Map();
+        historyBags.set(root, byKey);
+    }
+    if (!byKey.has(key)) byKey.set(key, createBag(pool));
+    return byKey.get(key);
+}
+
 /**
  * @param {import('./data/alternate-history.data.js').AlternateHistoryArticle[]} articles
  * @param {string} [query]
@@ -39,19 +54,28 @@ export function pickAlternateHistorySample(pool, count = 3, options = {}) {
     if (!pool.length || count < 1) return [];
 
     const exclude = new Set(options.excludeIds ?? []);
-    let candidates = pool;
-    if (exclude.size && pool.length > exclude.size) {
-        candidates = pool.filter((article) => !exclude.has(article.id));
-    }
+    const root = options.rootPool ?? pool;
+    const draw = drawFromHistoryBag(root, pool, options.bagKey ?? 'all');
+    const picked = [];
+    const seen = new Set();
+    const maxAttempts = Math.max(pool.length * 2, count * 4);
 
-    const shuffled = [...candidates].sort(() => Math.random() - 0.5);
-    const picked = shuffled.slice(0, count);
+    for (let attempt = 0; attempt < maxAttempts && picked.length < count; attempt += 1) {
+        const article = draw();
+        if (!article || seen.has(article.id)) continue;
+        if (exclude.has(article.id) && pool.length > exclude.size) continue;
+        seen.add(article.id);
+        picked.push(article);
+    }
 
     if (picked.length < count) {
         const pickedIds = new Set(picked.map((article) => article.id));
-        const rest = pool.filter((article) => !pickedIds.has(article.id));
-        const extra = [...rest].sort(() => Math.random() - 0.5).slice(0, count - picked.length);
-        picked.push(...extra);
+        for (const article of pool) {
+            if (picked.length >= count) break;
+            if (pickedIds.has(article.id)) continue;
+            pickedIds.add(article.id);
+            picked.push(article);
+        }
     }
 
     return picked;
@@ -63,21 +87,20 @@ export function pickAlternateHistorySample(pool, count = 3, options = {}) {
  */
 export function resolveAlternateHistoryArticles(articles, options = {}) {
     const count = options.count ?? 3;
-    const matches = searchAlternateHistory(articles, options.query);
-    const pickerOptions = { excludeIds: options.excludeIds ?? [] };
-
-    if (matches.length) {
-        return {
-            articles: pickAlternateHistorySample(matches, count, pickerOptions),
-            matchedBySearch: Boolean(options.query?.trim()),
-            matchCount: matches.length,
-        };
-    }
+    const query = options.query?.trim() ?? '';
+    const matches = searchAlternateHistory(articles, query);
+    const matchedBySearch = Boolean(query);
+    const pool = matches.length ? matches : articles;
+    const pickerOptions = {
+        excludeIds: options.excludeIds ?? [],
+        rootPool: articles,
+        bagKey: matchedBySearch ? `q:${query.toLowerCase()}` : 'random',
+    };
 
     return {
-        articles: pickAlternateHistorySample(articles, count, pickerOptions),
-        matchedBySearch: false,
-        matchCount: 0,
+        articles: pickAlternateHistorySample(pool, count, pickerOptions),
+        matchedBySearch: matchedBySearch && matches.length > 0,
+        matchCount: matches.length,
     };
 }
 

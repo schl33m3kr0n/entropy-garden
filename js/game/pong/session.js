@@ -13,6 +13,7 @@ import {
     isApril420,
     isIosTabletScreen,
     commentTtlMs,
+    pickOne,
 } from '../../core/shared.js';
 import { callHook, getHook } from '../../core/hooks.js';
 import { isCorrupted, isSingularityActive } from '../../core/state.js';
@@ -346,19 +347,15 @@ let reserviceTimer = null;
 let sixSevenResumeHandler = null;
 let ballHeld = false;
 
-function pickFrom(pool) {
-    return pool[Math.floor(Math.random() * pool.length)];
-}
-
 /** Corrupted mode: state flag + body class (CSS toggle). */
 function isPongCorruptedMode() {
     return isCorrupted || document.body.classList.contains('corrupted');
 }
 
 function pickPongComment(safePool, corruptedPool) {
-    if (isApril420() && PONG_COMMENT_HIGH.length) return pickFrom(PONG_COMMENT_HIGH);
-    if (isPongCorruptedMode() && corruptedPool?.length) return pickFrom(corruptedPool);
-    return pickFrom(safePool);
+    if (isApril420() && PONG_COMMENT_HIGH.length) return pickOne(PONG_COMMENT_HIGH);
+    if (isPongCorruptedMode() && corruptedPool?.length) return pickOne(safePool, corruptedPool);
+    return pickOne(safePool);
 }
 
 function isSixSevenScore() {

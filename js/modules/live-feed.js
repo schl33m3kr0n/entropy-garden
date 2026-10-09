@@ -1,7 +1,6 @@
 /** Live Feed modal — scrolling social non-activity ticker. */
 
-import { perf } from '../core/shared.js';
-import { isCorrupted } from '../core/state.js';
+import { createBag, pickOne, perf } from '../core/shared.js';
 
 const ITEM_DURATION_MS = 4200;
 const GAP_MS = 280;
@@ -9,21 +8,7 @@ const GAP_MS = 280;
 let statusEl = null;
 let cycleTimer = 0;
 let running = false;
-let recentLines = [];
-
-function pickOne(safe = [], gritty = []) {
-    const useGritty = isCorrupted && gritty.length;
-    const pool = useGritty && Math.random() < 0.35 ? gritty : safe;
-    const fallback = useGritty ? safe : gritty;
-    const source = pool.length ? pool : fallback;
-    if (!source.length) return '';
-    return source[Math.floor(Math.random() * source.length)];
-}
-
-function pickHandle(handles = []) {
-    if (!handles.length) return 'Someone';
-    return handles[Math.floor(Math.random() * handles.length)];
-}
+const drawLineKind = createBag(['follow', 'follow', 'activity', 'activity', 'activity', 'unfollow']);
 
 function buildLine() {
     const pools = globalThis.lorePools ?? {};
@@ -32,26 +17,14 @@ function buildLine() {
     const activities = pools.liveFeedActivitiesSafe ?? [];
     const gritty = pools.liveFeedActivitiesGritty ?? [];
 
-    const roll = Math.random();
-    if (roll < 0.34) {
-        return `followed @${pickHandle(handles)}`;
+    const kind = drawLineKind();
+    if (kind === 'follow' && handles.length) {
+        return `followed @${pickOne(handles) || 'Someone'}`;
     }
-    if (roll < 0.48 && unfollowHandles.length) {
-        return `unfollowed @${pickHandle(unfollowHandles)}`;
+    if (kind === 'unfollow' && unfollowHandles.length) {
+        return `unfollowed @${pickOne(unfollowHandles) || 'Someone'}`;
     }
-    return pickOne(activities, gritty);
-}
-
-function pickUniqueLine() {
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-        const line = buildLine();
-        if (!recentLines.includes(line)) return line;
-    }
-    return buildLine();
-}
-
-function rememberLine(line) {
-    recentLines = [...recentLines.slice(-11), line];
+    return pickOne(activities, gritty) || '';
 }
 
 function restartAnimation() {
@@ -64,9 +37,7 @@ function restartAnimation() {
 function showNextLine() {
     if (!statusEl || !running) return;
 
-    const text = pickUniqueLine();
-    rememberLine(text);
-    statusEl.textContent = text;
+    statusEl.textContent = buildLine();
 
     if (perf.prefersReducedMotion) {
         cycleTimer = window.setTimeout(showNextLine, ITEM_DURATION_MS + GAP_MS);
@@ -87,7 +58,6 @@ export function startLiveFeed() {
     if (!statusEl || running) return;
 
     running = true;
-    recentLines = [];
     statusEl.textContent = '';
     statusEl.classList.remove('is-animating');
     showNextLine();
