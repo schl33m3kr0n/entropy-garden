@@ -777,6 +777,9 @@ const weirdLoadingPhrases = [
     "Deciding between brave or bravado in public spaces...",
     "Transferring data to every acronym agency...",
     "Wondering where it all went wrong...",
+    "Isolating that emotion and looping it on repeat...",
+    "Downloading unrelated files and assets because they looked cool...",
+    "Loading stale cache memory because i was programmed to stay in the past...",
 ];
 
 function revealGardenUI() {
