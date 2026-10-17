@@ -4,7 +4,7 @@
     Object.assign(g.lorePools, {
     vibesAudioSafe: [
         "Tame Impala (Slowed + Reverb)",
-        "My Stratocaster (Kind of in tune)",
+        "My Stratocaster (Mostly in tune)",
         "The hum of a CRT monitor",
         "Synthwave for plants",
         "Washed Out (Fading audio)",
@@ -35,7 +35,7 @@
         "Fart (The Remix)",
         "The Penis (Eek!)",
         "一剪梅 (Yi Jian Mei)",
-        "Red Sun in the Sky (Ironically but not really)",
+        "Red Sun in the Sky (Ironically for the most part)",
     ],
     vibesAudioGritty: [
         "Aphex Twin (Scaring the neighbors)",
@@ -103,7 +103,6 @@
         "Ignoring dietary guidelines",
         "Insulting a meatball sub because it burned my mouth",
         "Factoring polynomials with the grace of a prehistoric caveman",
-        "Considering the bomb",
         "Reminiscing on time immemorial",
         "Reducing waste in my local community",
         "Confusing the dogs at the park",
@@ -177,12 +176,15 @@
         "Closing off my feelings so I don't get crippled by the moral ambiguity of my violent actions",
         "Comparing apples to oranges",
         "Acting like I didn\'t just hit that curb",
+        "Discovering new ways to ruin the family reunion",
         "Powerscaling the local community",
         "Teaching my cat about meme literacy from rage comics to brainrot",
         "Meowing until the sound loses all meaning",
         "Improving myself and training every day so I can become the next Hokage",
         "Listening to the Cowboy Bebop soundtrack without watching past the third episode",
         "Considering a switch to Progressive®",
+        "Sampling the crows for my experimental gothic revival song",
+        "Disrupting group therapy with my unfiltered takes on capitalism",
     ],
     vibesActivityGritty: [
         "Regret",
@@ -199,7 +201,7 @@
         "Paying the ultimate price for what I've done",
         "Lifting weights (of my despair & melancholy)",
         "Kinkshaming",
-        "Rocking out with my cock out",
+        "Gracing them with my mental illnesses",
         "Disturbing the silent disco with an airhorn",
         "Staring at people in the subway until I get molly-whopped",
         "Saying just about anything to get out of jury duty",
@@ -274,9 +276,8 @@
         "Rawr XD",
         "UwU",
         "Spirit Airline Autopilot",
-        "Heavy lies the Burger King Crown",
         "Screaming into the void to hear an echo",
-        "Harvesting other people's discomfort in my presence",
+        "Harvesting the discomfort of those in my presence",
     ]
     });
 })(globalThis);

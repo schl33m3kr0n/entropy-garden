@@ -577,7 +577,7 @@ const weirdLoadingPhrases = [
     "Reverse-engineering alien tech in my garage...",
     "Poking the bear with a stick...",
     "Getting the notion to rock the boat...",
-    "Compelling you with the power of Christ",
+    "Compelling you with the power of Christ...",
     "Triangulating coordinates of the One Piece...",
     "Deploying data trolls to your RAM...",
     "Stealing your dreams with computer magic...",
@@ -775,11 +775,16 @@ const weirdLoadingPhrases = [
     "Clicking and dragging your opinion into the trash bin...",
     "Considering what the trolley thinks...",
     "Deciding between brave or bravado in public spaces...",
-    "Transferring data to every acronym agency...",
+    "Transferring your data to every acronym agency...",
     "Wondering where it all went wrong...",
     "Isolating that emotion and looping it on repeat...",
     "Downloading unrelated files and assets because they looked cool...",
-    "Loading stale cache memory because i was programmed to stay in the past...",
+    "Loading stale cache memory for the nostalgia factor...",
+    "Verifying how stupid your face looks...",
+    "Hiding the sheer awe of how massive that forehead is...",
+    "Asking for access to Bluetooth to scan your tendencies...",
+    "Converting unprocessed rage and angst into passive-aggressive Hallmark cards...",
+    "Commodifying the soul into a premium karmic subscription...",
 ];
 
 function revealGardenUI() {
