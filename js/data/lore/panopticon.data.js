@@ -846,6 +846,7 @@
             "welcome to the garden: blurring moral boundaries since 1981",
             "welcome to the garden: overwhelming visitors with underwhelming attractions",
             "welcome to the garden. nobody can explain how the speakeasy got here",
+            "welcome to the garden: bringing ants out of poverty one colony at a time",
             "welcome to the garden. Carl keeps mentioning a doomsday bunker under the facility. we can’t confirm the claim as of now",
         ],
         gritty: [
