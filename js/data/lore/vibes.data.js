@@ -33,7 +33,6 @@
         "A generic 'Study Beats' playlist",
         "Triangulating Stevie Wonder samples",
         "Fart (The Remix)",
-        "The Penis (Eek!)",
         "一剪梅 (Yi Jian Mei)",
         "Red Sun in the Sky (Ironically for the most part)",
     ],
@@ -44,6 +43,7 @@
         "Childish Gambino (Politically Conservative High School Shamefully Outdated Fight Rap)",
         "Corrupted MP3 files",
         "fractals.mp3 (on loop)",
+        "The Penis (Eek!)",
         "Kanye West ('And I'm back on my grind')",
     ],
     vibesActivitySafe: [

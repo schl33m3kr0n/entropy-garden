@@ -117,6 +117,7 @@
         "wait 'til corporate sees this",
         "this is not worth another 5-month detour into job searching",
         "it's not the meds. it's the institution",
+        "we implanted a chip in your brain while you weren't looking. it's just a prank, bro",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",
@@ -261,6 +262,7 @@
         "back so soon? i was just getting comfortable",
         "a 'later' or 'goodbye' would've been nice",
         "i was almost getting used to the silence",
+        "back from hibernation so soon?",
         "that's okay. i'm used to abandonment at this point",
     ],
     panopticonAwayReturnComments: {
