@@ -266,6 +266,7 @@
         "Consulting the Owner's Manual",
         "Sky Blue and Baby Barf Green",
         "Printing Error",
+        "stupidity approaching critical mass",
     ],
     vibesMoodGritty: [
         "Existential Dread (Lite)",
