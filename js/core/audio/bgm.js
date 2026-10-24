@@ -17,7 +17,6 @@ export const BGM_TRACKS = [
     'playboi carti - 7am (slowed reverb).mp3',
     'windows96 - nostalgia (slowed reverb).mp3',
     'washed out - echoes (slowed + reverb).mp3',
-    'don toliver - cardigan (slowed + reverb).mp3',
     'home - resonance (slowed + reverb).mp3',
     'macintosh plus - lisa frank 420 modern computing (slowed + reverb).mp3',
     'ambient8.mp3',
@@ -35,7 +34,6 @@ export const BGM_TRACK_INFO = [
     { title: '7am', artist: 'Adrian' },
     { title: 'Nostalgia (slowed + reverb)', artist: 'Windows96' },
     { title: 'Echoes (slowed + reverb)', artist: 'Washed Out' },
-    { title: 'Cardigan (slowed + reverb)', artist: 'Don Toliver' },
     { title: 'Resonance (slowed + reverb)', artist: 'HOME' },
     { title: 'リサフランク420 / 現代のコンピュー (slowed + reverb)', artist: 'Macintosh Plus' },
     { title: 'Cybernetic Night (Sci-Fi Ambient)', artist: 'KonstantinPazuzuStudio' },
@@ -227,7 +225,6 @@ const BGM_LARGE_FILES = new Set([
     'playboi carti - 7am (slowed reverb).mp3',
     'windows96 - nostalgia (slowed reverb).mp3',
     'washed out - echoes (slowed + reverb).mp3',
-    'don toliver - cardigan (slowed + reverb).mp3',
     'macintosh plus - lisa frank 420 modern computing (slowed + reverb).mp3',
 ]);
 
