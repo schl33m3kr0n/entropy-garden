@@ -299,8 +299,8 @@ const PANOPTICON_WAKE_YAWN_MS = 640;
 const PANOPTICON_WAKE_SETTLE_MS = 360;
 const PANOPTICON_WAKE_HALF_SHUT = 0.52;
 const PANOPTICON_WAKE_BLINK_SHUT = 0.88;
-const PANOPTICON_IDLE_COMMENT_MS = 10000;
-const PANOPTICON_IDLE_COMMENT_CHANCE = 1;
+const PANOPTICON_IDLE_COMMENT_MS = 22000;
+const PANOPTICON_IDLE_COMMENT_CHANCE = 0.38;
 const PANOPTICON_TAB_RETURN_MIN_MS = 500;
 const PANOPTICON_AWAY_NOTICE_MIN_MS = 300;
 const PANOPTICON_AWAY_NOTICE_MAX_MS = 800;
@@ -708,16 +708,6 @@ function schedulePanopticonLateNightCommentSync() {
     }, msUntilNextHourBoundary());
 }
 
-function pickBehaviorBiasedIdleComment() {
-    const getTrigger = getHook('getBehaviorIdleTrigger');
-    if (typeof getTrigger !== 'function') return null;
-    const triggerId = getTrigger();
-    if (!triggerId) return null;
-    const entry = globalThis.lorePools?.panopticonTriggerComments?.[triggerId];
-    if (!entry?.safe?.length) return null;
-    return pickOne(entry.safe, entry.gritty || []) ?? null;
-}
-
 function pickPanopticonIdleComment() {
     const pools = globalThis.lorePools;
     if (!pools) return null;
@@ -743,12 +733,6 @@ function pickPanopticonIdleComment() {
             panopticonLateNightShownKey = panopticonLateNightSlotKey();
             return lateNight;
         }
-    }
-
-    // Session profile leaks into idle chatter once there's something to notice.
-    if (Math.random() < 0.34) {
-        const behavioral = pickBehaviorBiasedIdleComment();
-        if (behavioral) return behavioral;
     }
 
     const part = getPanopticonDayPart();

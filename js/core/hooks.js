@@ -83,7 +83,7 @@ installGardenHooksGlobal();
  * - toggleTerminal, openTerminal
  * - toggleBossKey, toggleFullscreen, handleReroll, toggleMode, resetTimeline, resetIdleTimer
  * - firePanopticonComment, syncPanopticonCodeSequenceComments
- * - recordBehavior, printBehaviorReport, getBehaviorSnapshot, getBehaviorIdleTrigger
+ * - recordBehavior, printBehaviorReport, getBehaviorSnapshot
  * - stopGardenLoop, resumeGardenLoop, setCorrupted
  * - konamiBlocksPongArming, isKonamiInProgress, isKonamiActivelyEntering
  * - isPongArmingActive, isPongSessionActive, pongBlocksArrowNav
