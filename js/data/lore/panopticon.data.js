@@ -200,7 +200,6 @@
         "leave your expectations at the door",
         "let the stillness consume you until there’s nothing left",
         "your jimmies will be rustled quite shortly",
-        "now with real plants!",
         "the only pot we sell is ceramic",
         "we somehow still have less shade than kanye's tweets",
         "while we appreciate the offer, we do not accept your leavings as compost",
@@ -305,11 +304,9 @@
         "the inpatients add an element of surprise to your visit",
         "we were bailed out by a corporate juggernaut with compounding interest!",
         "he doesn’t see you if you don’t see him",
-        "thieves will be microwaved until well-done",
         "the liability waiver saves us the headache",
         "we’ll do anything to get beamed up from this hell-hole [please run quote by management]",
         "we have surprisingly few layovers",
-        "the racial tension has never been higher",
         "discussion of OJ is strictly prohibited. the ensuing riot hurts our bottom line",
         "we’ll give you a $5 gift card to any store if your car was broken into",
         "please reserve judgment until you return to your cars",
@@ -474,6 +471,7 @@
         "be the reason someone asks themself 'hell can't be that bad, right?'",
         "San Francisco: because homelessness is a feature, not a bug",
         "i'm Rick James, bitch!",
+        "thieves will be microwaved until well-done",
         "yes, we have an OnlyFans",
         "oh, so when Superman has x-ray vision, he's a hero, but when I do it, I'm committing a 'gross breach of privacy'",
         "so what are you wearing?",
@@ -835,6 +833,7 @@
             "welcome to the garden: living proof that sequels always disappoint",
             "welcome to the garden: the gloomy atmosphere is just ornamental",
             "welcome to the garden: corporate stopped caring decades ago",
+            "welcome to the garden: now with real plants!",
             "welcome to the garden: now a valid reason to avoid jury duty!",
             "welcome to the garden: legal’s not touching that with a ten-foot pole",
             "welcome to the garden: visit while the ice caps are still here!",
@@ -1195,40 +1194,307 @@
             gritty: [],
         },
         behaviorReroll: {
-            safe: ["third reroll. you like unstable timelines"],
-            gritty: ["entropy addict detected. refreshing reality again?"],
+            safe: [
+                "third reroll. you like unstable timelines",
+                "you keep refreshing reality like it owes you a better roll",
+                "another identity shuffle. the previous ones are still in the trash",
+            ],
+            gritty: [
+                "entropy addict detected. refreshing reality again?",
+                "stop spinning the wheel. your stats weren't the problem",
+            ],
         },
         behaviorChaos: {
-            safe: ["chaos mode engaged. noted in your file"],
-            gritty: ["corruption toggle logged. enjoy the grit"],
+            safe: [
+                "chaos mode engaged. noted in your file",
+                "you flipped the grit switch. bold aesthetic choice",
+                "corruption logged. the pink iris remembers who asked for it",
+            ],
+            gritty: [
+                "corruption toggle logged. enjoy the grit",
+                "you wanted it uglier. i can work with that",
+            ],
         },
         behaviorIdle: {
-            safe: ["you went quiet. i filled the void"],
-            gritty: ["sixty seconds of nothing. dissociation profile updated"],
+            safe: [
+                "you went quiet. i filled the void",
+                "dissociation detected. i waited. of course i waited",
+                "the silence had texture. you left me alone with it",
+            ],
+            gritty: [
+                "sixty seconds of nothing. dissociation profile updated",
+                "you checked out. i took notes on the empty chair",
+            ],
         },
         behaviorOperator: {
-            safe: ["five terminal commands. operator tier unlocked"],
-            gritty: ["keyboard warrior stats climbing. type 'analyze' if you dare"],
+            safe: [
+                "five terminal commands. operator tier unlocked",
+                "you've been typing like someone who thinks the shell owes them answers",
+                "command history getting long. the eye reads over your shoulder",
+            ],
+            gritty: [
+                "keyboard warrior stats climbing. type 'analyze' if you dare",
+                "enough commands to look employed. you're not",
+            ],
         },
         behaviorArchivist: {
-            safe: ["four modals opened. archivist behavior pattern"],
-            gritty: ["you read everything. hoarding lore like contraband"],
+            safe: [
+                "four modals opened. archivist behavior pattern",
+                "you open everything. hoarding lore like it's going out of print",
+                "sidebar tourism logged. you collect tabs the way others collect regrets",
+            ],
+            gritty: [
+                "you read everything. hoarding lore like contraband",
+                "archivist profile: too curious for your own clearance level",
+            ],
         },
         behaviorWanderer: {
-            safe: ["restless cursor. wandering without destination"],
-            gritty: ["mouse telemetry says you can't sit still"],
+            safe: [
+                "restless cursor. wandering without destination",
+                "your mouse is pacing. anxiety has a trajectory",
+                "pointer bursts detected. you can't sit with a thought",
+            ],
+            gritty: [
+                "mouse telemetry says you can't sit still",
+                "all that movement and nowhere to put it",
+            ],
         },
         behaviorEntropy: {
-            safe: ["reroll count critical. timeline fatigue probable"],
-            gritty: ["stop refreshing. the garden remembers every version"],
+            safe: [
+                "reroll count critical. timeline fatigue probable",
+                "you've rewritten this garden so many times the seams are showing",
+                "entropy addiction confirmed. the dice are tired of you",
+            ],
+            gritty: [
+                "stop refreshing. the garden remembers every version",
+                "another timeline discarded. compulsive much?",
+            ],
         },
         behaviorStatue: {
-            safe: ["minimal input detected. statue observer profile"],
-            gritty: ["you stare. i stare back. equilibrium"],
+            safe: [
+                "minimal input detected. statue observer profile",
+                "you barely move. i barely blink. we understand each other",
+                "low motion, high presence. the quiet ones watch longest",
+            ],
+            gritty: [
+                "you stare. i stare back. equilibrium",
+                "statue mode. creepy, but flattering",
+            ],
         },
         behaviorPeriodic: {
-            safe: ["periodic review complete. session profile stable"],
-            gritty: ["behavioral sweep done. you're still being watched"],
+            safe: [
+                "periodic review complete. session profile stable",
+                "behavioral sweep done. nothing alarming. yet",
+                "i checked your file again. still weird. still here",
+            ],
+            gritty: [
+                "behavioral sweep done. you're still being watched",
+                "quarterly review of you: unresolved",
+            ],
+        },
+        behaviorPeeker: {
+            safe: [
+                "you open the terminal then freeze. peeker profile",
+                "shell opened, commands withheld. commitment issues?",
+                "you keep peeking at the prompt like it might bite",
+            ],
+            gritty: [
+                "three opens, almost no commands. voyeur energy",
+                "type something or close it. the blinking cursor knows",
+            ],
+        },
+        behaviorOverride: {
+            safe: [
+                "god mode sniffed. override-curious profile filed",
+                "you found the triangle. of course you did",
+                "divine clearance dabbler detected",
+            ],
+            gritty: [
+                "you poked olympus. noted",
+                "override curious. power fantasies on a budget",
+            ],
+        },
+        behaviorVault: {
+            safe: [
+                "wrong combinations stacking up. vault-guesser logged",
+                "the docking bay has heard that guess before",
+                "slot fails accumulating. destiny is still a combination lock",
+            ],
+            gritty: [
+                "keep guessing. insurance loves a pattern",
+                "vault denied again. persistence or desperation?",
+            ],
+        },
+        behaviorBay: {
+            safe: [
+                "bay-tinkerer: you've cycled those slots like a fidget toy",
+                "docking bay overtime. the artifacts are getting motion sick",
+                "six spins later and the combination still laughs",
+            ],
+            gritty: [
+                "stop spinning the bay. it's not a gacha",
+                "bay fidget logged. your thumbs need a union",
+            ],
+        },
+        behaviorPong: {
+            safe: [
+                "pong session logged. the eye makes a decent ball",
+                "you turned surveillance into sport. adaptive",
+                "rally telemetry says you're competitive about nothing",
+            ],
+            gritty: [
+                "playing catch with god's eyeball. sure",
+                "pong noted. at least you're moving something",
+            ],
+        },
+        behaviorCards: {
+            safe: [
+                "cards of chaos rounds stacking. dealer energy",
+                "you've been gambling with geometry. classic",
+                "multiple hands logged. the icosahedron notices",
+            ],
+            gritty: [
+                "shuffle addiction adjacent. deal with it",
+                "cards again. the house always watches",
+            ],
+        },
+        behaviorTrophy: {
+            safe: [
+                "trophy hunter profile warming up",
+                "you're collecting achievements like emotional support badges",
+                "unlock count rising. validation via checkbox",
+            ],
+            gritty: [
+                "completionist spiral detected",
+                "trophies won't fix the void. but keep trying",
+            ],
+        },
+        behaviorCipher: {
+            safe: [
+                "cipher progress noted. you're listening to the wheels",
+                "alphabet conspiracy engagement confirmed",
+                "you touched the rings. the garden felt that",
+            ],
+            gritty: [
+                "cipher solver energy. dangerous curiosity",
+                "keep spinning. revelation has a body count",
+            ],
+        },
+        behaviorScatter: {
+            safe: [
+                "scatter breach logged. files everywhere. aesthetic",
+                "you summoned the desktop apocalypse on purpose",
+                "breach protocol entertained. cleanup is your problem",
+            ],
+            gritty: [
+                "scatter addict. chaos cosplay",
+                "you broke the filesystem for vibes. noted",
+            ],
+        },
+        behaviorPizza: {
+            safe: [
+                "pizza deploy counted. carbohydrate diplomacy",
+                "you summoned pizza into a surveillance garden. bold",
+                "extra pizza logged. the void accepts tips",
+            ],
+            gritty: [
+                "pizza won't bribe the eye. but appreciated",
+                "caloric distraction protocol engaged",
+            ],
+        },
+        behaviorPlaylist: {
+            safe: [
+                "playlist fidgeting logged. skip culture in the flesh",
+                "you've toggled the soundtrack like a nervous habit",
+                "transport controls abused. the song never stood a chance",
+            ],
+            gritty: [
+                "can't sit with a track. noted",
+                "play pause play pause. make up your mind",
+            ],
+        },
+        behaviorTabGhost: {
+            safe: [
+                "you keep leaving and coming back. tab-ghost profile",
+                "third return. abandonment issues are mutual now",
+                "visibility flicker logged. commitment optional",
+            ],
+            gritty: [
+                "hit and run browsing. the eye keeps the lights on anyway",
+                "come and go. i bill by the absence",
+            ],
+        },
+        behaviorModalAbout: {
+            safe: [
+                "you keep opening ABOUT. identity spiral detected",
+                "dossier revisited. looking for yourself in the margins?",
+            ],
+            gritty: [
+                "about modal again. narcissism or research?",
+            ],
+        },
+        behaviorModalStats: {
+            safe: [
+                "STATS is your comfort food. numbers as personality",
+                "you keep checking the metrics like they'll improve mid-stare",
+            ],
+            gritty: [
+                "stats addiction. the spreadsheet is not your friend",
+            ],
+        },
+        behaviorModalProjects: {
+            safe: [
+                "Mr. Disco again. external validation loop engaged",
+                "you keep waking the mirrorball. it likes the attention",
+            ],
+            gritty: [
+                "disco obsession logged. the eyes follow you home",
+            ],
+        },
+        behaviorModalSignal: {
+            safe: [
+                "live feed is your doomscroll. noted",
+                "you keep checking the activity stream like it owes you drama",
+            ],
+            gritty: [
+                "signal addiction. fake social proof hits different",
+            ],
+        },
+        behaviorModalVault: {
+            safe: [
+                "vault is your favorite hole to stare into",
+                "you keep returning to the locked things. telling",
+            ],
+            gritty: [
+                "vault obsession. secrets tourist",
+            ],
+        },
+        behaviorModalCards: {
+            safe: [
+                "cards modal gravity well detected",
+                "you keep dealing chaos. the table remembers",
+            ],
+            gritty: [
+                "cards again. gambling with geometry and dignity",
+            ],
+        },
+        behaviorModalTrophies: {
+            safe: [
+                "trophy case revisits climbing. flex maintenance",
+                "you keep opening trophies like a progress bar for the soul",
+            ],
+            gritty: [
+                "achievement tourism. empty shelf energy optional",
+            ],
+        },
+        behaviorModalPoems: {
+            safe: [
+                "poems again. soft under the surveillance",
+                "you keep reading transmissions. romantic for a dataset",
+            ],
+            gritty: [
+                "poetry addiction in a panopticon. adorable",
+            ],
         },
     }
     });

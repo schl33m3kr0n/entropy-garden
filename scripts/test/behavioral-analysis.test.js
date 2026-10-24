@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { deriveProfileLabels } from '../../js/modules/behavioral-labels.js';
+import {
+    deriveProfileLabels,
+    resolveBehaviorTrigger,
+} from '../../js/modules/behavioral-labels.js';
 
 const base = () => ({
     rerolls: 0,
@@ -12,6 +15,14 @@ const base = () => ({
     godModeToggles: 0,
     slotFails: 0,
     dockingCycles: 0,
+    pongSessions: 0,
+    cardsRounds: 0,
+    trophyUnlocks: 0,
+    cipherStages: 0,
+    scatterBreaches: 0,
+    pizzaDeploys: 0,
+    playlistToggles: 0,
+    tabReturns: 0,
 });
 
 describe('deriveProfileLabels', () => {
@@ -45,5 +56,25 @@ describe('deriveProfileLabels', () => {
     it('labels statue with low pointer bursts over long session', () => {
         const labels = deriveProfileLabels({ ...base(), pointerBursts: 2 }, 6);
         expect(labels).toContain('statue');
+    });
+
+    it('labels pong-player and tab-ghost from session habits', () => {
+        const labels = deriveProfileLabels({
+            ...base(),
+            pongSessions: 1,
+            tabReturns: 3,
+        });
+        expect(labels).toContain('pong-player');
+        expect(labels).toContain('tab-ghost');
+    });
+});
+
+describe('resolveBehaviorTrigger', () => {
+    it('maps the first specific label to a trigger id', () => {
+        expect(resolveBehaviorTrigger(['vault-guesser', 'statue'])).toBe('behaviorVault');
+    });
+
+    it('skips baseline-observer', () => {
+        expect(resolveBehaviorTrigger(['baseline-observer'])).toBeNull();
     });
 });

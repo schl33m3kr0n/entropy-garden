@@ -708,6 +708,16 @@ function schedulePanopticonLateNightCommentSync() {
     }, msUntilNextHourBoundary());
 }
 
+function pickBehaviorBiasedIdleComment() {
+    const getTrigger = getHook('getBehaviorIdleTrigger');
+    if (typeof getTrigger !== 'function') return null;
+    const triggerId = getTrigger();
+    if (!triggerId) return null;
+    const entry = globalThis.lorePools?.panopticonTriggerComments?.[triggerId];
+    if (!entry?.safe?.length) return null;
+    return pickOne(entry.safe, entry.gritty || []) ?? null;
+}
+
 function pickPanopticonIdleComment() {
     const pools = globalThis.lorePools;
     if (!pools) return null;
@@ -733,6 +743,12 @@ function pickPanopticonIdleComment() {
             panopticonLateNightShownKey = panopticonLateNightSlotKey();
             return lateNight;
         }
+    }
+
+    // Session profile leaks into idle chatter once there's something to notice.
+    if (Math.random() < 0.34) {
+        const behavioral = pickBehaviorBiasedIdleComment();
+        if (behavioral) return behavioral;
     }
 
     const part = getPanopticonDayPart();

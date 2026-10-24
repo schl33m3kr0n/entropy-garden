@@ -4,9 +4,9 @@
  */
 import { gardenHasStarted } from '../core/state.js';
 import { resetPanopticonIdleCommentTimer } from '../core/shared.js';
-import { deriveProfileLabels } from './behavioral-labels.js';
+import { deriveProfileLabels, resolveBehaviorTrigger } from './behavioral-labels.js';
 
-export { deriveProfileLabels } from './behavioral-labels.js';
+export { deriveProfileLabels, resolveBehaviorTrigger, BEHAVIOR_LABEL_TRIGGERS } from './behavioral-labels.js';
 
 const ANALYSIS_INTERVAL_MS = 240_000;
 const POINTER_SAMPLE_MS = 4000;
@@ -84,14 +84,44 @@ function emitInsight(triggerId, options = {}, attempt = 0) {
     milestones.add(triggerId);
 }
 
+function emitModalObsession(modalId) {
+    const map = {
+        about: 'behaviorModalAbout',
+        stats: 'behaviorModalStats',
+        projects: 'behaviorModalProjects',
+        signal: 'behaviorModalSignal',
+        vault: 'behaviorModalVault',
+        cards: 'behaviorModalCards',
+        trophies: 'behaviorModalTrophies',
+        poems: 'behaviorModalPoems',
+    };
+    const trigger = map[modalId];
+    if (trigger) emitInsight(trigger);
+}
+
 function checkMilestones() {
     if (metrics.rerolls >= 3) emitInsight('behaviorReroll');
     if (metrics.corruptEngagements >= 1) emitInsight('behaviorChaos');
     if (metrics.idleDissociations >= 1) emitInsight('behaviorIdle');
     if (metrics.terminalCommands >= 5) emitInsight('behaviorOperator');
+    if (metrics.terminalOpens >= 3 && metrics.terminalCommands < 2) emitInsight('behaviorPeeker');
+    if (metrics.godModeToggles >= 1) emitInsight('behaviorOverride');
+    if (metrics.slotFails >= 2) emitInsight('behaviorVault');
+    if (metrics.dockingCycles >= 6) emitInsight('behaviorBay');
+    if (metrics.pongSessions >= 1) emitInsight('behaviorPong');
+    if (metrics.cardsRounds >= 2) emitInsight('behaviorCards');
+    if (metrics.trophyUnlocks >= 2) emitInsight('behaviorTrophy');
+    if (metrics.cipherStages >= 1) emitInsight('behaviorCipher');
+    if (metrics.scatterBreaches >= 1) emitInsight('behaviorScatter');
+    if (metrics.pizzaDeploys >= 1) emitInsight('behaviorPizza');
+    if (metrics.playlistToggles >= 5) emitInsight('behaviorPlaylist');
+    if (metrics.tabReturns >= 3) emitInsight('behaviorTabGhost');
 
     const modalTotal = Object.values(metrics.modalOpens).reduce((a, b) => a + b, 0);
     if (modalTotal >= 4) emitInsight('behaviorArchivist');
+
+    const obsessed = topModal();
+    if (obsessed && obsessed.count >= 3) emitModalObsession(obsessed.id);
 
     if (sessionMinutes() >= 4 && metrics.pointerBursts >= 4) {
         emitInsight('behaviorWanderer');
@@ -205,10 +235,33 @@ function runPeriodicAnalysis() {
     const snap = getBehaviorSnapshot();
     if (snap.sessionMinutes < 4) return;
 
-    if (snap.rerolls >= 5) emitInsight('behaviorEntropy');
-    else if (snap.labels.includes('statue')) emitInsight('behaviorStatue');
-    else if (snap.labels.includes('archivist')) emitInsight('behaviorArchivist');
-    else emitInsight('behaviorPeriodic');
+    if (snap.rerolls >= 5) {
+        emitInsight('behaviorEntropy');
+        return;
+    }
+
+    const labeled = resolveBehaviorTrigger(snap.labels);
+    if (labeled) {
+        emitInsight(labeled);
+        return;
+    }
+
+    if (snap.modalTop && snap.modalTop.count >= 3) {
+        emitModalObsession(snap.modalTop.id);
+        return;
+    }
+
+    emitInsight('behaviorPeriodic');
+}
+
+/**
+ * Trigger id for idle panopticon bias, or null if profile is still bland.
+ * @returns {string|null}
+ */
+export function getBehaviorIdleTrigger() {
+    if (!gardenHasStarted || !metrics.sessionStart) return null;
+    if (sessionMinutes() < 2) return null;
+    return resolveBehaviorTrigger(deriveLabels());
 }
 
 function onPointerActivity() {

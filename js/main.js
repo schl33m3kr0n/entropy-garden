@@ -110,6 +110,7 @@ import {
     recordBehavior,
     printBehaviorReport,
     getBehaviorSnapshot,
+    getBehaviorIdleTrigger,
 } from './modules/behavioral-analysis.js';
 import { initGroovyMeter } from './modules/groovy-meter.js';
 
@@ -2343,6 +2344,7 @@ registerHooks({
     recordBehavior,
     printBehaviorReport,
     getBehaviorSnapshot,
+    getBehaviorIdleTrigger,
     konamiBlocksPongArming: () => false,
     isKonamiInProgress: () => false,
     isKonamiActivelyEntering: () => false,
