@@ -83,17 +83,8 @@
       padding: 72px 20px 88px;
     }
 
-    .eyebrow {
-      margin: 0 0 10px;
-      font-size: 0.72rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: rgba(0, 255, 0, 0.7);
-      text-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
-    }
-
     h1 {
-      margin: 0 16px 8px;
+      margin: 0 16px 22px;
       font-size: clamp(42px, 9vw, 96px);
       font-weight: 500;
       letter-spacing: -0.045em;
@@ -102,15 +93,6 @@
       text-shadow:
         0 0 24px rgba(0, 255, 0, 0.18),
         0 0 1px rgba(255, 255, 255, 0.4);
-    }
-
-    .tagline {
-      margin: 0 auto 22px;
-      max-width: 28rem;
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      line-height: 1.5;
-      color: rgba(210, 235, 210, 0.55);
     }
 
     .sculptures {
@@ -175,9 +157,7 @@
 
   <canvas id="sigils" aria-hidden="true"></canvas>
   <main>
-    <p class="eyebrow">// hello world</p>
     <h1>hello world</h1>
-    <p class="tagline">standalone installation · helix · pyramid · sigils</p>
     <div class="sculptures">
       <canvas id="helix" role="img" aria-label="A horizontal spinning white double helix beneath the title">A spinning double helix.</canvas>
       <canvas id="pyramid" role="img" aria-label="A rotating black pyramid in three slightly separated tiers making random quarter turns with white edges and an eye icon on the capstone">A rotating three-tier pyramid with white edges.</canvas>
@@ -268,7 +248,7 @@
         sigilContext.translate(sigil.x * width, sigil.y * height);
         sigilContext.rotate(sigil.rotation);
         const size = Math.min(sigil.size, width * 0.18);
-        sigilContext.fillStyle = 'rgba(0,255,120,' + (fade * 0.16) + ')';
+        sigilContext.fillStyle = 'rgba(255,255,255,' + (fade * 0.18) + ')';
         sigilContext.font = size + 'px "Apple Symbols", "Noto Sans Symbols 2", "Segoe UI Symbol", serif';
         sigilContext.textAlign = 'center';
         sigilContext.textBaseline = 'middle';
