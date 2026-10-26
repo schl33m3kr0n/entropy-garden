@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hello World — Entropy Garden</title>
+  <meta name="description" content="A simple hello world page.">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; display: grid; place-items: center; background: #000; color: #fff; font-family: system-ui, sans-serif; }
+    h1 { margin: 0 24px 14px; font-size: clamp(48px, 10vw, 112px); font-weight: 500; letter-spacing: -0.06em; }
+    #sigils { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .garden-link { display: inline-block; margin-top: 8px; color: #aaa; font-size: 12px; letter-spacing: 0.1em; text-decoration: none; }
+    .garden-link:hover, .garden-link:focus-visible { color: #fff; text-decoration: underline; }
+    main { position: relative; z-index: 1; width: 100%; text-align: center; padding: 32px 0; }
+    .sculptures { display: flex; flex-direction: column; align-items: center; width: 100%; margin: 0 auto; gap: 18px; }
+    canvas { display: block; min-width: 0; }
+    #helix { width: clamp(150px, 30vw, 336px); height: clamp(40px, 5.5vw, 62px); }
+    #pyramid { width: min(90vw, 480px); height: min(90vw, 430px); }
+  </style>
+</head>
+<body>
+  <canvas id="sigils" aria-hidden="true"></canvas>
+  <main>
+    <h1>hello world</h1>
+    <div class="sculptures">
+    <canvas id="helix" role="img" aria-label="A horizontal spinning white double helix beneath the title">A spinning double helix.</canvas>
+    <canvas id="pyramid" role="img" aria-label="A rotating black pyramid in three slightly separated tiers making random quarter turns with white edges and an eye icon on the capstone">A rotating three-tier pyramid with white edges.</canvas>
+    </div>
+    <a class="garden-link" href="../index.html">← return to entropy garden</a>
+  </main>
+  <script>
+    const canvas = document.querySelector('#pyramid');
+    const context = canvas.getContext('2d');
+    const helixCanvas = document.querySelector('#helix');
+    const helixContext = helixCanvas.getContext('2d');
+    let helixAngle = 0;
+    function drawHelix(elapsed) {
+      if (!reducedMotion.matches) helixAngle += elapsed * 0.0006;
+      const {width, height} = helixCanvas.getBoundingClientRect();
+      const ratio = Math.min(devicePixelRatio || 1, 2);
+      if (helixCanvas.width !== Math.round(width * ratio) || helixCanvas.height !== Math.round(height * ratio)) {
+        helixCanvas.width = Math.round(width * ratio);
+        helixCanvas.height = Math.round(height * ratio);
+      }
+      helixContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+      helixContext.clearRect(0, 0, width, height);
+      const radius = height * 0.28;
+      const span = width * 0.90;
+      const point = (t, strand) => {
+        const theta = t * Math.PI * 3 + helixAngle + strand * Math.PI;
+        return [width * 0.5 + (t - 0.5) * span,
+          height * 0.5 + Math.cos(theta) * radius,
+          Math.sin(theta)];
+      };
+      const segments = [];
+      for (let strand = 0; strand < 2; strand++) {
+        for (let step = 0; step < 180; step++) {
+          segments.push({a: point(step / 180, strand), b: point((step + 1) / 180, strand), rung: false});
+        }
+      }
+      for (let step = 0; step <= 8; step++) {
+        segments.push({a: point(step / 8, 0), b: point(step / 8, 1), rung: true});
+      }
+      segments.sort((a, b) => a.a[2] + a.b[2] - b.a[2] - b.b[2]);
+      helixContext.lineCap = 'round';
+      for (const {a, b, rung} of segments) {
+        helixContext.strokeStyle = '#fff';
+        helixContext.lineWidth = rung ? 1.2 : 2;
+        helixContext.beginPath();
+        helixContext.moveTo(a[0], a[1]);
+        helixContext.lineTo(b[0], b[1]);
+        helixContext.stroke();
+      }
+    }
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const sigilCanvas = document.querySelector('#sigils');
+    const sigilContext = sigilCanvas.getContext('2d');
+    const alchemicalSymbols = Array.from({length: 116}, (_, index) => String.fromCodePoint(0x1F700 + index));
+    const sigils = [];
+    let nextSigil = 0;
+    function createSigil() {
+      return {
+        x: 0.06 + Math.random() * 0.88,
+        y: 0.08 + Math.random() * 0.84,
+        size: 35 + Math.random() * 65,
+        rotation: (Math.random() - 0.5) * 0.6,
+        age: 0, life: 5000 + Math.random() * 5000,
+        symbol: alchemicalSymbols[Math.floor(Math.random() * alchemicalSymbols.length)]
+      };
+    }
+    function drawSigils(elapsed) {
+      const width = innerWidth, height = innerHeight;
+      const ratio = Math.min(devicePixelRatio || 1, 2);
+      if (sigilCanvas.width !== Math.round(width * ratio) || sigilCanvas.height !== Math.round(height * ratio)) {
+        sigilCanvas.width = Math.round(width * ratio);
+        sigilCanvas.height = Math.round(height * ratio);
+      }
+      sigilContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+      sigilContext.clearRect(0, 0, width, height);
+      if (reducedMotion.matches) return;
+      nextSigil -= elapsed;
+      if (nextSigil <= 0 && sigils.length < 7) {
+        sigils.push(createSigil());
+        nextSigil = 1100 + Math.random() * 1400;
+      }
+      for (let index = sigils.length - 1; index >= 0; index--) {
+        const sigil = sigils[index];
+        sigil.age += elapsed;
+        if (sigil.age >= sigil.life) { sigils.splice(index, 1); continue; }
+        const fade = Math.sin(Math.PI * sigil.age / sigil.life) ** 2;
+        sigilContext.save();
+        sigilContext.translate(sigil.x * width, sigil.y * height);
+        sigilContext.rotate(sigil.rotation);
+        const size = Math.min(sigil.size, width * 0.18);
+        sigilContext.fillStyle = 'rgba(255,255,255,' + (fade * 0.18) + ')';
+        sigilContext.font = size + 'px "Apple Symbols", "Noto Sans Symbols 2", "Segoe UI Symbol", serif';
+        sigilContext.textAlign = 'center';
+        sigilContext.textBaseline = 'middle';
+        sigilContext.fillText(sigil.symbol, 0, 0);
+        sigilContext.restore();
+      }
+    }
+    const faces = [];
+    const ring = (t, lift) => [
+      [-t, 1 - 2 * t + lift, -t],
+      [t, 1 - 2 * t + lift, -t],
+      [t, 1 - 2 * t + lift, t],
+      [-t, 1 - 2 * t + lift, t]
+    ];
+    for (let tier = 0; tier < 3; tier++) {
+      const lift = (1 - tier) * 0.20;
+      const top = ring(tier / 3, lift);
+      const bottom = ring((tier + 1) / 3, lift);
+      for (let side = 0; side < 4; side++) {
+        const next = (side + 1) % 4;
+        faces.push({tier, eye: tier === 0 && side === 2, points: [top[side], top[next], bottom[next], bottom[side]]});
+      }
+      if (tier > 0) faces.push({tier, points: [...top].reverse()});
+      faces.push({tier, points: bottom});
+    }
+    const angles = [0.45, 0.45, 0.45];
+    const randomPause = () => 900 + Math.random() * 2800;
+    const turns = angles.map(angle => ({
+      start: angle, target: angle, elapsed: 0,
+      duration: 750, waiting: randomPause(), moving: false
+    }));
+    function updateLayers(elapsed) {
+      if (reducedMotion.matches) return;
+      turns.forEach((turn, tier) => {
+        if (!turn.moving) {
+          turn.waiting -= elapsed;
+          if (turn.waiting > 0) return;
+          turn.start = angles[tier];
+          turn.target = turn.start + (Math.random() < 0.5 ? -1 : 1) * Math.PI / 2;
+          turn.elapsed = 0;
+          turn.duration = 650 + Math.random() * 350;
+          turn.moving = true;
+        }
+        turn.elapsed = Math.min(turn.elapsed + elapsed, turn.duration);
+        const t = turn.elapsed / turn.duration;
+        const eased = t * t * (3 - 2 * t);
+        angles[tier] = turn.start + (turn.target - turn.start) * eased;
+        if (t === 1) {
+          angles[tier] = turn.target;
+          turn.moving = false;
+          turn.waiting = randomPause();
+        }
+      });
+    }
+    const blink = {waiting: 1800 + Math.random() * 4200, elapsed: 0, active: false, openness: 1};
+    function updateBlink(elapsed) {
+      if (reducedMotion.matches) { blink.openness = 1; return; }
+      if (!blink.active) {
+        blink.waiting -= elapsed;
+        if (blink.waiting > 0) return;
+        blink.active = true;
+        blink.elapsed = 0;
+      }
+      blink.elapsed += elapsed;
+      // Close quickly, hold briefly, then open a little more slowly.
+      const t = blink.elapsed;
+      blink.openness = t < 85 ? 1 - t / 85 : t < 120 ? 0 : Math.min(1, (t - 120) / 125);
+      if (t >= 245) {
+        blink.active = false;
+        blink.openness = 1;
+        blink.waiting = 2200 + Math.random() * 4800;
+      }
+    }
+    let previousTime;
+    function draw(time) {
+      const elapsed = previousTime === undefined ? 0 : Math.min(time - previousTime, 50);
+      previousTime = time;
+      drawHelix(elapsed);
+      updateLayers(elapsed);
+      updateBlink(elapsed);
+      drawSigils(elapsed);
+      const {width, height} = canvas.getBoundingClientRect();
+      const ratio = Math.min(devicePixelRatio || 1, 2);
+      if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+      }
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      context.clearRect(0, 0, width, height);
+      function project([x, y, z], angle) {
+        const rx = x * Math.cos(angle) + z * Math.sin(angle);
+        const rz = -x * Math.sin(angle) + z * Math.cos(angle);
+        const ry = y * Math.cos(0.08) - rz * Math.sin(0.08);
+        const depth = y * Math.sin(0.08) + rz * Math.cos(0.08);
+        const scale = Math.min(width, height) * 0.25;
+        return [width / 2 + rx * scale, height * 0.46 - ry * scale, depth];
+      }
+      // Discard rear faces before depth sorting so hidden caps cannot
+      // paint across the visible sides of another tier.
+      const projected = faces
+        .map(({tier, points, eye}) => Object.assign(points.map(point => project(point, angles[tier])), {eye}))
+        .filter(face => {
+          const signedArea = face.reduce((sum, point, index) => {
+            const next = face[(index + 1) % face.length];
+            return sum + point[0] * next[1] - next[0] * point[1];
+          }, 0);
+          return signedArea < -0.001;
+        });
+      const averageDepth = face => face.reduce((sum, point) => sum + point[2], 0) / face.length;
+      projected.sort((a, b) => averageDepth(a) - averageDepth(b));
+      context.lineWidth = 1.4;
+      context.lineJoin = 'round';
+      for (const face of projected) {
+        context.beginPath();
+        face.forEach(([x, y], index) => index === 0 ? context.moveTo(x, y) : context.lineTo(x, y));
+        context.closePath();
+        context.fillStyle = '#000';
+        context.fill();
+        context.strokeStyle = '#fff';
+        context.stroke();
+        if (face.eye) {
+          // Draw on the capstone's front plane so the eye follows its rotation.
+          const eyePoint = (x, y) => {
+            const lidY = 0.76 + (y - 0.76) * blink.openness;
+            return project([x, lidY, (1.2 - lidY) / 2], angles[0]);
+          };
+          const trace = (points, fill) => {
+            context.beginPath();
+            points.forEach(([x, y], index) => {
+              const [px, py] = eyePoint(x, y);
+              if (index === 0) context.moveTo(px, py);
+              else context.lineTo(px, py);
+            });
+            context.closePath();
+            if (fill) {
+              context.fillStyle = fill;
+              context.fill();
+            } else context.stroke();
+          };
+          const outline = [];
+          for (let step = 0; step <= 32; step++) {
+            const t = step / 32;
+            outline.push([-0.14 + 0.28 * t, 0.76 + 0.065 * Math.sin(Math.PI * t)]);
+          }
+          for (let step = 32; step >= 0; step--) {
+            const t = step / 32;
+            outline.push([-0.14 + 0.28 * t, 0.76 - 0.065 * Math.sin(Math.PI * t)]);
+          }
+          trace(outline, '#fff');
+          trace(Array.from({length: 49}, (_, index) => {
+            const theta = index / 48 * Math.PI * 2;
+            return [0.038 * Math.cos(theta), 0.76 + 0.038 * Math.sin(theta)];
+          }), '#000');
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>

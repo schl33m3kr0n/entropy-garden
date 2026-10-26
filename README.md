@@ -80,3 +80,12 @@ bash scripts/dev/serve-local.sh
 ## Content warning
 
 This experience includes rapid flashing, high-contrast strobing, and glitch effects. A photosensitivity warning is shown before initialize. Use **SAFE MODE** if you want a calmer pass; **chaos mode** leans into the grit.
+
+## Hello World installation
+
+Open `pages/hello-world.html`, or choose **HELLO WORLD** in the garden sidebar.
+This self-contained page includes the three-tier pyramid with random quarter turns,
+a blinking capstone eye, the horizontal helix, and fading alchemical symbols.
+It respects reduced-motion preferences and needs no dependencies or build step.
+The return link leads back to the garden. The existing deployment includes `pages/`,
+so this page is included in the next normal build.
