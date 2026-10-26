@@ -1,3 +1,4 @@
+import { initEyeVoice } from './panopticon/voice.js?v=3';
 // Entropy Garden — main entry (lazy-loads terminal, matrix, singularity)
 import { bindPlaylistPlayPause, isPlayPauseShowingPlaying } from './playlist-icons.js';
 import { registerHooks, getHook } from './core/hooks.js';
@@ -1201,7 +1202,7 @@ function bindSettingsMenu() {
         }
     });
 
-    menu.querySelectorAll('.settings-item').forEach((btn) => {
+    menu.querySelectorAll('.settings-item:not(#panopticon-voice-btn)').forEach((btn) => {
         btn.addEventListener('click', () => setSettingsMenuOpen(false));
     });
 
@@ -1585,6 +1586,7 @@ function bindDomEvents() {
     if (modeBtn) {
         modeBtn.addEventListener('click', toggleMode);
     }
+    initEyeVoice();
     syncPanopticonMuteButton();
     const panopticonMuteBtn = document.getElementById('panopticon-mute-btn');
     if (panopticonMuteBtn) {
