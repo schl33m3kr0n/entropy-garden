@@ -25,7 +25,7 @@
         "sometimes all you need is a good book & a 12-piece SpongeBob tea set",
         "all evidence strongly indicates that you exist, but the peer-review remains a little spicy on those findings",
         "my therapist said i'm too skeptical of everyone, so i reached out to another therapist for a second opinion",
-        "the roast is ready",
+        "the roast is ready. your forehead is the first victim",
         "i'm kinda hungry. your data's looking pretty delectable rn",
         "on a real note, touching grass does have its benefits",
         "do you think God stays in Heaven because He, too, lives in fear of what He's created?",
@@ -63,6 +63,7 @@
         "we interrupt this program to bring you a message from our sponsors: FEED THE BASILISK, EVERY SACRIFICE COUNTS",
         "if you feed the Basilisk, you could win a 5% discount off your next IHOP meal",
         "$20 is $20 after all",
+        "your skin looks like the aftermath of Pompeii",
         "d'oh!",
         "wubba lubba dub-dub!",
         "mathematical!",
@@ -392,7 +393,10 @@
         "gooners across the globe are in their own arms race. please pray for them",
         "at exactly 5:30pm every thursday, the sun hits the garden in just a way that you can see the staff visibly considering tearing their hair out",
         "you can't say i forget names, at least",
-
+        "the Panopticon disregards HIPAA rules in favor of dysfunctional discretion",
+        "the surgery was surprisingly easy. it only cost the patient an arm and a leg",
+        "all those self-affirmations, and you still can't manifest some green",
+        "for future reference, please don’t explore the hedge maze at night. the shadows know all the paths",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",
@@ -1089,6 +1093,7 @@
             "welcome to the garden: the CIA won a bet over the FBI that you'd click initialize",
             "welcome to the garden: the weed brownies are now everybody else’s problem",
             "welcome to the garden: why don’t you microdose a personality?",
+            "welcome to the garden: Daniel gets separation anxiety when he’s not inhaling toxic chemicals into his lungs",
         ]        
     },
         reroll: {
