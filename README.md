@@ -84,8 +84,7 @@ This experience includes rapid flashing, high-contrast strobing, and glitch effe
 ## Hello World installation
 
 Open `pages/hello-world.html`, or choose **HELLO WORLD** in the garden sidebar.
-This self-contained page includes the three-tier pyramid with random quarter turns,
-a blinking capstone eye, the horizontal helix, and fading alchemical symbols.
-It respects reduced-motion preferences and needs no dependencies or build step.
-The return link leads back to the garden. The existing deployment includes `pages/`,
-so this page is included in the next normal build.
+This page shares garden tokens (void black, neon green, Avenir) and light HUD chrome
+with the main SPA, while keeping the three-tier pyramid, blinking capstone eye,
+horizontal helix, and fading alchemical symbols as a self-contained canvas piece.
+It respects reduced-motion preferences. The return control leads back to the garden.

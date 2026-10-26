@@ -2,32 +2,187 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Hello World — Entropy Garden</title>
-  <meta name="description" content="A simple hello world page.">
+  <meta name="description" content="A standalone Entropy Garden installation: helix, pyramid, and alchemical sigils.">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g transform='rotate(90 50 50)'><path d='M 10 50 C 30 20, 70 20, 90 50 C 70 80, 30 80, 10 50 Z' stroke='%230f0' stroke-width='4' fill='none' stroke-linejoin='round'/><circle cx='50' cy='50' r='24' stroke='%230f0' stroke-width='1.5' fill='none'/><circle cx='50' cy='50' r='14' stroke='%230f0' stroke-width='2' fill='none'/><circle cx='50' cy='50' r='5' fill='%230f0'/></g></svg>">
+  <link rel="stylesheet" href="../css/tokens.css">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100svh; display: grid; place-items: center; background: #000; color: #fff; font-family: system-ui, sans-serif; }
-    h1 { margin: 0 24px 14px; font-size: clamp(48px, 10vw, 112px); font-weight: 500; letter-spacing: -0.06em; }
-    #sigils { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-    .garden-link { display: inline-block; margin-top: 8px; color: #aaa; font-size: 12px; letter-spacing: 0.1em; text-decoration: none; }
-    .garden-link:hover, .garden-link:focus-visible { color: #fff; text-decoration: underline; }
-    main { position: relative; z-index: 1; width: 100%; text-align: center; padding: 32px 0; }
-    .sculptures { display: flex; flex-direction: column; align-items: center; width: 100%; margin: 0 auto; gap: 18px; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--void-black);
+      color: #fff;
+      font-family: var(--main-font);
+      color-scheme: dark;
+    }
+
+    body {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Soft garden atmosphere — same plate, quieter than the main SPA */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 50% 42%, rgba(0, 40, 12, 0.35), transparent 70%),
+        url('../assets/img/backgrounds/bkgrnd.webp') center / cover no-repeat;
+      opacity: 0.14;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(0, 255, 0, 0.018) 1px, transparent 1px);
+      background-size: 100% 3px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 2;
+      mix-blend-mode: soft-light;
+    }
+
+    .chrome {
+      position: fixed;
+      z-index: 4;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(0, 255, 0, 0.72);
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.28);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .chrome-tl { top: max(16px, env(safe-area-inset-top)); left: max(18px, env(safe-area-inset-left)); }
+    .chrome-tr { top: max(16px, env(safe-area-inset-top)); right: max(18px, env(safe-area-inset-right)); text-align: right; }
+    .chrome-bl { bottom: max(16px, env(safe-area-inset-bottom)); left: max(18px, env(safe-area-inset-left)); }
+    .chrome strong { font-weight: 600; color: rgba(0, 255, 0, 0.92); }
+    .chrome .dim { color: rgba(0, 255, 0, 0.42); letter-spacing: 0.18em; }
+
+    #sigils { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+    main {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      text-align: center;
+      padding: 72px 20px 88px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(0, 255, 0, 0.7);
+      text-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+    }
+
+    h1 {
+      margin: 0 16px 8px;
+      font-size: clamp(42px, 9vw, 96px);
+      font-weight: 500;
+      letter-spacing: -0.045em;
+      line-height: 0.95;
+      color: #f4fff4;
+      text-shadow:
+        0 0 24px rgba(0, 255, 0, 0.18),
+        0 0 1px rgba(255, 255, 255, 0.4);
+    }
+
+    .tagline {
+      margin: 0 auto 22px;
+      max-width: 28rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      line-height: 1.5;
+      color: rgba(210, 235, 210, 0.55);
+    }
+
+    .sculptures {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin: 0 auto;
+      gap: 18px;
+    }
+
     canvas { display: block; min-width: 0; }
     #helix { width: clamp(150px, 30vw, 336px); height: clamp(40px, 5.5vw, 62px); }
     #pyramid { width: min(90vw, 480px); height: min(90vw, 430px); }
+
+    .garden-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 28px;
+      padding: 10px 16px;
+      border: 1px solid rgba(0, 255, 0, 0.35);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 12, 0, 0.55);
+      color: rgba(0, 255, 0, 0.88);
+      font-family: inherit;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-decoration: none;
+      text-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .garden-link:hover,
+    .garden-link:focus-visible {
+      color: #050505;
+      background: var(--neon-green);
+      border-color: var(--neon-green);
+      text-shadow: none;
+      box-shadow: 0 0 22px rgba(0, 255, 0, 0.35);
+      outline: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::after { display: none; }
+    }
   </style>
 </head>
 <body>
+  <div class="chrome chrome-tl" aria-hidden="true">
+    <strong>Entropy Garden</strong><br>
+    <span class="dim">// node · hello-world</span>
+  </div>
+  <div class="chrome chrome-tr" aria-hidden="true">
+    installation 01<br>
+    <span class="dim">sigil · helix · eye</span>
+  </div>
+  <div class="chrome chrome-bl" aria-hidden="true">
+    <span class="dim">obs · live</span>
+  </div>
+
   <canvas id="sigils" aria-hidden="true"></canvas>
   <main>
+    <p class="eyebrow">// hello world</p>
     <h1>hello world</h1>
+    <p class="tagline">standalone installation · helix · pyramid · sigils</p>
     <div class="sculptures">
-    <canvas id="helix" role="img" aria-label="A horizontal spinning white double helix beneath the title">A spinning double helix.</canvas>
-    <canvas id="pyramid" role="img" aria-label="A rotating black pyramid in three slightly separated tiers making random quarter turns with white edges and an eye icon on the capstone">A rotating three-tier pyramid with white edges.</canvas>
+      <canvas id="helix" role="img" aria-label="A horizontal spinning white double helix beneath the title">A spinning double helix.</canvas>
+      <canvas id="pyramid" role="img" aria-label="A rotating black pyramid in three slightly separated tiers making random quarter turns with white edges and an eye icon on the capstone">A rotating three-tier pyramid with white edges.</canvas>
     </div>
-    <a class="garden-link" href="../index.html">← return to entropy garden</a>
+    <a class="garden-link" href="../index.html">← // return to the garden</a>
   </main>
   <script>
     const canvas = document.querySelector('#pyramid');
@@ -65,7 +220,7 @@
       segments.sort((a, b) => a.a[2] + a.b[2] - b.a[2] - b.b[2]);
       helixContext.lineCap = 'round';
       for (const {a, b, rung} of segments) {
-        helixContext.strokeStyle = '#fff';
+        helixContext.strokeStyle = 'rgba(220, 255, 220, 0.95)';
         helixContext.lineWidth = rung ? 1.2 : 2;
         helixContext.beginPath();
         helixContext.moveTo(a[0], a[1]);
@@ -113,7 +268,7 @@
         sigilContext.translate(sigil.x * width, sigil.y * height);
         sigilContext.rotate(sigil.rotation);
         const size = Math.min(sigil.size, width * 0.18);
-        sigilContext.fillStyle = 'rgba(255,255,255,' + (fade * 0.18) + ')';
+        sigilContext.fillStyle = 'rgba(0,255,120,' + (fade * 0.16) + ')';
         sigilContext.font = size + 'px "Apple Symbols", "Noto Sans Symbols 2", "Segoe UI Symbol", serif';
         sigilContext.textAlign = 'center';
         sigilContext.textBaseline = 'middle';
@@ -230,9 +385,9 @@
         context.beginPath();
         face.forEach(([x, y], index) => index === 0 ? context.moveTo(x, y) : context.lineTo(x, y));
         context.closePath();
-        context.fillStyle = '#000';
+        context.fillStyle = '#050505';
         context.fill();
-        context.strokeStyle = '#fff';
+        context.strokeStyle = 'rgba(220, 255, 220, 0.92)';
         context.stroke();
         if (face.eye) {
           // Draw on the capstone's front plane so the eye follows its rotation.
@@ -262,11 +417,11 @@
             const t = step / 32;
             outline.push([-0.14 + 0.28 * t, 0.76 - 0.065 * Math.sin(Math.PI * t)]);
           }
-          trace(outline, '#fff');
+          trace(outline, 'rgba(230, 255, 230, 0.95)');
           trace(Array.from({length: 49}, (_, index) => {
             const theta = index / 48 * Math.PI * 2;
             return [0.038 * Math.cos(theta), 0.76 + 0.038 * Math.sin(theta)];
-          }), '#000');
+          }), '#050505');
         }
       }
       requestAnimationFrame(draw);
