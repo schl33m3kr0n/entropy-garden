@@ -7,7 +7,8 @@ let pending = null;
 let button;
 let status;
 let failure = '';
-/** Holds the output device awake — macOS often clicks when TTS tears the DAC down. */
+let softEndTimer = 0;
+/** Holds the output device awake — helps some cancel paths; soft-land covers natural ends. */
 let keepAlive = null;
 let keepAliveStopTimer = 0;
 
@@ -34,6 +35,12 @@ function clearUtteranceHandlers(utterance) {
     utterance.onboundary = null;
 }
 
+function clearSoftEnd() {
+    if (!softEndTimer) return;
+    clearTimeout(softEndTimer);
+    softEndTimer = 0;
+}
+
 function startKeepAlive() {
     if (keepAliveStopTimer) {
         clearTimeout(keepAliveStopTimer);
@@ -47,7 +54,6 @@ function startKeepAlive() {
     }
     try {
         const ctx = new AC();
-        // Tiny non-zero noise (not digital silence) so macOS won't power-gate the DAC.
         const seconds = 2;
         const buffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * seconds)), ctx.sampleRate);
         const data = buffer.getChannelData(0);
@@ -69,7 +75,6 @@ function startKeepAlive() {
 
 function stopKeepAliveSoon() {
     if (keepAliveStopTimer) clearTimeout(keepAliveStopTimer);
-    // Leave the bed up briefly after cancel so the disconnect click is masked.
     keepAliveStopTimer = setTimeout(() => {
         keepAliveStopTimer = 0;
         if (!keepAlive) return;
@@ -79,9 +84,42 @@ function stopKeepAliveSoon() {
     }, 280);
 }
 
+/**
+ * Cut slightly before the engine's natural teardown. On macOS the loud pop is
+ * usually that disconnect, not cancel() itself when we land this late.
+ */
+function softLand(utterance) {
+    softEndTimer = 0;
+    if (active !== utterance) return;
+    startKeepAlive();
+    clearUtteranceHandlers(utterance);
+    active = null;
+    try {
+        if (synth.speaking || synth.pending) synth.cancel();
+    } catch {
+        /* ignore */
+    }
+    if (status && enabled && !pending) status.textContent = 'Eye voice is ready.';
+    flushPending();
+}
+
+function estimateDurationMs(text, rate) {
+    const words = text.split(/\s+/).filter(Boolean).length || 1;
+    const wordsPerSec = 2.55 * Math.max(0.55, rate || 1);
+    return (words / wordsPerSec) * 1000;
+}
+
+function armSoftEnd(utterance, text, rate) {
+    clearSoftEnd();
+    const est = estimateDurationMs(text, rate);
+    // Prefer landing just before natural end; boundary events refine this.
+    softEndTimer = setTimeout(() => softLand(utterance), Math.max(320, est - 140));
+}
+
 /** Forced stop only (toggle off, tab hide, singularity). Prefer queueing over this. */
 export function stopEyeVoice() {
     pending = null;
+    clearSoftEnd();
     const current = active;
     active = null;
     clearUtteranceHandlers(current);
@@ -89,7 +127,6 @@ export function stopEyeVoice() {
         stopKeepAliveSoon();
         return;
     }
-    // Avoid cancel() when the engine is already idle — that click is worse than silence.
     if (synth.speaking || synth.pending) {
         try {
             synth.cancel();
@@ -111,13 +148,13 @@ export function speakEyeComment(payload) {
     if (document.body.classList.contains('singularity-active')) return;
     const text = String(payload.text || '').replace(/\s+/g, ' ').trim();
     if (!text) return;
-    // Never cancel mid-line for a newer comment — cancel() is the loud end-pop.
-    // Keep only the latest pending line and speak it when the current one finishes.
+    // Never cancel mid-line for a newer comment — queue the latest instead.
     if (active || synth.speaking || synth.pending) {
         pending = { text };
         return;
     }
     startKeepAlive();
+    clearSoftEnd();
     const utterance = new SpeechSynthesisUtterance(text);
     const voice = pickEyeVoice(synth.getVoices());
     if (voice) utterance.voice = voice;
@@ -126,25 +163,39 @@ export function speakEyeComment(payload) {
     utterance.pitch = 1;
     utterance.volume = 0.7;
     const done = () => {
+        clearSoftEnd();
         if (active === utterance) active = null;
         clearUtteranceHandlers(utterance);
     };
     utterance.onstart = () => {
         failure = '';
         startKeepAlive();
+        armSoftEnd(utterance, text, utterance.rate);
         if (status) status.textContent = 'Reading: “' + text + '”';
     };
+    utterance.onboundary = (event) => {
+        if (active !== utterance) return;
+        if (event.name && event.name !== 'word') return;
+        const index = typeof event.charIndex === 'number' ? event.charIndex : 0;
+        const remaining = text.length - index;
+        // Last word / trailing scrap — land shortly after it starts.
+        if (remaining <= Math.max(10, Math.ceil(text.length * 0.12))) {
+            clearSoftEnd();
+            softEndTimer = setTimeout(() => softLand(utterance), 240);
+        }
+    };
     utterance.onend = () => {
+        // Natural end (soft-land missed). Still clear state; pop may have already fired.
         done();
         if (status && enabled && !pending) status.textContent = 'Eye voice is ready.';
-        // Keep the DAC bed warm between lines; only tear it down on stopEyeVoice.
         if (enabled) startKeepAlive();
         flushPending();
     };
     utterance.onerror = event => {
         done();
         if (event.error === 'canceled' || event.error === 'interrupted') {
-            flushPending();
+            // softLand already advances the queue; ignore duplicate cancel errors.
+            if (!pending || active) flushPending();
             return;
         }
         pending = null;
@@ -220,7 +271,6 @@ export function initEyeVoice() {
         status.textContent = enabled ? 'Starting eye voice…' : 'Eye voice is off.';
         syncButton();
         if (enabled) {
-            // User gesture — open the keep-alive context while unlock is allowed.
             startKeepAlive();
             lastComment = '';
             if (!readVisibleComment()) speakEyeComment({text: 'Eye voice enabled.'});
