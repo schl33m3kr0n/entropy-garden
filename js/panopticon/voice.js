@@ -5,7 +5,6 @@ let enabled = false;
 let active = null;
 let pending = null;
 let button;
-let status;
 let failure = '';
 let softEndTimer = 0;
 let speakRetryTimer = 0;
@@ -138,7 +137,6 @@ function softLand(utterance) {
     } catch {
         /* ignore */
     }
-    if (status && enabled && !pending) status.textContent = 'Eye voice is ready.';
     // cancel() leaves speaking/pending true briefly — wait before the next line.
     whenSynthIdle(() => flushPending());
 }
@@ -235,7 +233,6 @@ function beginSpeak(text, attempt = 0) {
         clearStartWatch();
         startKeepAlive();
         armSoftEnd(utterance, text, utterance.rate);
-        if (status) status.textContent = 'Reading: “' + text + '”';
     };
 
     utterance.onboundary = (event) => {
@@ -253,7 +250,6 @@ function beginSpeak(text, attempt = 0) {
 
     utterance.onend = () => {
         done();
-        if (status && enabled && !pending) status.textContent = 'Eye voice is ready.';
         if (enabled) startKeepAlive();
         whenSynthIdle(() => flushPending());
     };
@@ -269,13 +265,9 @@ function beginSpeak(text, attempt = 0) {
         enabled = false;
         syncButton();
         stopKeepAliveSoon();
-        if (status) status.textContent = failure === 'not-allowed'
-            ? 'This browser blocked speech. Try opening this page in Safari or Chrome, then enable Eye Voice.'
-            : 'Speech could not start (' + failure + '). Check that an English system voice is installed, then try again.';
     };
 
     active = utterance;
-    if (status) status.textContent = 'Reading: “' + text + '”';
 
     // Chrome sometimes swallows the first speak until cancel + retry.
     startWatchTimer = setTimeout(() => {
@@ -291,9 +283,6 @@ function beginSpeak(text, attempt = 0) {
         failure = 'speech-failed';
         enabled = false;
         syncButton();
-        if (status) {
-            status.textContent = 'Speech never started. Check that an English system voice is installed, then retry.';
-        }
     }, 1400);
 
     try {
@@ -306,7 +295,6 @@ function beginSpeak(text, attempt = 0) {
         failure = 'speech-failed';
         syncButton();
         stopKeepAliveSoon();
-        if (status) status.textContent = 'Speech could not start in this browser.';
     }
 }
 
@@ -335,16 +323,8 @@ export function initEyeVoice() {
     button = document.getElementById('panopticon-voice-btn');
     if (!button || button.dataset.voiceBound) return;
     button.dataset.voiceBound = 'true';
-    status = document.createElement('p');
-    status.id = 'panopticon-voice-status';
-    status.setAttribute('role', 'status');
-    status.style.cssText = 'max-width:250px;margin:6px 12px;color:inherit;font-size:12px;line-height:1.5';
-    button.after(status);
     syncButton();
-    if (!supported) {
-        status.textContent = 'Speech is unavailable in this browser. Try Safari or Chrome.';
-        return;
-    }
+    if (!supported) return;
     synth.getVoices();
     synth.addEventListener?.('voiceschanged', () => { synth.getVoices(); });
     const bubble = document.getElementById('panopticon-comment');
@@ -371,7 +351,6 @@ export function initEyeVoice() {
     button.addEventListener('click', () => {
         enabled = !enabled;
         failure = '';
-        status.textContent = enabled ? 'Starting eye voice…' : 'Eye voice is off.';
         syncButton();
         if (enabled) {
             startKeepAlive();
