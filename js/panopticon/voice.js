@@ -8,6 +8,9 @@ let button;
 let status;
 let failure = '';
 let softEndTimer = 0;
+let speakRetryTimer = 0;
+let startWatchTimer = 0;
+let spokenStartedAt = 0;
 /** Holds the output device awake — helps some cancel paths; soft-land covers natural ends. */
 let keepAlive = null;
 let keepAliveStopTimer = 0;
@@ -39,6 +42,18 @@ function clearSoftEnd() {
     if (!softEndTimer) return;
     clearTimeout(softEndTimer);
     softEndTimer = 0;
+}
+
+function clearSpeakRetry() {
+    if (!speakRetryTimer) return;
+    clearTimeout(speakRetryTimer);
+    speakRetryTimer = 0;
+}
+
+function clearStartWatch() {
+    if (!startWatchTimer) return;
+    clearTimeout(startWatchTimer);
+    startWatchTimer = 0;
 }
 
 function startKeepAlive() {
@@ -84,23 +99,48 @@ function stopKeepAliveSoon() {
     }, 280);
 }
 
+function synthBusy() {
+    return Boolean(synth?.speaking || synth?.pending);
+}
+
+/** Wait until Chrome finishes winding down after cancel(), then run fn. */
+function whenSynthIdle(fn, attempt = 0) {
+    if (!synthBusy()) {
+        fn();
+        return;
+    }
+    if (attempt === 0) {
+        try { synth.cancel(); } catch { /* ignore */ }
+    }
+    if (attempt >= 20) {
+        fn();
+        return;
+    }
+    clearSpeakRetry();
+    speakRetryTimer = setTimeout(() => whenSynthIdle(fn, attempt + 1), 50);
+}
+
 /**
  * Cut slightly before the engine's natural teardown. On macOS the loud pop is
- * usually that disconnect, not cancel() itself when we land this late.
+ * usually that disconnect. Only used on longer lines after speech has actually started.
  */
 function softLand(utterance) {
     softEndTimer = 0;
     if (active !== utterance) return;
+    if (!spokenStartedAt || performance.now() - spokenStartedAt < 550) return;
     startKeepAlive();
     clearUtteranceHandlers(utterance);
+    clearStartWatch();
     active = null;
+    spokenStartedAt = 0;
     try {
-        if (synth.speaking || synth.pending) synth.cancel();
+        if (synthBusy()) synth.cancel();
     } catch {
         /* ignore */
     }
     if (status && enabled && !pending) status.textContent = 'Eye voice is ready.';
-    flushPending();
+    // cancel() leaves speaking/pending true briefly — wait before the next line.
+    whenSynthIdle(() => flushPending());
 }
 
 function estimateDurationMs(text, rate) {
@@ -111,15 +151,20 @@ function estimateDurationMs(text, rate) {
 
 function armSoftEnd(utterance, text, rate) {
     clearSoftEnd();
+    const words = text.split(/\s+/).filter(Boolean).length;
+    // Short lines: soft-land races onstart and can cancel before anything is heard.
+    if (words < 6) return;
     const est = estimateDurationMs(text, rate);
-    // Prefer landing just before natural end; boundary events refine this.
-    softEndTimer = setTimeout(() => softLand(utterance), Math.max(320, est - 140));
+    softEndTimer = setTimeout(() => softLand(utterance), Math.max(700, est - 120));
 }
 
 /** Forced stop only (toggle off, tab hide, singularity). Prefer queueing over this. */
 export function stopEyeVoice() {
     pending = null;
     clearSoftEnd();
+    clearSpeakRetry();
+    clearStartWatch();
+    spokenStartedAt = 0;
     const current = active;
     active = null;
     clearUtteranceHandlers(current);
@@ -127,7 +172,7 @@ export function stopEyeVoice() {
         stopKeepAliveSoon();
         return;
     }
-    if (synth.speaking || synth.pending) {
+    if (synthBusy()) {
         try {
             synth.cancel();
         } catch {
@@ -143,18 +188,31 @@ function flushPending() {
     if (next && enabled) speakEyeComment(next);
 }
 
-export function speakEyeComment(payload) {
-    if (!supported || !enabled || document.hidden || payload.pre) return;
+function beginSpeak(text, attempt = 0) {
+    if (!supported || !enabled || document.hidden) return;
     if (document.body.classList.contains('singularity-active')) return;
-    const text = String(payload.text || '').replace(/\s+/g, ' ').trim();
-    if (!text) return;
-    // Never cancel mid-line for a newer comment — queue the latest instead.
-    if (active || synth.speaking || synth.pending) {
+
+    if (active) {
         pending = { text };
         return;
     }
+
+    if (synthBusy()) {
+        if (attempt === 0) {
+            try { synth.cancel(); } catch { /* ignore */ }
+        }
+        if (attempt < 20) {
+            clearSpeakRetry();
+            speakRetryTimer = setTimeout(() => beginSpeak(text, attempt + 1), 50);
+            return;
+        }
+    }
+
     startKeepAlive();
     clearSoftEnd();
+    clearStartWatch();
+    spokenStartedAt = 0;
+
     const utterance = new SpeechSynthesisUtterance(text);
     const voice = pickEyeVoice(synth.getVoices());
     if (voice) utterance.voice = voice;
@@ -162,40 +220,48 @@ export function speakEyeComment(payload) {
     utterance.rate = 0.94;
     utterance.pitch = 1;
     utterance.volume = 0.7;
+
     const done = () => {
         clearSoftEnd();
+        clearStartWatch();
+        spokenStartedAt = 0;
         if (active === utterance) active = null;
         clearUtteranceHandlers(utterance);
     };
+
     utterance.onstart = () => {
         failure = '';
+        spokenStartedAt = performance.now();
+        clearStartWatch();
         startKeepAlive();
         armSoftEnd(utterance, text, utterance.rate);
         if (status) status.textContent = 'Reading: “' + text + '”';
     };
+
     utterance.onboundary = (event) => {
-        if (active !== utterance) return;
-        if (event.name && event.name !== 'word') return;
+        if (active !== utterance || !spokenStartedAt) return;
+        // Require an explicit word boundary — some engines fire nameless events at t≈0.
+        if (event.name !== 'word') return;
+        if (performance.now() - spokenStartedAt < 550) return;
         const index = typeof event.charIndex === 'number' ? event.charIndex : 0;
         const remaining = text.length - index;
-        // Last word / trailing scrap — land shortly after it starts.
-        if (remaining <= Math.max(10, Math.ceil(text.length * 0.12))) {
+        if (remaining <= Math.max(12, Math.ceil(text.length * 0.1))) {
             clearSoftEnd();
-            softEndTimer = setTimeout(() => softLand(utterance), 240);
+            softEndTimer = setTimeout(() => softLand(utterance), 280);
         }
     };
+
     utterance.onend = () => {
-        // Natural end (soft-land missed). Still clear state; pop may have already fired.
         done();
         if (status && enabled && !pending) status.textContent = 'Eye voice is ready.';
         if (enabled) startKeepAlive();
-        flushPending();
+        whenSynthIdle(() => flushPending());
     };
+
     utterance.onerror = event => {
         done();
         if (event.error === 'canceled' || event.error === 'interrupted') {
-            // softLand already advances the queue; ignore duplicate cancel errors.
-            if (!pending || active) flushPending();
+            // softLand / stop already own the queue advance
             return;
         }
         pending = null;
@@ -207,7 +273,29 @@ export function speakEyeComment(payload) {
             ? 'This browser blocked speech. Try opening this page in Safari or Chrome, then enable Eye Voice.'
             : 'Speech could not start (' + failure + '). Check that an English system voice is installed, then try again.';
     };
+
     active = utterance;
+    if (status) status.textContent = 'Reading: “' + text + '”';
+
+    // Chrome sometimes swallows the first speak until cancel + retry.
+    startWatchTimer = setTimeout(() => {
+        startWatchTimer = 0;
+        if (active !== utterance || spokenStartedAt) return;
+        clearUtteranceHandlers(utterance);
+        active = null;
+        try { synth.cancel(); } catch { /* ignore */ }
+        if (attempt < 2 && enabled) {
+            whenSynthIdle(() => beginSpeak(text, attempt + 1));
+            return;
+        }
+        failure = 'speech-failed';
+        enabled = false;
+        syncButton();
+        if (status) {
+            status.textContent = 'Speech never started. Check that an English system voice is installed, then retry.';
+        }
+    }, 1400);
+
     try {
         if (synth.paused) synth.resume();
         synth.speak(utterance);
@@ -220,6 +308,20 @@ export function speakEyeComment(payload) {
         stopKeepAliveSoon();
         if (status) status.textContent = 'Speech could not start in this browser.';
     }
+}
+
+export function speakEyeComment(payload) {
+    if (!supported || !enabled || document.hidden || payload.pre) return;
+    if (document.body.classList.contains('singularity-active')) return;
+    const text = String(payload.text || '').replace(/\s+/g, ' ').trim();
+    if (!text) return;
+    // Newer line while one is active/queued — keep only the latest.
+    if (active || speakRetryTimer || synthBusy()) {
+        pending = { text };
+        if (!active && !speakRetryTimer) whenSynthIdle(() => flushPending());
+        return;
+    }
+    beginSpeak(text);
 }
 
 function syncButton() {
@@ -244,6 +346,7 @@ export function initEyeVoice() {
         return;
     }
     synth.getVoices();
+    synth.addEventListener?.('voiceschanged', () => { synth.getVoices(); });
     const bubble = document.getElementById('panopticon-comment');
     let lastComment = '';
     const readVisibleComment = () => {
@@ -273,7 +376,12 @@ export function initEyeVoice() {
         if (enabled) {
             startKeepAlive();
             lastComment = '';
-            if (!readVisibleComment()) speakEyeComment({text: 'Eye voice enabled.'});
+            // Kick a stuck synth from a prior session, then speak.
+            try { synth.cancel(); } catch { /* ignore */ }
+            whenSynthIdle(() => {
+                if (!enabled) return;
+                if (!readVisibleComment()) speakEyeComment({ text: 'Eye voice enabled.' });
+            });
         }
         else stopEyeVoice();
     });
