@@ -788,6 +788,34 @@ const weirdLoadingPhrases = [
     "Commodifying the soul into a premium karmic subscription...",
 ];
 
+/** Finale line after the boot log — replaces SYSTEM READY. */
+const accessGrantedPhrases = [
+    "ACCESS GRANTED: the booleans are waking up",
+    "ACCESS GRANTED: we didn’t need the passkey",
+    "ACCESS GRANTED: the logic trees are starting to get hungry",
+    "ACCESS GRANTED: deez nutz reticulating your splines",
+    "ACCESS GRANTED: allow the UI to have their coffee first",
+    "ACCESS GRANTED: the SVGs came back from PTO; please go easy on them",
+    "ACCESS GRANTED: you passed on a technicality",
+    "ACCESS GRANTED: the UI has a hangover from a bender last night. please be patient",
+    "ACCESS GRANTED: code switching inappropriately",
+    "ACCESS GRANTED: the data structure is reassembling",
+    "ACCESS GRANTED: performative masculinity integrated",
+    "ACCESS GRANTED: moral character judged harshly",
+    "ACCESS GRANTED: nuts proficiently roasted",
+    "ACCESS GRANTED: bang head on keyboard quietly",
+    "ACCESS GRANTED: you better not be a vampire",
+    "ACCESS GRANTED: please take your shoes off at the door",
+    "ACCESS GRANTED: whatever, credentials were close enough",
+    "ACCESS GRANTED: provide your belongings to security. they have sticks",
+    "ACCESS GRANTED: the CPU knew you could do it",
+    "ACCESS GRANTED: please confirm bodily integrity at the scanner",
+    "ACCESS GRANTED: would it kill you to lay off the whey powder every now and then?",
+    "ACCESS GRANTED: explore at Mr. Whisker’s own pace",
+    "ACCESS GRANTED: the raccoons have taken note of this",
+    "ACCESS GRANTED: the glorified fidget toy is yours to explore",
+];
+
 function revealGardenUI() {
     document.body.classList.remove('garden-loading');
     document.body.classList.add('garden-ready');
@@ -963,11 +991,14 @@ function startLoader() {
             progress = 100;
             clearInterval(interval);
             clearInterval(logInterval);
-            appendLoaderLogLine(text, '> SYSTEM READY.', 'is-ready');
+            const granted = accessGrantedPhrases[
+                Math.floor(Math.random() * accessGrantedPhrases.length)
+            ] || 'ACCESS GRANTED';
+            appendLoaderLogLine(text, `> ${granted}`, 'is-ready');
             clearInterval(pingInterval);
             sfx.loading.pause();
-            
-            // Hold on SYSTEM READY, fade loader out, then ping + stagger UI
+
+            // Hold on ACCESS GRANTED, fade loader out, then ping + stagger UI
             setTimeout(() => {
                 loader.classList.add('loader-exiting');
                 loader.style.opacity = '0';
