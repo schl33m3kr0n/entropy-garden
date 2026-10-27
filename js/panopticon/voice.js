@@ -6,11 +6,10 @@ let active = null;
 let pending = null;
 let button;
 let failure = '';
-let softEndTimer = 0;
 let speakRetryTimer = 0;
 let startWatchTimer = 0;
 let spokenStartedAt = 0;
-/** Holds the output device awake — helps some cancel paths; soft-land covers natural ends. */
+/** Near-silent bed so macOS is less likely to power-gate the DAC between lines. */
 let keepAlive = null;
 let keepAliveStopTimer = 0;
 
@@ -35,12 +34,6 @@ function clearUtteranceHandlers(utterance) {
     utterance.onend = null;
     utterance.onerror = null;
     utterance.onboundary = null;
-}
-
-function clearSoftEnd() {
-    if (!softEndTimer) return;
-    clearTimeout(softEndTimer);
-    softEndTimer = 0;
 }
 
 function clearSpeakRetry() {
@@ -119,47 +112,9 @@ function whenSynthIdle(fn, attempt = 0) {
     speakRetryTimer = setTimeout(() => whenSynthIdle(fn, attempt + 1), 50);
 }
 
-/**
- * Cut slightly before the engine's natural teardown. On macOS the loud pop is
- * usually that disconnect. Only used on longer lines after speech has actually started.
- */
-function softLand(utterance) {
-    softEndTimer = 0;
-    if (active !== utterance) return;
-    if (!spokenStartedAt || performance.now() - spokenStartedAt < 550) return;
-    startKeepAlive();
-    clearUtteranceHandlers(utterance);
-    clearStartWatch();
-    active = null;
-    spokenStartedAt = 0;
-    try {
-        if (synthBusy()) synth.cancel();
-    } catch {
-        /* ignore */
-    }
-    // cancel() leaves speaking/pending true briefly — wait before the next line.
-    whenSynthIdle(() => flushPending());
-}
-
-function estimateDurationMs(text, rate) {
-    const words = text.split(/\s+/).filter(Boolean).length || 1;
-    const wordsPerSec = 2.55 * Math.max(0.55, rate || 1);
-    return (words / wordsPerSec) * 1000;
-}
-
-function armSoftEnd(utterance, text, rate) {
-    clearSoftEnd();
-    const words = text.split(/\s+/).filter(Boolean).length;
-    // Short lines: soft-land races onstart and can cancel before anything is heard.
-    if (words < 6) return;
-    const est = estimateDurationMs(text, rate);
-    softEndTimer = setTimeout(() => softLand(utterance), Math.max(700, est - 120));
-}
-
 /** Forced stop only (toggle off, tab hide, singularity). Prefer queueing over this. */
 export function stopEyeVoice() {
     pending = null;
-    clearSoftEnd();
     clearSpeakRetry();
     clearStartWatch();
     spokenStartedAt = 0;
@@ -207,7 +162,6 @@ function beginSpeak(text, attempt = 0) {
     }
 
     startKeepAlive();
-    clearSoftEnd();
     clearStartWatch();
     spokenStartedAt = 0;
 
@@ -220,7 +174,6 @@ function beginSpeak(text, attempt = 0) {
     utterance.volume = 0.7;
 
     const done = () => {
-        clearSoftEnd();
         clearStartWatch();
         spokenStartedAt = 0;
         if (active === utterance) active = null;
@@ -232,20 +185,6 @@ function beginSpeak(text, attempt = 0) {
         spokenStartedAt = performance.now();
         clearStartWatch();
         startKeepAlive();
-        armSoftEnd(utterance, text, utterance.rate);
-    };
-
-    utterance.onboundary = (event) => {
-        if (active !== utterance || !spokenStartedAt) return;
-        // Require an explicit word boundary — some engines fire nameless events at t≈0.
-        if (event.name !== 'word') return;
-        if (performance.now() - spokenStartedAt < 550) return;
-        const index = typeof event.charIndex === 'number' ? event.charIndex : 0;
-        const remaining = text.length - index;
-        if (remaining <= Math.max(12, Math.ceil(text.length * 0.1))) {
-            clearSoftEnd();
-            softEndTimer = setTimeout(() => softLand(utterance), 280);
-        }
     };
 
     utterance.onend = () => {
@@ -256,10 +195,7 @@ function beginSpeak(text, attempt = 0) {
 
     utterance.onerror = event => {
         done();
-        if (event.error === 'canceled' || event.error === 'interrupted') {
-            // softLand / stop already own the queue advance
-            return;
-        }
+        if (event.error === 'canceled' || event.error === 'interrupted') return;
         pending = null;
         failure = event.error || 'speech-failed';
         enabled = false;
@@ -355,7 +291,6 @@ export function initEyeVoice() {
         if (enabled) {
             startKeepAlive();
             lastComment = '';
-            // Kick a stuck synth from a prior session, then speak.
             try { synth.cancel(); } catch { /* ignore */ }
             whenSynthIdle(() => {
                 if (!enabled) return;
