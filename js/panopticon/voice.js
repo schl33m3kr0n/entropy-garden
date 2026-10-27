@@ -7,6 +7,9 @@ let pending = null;
 let button;
 let status;
 let failure = '';
+/** Holds the output device awake — macOS often clicks when TTS tears the DAC down. */
+let keepAlive = null;
+let keepAliveStopTimer = 0;
 
 export function pickEyeVoice(voices) {
     const english = voices.filter(voice => /^en(?:-|_|$)/i.test(voice.lang));
@@ -31,20 +34,70 @@ function clearUtteranceHandlers(utterance) {
     utterance.onboundary = null;
 }
 
+function startKeepAlive() {
+    if (keepAliveStopTimer) {
+        clearTimeout(keepAliveStopTimer);
+        keepAliveStopTimer = 0;
+    }
+    const AC = globalThis.AudioContext || globalThis.webkitAudioContext;
+    if (!AC) return;
+    if (keepAlive) {
+        if (keepAlive.ctx.state === 'suspended') keepAlive.ctx.resume().catch(() => {});
+        return;
+    }
+    try {
+        const ctx = new AC();
+        // Tiny non-zero noise (not digital silence) so macOS won't power-gate the DAC.
+        const seconds = 2;
+        const buffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * seconds)), ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.00035;
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        const gain = ctx.createGain();
+        gain.gain.value = 1;
+        source.connect(gain);
+        gain.connect(ctx.destination);
+        source.start();
+        keepAlive = { ctx, source, gain };
+        if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    } catch {
+        keepAlive = null;
+    }
+}
+
+function stopKeepAliveSoon() {
+    if (keepAliveStopTimer) clearTimeout(keepAliveStopTimer);
+    // Leave the bed up briefly after cancel so the disconnect click is masked.
+    keepAliveStopTimer = setTimeout(() => {
+        keepAliveStopTimer = 0;
+        if (!keepAlive) return;
+        try { keepAlive.source.stop(); } catch { /* ignore */ }
+        try { keepAlive.ctx.close(); } catch { /* ignore */ }
+        keepAlive = null;
+    }, 280);
+}
+
 /** Forced stop only (toggle off, tab hide, singularity). Prefer queueing over this. */
 export function stopEyeVoice() {
     pending = null;
     const current = active;
     active = null;
     clearUtteranceHandlers(current);
-    if (!synth) return;
-    // Avoid cancel() when the engine is already idle — that click is worse than silence.
-    if (!synth.speaking && !synth.pending) return;
-    try {
-        synth.cancel();
-    } catch {
-        /* ignore */
+    if (!synth) {
+        stopKeepAliveSoon();
+        return;
     }
+    // Avoid cancel() when the engine is already idle — that click is worse than silence.
+    if (synth.speaking || synth.pending) {
+        try {
+            synth.cancel();
+        } catch {
+            /* ignore */
+        }
+    }
+    stopKeepAliveSoon();
 }
 
 function flushPending() {
@@ -64,26 +117,28 @@ export function speakEyeComment(payload) {
         pending = { text };
         return;
     }
-    // Gentle sentence end helps some engines avoid a hard glottal cut.
-    const spoken = /[.!?…]$/.test(text) ? text : `${text}.`;
-    const utterance = new SpeechSynthesisUtterance(spoken);
+    startKeepAlive();
+    const utterance = new SpeechSynthesisUtterance(text);
     const voice = pickEyeVoice(synth.getVoices());
     if (voice) utterance.voice = voice;
     utterance.lang = voice?.lang || 'en-US';
     utterance.rate = 0.94;
     utterance.pitch = 1;
-    utterance.volume = 0.72;
+    utterance.volume = 0.7;
     const done = () => {
         if (active === utterance) active = null;
         clearUtteranceHandlers(utterance);
     };
     utterance.onstart = () => {
         failure = '';
+        startKeepAlive();
         if (status) status.textContent = 'Reading: “' + text + '”';
     };
     utterance.onend = () => {
         done();
         if (status && enabled && !pending) status.textContent = 'Eye voice is ready.';
+        // Keep the DAC bed warm between lines; only tear it down on stopEyeVoice.
+        if (enabled) startKeepAlive();
         flushPending();
     };
     utterance.onerror = event => {
@@ -96,6 +151,7 @@ export function speakEyeComment(payload) {
         failure = event.error || 'speech-failed';
         enabled = false;
         syncButton();
+        stopKeepAliveSoon();
         if (status) status.textContent = failure === 'not-allowed'
             ? 'This browser blocked speech. Try opening this page in Safari or Chrome, then enable Eye Voice.'
             : 'Speech could not start (' + failure + '). Check that an English system voice is installed, then try again.';
@@ -110,6 +166,7 @@ export function speakEyeComment(payload) {
         enabled = false;
         failure = 'speech-failed';
         syncButton();
+        stopKeepAliveSoon();
         if (status) status.textContent = 'Speech could not start in this browser.';
     }
 }
@@ -163,6 +220,8 @@ export function initEyeVoice() {
         status.textContent = enabled ? 'Starting eye voice…' : 'Eye voice is off.';
         syncButton();
         if (enabled) {
+            // User gesture — open the keep-alive context while unlock is allowed.
+            startKeepAlive();
             lastComment = '';
             if (!readVisibleComment()) speakEyeComment({text: 'Eye voice enabled.'});
         }
