@@ -59,6 +59,10 @@ let singularityVoicesBound = false;
 
 function pickSingularityVoice(voices) {
     if (!voices?.length) return null;
+    const byGoogle = voices.find((v) => /google/i.test(v.name) && /^en(-|_)US$/i.test(v.lang));
+    if (byGoogle) return byGoogle;
+    const byEnhanced = voices.find((v) => /samantha/i.test(v.name) && /enhanced|premium/i.test(v.name));
+    if (byEnhanced) return byEnhanced;
     const byUri = voices.find((v) => /samantha/i.test(v.voiceURI || ''));
     if (byUri) return byUri;
     const byName = voices.find((v) => /^samantha$/i.test(v.name) || /\bsamantha\b/i.test(v.name));

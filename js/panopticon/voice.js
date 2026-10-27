@@ -9,31 +9,35 @@ let failure = '';
 let speakRetryTimer = 0;
 let startWatchTimer = 0;
 let spokenStartedAt = 0;
-/** Near-silent bed so macOS is less likely to power-gate the DAC between lines. */
-let keepAlive = null;
-let keepAliveStopTimer = 0;
 
-export function pickEyeVoice(voices) {
-    const english = voices.filter(voice => /^en(?:-|_|$)/i.test(voice.lang));
-    // Prefer compact local voices. Enhanced/premium/neural engines often
-    // disconnect the audio graph with a loud click when an utterance ends.
-    const score = voice => {
-        const name = voice.name || '';
-        if (/enhanced|premium|neural|superstar|novelty|sapi[rs]/i.test(name)) return 0;
-        if (/samantha|ava|serena|karen|moira|daniel|arthur|fred|victoria/i.test(name)) return 5;
-        if (/google|microsoft/i.test(name)) return 3;
-        if (/natural/i.test(name)) return 2;
-        return voice.default ? 1 : 0;
-    };
-    return english.sort((a, b) => score(b) - score(a))[0] || null;
+/** Retain utterances in memory for 15s so V8/WebKit GC doesn't kill the C++ audio unit mid-stream (end pop). */
+const retainedUtterances = [];
+function retainUtterance(u) {
+    if (!u) return;
+    retainedUtterances.push(u);
+    setTimeout(() => {
+        const idx = retainedUtterances.indexOf(u);
+        if (idx !== -1) retainedUtterances.splice(idx, 1);
+    }, 15000);
 }
 
-function clearUtteranceHandlers(utterance) {
-    if (!utterance) return;
-    utterance.onstart = null;
-    utterance.onend = null;
-    utterance.onerror = null;
-    utterance.onboundary = null;
+export function pickEyeVoice(voices) {
+    if (!voices?.length) return null;
+    const english = voices.filter(voice => /^en(?:-|_|$)/i.test(voice.lang));
+    const score = voice => {
+        const name = voice.name || '';
+        // 1. Google / Microsoft / Natural network voices stream cleanly in software without CoreAudio AUHAL pop
+        if (/google|microsoft/i.test(name)) return 10;
+        if (/natural/i.test(name)) return 9;
+        // 2. Enhanced/Premium system voices have proper release envelopes compared to legacy compact voices
+        if (/enhanced|premium/i.test(name)) return 8;
+        // 3. Known pleasant English voices
+        if (/samantha|ava|serena|karen|moira|daniel|victoria/i.test(name)) return 6;
+        if (voice.default) return 4;
+        if (voice.localService) return 3;
+        return 1;
+    };
+    return (english.length ? english : voices).sort((a, b) => score(b) - score(a))[0] || null;
 }
 
 function clearSpeakRetry() {
@@ -46,61 +50,6 @@ function clearStartWatch() {
     if (!startWatchTimer) return;
     clearTimeout(startWatchTimer);
     startWatchTimer = 0;
-}
-
-function startKeepAlive() {
-    if (keepAliveStopTimer) {
-        clearTimeout(keepAliveStopTimer);
-        keepAliveStopTimer = 0;
-    }
-    const AC = globalThis.AudioContext || globalThis.webkitAudioContext;
-    if (!AC) return;
-    if (keepAlive) {
-        if (keepAlive.ctx.state === 'suspended') keepAlive.ctx.resume().catch(() => {});
-        return;
-    }
-    try {
-        const ctx = new AC();
-        const seconds = 2;
-        const buffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * seconds)), ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.00035;
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.00001, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.05);
-        source.connect(gain);
-        gain.connect(ctx.destination);
-        source.start();
-        keepAlive = { ctx, source, gain };
-        if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-    } catch {
-        keepAlive = null;
-    }
-}
-
-function stopKeepAliveSoon() {
-    if (keepAliveStopTimer) clearTimeout(keepAliveStopTimer);
-    keepAliveStopTimer = setTimeout(() => {
-        keepAliveStopTimer = 0;
-        if (!keepAlive) return;
-        const target = keepAlive;
-        keepAlive = null;
-        try {
-            const now = target.ctx.currentTime;
-            target.gain.gain.setValueAtTime(target.gain.gain.value, now);
-            target.gain.gain.linearRampToValueAtTime(0.00001, now + 0.05);
-            setTimeout(() => {
-                try { target.source.stop(); } catch { /* ignore */ }
-                try { target.ctx.close(); } catch { /* ignore */ }
-            }, 60);
-        } catch {
-            try { target.source.stop(); } catch { /* ignore */ }
-            try { target.ctx.close(); } catch { /* ignore */ }
-        }
-    }, 280);
 }
 
 function synthBusy() {
@@ -140,11 +89,7 @@ export function stopEyeVoice() {
     spokenStartedAt = 0;
     const current = active;
     active = null;
-    clearUtteranceHandlers(current);
-    if (!synth) {
-        stopKeepAliveSoon();
-        return;
-    }
+    if (!synth) return;
     if (current && synthBusy()) {
         try {
             synth.cancel();
@@ -152,7 +97,6 @@ export function stopEyeVoice() {
             /* ignore */
         }
     }
-    stopKeepAliveSoon();
 }
 
 function flushPending() {
@@ -180,39 +124,39 @@ function beginSpeak(text, attempt = 0) {
         return;
     }
 
-    startKeepAlive();
     clearStartWatch();
     spokenStartedAt = 0;
 
-    // Gentle sentence ending with trailing padding ensures the engine completes
-    // with a natural release into silence before onend, avoiding a hard glottal cut or DAC pop.
-    const clean = text.trim();
-    const spoken = /[.!?…]$/.test(clean) ? `${clean}   ` : `${clean}.   `;
+    // Clean sentence ending with trailing period
+    const clean = text.trim().replace(/[.!?…\s]+$/, '');
+    const spoken = clean ? `${clean}.` : '';
+    if (!spoken) return;
+
     const utterance = new SpeechSynthesisUtterance(spoken);
+    retainUtterance(utterance);
+
     const voice = pickEyeVoice(synth.getVoices());
     if (voice) utterance.voice = voice;
     utterance.lang = voice?.lang || 'en-US';
     utterance.rate = 0.94;
     utterance.pitch = 1;
-    utterance.volume = 0.7;
+    // Leave volume at 1 to prevent CoreAudio digital gain scaling pops on stream teardown
+    utterance.volume = 1;
 
     const done = () => {
         clearStartWatch();
         spokenStartedAt = 0;
         if (active === utterance) active = null;
-        clearUtteranceHandlers(utterance);
     };
 
     utterance.onstart = () => {
         failure = '';
         spokenStartedAt = performance.now();
         clearStartWatch();
-        startKeepAlive();
     };
 
     utterance.onend = () => {
         done();
-        if (enabled) startKeepAlive();
         if (pending) {
             whenSynthIdle(() => flushPending());
         }
@@ -225,7 +169,6 @@ function beginSpeak(text, attempt = 0) {
         failure = event.error || 'speech-failed';
         enabled = false;
         syncButton();
-        stopKeepAliveSoon();
     };
 
     active = utterance;
@@ -234,7 +177,6 @@ function beginSpeak(text, attempt = 0) {
     startWatchTimer = setTimeout(() => {
         startWatchTimer = 0;
         if (active !== utterance || spokenStartedAt) return;
-        clearUtteranceHandlers(utterance);
         active = null;
         try { synth.cancel(); } catch { /* ignore */ }
         if (attempt < 2 && enabled) {
@@ -255,7 +197,6 @@ function beginSpeak(text, attempt = 0) {
         enabled = false;
         failure = 'speech-failed';
         syncButton();
-        stopKeepAliveSoon();
     }
 }
 
@@ -322,7 +263,6 @@ export function initEyeVoice() {
                 // Don't fight poem voiceover for the synthesizer.
                 return;
             }
-            startKeepAlive();
             lastComment = '';
             try { synth.cancel(); } catch { /* ignore */ }
             whenSynthIdle(() => {
