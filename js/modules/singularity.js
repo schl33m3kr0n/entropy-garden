@@ -582,7 +582,9 @@ function runSpeechQueue(items, lineElements, token) {
         if (token !== speechQueueToken || index >= items.length) return;
 
         const item = items[index++];
-        const utterance = new SpeechSynthesisUtterance(item.text);
+        const clean = (item.text || '').trim();
+        const spoken = clean ? (/[.!?…]$/.test(clean) ? `${clean}   ` : `${clean}.   `) : '';
+        const utterance = new SpeechSynthesisUtterance(spoken || item.text);
         const voice = ensureSingularityVoice();
         if (voice) utterance.voice = voice;
         utterance.volume = item.silent ? 0 : 1;

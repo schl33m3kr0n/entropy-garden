@@ -69,7 +69,8 @@ function startKeepAlive() {
         source.buffer = buffer;
         source.loop = true;
         const gain = ctx.createGain();
-        gain.gain.value = 1;
+        gain.gain.setValueAtTime(0.00001, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.05);
         source.connect(gain);
         gain.connect(ctx.destination);
         source.start();
@@ -85,9 +86,20 @@ function stopKeepAliveSoon() {
     keepAliveStopTimer = setTimeout(() => {
         keepAliveStopTimer = 0;
         if (!keepAlive) return;
-        try { keepAlive.source.stop(); } catch { /* ignore */ }
-        try { keepAlive.ctx.close(); } catch { /* ignore */ }
+        const target = keepAlive;
         keepAlive = null;
+        try {
+            const now = target.ctx.currentTime;
+            target.gain.gain.setValueAtTime(target.gain.gain.value, now);
+            target.gain.gain.linearRampToValueAtTime(0.00001, now + 0.05);
+            setTimeout(() => {
+                try { target.source.stop(); } catch { /* ignore */ }
+                try { target.ctx.close(); } catch { /* ignore */ }
+            }, 60);
+        } catch {
+            try { target.source.stop(); } catch { /* ignore */ }
+            try { target.ctx.close(); } catch { /* ignore */ }
+        }
     }, 280);
 }
 
@@ -95,7 +107,7 @@ function synthBusy() {
     return Boolean(synth?.speaking || synth?.pending);
 }
 
-/** Wait until Chrome finishes winding down after cancel(), then run fn. */
+/** Wait until the speech synthesizer finishes naturally, then run fn. */
 function whenSynthIdle(fn, attempt = 0) {
     // Poem TTS owns speechSynthesis during singularity — never cancel it from here.
     if (document.body.classList.contains('singularity-active')) {
@@ -106,10 +118,10 @@ function whenSynthIdle(fn, attempt = 0) {
         fn();
         return;
     }
-    if (attempt === 0) {
-        try { synth.cancel(); } catch { /* ignore */ }
-    }
+    // Only force cancel as a last-resort recovery if hung after 1 second (20 attempts).
+    // Never cancel on attempt 0 — that abruptly halts the audio buffer and causes an end-pop.
     if (attempt >= 20) {
+        try { synth.cancel(); } catch { /* ignore */ }
         fn();
         return;
     }
@@ -172,7 +184,11 @@ function beginSpeak(text, attempt = 0) {
     clearStartWatch();
     spokenStartedAt = 0;
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Gentle sentence ending with trailing padding ensures the engine completes
+    // with a natural release into silence before onend, avoiding a hard glottal cut or DAC pop.
+    const clean = text.trim();
+    const spoken = /[.!?…]$/.test(clean) ? `${clean}   ` : `${clean}.   `;
+    const utterance = new SpeechSynthesisUtterance(spoken);
     const voice = pickEyeVoice(synth.getVoices());
     if (voice) utterance.voice = voice;
     utterance.lang = voice?.lang || 'en-US';
@@ -197,7 +213,9 @@ function beginSpeak(text, attempt = 0) {
     utterance.onend = () => {
         done();
         if (enabled) startKeepAlive();
-        whenSynthIdle(() => flushPending());
+        if (pending) {
+            whenSynthIdle(() => flushPending());
+        }
     };
 
     utterance.onerror = event => {
