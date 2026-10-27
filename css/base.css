@@ -295,7 +295,7 @@ body.garden-loading #loader {
     margin: 0;
     padding-bottom: 0.4em;
     overflow: hidden;
-    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-family: var(--main-font);
     font-size: 0.78rem;
     line-height: 1.5;
     letter-spacing: 0.01em;
