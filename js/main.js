@@ -1,4 +1,4 @@
-import { initEyeVoice } from './panopticon/voice.js?v=11';
+import { initEyeVoice } from './panopticon/voice.js?v=12';
 // Entropy Garden — main entry (lazy-loads terminal, matrix, singularity)
 import { bindPlaylistPlayPause, isPlayPauseShowingPlaying } from './playlist-icons.js';
 import { registerHooks, getHook } from './core/hooks.js';

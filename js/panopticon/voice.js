@@ -97,6 +97,11 @@ function synthBusy() {
 
 /** Wait until Chrome finishes winding down after cancel(), then run fn. */
 function whenSynthIdle(fn, attempt = 0) {
+    // Poem TTS owns speechSynthesis during singularity — never cancel it from here.
+    if (document.body.classList.contains('singularity-active')) {
+        clearSpeakRetry();
+        return;
+    }
     if (!synthBusy()) {
         fn();
         return;
@@ -112,7 +117,10 @@ function whenSynthIdle(fn, attempt = 0) {
     speakRetryTimer = setTimeout(() => whenSynthIdle(fn, attempt + 1), 50);
 }
 
-/** Forced stop only (toggle off, tab hide, singularity). Prefer queueing over this. */
+/**
+ * Stop eye narration only. Do not cancel speechSynthesis unless this module
+ * owns the current utterance — otherwise poem TTS gets killed.
+ */
 export function stopEyeVoice() {
     pending = null;
     clearSpeakRetry();
@@ -125,7 +133,7 @@ export function stopEyeVoice() {
         stopKeepAliveSoon();
         return;
     }
-    if (synthBusy()) {
+    if (current && synthBusy()) {
         try {
             synth.cancel();
         } catch {
@@ -151,14 +159,13 @@ function beginSpeak(text, attempt = 0) {
     }
 
     if (synthBusy()) {
-        if (attempt === 0) {
-            try { synth.cancel(); } catch { /* ignore */ }
-        }
+        // Another narrator (poems) may own the synth — wait, don't steal it.
         if (attempt < 20) {
             clearSpeakRetry();
             speakRetryTimer = setTimeout(() => beginSpeak(text, attempt + 1), 50);
             return;
         }
+        return;
     }
 
     startKeepAlive();
@@ -280,8 +287,12 @@ export function initEyeVoice() {
         observer.observe(bubble, {childList: true, subtree: true, characterData: true,
             attributes: true, attributeFilter: ['class', 'aria-hidden']});
     }
+    let sawSingularity = document.body.classList.contains('singularity-active');
     const modeObserver = new MutationObserver(() => {
-        if (document.body.classList.contains('singularity-active')) stopEyeVoice();
+        const now = document.body.classList.contains('singularity-active');
+        // Only on enter — re-running cancel on every body class tweak kills poem TTS.
+        if (now && !sawSingularity) stopEyeVoice();
+        sawSingularity = now;
     });
     modeObserver.observe(document.body, {attributes: true, attributeFilter: ['class']});
     button.addEventListener('click', () => {
@@ -289,11 +300,15 @@ export function initEyeVoice() {
         failure = '';
         syncButton();
         if (enabled) {
+            if (document.body.classList.contains('singularity-active')) {
+                // Don't fight poem voiceover for the synthesizer.
+                return;
+            }
             startKeepAlive();
             lastComment = '';
             try { synth.cancel(); } catch { /* ignore */ }
             whenSynthIdle(() => {
-                if (!enabled) return;
+                if (!enabled || document.body.classList.contains('singularity-active')) return;
                 if (!readVisibleComment()) speakEyeComment({ text: 'Eye voice enabled.' });
             });
         }
