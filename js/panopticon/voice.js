@@ -233,13 +233,28 @@ async function beginSpeak(text) {
     }
 }
 
+/** Respelling / phoneme hints so espeak hits the intended pronunciation. */
+const EYE_PRONUNCIATIONS = [
+    [/\bkanye\s+west\b/gi, 'kahn yay west'],
+    [/\bkanye('s)?\b/gi, 'kahn yay$1'],
+];
+
+function applyEyePronunciations(text) {
+    let out = text;
+    for (const [pattern, replacement] of EYE_PRONUNCIATIONS) {
+        out = out.replace(pattern, replacement);
+    }
+    return out;
+}
+
 /** God-mode bubbles are ALL CAPS on screen; espeak spells "IT" unless spoken lowercase. */
 function spokenEyeText(text) {
     const clean = String(text || '').replace(/\s+/g, ' ').trim();
     if (!clean) return '';
     const god = document.body.classList.contains('god-mode')
         || document.getElementById('panopticon-comment')?.classList.contains('panopticon-comment-god');
-    return god ? clean.toLowerCase() : clean;
+    const cased = god ? clean.toLowerCase() : clean;
+    return applyEyePronunciations(cased);
 }
 
 export function speakEyeComment(payload) {
