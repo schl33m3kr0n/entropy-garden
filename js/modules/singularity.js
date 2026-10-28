@@ -596,29 +596,47 @@ function attachSingularityUtterance(utterance) {
     return utterance;
 }
 
-/** Firefox: one utterance for the whole poem so the audio device stays open. */
+/**
+ * Firefox: chop audio per line, but enqueue every utterance up front.
+ * Waiting for onend before the next speak() lets the device close (the click);
+ * a full queue keeps the stream warm between lines.
+ */
 function runFirefoxSpeech(items, lineElements, token) {
     const synth = window.speechSynthesis;
     if (!synth) {
         runVisualPoemScroll(lineElements, token);
         return;
     }
-    const spoken = items
-        .map((item) => String(item.text || '').replace(/\s+/g, ' ').trim())
-        .filter(Boolean)
-        .map((line) => (/[.!?…]$/.test(line) ? line : `${line}.`))
-        .join('\n');
-    if (!spoken) {
+
+    const queued = [];
+    items.forEach((item) => {
+        const clean = String(item.text || '').replace(/\s+/g, ' ').trim();
+        if (!clean) return;
+        const spoken = /[.!?…]$/.test(clean) ? clean : `${clean}.`;
+        const utterance = attachSingularityUtterance(new SpeechSynthesisUtterance(spoken));
+        utterance.onstart = () => {
+            if (token !== speechQueueToken) return;
+            if (item.lineIndex != null) {
+                highlightPoemLine(lineElements, item.lineIndex);
+            }
+        };
+        queued.push(utterance);
+    });
+
+    if (!queued.length) {
         runVisualPoemScroll(lineElements, token);
         return;
     }
-    runVisualPoemScroll(lineElements, token);
-    const utterance = attachSingularityUtterance(new SpeechSynthesisUtterance(spoken));
+
+    if (items[0]?.lineIndex != null) {
+        highlightPoemLine(lineElements, items[0].lineIndex);
+    }
+
     try {
         if (synth.paused) synth.resume();
-        synth.speak(utterance);
+        queued.forEach((utterance) => synth.speak(utterance));
     } catch {
-        /* visual scroll already running */
+        runVisualPoemScroll(lineElements, token);
     }
 }
 
