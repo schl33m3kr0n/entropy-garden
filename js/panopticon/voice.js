@@ -6,7 +6,13 @@
 const SPELL_MOD =
     'https://cdn.jsdelivr.net/npm/@spelling-creator/spellophone@0.2.1/+esm';
 const FADE_OUT_SEC = 0.07;
-const VOICE_ID = 'en-us';
+/** Prefer American English — default espeak `en` is British RP. */
+const VOICE_CANDIDATES = [
+    'en-us',
+    'English (America)',
+    'gmw/en-US',
+    { language: 'en-us' },
+];
 
 let enabled = false;
 let button;
@@ -53,10 +59,33 @@ async function ensureEspeak() {
             cdn: 'jsdelivr',
             languages: ['en'],
         });
-        try {
-            await engine.loadVoice(VOICE_ID);
-        } catch {
-            try { engine.setVoice(VOICE_ID); } catch { /* keep default */ }
+        let selected = null;
+        for (const candidate of VOICE_CANDIDATES) {
+            try {
+                if (typeof engine.loadVoice === 'function') {
+                    await engine.loadVoice(candidate);
+                } else {
+                    engine.setVoice(candidate);
+                }
+                selected = engine.voice || candidate;
+                break;
+            } catch {
+                try {
+                    engine.setVoice(candidate);
+                    selected = engine.voice || candidate;
+                    break;
+                } catch {
+                    /* try next */
+                }
+            }
+        }
+        if (!selected) {
+            console.warn('[eye voice] American en-us voice unavailable; using espeak default');
+        } else {
+            const label = selected?.name || selected?.identifier || String(selected);
+            if (!/america|en-us|en_us/i.test(label) && !/america|en-us/i.test(JSON.stringify(selected))) {
+                console.warn('[eye voice] expected American voice, got', selected);
+            }
         }
         try { engine.setParameter('rate', 155); } catch { /* optional */ }
         try { engine.setParameter('pitch', 42); } catch { /* optional */ }
