@@ -8,9 +8,10 @@ let button;
 let failure = '';
 let speakRetryTimer = 0;
 let startWatchTimer = 0;
+let softEndTimer = 0;
 let spokenStartedAt = 0;
 
-/** Retain utterances in memory for 15s so V8/WebKit GC doesn't kill the C++ audio unit mid-stream (end pop). */
+/** Retain utterances so Safari/Chrome GC does not drop the audio unit mid-stream. */
 const retainedUtterances = [];
 function retainUtterance(u) {
     if (!u) return;
@@ -18,7 +19,7 @@ function retainUtterance(u) {
     setTimeout(() => {
         const idx = retainedUtterances.indexOf(u);
         if (idx !== -1) retainedUtterances.splice(idx, 1);
-    }, 15000);
+    }, 20000);
 }
 
 let currentEyeVoice = null;
@@ -27,16 +28,14 @@ export function pickEyeVoice(voices) {
     if (!voices?.length) return null;
     const english = voices.filter(voice => /^en(?:-|_|$)/i.test(voice.lang));
     const pool = english.length ? english : voices;
+    // Compact local voices tear down cleaner than Apple neural/enhanced (loud end click).
     const score = voice => {
         const name = voice.name || '';
-        // 1. Google / Microsoft / Natural network voices stream cleanly in software without CoreAudio AUHAL pop
-        if (/google|microsoft/i.test(name)) return 10;
-        if (/natural/i.test(name)) return 9;
-        // 2. Modern Apple neural voices (Eddy, Flo, Reed, Shelley, Ava, Serena, etc.)
-        if (/eddy|flo|reed|shelley|sandy|ava|serena|evan|nathan|zoe/i.test(name)) return 8;
-        if (/enhanced|premium/i.test(name)) return 7;
-        // 3. Known pleasant English voices
-        if (/samantha|karen|moira|daniel|victoria/i.test(name)) return 5;
+        if (/enhanced|premium|neural|superstar|novelty|sapi[rs]|eddy|flo|reed|shelley|sandy/i.test(name)) {
+            return 0;
+        }
+        if (/samantha|ava|serena|karen|moira|daniel|arthur|fred|victoria|alex/i.test(name)) return 8;
+        if (/google|microsoft/i.test(name) && !voice.localService) return 6;
         if (voice.default) return 4;
         if (voice.localService) return 3;
         return 1;
@@ -47,9 +46,7 @@ export function pickEyeVoice(voices) {
 function refreshEyeVoice() {
     if (!synth) return;
     const voices = synth.getVoices();
-    if (voices?.length) {
-        currentEyeVoice = pickEyeVoice(voices);
-    }
+    if (voices?.length) currentEyeVoice = pickEyeVoice(voices);
 }
 
 function clearSpeakRetry() {
@@ -64,13 +61,18 @@ function clearStartWatch() {
     startWatchTimer = 0;
 }
 
+function clearSoftEnd() {
+    if (!softEndTimer) return;
+    clearTimeout(softEndTimer);
+    softEndTimer = 0;
+}
+
 function synthBusy() {
     return Boolean(synth?.speaking || synth?.pending);
 }
 
 /** Wait until the speech synthesizer finishes naturally, then run fn. */
 function whenSynthIdle(fn, attempt = 0) {
-    // Poem TTS owns speechSynthesis during singularity — never cancel it from here.
     if (document.body.classList.contains('singularity-active')) {
         clearSpeakRetry();
         return;
@@ -79,8 +81,6 @@ function whenSynthIdle(fn, attempt = 0) {
         fn();
         return;
     }
-    // Only force cancel as a last-resort recovery if hung after 1 second (20 attempts).
-    // Never cancel on attempt 0 — that abruptly halts the audio buffer and causes an end-pop.
     if (attempt >= 20) {
         try { synth.cancel(); } catch { /* ignore */ }
         fn();
@@ -91,6 +91,24 @@ function whenSynthIdle(fn, attempt = 0) {
 }
 
 /**
+ * Land in the trailing silence after the last word — cancel before the engine's
+ * natural teardown click, without clipping speech.
+ */
+function softLand(utterance) {
+    softEndTimer = 0;
+    if (active !== utterance) return;
+    active = null;
+    spokenStartedAt = 0;
+    clearStartWatch();
+    try {
+        if (synthBusy()) synth.cancel();
+    } catch {
+        /* ignore */
+    }
+    whenSynthIdle(() => flushPending());
+}
+
+/**
  * Stop eye narration only. Do not cancel speechSynthesis unless this module
  * owns the current utterance — otherwise poem TTS gets killed.
  */
@@ -98,6 +116,7 @@ export function stopEyeVoice() {
     pending = null;
     clearSpeakRetry();
     clearStartWatch();
+    clearSoftEnd();
     spokenStartedAt = 0;
     const current = active;
     active = null;
@@ -127,7 +146,6 @@ function beginSpeak(text, attempt = 0) {
     }
 
     if (synthBusy()) {
-        // Another narrator (poems) may own the synth — wait, don't steal it.
         if (attempt < 20) {
             clearSpeakRetry();
             speakRetryTimer = setTimeout(() => beginSpeak(text, attempt + 1), 50);
@@ -137,12 +155,13 @@ function beginSpeak(text, attempt = 0) {
     }
 
     clearStartWatch();
+    clearSoftEnd();
     spokenStartedAt = 0;
 
-    // Clean sentence ending with trailing period and paragraph breaks for natural silence decay
     const clean = text.trim().replace(/[.!?…\s]+$/, '');
-    const spoken = clean ? `${clean}.\n\n` : '';
-    if (!spoken) return;
+    if (!clean) return;
+    // Trailing ellipses give compact voices a quiet tail to soft-land into.
+    const spoken = `${clean}. … …`;
 
     const utterance = new SpeechSynthesisUtterance(spoken);
     retainUtterance(utterance);
@@ -152,11 +171,11 @@ function beginSpeak(text, attempt = 0) {
     utterance.lang = currentEyeVoice?.lang || 'en-US';
     utterance.rate = 0.94;
     utterance.pitch = 1;
-    // Leave volume at 1 to prevent CoreAudio digital gain scaling pops on stream teardown
     utterance.volume = 1;
 
     const done = () => {
         clearStartWatch();
+        clearSoftEnd();
         spokenStartedAt = 0;
         if (active === utterance) active = null;
     };
@@ -165,18 +184,40 @@ function beginSpeak(text, attempt = 0) {
         failure = '';
         spokenStartedAt = performance.now();
         clearStartWatch();
+        // Fallback: overestimate content length, land in trailing silence.
+        const words = clean.split(/\s+/).filter(Boolean).length || 1;
+        const contentMs = (words / (2.35 * utterance.rate)) * 1000;
+        clearSoftEnd();
+        softEndTimer = setTimeout(() => softLand(utterance), contentMs + 280);
+    };
+
+    utterance.onboundary = (event) => {
+        if (active !== utterance || !spokenStartedAt) return;
+        if (event.name !== 'word') return;
+        const index = typeof event.charIndex === 'number' ? event.charIndex : 0;
+        // Still inside the real sentence (before trailing “. … …”).
+        if (index >= clean.length) return;
+        const remaining = clean.length - index;
+        const lastWord = clean.split(/\s+/).pop() || '';
+        // Last word of the real sentence — finish it, then land in the quiet tail.
+        if (remaining <= lastWord.length + 1) {
+            clearSoftEnd();
+            const wait = Math.max(320, Math.min(700, 80 + lastWord.length * 45));
+            softEndTimer = setTimeout(() => softLand(utterance), wait);
+        }
     };
 
     utterance.onend = () => {
         done();
-        if (pending) {
-            whenSynthIdle(() => flushPending());
-        }
+        if (pending) whenSynthIdle(() => flushPending());
     };
 
     utterance.onerror = event => {
         done();
-        if (event.error === 'canceled' || event.error === 'interrupted') return;
+        if (event.error === 'canceled' || event.error === 'interrupted') {
+            // softLand already advances the queue
+            return;
+        }
         pending = null;
         failure = event.error || 'speech-failed';
         enabled = false;
@@ -185,7 +226,6 @@ function beginSpeak(text, attempt = 0) {
 
     active = utterance;
 
-    // Chrome sometimes swallows the first speak until cancel + retry.
     startWatchTimer = setTimeout(() => {
         startWatchTimer = 0;
         if (active !== utterance || spokenStartedAt) return;
@@ -217,7 +257,6 @@ export function speakEyeComment(payload) {
     if (document.body.classList.contains('singularity-active')) return;
     const text = String(payload.text || '').replace(/\s+/g, ' ').trim();
     if (!text) return;
-    // Newer line while one is active/queued — keep only the latest.
     if (active || speakRetryTimer || synthBusy()) {
         pending = { text };
         if (!active && !speakRetryTimer) whenSynthIdle(() => flushPending());
@@ -264,7 +303,6 @@ export function initEyeVoice() {
     let sawSingularity = document.body.classList.contains('singularity-active');
     const modeObserver = new MutationObserver(() => {
         const now = document.body.classList.contains('singularity-active');
-        // Only on enter — re-running cancel on every body class tweak kills poem TTS.
         if (now && !sawSingularity) stopEyeVoice();
         sawSingularity = now;
     });
@@ -274,10 +312,7 @@ export function initEyeVoice() {
         failure = '';
         syncButton();
         if (enabled) {
-            if (document.body.classList.contains('singularity-active')) {
-                // Don't fight poem voiceover for the synthesizer.
-                return;
-            }
+            if (document.body.classList.contains('singularity-active')) return;
             lastComment = '';
             try { synth.cancel(); } catch { /* ignore */ }
             whenSynthIdle(() => {
