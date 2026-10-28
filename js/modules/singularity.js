@@ -53,21 +53,27 @@ function usesSingularityVoiceover() {
     return !isIosSingularity();
 }
 
-/** Prefer macOS/iOS Samantha; fall back to any en-US voice, then browser default. */
+/** Prefer compact Samantha — Enhanced/Premium neural voices click hard on teardown. */
 let singularityVoice = null;
 let singularityVoicesBound = false;
 
+function isNeuralVoice(voice) {
+    return /enhanced|premium|neural|superstar|novelty|eddy|flo|reed|shelley|sandy/i.test(voice?.name || '');
+}
+
 function pickSingularityVoice(voices) {
     if (!voices?.length) return null;
-    const byGoogle = voices.find((v) => /google/i.test(v.name) && /^en(-|_)US$/i.test(v.lang));
-    if (byGoogle) return byGoogle;
-    const byEnhanced = voices.find((v) => /samantha/i.test(v.name) && /enhanced|premium/i.test(v.name));
-    if (byEnhanced) return byEnhanced;
-    const byUri = voices.find((v) => /samantha/i.test(v.voiceURI || ''));
-    if (byUri) return byUri;
-    const byName = voices.find((v) => /^samantha$/i.test(v.name) || /\bsamantha\b/i.test(v.name));
+    const english = voices.filter((v) => /^en(-|_)/i.test(v.lang));
+    const pool = english.length ? english : voices;
+    const compact = pool.filter((v) => !isNeuralVoice(v));
+    const prefer = compact.length ? compact : pool;
+    const byName = prefer.find((v) => /^samantha$/i.test(v.name) || /\bsamantha\b/i.test(v.name));
     if (byName) return byName;
-    return voices.find((v) => /^en(-|_)US$/i.test(v.lang)) || null;
+    const byUri = prefer.find((v) => /samantha/i.test(v.voiceURI || ''));
+    if (byUri) return byUri;
+    const byGoogle = prefer.find((v) => /google/i.test(v.name) && /^en(-|_)US$/i.test(v.lang));
+    if (byGoogle) return byGoogle;
+    return prefer.find((v) => /^en(-|_)US$/i.test(v.lang)) || prefer[0] || null;
 }
 
 function refreshSingularityVoice() {
@@ -123,8 +129,14 @@ function cancelSingularitySpeech() {
         clearInterval(visualPoemTimer);
         visualPoemTimer = null;
     }
-    if (usesSingularityVoiceover()) {
-        window.speechSynthesis?.cancel();
+    const synth = window.speechSynthesis;
+    // Hard cancel mid-stream is the loud end-pop — only do it when something is actually playing.
+    if (usesSingularityVoiceover() && synth && (synth.speaking || synth.pending)) {
+        try {
+            synth.cancel();
+        } catch {
+            /* ignore */
+        }
     }
     activeUtterances.length = 0;
 }
@@ -531,26 +543,9 @@ function highlightPoemLine(lineElements, index) {
 }
 
 function buildSpeechItems(lines) {
-    const useLineSpeech = perf.isMobile || document.body.classList.contains('ios-ui');
-    if (useLineSpeech) {
-        return lines.map((text, lineIndex) => ({ text, lineIndex }));
-    }
-
-    const items = [];
-    lines.forEach((line, lineIndex) => {
-        const phrases = line.split(/([.,!?;])+/);
-        phrases.forEach((phrase) => {
-            if (!phrase.trim()) return;
-            const isPunctuation = /[.,!?;]/.test(phrase);
-            items.push({
-                text: phrase,
-                lineIndex,
-                silent: isPunctuation,
-                rate: /[,;]/.test(phrase) ? 4.5 : 3,
-            });
-        });
-    });
-    return items;
+    // One utterance per line. Splitting on punctuation into silent fillers
+    // starts/stops the audio unit between every clause and causes end pops.
+    return lines.map((text, lineIndex) => ({ text, lineIndex }));
 }
 
 function runVisualPoemScroll(lineElements, token) {
@@ -586,25 +581,42 @@ function runSpeechQueue(items, lineElements, token) {
         if (token !== speechQueueToken || index >= items.length) return;
 
         const item = items[index++];
-        const clean = (item.text || '').trim();
-        const spoken = clean ? `${clean.replace(/[.!?…\s]+$/, '')}.\n\n` : '';
-        const utterance = new SpeechSynthesisUtterance(spoken || item.text);
+        const clean = (item.text || '').replace(/\s+/g, ' ').trim();
+        if (!clean) {
+            speakNext();
+            return;
+        }
+        const spoken = /[.!?…]$/.test(clean) ? clean : `${clean}.`;
+        const utterance = new SpeechSynthesisUtterance(spoken);
         const voice = ensureSingularityVoice();
         if (voice) utterance.voice = voice;
-        utterance.volume = item.silent ? 0 : 1;
-        if (item.silent) utterance.rate = item.rate || 3;
-        else utterance.rate = perf.isMobile ? 0.92 : 1;
+        utterance.lang = voice?.lang || 'en-US';
+        utterance.volume = 1;
+        utterance.rate = perf.isMobile ? 0.92 : 1;
+        utterance.pitch = 1;
 
         utterance.onstart = () => {
-            if (!item.silent && item.lineIndex != null) {
+            if (item.lineIndex != null) {
                 highlightPoemLine(lineElements, item.lineIndex);
             }
         };
-        utterance.onend = speakNext;
-        utterance.onerror = speakNext;
+        utterance.onend = () => {
+            if (token !== speechQueueToken) return;
+            speakNext();
+        };
+        utterance.onerror = (event) => {
+            if (token !== speechQueueToken) return;
+            if (event.error === 'canceled' || event.error === 'interrupted') return;
+            speakNext();
+        };
 
         activeUtterances.push(utterance);
-        synth.speak(utterance);
+        try {
+            if (synth.paused) synth.resume();
+            synth.speak(utterance);
+        } catch {
+            speakNext();
+        }
     };
 
     speakNext();
