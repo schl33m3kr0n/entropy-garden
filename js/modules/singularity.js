@@ -535,10 +535,14 @@ function highlightPoemLine(lineElements, index) {
     currentEl.style.color = '#ffffff';
     currentEl.style.textShadow = '0 0 15px var(--neon-green)';
     currentEl.style.animation = 'crtFlicker 0.15s infinite';
-    try {
-        currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } catch (_) {
-        currentEl.scrollIntoView(false);
+    const container = currentEl.parentElement;
+    if (container) {
+        const top = currentEl.offsetTop - (container.clientHeight / 2) + (currentEl.offsetHeight / 2);
+        try {
+            container.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        } catch (_) {
+            container.scrollTop = Math.max(0, top);
+        }
     }
 }
 
@@ -586,6 +590,11 @@ function runSpeechQueue(items, lineElements, token) {
             speakNext();
             return;
         }
+        // Advance the poem view with the queue — don't wait for onstart
+        // (Chrome sometimes skips it after a prior cancel).
+        if (item.lineIndex != null) {
+            highlightPoemLine(lineElements, item.lineIndex);
+        }
         const spoken = /[.!?…]$/.test(clean) ? clean : `${clean}.`;
         const utterance = new SpeechSynthesisUtterance(spoken);
         const voice = ensureSingularityVoice();
@@ -595,18 +604,13 @@ function runSpeechQueue(items, lineElements, token) {
         utterance.rate = perf.isMobile ? 0.92 : 1;
         utterance.pitch = 1;
 
-        utterance.onstart = () => {
-            if (item.lineIndex != null) {
-                highlightPoemLine(lineElements, item.lineIndex);
-            }
-        };
         utterance.onend = () => {
             if (token !== speechQueueToken) return;
             speakNext();
         };
-        utterance.onerror = (event) => {
+        // Always continue — canceled/interrupted after poem switch must not stall the queue.
+        utterance.onerror = () => {
             if (token !== speechQueueToken) return;
-            if (event.error === 'canceled' || event.error === 'interrupted') return;
             speakNext();
         };
 
@@ -656,7 +660,8 @@ function speakSingularity(poemText) {
     container.style.zIndex = '100040';
     container.style.top = '15%';
     container.style.height = '70vh';
-    container.style.overflowY = 'hidden';
+    container.style.overflowY = 'auto';
+    container.style.scrollbarWidth = 'none';
     container.style.pointerEvents = 'none';
 
     const lines = poemText.split('\n').filter(line => line.trim() !== '');
