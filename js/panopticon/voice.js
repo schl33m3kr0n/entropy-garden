@@ -8,7 +8,6 @@ let button;
 let failure = '';
 let speakRetryTimer = 0;
 let startWatchTimer = 0;
-let softEndTimer = 0;
 let spokenStartedAt = 0;
 
 /** Retain utterances so Safari/Chrome GC does not drop the audio unit mid-stream. */
@@ -61,51 +60,36 @@ function clearStartWatch() {
     startWatchTimer = 0;
 }
 
-function clearSoftEnd() {
-    if (!softEndTimer) return;
-    clearTimeout(softEndTimer);
-    softEndTimer = 0;
-}
-
 function synthBusy() {
     return Boolean(synth?.speaking || synth?.pending);
 }
 
-/** Wait until the speech synthesizer finishes naturally, then run fn. */
+function kickSynth() {
+    if (!synth) return;
+    try { synth.cancel(); } catch { /* ignore */ }
+    try { if (synth.paused) synth.resume(); } catch { /* ignore */ }
+}
+
+/** Wait until the synthesizer is idle, then run fn. Avoids canceling mid-utterance. */
 function whenSynthIdle(fn, attempt = 0) {
     if (document.body.classList.contains('singularity-active')) {
         clearSpeakRetry();
         return;
     }
     if (!synthBusy()) {
+        clearSpeakRetry();
+        try { if (synth?.paused) synth.resume(); } catch { /* ignore */ }
         fn();
         return;
     }
-    if (attempt >= 20) {
-        try { synth.cancel(); } catch { /* ignore */ }
+    if (attempt >= 24) {
+        kickSynth();
+        clearSpeakRetry();
         fn();
         return;
     }
     clearSpeakRetry();
     speakRetryTimer = setTimeout(() => whenSynthIdle(fn, attempt + 1), 50);
-}
-
-/**
- * Land in the trailing silence after the last word — cancel before the engine's
- * natural teardown click, without clipping speech.
- */
-function softLand(utterance) {
-    softEndTimer = 0;
-    if (active !== utterance) return;
-    active = null;
-    spokenStartedAt = 0;
-    clearStartWatch();
-    try {
-        if (synthBusy()) synth.cancel();
-    } catch {
-        /* ignore */
-    }
-    whenSynthIdle(() => flushPending());
 }
 
 /**
@@ -116,7 +100,6 @@ export function stopEyeVoice() {
     pending = null;
     clearSpeakRetry();
     clearStartWatch();
-    clearSoftEnd();
     spokenStartedAt = 0;
     const current = active;
     active = null;
@@ -133,7 +116,7 @@ export function stopEyeVoice() {
 function flushPending() {
     const next = pending;
     pending = null;
-    if (next && enabled) speakEyeComment(next);
+    if (next && enabled) beginSpeak(next.text);
 }
 
 function beginSpeak(text, attempt = 0) {
@@ -146,22 +129,17 @@ function beginSpeak(text, attempt = 0) {
     }
 
     if (synthBusy()) {
-        if (attempt < 20) {
-            clearSpeakRetry();
-            speakRetryTimer = setTimeout(() => beginSpeak(text, attempt + 1), 50);
-            return;
-        }
+        pending = { text };
+        whenSynthIdle(() => flushPending());
         return;
     }
 
     clearStartWatch();
-    clearSoftEnd();
     spokenStartedAt = 0;
 
-    const clean = text.trim().replace(/[.!?…\s]+$/, '');
+    const clean = String(text || '').replace(/\s+/g, ' ').trim().replace(/[.!?…\s]+$/, '');
     if (!clean) return;
-    // Trailing ellipses give compact voices a quiet tail to soft-land into.
-    const spoken = `${clean}. … …`;
+    const spoken = `${clean}.`;
 
     const utterance = new SpeechSynthesisUtterance(spoken);
     retainUtterance(utterance);
@@ -175,7 +153,6 @@ function beginSpeak(text, attempt = 0) {
 
     const done = () => {
         clearStartWatch();
-        clearSoftEnd();
         spokenStartedAt = 0;
         if (active === utterance) active = null;
     };
@@ -184,38 +161,17 @@ function beginSpeak(text, attempt = 0) {
         failure = '';
         spokenStartedAt = performance.now();
         clearStartWatch();
-        // Fallback: overestimate content length, land in trailing silence.
-        const words = clean.split(/\s+/).filter(Boolean).length || 1;
-        const contentMs = (words / (2.35 * utterance.rate)) * 1000;
-        clearSoftEnd();
-        softEndTimer = setTimeout(() => softLand(utterance), contentMs + 280);
-    };
-
-    utterance.onboundary = (event) => {
-        if (active !== utterance || !spokenStartedAt) return;
-        if (event.name !== 'word') return;
-        const index = typeof event.charIndex === 'number' ? event.charIndex : 0;
-        // Still inside the real sentence (before trailing “. … …”).
-        if (index >= clean.length) return;
-        const remaining = clean.length - index;
-        const lastWord = clean.split(/\s+/).pop() || '';
-        // Last word of the real sentence — finish it, then land in the quiet tail.
-        if (remaining <= lastWord.length + 1) {
-            clearSoftEnd();
-            const wait = Math.max(320, Math.min(700, 80 + lastWord.length * 45));
-            softEndTimer = setTimeout(() => softLand(utterance), wait);
-        }
     };
 
     utterance.onend = () => {
         done();
-        if (pending) whenSynthIdle(() => flushPending());
+        whenSynthIdle(() => flushPending());
     };
 
     utterance.onerror = event => {
         done();
         if (event.error === 'canceled' || event.error === 'interrupted') {
-            // softLand already advances the queue
+            whenSynthIdle(() => flushPending());
             return;
         }
         pending = null;
@@ -226,18 +182,20 @@ function beginSpeak(text, attempt = 0) {
 
     active = utterance;
 
+    // Chrome sometimes swallows speak() until cancel + retry.
     startWatchTimer = setTimeout(() => {
         startWatchTimer = 0;
         if (active !== utterance || spokenStartedAt) return;
         active = null;
-        try { synth.cancel(); } catch { /* ignore */ }
+        kickSynth();
         if (attempt < 2 && enabled) {
             whenSynthIdle(() => beginSpeak(text, attempt + 1));
             return;
         }
-        failure = 'speech-failed';
-        enabled = false;
+        // Keep enabled — leave a retry for the next comment instead of going dark.
+        failure = '';
         syncButton();
+        whenSynthIdle(() => flushPending());
     }, 1400);
 
     try {
@@ -245,9 +203,12 @@ function beginSpeak(text, attempt = 0) {
         synth.speak(utterance);
     } catch {
         done();
-        pending = null;
-        enabled = false;
+        if (attempt < 2 && enabled) {
+            whenSynthIdle(() => beginSpeak(text, attempt + 1));
+            return;
+        }
         failure = 'speech-failed';
+        enabled = false;
         syncButton();
     }
 }
@@ -259,7 +220,7 @@ export function speakEyeComment(payload) {
     if (!text) return;
     if (active || speakRetryTimer || synthBusy()) {
         pending = { text };
-        if (!active && !speakRetryTimer) whenSynthIdle(() => flushPending());
+        if (!active) whenSynthIdle(() => flushPending());
         return;
     }
     beginSpeak(text);
@@ -314,7 +275,7 @@ export function initEyeVoice() {
         if (enabled) {
             if (document.body.classList.contains('singularity-active')) return;
             lastComment = '';
-            try { synth.cancel(); } catch { /* ignore */ }
+            kickSynth();
             whenSynthIdle(() => {
                 if (!enabled || document.body.classList.contains('singularity-active')) return;
                 if (!readVisibleComment()) speakEyeComment({ text: 'Eye voice enabled.' });
