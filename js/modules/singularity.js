@@ -598,13 +598,14 @@ function attachSingularityUtterance(utterance) {
 
 /**
  * Firefox: one utterance (one audio stream) with per-line chops.
- * Each line is truncated to its last full word, then a pause is inserted —
- * Apple OSX voices honor [[slnc N]]; otherwise an ellipsis beat.
+ * Each line is truncated to its last full word and ends with `.`;
+ * blank newlines separate lines so the engine pauses without reading markers
+ * ( [[slnc]] / ellipses get spoken aloud through moz-tts ).
  * onboundary charIndex drives the poem scroll; elapsed-time is the fallback.
  */
-function buildFirefoxPoemScript(items, voice) {
-    const appleVoice = /moz-tts:osx|com\.apple/i.test(voice?.voiceURI || voice?.name || '');
-    const pause = appleVoice ? ' [[slnc 650]] ' : ' … ';
+function buildFirefoxPoemScript(items) {
+    // Newlines are silent; avoid any pronounceable pause tokens.
+    const pause = '\n\n';
     const ranges = [];
     const parts = [];
     let cursor = 0;
@@ -632,7 +633,7 @@ function buildFirefoxPoemScript(items, voice) {
         });
     });
 
-    return { spoken: parts.join(''), ranges, pauseLen: pause.length };
+    return { spoken: parts.join(''), ranges };
 }
 
 function lineIndexAtChar(ranges, charIndex) {
@@ -650,8 +651,7 @@ function runFirefoxSpeech(items, lineElements, token) {
         return;
     }
 
-    const voice = ensureSingularityVoice();
-    const { spoken, ranges } = buildFirefoxPoemScript(items, voice);
+    const { spoken, ranges } = buildFirefoxPoemScript(items);
     if (!spoken || !ranges.length) {
         runVisualPoemScroll(lineElements, token);
         return;
