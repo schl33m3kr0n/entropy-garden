@@ -57,6 +57,11 @@ function usesSingularityVoiceover() {
 let singularityVoice = null;
 let singularityVoicesBound = false;
 
+/** Firefox re-opens the output device per utterance → loud click between lines. */
+function isFirefoxSynth() {
+    return /firefox\/\d/i.test(navigator.userAgent || '');
+}
+
 function isNeuralVoice(voice) {
     return /enhanced|premium|neural|superstar|novelty|eddy|flo|reed|shelley|sandy/i.test(voice?.name || '');
 }
@@ -66,13 +71,20 @@ function pickSingularityVoice(voices) {
     const english = voices.filter((v) => /^en(-|_)/i.test(v.lang));
     const pool = english.length ? english : voices;
     const compact = pool.filter((v) => !isNeuralVoice(v));
-    const prefer = compact.length ? compact : pool;
+    let prefer = compact.length ? compact : pool;
+    // Firefox: stick to local OS voices — remote ones reconnect and click harder.
+    if (isFirefoxSynth()) {
+        const local = prefer.filter((v) => v.localService);
+        if (local.length) prefer = local;
+    }
     const byName = prefer.find((v) => /^samantha$/i.test(v.name) || /\bsamantha\b/i.test(v.name));
     if (byName) return byName;
     const byUri = prefer.find((v) => /samantha/i.test(v.voiceURI || ''));
     if (byUri) return byUri;
-    const byGoogle = prefer.find((v) => /google/i.test(v.name) && /^en(-|_)US$/i.test(v.lang));
-    if (byGoogle) return byGoogle;
+    if (!isFirefoxSynth()) {
+        const byGoogle = prefer.find((v) => /google/i.test(v.name) && /^en(-|_)US$/i.test(v.lang));
+        if (byGoogle) return byGoogle;
+    }
     return prefer.find((v) => /^en(-|_)US$/i.test(v.lang)) || prefer[0] || null;
 }
 
@@ -573,10 +585,53 @@ function runVisualPoemScroll(lineElements, token) {
     }, perf.isIOS ? 2400 : (perf.isMobile ? 3200 : 2600));
 }
 
+function attachSingularityUtterance(utterance) {
+    const voice = ensureSingularityVoice();
+    if (voice) utterance.voice = voice;
+    utterance.lang = voice?.lang || 'en-US';
+    utterance.volume = 1;
+    utterance.rate = perf.isMobile ? 0.92 : 1;
+    utterance.pitch = 1;
+    activeUtterances.push(utterance);
+    return utterance;
+}
+
+/** Firefox: one utterance for the whole poem so the audio device stays open. */
+function runFirefoxSpeech(items, lineElements, token) {
+    const synth = window.speechSynthesis;
+    if (!synth) {
+        runVisualPoemScroll(lineElements, token);
+        return;
+    }
+    const spoken = items
+        .map((item) => String(item.text || '').replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .map((line) => (/[.!?…]$/.test(line) ? line : `${line}.`))
+        .join('\n');
+    if (!spoken) {
+        runVisualPoemScroll(lineElements, token);
+        return;
+    }
+    runVisualPoemScroll(lineElements, token);
+    const utterance = attachSingularityUtterance(new SpeechSynthesisUtterance(spoken));
+    try {
+        if (synth.paused) synth.resume();
+        synth.speak(utterance);
+    } catch {
+        /* visual scroll already running */
+    }
+}
+
 function runSpeechQueue(items, lineElements, token) {
     const synth = window.speechSynthesis;
     if (!synth || !items.length) {
         runVisualPoemScroll(lineElements, token);
+        return;
+    }
+
+    // Per-line speak() on Firefox clicks between every line; Safari does not.
+    if (isFirefoxSynth()) {
+        runFirefoxSpeech(items, lineElements, token);
         return;
     }
 
@@ -596,13 +651,7 @@ function runSpeechQueue(items, lineElements, token) {
             highlightPoemLine(lineElements, item.lineIndex);
         }
         const spoken = /[.!?…]$/.test(clean) ? clean : `${clean}.`;
-        const utterance = new SpeechSynthesisUtterance(spoken);
-        const voice = ensureSingularityVoice();
-        if (voice) utterance.voice = voice;
-        utterance.lang = voice?.lang || 'en-US';
-        utterance.volume = 1;
-        utterance.rate = perf.isMobile ? 0.92 : 1;
-        utterance.pitch = 1;
+        const utterance = attachSingularityUtterance(new SpeechSynthesisUtterance(spoken));
 
         utterance.onend = () => {
             if (token !== speechQueueToken) return;
@@ -614,7 +663,6 @@ function runSpeechQueue(items, lineElements, token) {
             speakNext();
         };
 
-        activeUtterances.push(utterance);
         try {
             if (synth.paused) synth.resume();
             synth.speak(utterance);
