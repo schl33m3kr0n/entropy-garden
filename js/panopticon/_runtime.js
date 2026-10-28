@@ -8,7 +8,7 @@ import {
     cellSize,
 } from '../core/state.js';
 import { perf } from '../core/canvas-perf.js';
-import { pickOne, createBag, commentTtlMs } from '../core/lore/random.js';
+import { createBag, commentTtlMs } from '../core/lore/random.js';
 import { sfx, playSound, playSoundOverlap } from '../core/audio/sfx.js';
 import { getHook } from '../core/hooks.js';
 import {
@@ -435,7 +435,76 @@ function bindPanopticonCommentViewportSync() {
 }
 
 const PANOPTICON_MUTE_KEY = 'entropy-garden-panopticon-muted-v1';
+const PANOPTICON_SEEN_COMMENTS_KEY = 'entropy-garden-panopticon-seen-comments-v1';
+const PANOPTICON_SEEN_COMMENTS_MAX = 500;
 let panopticonMuted = false;
+/** Time-of-day lines already spoken this page visit. */
+const panopticonTodShownThisVisit = new Set();
+/** @type {Set<string>|null} */
+let panopticonSeenCommentsCache = null;
+
+function loadPanopticonSeenComments() {
+    if (panopticonSeenCommentsCache) return panopticonSeenCommentsCache;
+    try {
+        const raw = localStorage.getItem(PANOPTICON_SEEN_COMMENTS_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        panopticonSeenCommentsCache = new Set(
+            Array.isArray(arr) ? arr.filter((t) => typeof t === 'string' && t) : [],
+        );
+    } catch {
+        panopticonSeenCommentsCache = new Set();
+    }
+    return panopticonSeenCommentsCache;
+}
+
+function persistPanopticonSeenComments() {
+    const seen = loadPanopticonSeenComments();
+    let arr = [...seen];
+    if (arr.length > PANOPTICON_SEEN_COMMENTS_MAX) {
+        arr = arr.slice(arr.length - PANOPTICON_SEEN_COMMENTS_MAX);
+        panopticonSeenCommentsCache = new Set(arr);
+    }
+    try {
+        localStorage.setItem(PANOPTICON_SEEN_COMMENTS_KEY, JSON.stringify(arr));
+    } catch {
+        /* private mode / quota */
+    }
+}
+
+/** Remember a spoken line so later sessions prefer fresh copy. */
+function rememberPanopticonComment(text) {
+    const line = String(text || '').trim();
+    if (!line) return;
+    const seen = loadPanopticonSeenComments();
+    if (seen.has(line)) return;
+    seen.add(line);
+    persistPanopticonSeenComments();
+}
+
+/**
+ * Pick from safe(+gritty) preferring lines not yet saved across visits.
+ * When `tod` is set, also skip lines already used this visit (once per visit).
+ */
+function pickPanopticonLine(safe, gritty = [], { tod = false } = {}) {
+    if (!Array.isArray(safe) || !safe.length) return null;
+    const pool = (isCorrupted && gritty.length) ? safe.concat(gritty) : safe.slice();
+    let candidates = pool;
+    if (tod) {
+        candidates = candidates.filter((t) => !panopticonTodShownThisVisit.has(t));
+        if (!candidates.length) return null;
+    }
+    const seen = loadPanopticonSeenComments();
+    let fresh = candidates.filter((t) => !seen.has(t));
+    if (!fresh.length) {
+        // Pool exhausted across sessions — clear these lines and rotate again.
+        for (const t of candidates) seen.delete(t);
+        persistPanopticonSeenComments();
+        fresh = candidates.slice();
+    }
+    const text = fresh[Math.floor(Math.random() * fresh.length)];
+    if (tod && text) panopticonTodShownThisVisit.add(text);
+    return text || null;
+}
 
 function loadPanopticonMutePref() {
     try {
@@ -543,6 +612,7 @@ function showPanopticonIdleComment(entry, ttlMs) {
     const payload = normalizePanopticonComment(entry);
     if (!panopticonCommentEl || !payload || !canShowPanopticonIdleComment()) return;
 
+    rememberPanopticonComment(payload.text);
     clearIosPanopticonCommentInlinePosition();
     syncPanopticonCommentChrome();
     playPanopticonCommentSfx();
@@ -566,6 +636,7 @@ export function showPanopticonComment(entry, ttlMs) {
     const payload = normalizePanopticonComment(entry);
     if (!panopticonCommentEl || !payload || !canShowPanopticonComment()) return;
 
+    rememberPanopticonComment(payload.text);
     clearIosPanopticonCommentInlinePosition();
     syncPanopticonCommentChrome();
     playPanopticonCommentSfx();
@@ -683,8 +754,9 @@ function pickPanopticonLateNightComment(now = new Date()) {
 function tryShowPanopticonLateNightComment(now = new Date()) {
     if (panopticonLateNightAlreadyShown(now)) return false;
     const text = pickPanopticonLateNightComment(now);
-    if (!text || !canShowPanopticonComment()) return false;
+    if (!text || panopticonTodShownThisVisit.has(text) || !canShowPanopticonComment()) return false;
     panopticonLateNightShownKey = panopticonLateNightSlotKey(now);
+    panopticonTodShownThisVisit.add(text);
     showPanopticonComment(text);
     return true;
 }
@@ -714,23 +786,25 @@ function pickPanopticonIdleComment() {
     if (isChristmas()) {
         const xmas = pools.panopticonIdleCommentsChristmasSafe;
         if (xmas?.length) {
-            return pickOne(xmas, pools.panopticonIdleCommentsChristmasGritty || []);
+            return pickPanopticonLine(xmas, pools.panopticonIdleCommentsChristmasGritty || []);
         }
     }
     if (isApril420()) {
         const high = pools.panopticonHighCommentsSafe;
         if (!high?.length) return null;
-        return pickOne(high, pools.panopticonHighCommentsGritty || []);
+        return pickPanopticonLine(high, pools.panopticonHighCommentsGritty || []);
     }
     if (isPanopticonGodModeCommentary()) {
         const god = pools.panopticonGodModeComments;
-        return god?.length ? pickOne(god, []) : null;
+        return god?.length ? pickPanopticonLine(god, []) : null;
     }
 
     if (isPanopticonLateNightHour()) {
         const lateNight = pickPanopticonLateNightComment();
-        if (lateNight && !panopticonLateNightAlreadyShown()) {
+        if (lateNight && !panopticonLateNightAlreadyShown()
+            && !panopticonTodShownThisVisit.has(lateNight)) {
             panopticonLateNightShownKey = panopticonLateNightSlotKey();
+            panopticonTodShownThisVisit.add(lateNight);
             return lateNight;
         }
     }
@@ -743,14 +817,15 @@ function pickPanopticonIdleComment() {
     const todGritty = eveningIdle
         ? pools.panopticonIdleCommentsEveningGritty
         : (part === 'day' ? pools.panopticonIdleCommentsDayGritty : null);
-    // Sprinkle time-of-day lines among general idle chatter
+    // Sprinkle time-of-day lines among general idle chatter — once each per visit.
     if (todSafe?.length && Math.random() < 0.28) {
-        return pickOne(todSafe, todGritty || []);
+        const tod = pickPanopticonLine(todSafe, todGritty || [], { tod: true });
+        if (tod) return tod;
     }
 
     const safe = pools.panopticonIdleCommentsSafe;
     if (!safe?.length) return null;
-    return pickOne(safe, pools.panopticonIdleCommentsGritty || []);
+    return pickPanopticonLine(safe, pools.panopticonIdleCommentsGritty || []);
 }
 
 function pickPanopticonReturnComment() {
@@ -759,21 +834,26 @@ function pickPanopticonReturnComment() {
     if (isApril420()) {
         const high = pools.panopticonHighReturnCommentsSafe;
         if (!high?.length) return 'welcome back. did you forget where you were';
-        return pickOne(high, pools.panopticonHighReturnCommentsGritty || []);
+        return pickPanopticonLine(high, pools.panopticonHighReturnCommentsGritty || [])
+            || 'welcome back. did you forget where you were';
     }
     if (isPanopticonGodModeCommentary()) {
         const god = pools.panopticonGodModeComments;
-        return god?.length ? pickOne(god, []) : 'YOU HAVE RETURNED TO THE THRESHOLD';
+        return (god?.length ? pickPanopticonLine(god, []) : null)
+            || 'YOU HAVE RETURNED TO THE THRESHOLD';
     }
     const safe = pools.panopticonReturnCommentsSafe;
     if (!safe?.length) return 'missed me?';
-    return pickOne(safe, pools.panopticonReturnCommentsGritty || []);
+    return pickPanopticonLine(safe, pools.panopticonReturnCommentsGritty || []) || 'missed me?';
 }
 
 function pickPanopticonAwayReturnComment(activityId) {
     const pools = globalThis.lorePools;
     const entry = pools?.panopticonAwayReturnComments?.[activityId];
-    if (entry?.safe?.length) return pickOne(entry.safe, entry.gritty || []);
+    if (entry?.safe?.length) {
+        return pickPanopticonLine(entry.safe, entry.gritty || [])
+            || pickPanopticonReturnComment();
+    }
     return pickPanopticonReturnComment();
 }
 

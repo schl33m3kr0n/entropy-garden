@@ -233,10 +233,19 @@ async function beginSpeak(text) {
     }
 }
 
+/** God-mode bubbles are ALL CAPS on screen; espeak spells "IT" unless spoken lowercase. */
+function spokenEyeText(text) {
+    const clean = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!clean) return '';
+    const god = document.body.classList.contains('god-mode')
+        || document.getElementById('panopticon-comment')?.classList.contains('panopticon-comment-god');
+    return god ? clean.toLowerCase() : clean;
+}
+
 export function speakEyeComment(payload) {
     if (!supported || !enabled || document.hidden || payload?.pre) return;
     if (document.body.classList.contains('singularity-active')) return;
-    const text = String(payload?.text || '').replace(/\s+/g, ' ').trim();
+    const text = spokenEyeText(payload?.text);
     if (!text) return;
     if (playerState === 'speaking' || playerState === 'loading') {
         pending = { text };
