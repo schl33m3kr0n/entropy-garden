@@ -21,23 +21,35 @@ function retainUtterance(u) {
     }, 15000);
 }
 
+let currentEyeVoice = null;
+
 export function pickEyeVoice(voices) {
     if (!voices?.length) return null;
     const english = voices.filter(voice => /^en(?:-|_|$)/i.test(voice.lang));
+    const pool = english.length ? english : voices;
     const score = voice => {
         const name = voice.name || '';
         // 1. Google / Microsoft / Natural network voices stream cleanly in software without CoreAudio AUHAL pop
         if (/google|microsoft/i.test(name)) return 10;
         if (/natural/i.test(name)) return 9;
-        // 2. Enhanced/Premium system voices have proper release envelopes compared to legacy compact voices
-        if (/enhanced|premium/i.test(name)) return 8;
+        // 2. Modern Apple neural voices (Eddy, Flo, Reed, Shelley, Ava, Serena, etc.)
+        if (/eddy|flo|reed|shelley|sandy|ava|serena|evan|nathan|zoe/i.test(name)) return 8;
+        if (/enhanced|premium/i.test(name)) return 7;
         // 3. Known pleasant English voices
-        if (/samantha|ava|serena|karen|moira|daniel|victoria/i.test(name)) return 6;
+        if (/samantha|karen|moira|daniel|victoria/i.test(name)) return 5;
         if (voice.default) return 4;
         if (voice.localService) return 3;
         return 1;
     };
-    return (english.length ? english : voices).sort((a, b) => score(b) - score(a))[0] || null;
+    return pool.slice().sort((a, b) => score(b) - score(a))[0] || null;
+}
+
+function refreshEyeVoice() {
+    if (!synth) return;
+    const voices = synth.getVoices();
+    if (voices?.length) {
+        currentEyeVoice = pickEyeVoice(voices);
+    }
 }
 
 function clearSpeakRetry() {
@@ -127,17 +139,17 @@ function beginSpeak(text, attempt = 0) {
     clearStartWatch();
     spokenStartedAt = 0;
 
-    // Clean sentence ending with trailing period
+    // Clean sentence ending with trailing period and paragraph breaks for natural silence decay
     const clean = text.trim().replace(/[.!?…\s]+$/, '');
-    const spoken = clean ? `${clean}.` : '';
+    const spoken = clean ? `${clean}.\n\n` : '';
     if (!spoken) return;
 
     const utterance = new SpeechSynthesisUtterance(spoken);
     retainUtterance(utterance);
 
-    const voice = pickEyeVoice(synth.getVoices());
-    if (voice) utterance.voice = voice;
-    utterance.lang = voice?.lang || 'en-US';
+    if (!currentEyeVoice) refreshEyeVoice();
+    if (currentEyeVoice) utterance.voice = currentEyeVoice;
+    utterance.lang = currentEyeVoice?.lang || 'en-US';
     utterance.rate = 0.94;
     utterance.pitch = 1;
     // Leave volume at 1 to prevent CoreAudio digital gain scaling pops on stream teardown
@@ -227,8 +239,11 @@ export function initEyeVoice() {
     button.dataset.voiceBound = 'true';
     syncButton();
     if (!supported) return;
-    synth.getVoices();
-    synth.addEventListener?.('voiceschanged', () => { synth.getVoices(); });
+    refreshEyeVoice();
+    synth.addEventListener?.('voiceschanged', refreshEyeVoice);
+    if (typeof synth.onvoiceschanged !== 'undefined') {
+        synth.onvoiceschanged = refreshEyeVoice;
+    }
     const bubble = document.getElementById('panopticon-comment');
     let lastComment = '';
     const readVisibleComment = () => {
