@@ -37,7 +37,7 @@ Entropy Garden is a **static client-side app** deployed to Cloudflare Pages. All
 
 The only server-side code today is `functions/_middleware.js` — MIME-type fallback for Pages, not an application API.
 
-**EYE VOICE** (settings) narrates panopticon comments with in-browser [Spellophone](https://github.com/Spelling-Creator/spellophone) (espeak-ng WASM, GPL-3.0), loaded on demand from jsDelivr and played through Web Audio with a short fade-out — no system `speechSynthesis` clicks. Poem voiceover still uses the browser speech API. Needs network once to fetch the WASM/data (then cacheable).
+**EYE VOICE** (settings) narrates panopticon comments with in-browser [Spellophone](https://github.com/Spelling-Creator/spellophone) (espeak-ng WASM — robotic), loaded on demand from jsDelivr and played through Web Audio with a short fade-out. Singularity poem voiceover stays on the natural browser `speechSynthesis` API. Needs network once to fetch the WASM/data (then cacheable).
 
 **Recommendation:** stay API-free unless you explicitly want accounts, shared state across devices, or server-side secrets. That matches the privacy posture, keeps hosting simple, and preserves offline portability.
 
