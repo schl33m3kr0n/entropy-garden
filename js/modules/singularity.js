@@ -597,10 +597,52 @@ function attachSingularityUtterance(utterance) {
 }
 
 /**
- * Firefox: chop audio per line, but enqueue every utterance up front.
- * Waiting for onend before the next speak() lets the device close (the click);
- * a full queue keeps the stream warm between lines.
+ * Firefox: one utterance (one audio stream) with per-line chops.
+ * Each line is truncated to its last full word, then a pause is inserted —
+ * Apple OSX voices honor [[slnc N]]; otherwise an ellipsis beat.
+ * onboundary charIndex drives the poem scroll; elapsed-time is the fallback.
  */
+function buildFirefoxPoemScript(items, voice) {
+    const appleVoice = /moz-tts:osx|com\.apple/i.test(voice?.voiceURI || voice?.name || '');
+    const pause = appleVoice ? ' [[slnc 650]] ' : ' … ';
+    const ranges = [];
+    const parts = [];
+    let cursor = 0;
+
+    items.forEach((item, i) => {
+        let clean = String(item.text || '').replace(/\s+/g, ' ').trim();
+        if (!clean) return;
+        // Truncate at the last complete word — drop trailing punct/fragments.
+        clean = clean.replace(/[\s.…,;:!?\u2014\u2013-]+$/u, '');
+        const words = clean.split(/\s+/).filter(Boolean);
+        if (!words.length) return;
+        const lineText = `${words.join(' ')}.`;
+
+        if (parts.length) {
+            parts.push(pause);
+            cursor += pause.length;
+        }
+        const start = cursor;
+        parts.push(lineText);
+        cursor += lineText.length;
+        ranges.push({
+            start,
+            end: cursor,
+            lineIndex: item.lineIndex != null ? item.lineIndex : i,
+        });
+    });
+
+    return { spoken: parts.join(''), ranges, pauseLen: pause.length };
+}
+
+function lineIndexAtChar(ranges, charIndex) {
+    if (!ranges.length) return 0;
+    for (let i = ranges.length - 1; i >= 0; i -= 1) {
+        if (charIndex >= ranges[i].start) return ranges[i].lineIndex;
+    }
+    return ranges[0].lineIndex;
+}
+
 function runFirefoxSpeech(items, lineElements, token) {
     const synth = window.speechSynthesis;
     if (!synth) {
@@ -608,34 +650,64 @@ function runFirefoxSpeech(items, lineElements, token) {
         return;
     }
 
-    const queued = [];
-    items.forEach((item) => {
-        const clean = String(item.text || '').replace(/\s+/g, ' ').trim();
-        if (!clean) return;
-        const spoken = /[.!?…]$/.test(clean) ? clean : `${clean}.`;
-        const utterance = attachSingularityUtterance(new SpeechSynthesisUtterance(spoken));
-        utterance.onstart = () => {
-            if (token !== speechQueueToken) return;
-            if (item.lineIndex != null) {
-                highlightPoemLine(lineElements, item.lineIndex);
-            }
-        };
-        queued.push(utterance);
-    });
-
-    if (!queued.length) {
+    const voice = ensureSingularityVoice();
+    const { spoken, ranges } = buildFirefoxPoemScript(items, voice);
+    if (!spoken || !ranges.length) {
         runVisualPoemScroll(lineElements, token);
         return;
     }
 
-    if (items[0]?.lineIndex != null) {
-        highlightPoemLine(lineElements, items[0].lineIndex);
-    }
+    let currentLine = ranges[0].lineIndex;
+    highlightPoemLine(lineElements, currentLine);
+
+    const utterance = attachSingularityUtterance(new SpeechSynthesisUtterance(spoken));
+
+    const syncTo = (charIndex) => {
+        if (token !== speechQueueToken) return;
+        const next = lineIndexAtChar(ranges, Math.max(0, charIndex | 0));
+        if (next === currentLine) return;
+        currentLine = next;
+        highlightPoemLine(lineElements, currentLine);
+    };
+
+    utterance.onboundary = (event) => {
+        if (typeof event.charIndex === 'number') syncTo(event.charIndex);
+    };
+
+    utterance.onstart = () => {
+        if (token !== speechQueueToken) return;
+        const startedAt = performance.now();
+        const rate = utterance.rate || 1;
+        // ~13–15 English chars/sec at rate 1; pause markers slow wall-clock progress.
+        const cps = 13.5 * rate;
+        if (visualPoemTimer) {
+            clearInterval(visualPoemTimer);
+            visualPoemTimer = null;
+        }
+        visualPoemTimer = setInterval(() => {
+            if (token !== speechQueueToken) {
+                clearInterval(visualPoemTimer);
+                visualPoemTimer = null;
+                return;
+            }
+            const elapsedSec = (performance.now() - startedAt) / 1000;
+            syncTo(Math.min(spoken.length - 1, Math.floor(elapsedSec * cps)));
+        }, 180);
+    };
+
+    const clearSync = () => {
+        if (!visualPoemTimer) return;
+        clearInterval(visualPoemTimer);
+        visualPoemTimer = null;
+    };
+    utterance.onend = clearSync;
+    utterance.onerror = clearSync;
 
     try {
         if (synth.paused) synth.resume();
-        queued.forEach((utterance) => synth.speak(utterance));
+        synth.speak(utterance);
     } catch {
+        clearSync();
         runVisualPoemScroll(lineElements, token);
     }
 }

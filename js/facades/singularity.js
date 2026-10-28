@@ -53,7 +53,7 @@ function revealSingularityShell() {
             if (nextBtn) nextBtn.style.display = 'inline-block';
         }
         if (controls) controls.style.opacity = '1';
-        import('../modules/singularity.js?v=24')
+        import('../modules/singularity.js?v=25')
             .then((mod) => mod.bindSingularityControls?.())
             .catch(() => {});
 
