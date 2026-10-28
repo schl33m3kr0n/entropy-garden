@@ -2,7 +2,7 @@
 
 const INDEX_PATH = 'content/poems/index.json';
 
-/** @typedef {{ id: string, tone: 'safe' | 'gritty', title: string, text: string }} SingularityPoem */
+/** @typedef {{ id: string, tone: 'safe' | 'gritty', title: string, text: string, audio?: string, lineTimings?: number[][] }} SingularityPoem */
 
 /** @type {Promise<SingularityPoem[]> | null} */
 let loadPromise = null;
@@ -43,6 +43,18 @@ export function buildSingularityPoemPool(isCorrupted) {
 export function poemTitleFromText(text) {
     const line = text.split('\n').map((l) => l.trim()).find(Boolean);
     return line || 'Transmission';
+}
+
+/**
+ * Look up full poem metadata (including pre-rendered audio path and per-line timings)
+ * for a given poem text string.
+ * @param {string} text
+ * @returns {SingularityPoem | null}
+ */
+export function findSingularityPoemByText(text) {
+    if (!cachedPoems || !text) return null;
+    const trimmed = String(text).trim();
+    return cachedPoems.find((p) => String(p.text || '').trim() === trimmed) || null;
 }
 
 /** @returns {{ safe: number, gritty: number }} */

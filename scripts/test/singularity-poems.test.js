@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import poemsIndex from '../../content/poems/index.json';
 import {
     buildSingularityPoemPool,
+    findSingularityPoemByText,
     getSingularityPoemCounts,
     loadSingularityPoems,
 } from '../../js/data/singularity-poems.data.js';
@@ -38,5 +39,17 @@ describe('buildSingularityPoemPool', () => {
         const before = buildSingularityPoemPool(false);
         buildSingularityPoemPool(true);
         expect(buildSingularityPoemPool(false)).toEqual(before);
+    });
+
+    it('provides pre-rendered audio and per-line timings for every poem', () => {
+        const pool = buildSingularityPoemPool(true);
+        for (const text of pool) {
+            const entry = findSingularityPoemByText(text);
+            expect(entry).toBeTruthy();
+            expect(entry.audio).toMatch(/^content\/poems\/audio\/[a-z0-9-]+\.m4a$/);
+            const lines = text.split('\n').filter((l) => l.trim() !== '');
+            expect(Array.isArray(entry.lineTimings)).toBe(true);
+            expect(entry.lineTimings).toHaveLength(lines.length);
+        }
     });
 });

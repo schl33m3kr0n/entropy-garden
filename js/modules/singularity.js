@@ -15,6 +15,7 @@ import {
 } from '../core/state.js';
 import {
     buildSingularityPoemPool,
+    findSingularityPoemByText,
     loadSingularityPoems,
     poemTitleFromText,
 } from '../data/singularity-poems.data.js';
@@ -40,6 +41,27 @@ let lastMouseY;
 let draw3DFrame = 0;
 let speechQueueToken = 0;
 let visualPoemTimer = null;
+
+/** @type {AudioContext | null} */
+let poemAudioCtx = null;
+/** @type {AudioBufferSourceNode | null} */
+let activePoemSource = null;
+/** @type {GainNode | null} */
+let activePoemGain = null;
+let isPoemAudioPlaying = false;
+/** @type {Map<string, Promise<{ buffer: AudioBuffer, timings: number[][] }>>} */
+const poemAudioCache = new Map();
+
+function getPoemAudioCtx() {
+    if (!poemAudioCtx) {
+        const AC = globalThis.AudioContext || globalThis.webkitAudioContext;
+        if (AC) poemAudioCtx = new AC();
+    }
+    if (poemAudioCtx && poemAudioCtx.state === 'suspended') {
+        poemAudioCtx.resume().catch(() => {});
+    }
+    return poemAudioCtx;
+}
 
 function singularityCanvas() {
     return document.getElementById('singularity-canvas');
@@ -135,12 +157,45 @@ export function stopSingularity3D() {
     }
 }
 
+function stopPoemWebAudio() {
+    isPoemAudioPlaying = false;
+    const src = activePoemSource;
+    const gain = activePoemGain;
+    activePoemSource = null;
+    activePoemGain = null;
+    if (gain && poemAudioCtx) {
+        try {
+            const t = poemAudioCtx.currentTime;
+            gain.gain.cancelScheduledValues(t);
+            gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.0001), t);
+            gain.gain.linearRampToValueAtTime(0.0001, t + 0.035);
+        } catch {
+            /* ignore */
+        }
+    }
+    if (src) {
+        try {
+            src.onended = null;
+            src.stop(poemAudioCtx ? poemAudioCtx.currentTime + 0.04 : undefined);
+        } catch {
+            /* ignore */
+        }
+        setTimeout(() => {
+            try { src.disconnect(); } catch { /* ignore */ }
+            try { gain?.disconnect(); } catch { /* ignore */ }
+        }, 60);
+    } else if (gain) {
+        try { gain.disconnect(); } catch { /* ignore */ }
+    }
+}
+
 function cancelSingularitySpeech() {
     speechQueueToken += 1;
     if (visualPoemTimer) {
         clearInterval(visualPoemTimer);
         visualPoemTimer = null;
     }
+    stopPoemWebAudio();
     const synth = window.speechSynthesis;
     // Hard cancel mid-stream is the loud end-pop — only do it when something is actually playing.
     if (usesSingularityVoiceover() && synth && (synth.speaking || synth.pending)) {
@@ -636,14 +691,6 @@ function buildFirefoxPoemScript(items) {
     return { spoken: parts.join(''), ranges };
 }
 
-function lineIndexAtChar(ranges, charIndex) {
-    if (!ranges.length) return 0;
-    for (let i = ranges.length - 1; i >= 0; i -= 1) {
-        if (charIndex >= ranges[i].start) return ranges[i].lineIndex;
-    }
-    return ranges[0].lineIndex;
-}
-
 function runFirefoxSpeech(items, lineElements, token) {
     const synth = window.speechSynthesis;
     if (!synth) {
@@ -657,49 +704,61 @@ function runFirefoxSpeech(items, lineElements, token) {
         return;
     }
 
+    let rangePos = 0;
     let currentLine = ranges[0].lineIndex;
+    let sawBoundary = false;
     highlightPoemLine(lineElements, currentLine);
 
     const utterance = attachSingularityUtterance(new SpeechSynthesisUtterance(spoken));
-
-    const syncTo = (charIndex) => {
-        if (token !== speechQueueToken) return;
-        const next = lineIndexAtChar(ranges, Math.max(0, charIndex | 0));
-        if (next === currentLine) return;
-        currentLine = next;
-        highlightPoemLine(lineElements, currentLine);
-    };
-
-    utterance.onboundary = (event) => {
-        if (typeof event.charIndex === 'number') syncTo(event.charIndex);
-    };
-
-    utterance.onstart = () => {
-        if (token !== speechQueueToken) return;
-        const startedAt = performance.now();
-        const rate = utterance.rate || 1;
-        // ~13–15 English chars/sec at rate 1; pause markers slow wall-clock progress.
-        const cps = 13.5 * rate;
-        if (visualPoemTimer) {
-            clearInterval(visualPoemTimer);
-            visualPoemTimer = null;
-        }
-        visualPoemTimer = setInterval(() => {
-            if (token !== speechQueueToken) {
-                clearInterval(visualPoemTimer);
-                visualPoemTimer = null;
-                return;
-            }
-            const elapsedSec = (performance.now() - startedAt) / 1000;
-            syncTo(Math.min(spoken.length - 1, Math.floor(elapsedSec * cps)));
-        }, 180);
-    };
 
     const clearSync = () => {
         if (!visualPoemTimer) return;
         clearInterval(visualPoemTimer);
         visualPoemTimer = null;
     };
+
+    // Only move forward through ranges — never jump back when charIndex jitters.
+    const syncTo = (charIndex) => {
+        if (token !== speechQueueToken) return;
+        const idx = Math.max(0, charIndex | 0);
+        let advanced = false;
+        while (rangePos < ranges.length - 1 && idx >= ranges[rangePos + 1].start) {
+            rangePos += 1;
+            advanced = true;
+        }
+        if (!advanced && ranges[rangePos].lineIndex === currentLine) return;
+        const next = ranges[rangePos].lineIndex;
+        if (next === currentLine) return;
+        currentLine = next;
+        highlightPoemLine(lineElements, currentLine);
+    };
+
+    utterance.onboundary = (event) => {
+        if (typeof event.charIndex !== 'number') return;
+        if (!sawBoundary) {
+            sawBoundary = true;
+            clearSync(); // boundary wins — stop the timing estimate so they don't fight
+        }
+        syncTo(event.charIndex);
+    };
+
+    utterance.onstart = () => {
+        if (token !== speechQueueToken) return;
+        const startedAt = performance.now();
+        const rate = utterance.rate || 1;
+        const cps = 13.5 * rate;
+        clearSync();
+        // Timing fallback only until the first real boundary event.
+        visualPoemTimer = setInterval(() => {
+            if (token !== speechQueueToken || sawBoundary) {
+                clearSync();
+                return;
+            }
+            const elapsedSec = (performance.now() - startedAt) / 1000;
+            syncTo(Math.min(spoken.length - 1, Math.floor(elapsedSec * cps)));
+        }, 220);
+    };
+
     utterance.onend = clearSync;
     utterance.onerror = clearSync;
 
@@ -712,7 +771,239 @@ function runFirefoxSpeech(items, lineElements, token) {
     }
 }
 
-function runSpeechQueue(items, lineElements, token) {
+/**
+ * Decode pre-rendered Samantha poem audio and apply sample-level raised-cosine
+ * fade-in / fade-out envelopes around every line's audio packet while zeroing
+ * out inter-line gaps so codec frame boundaries or OS TTS teardown can never pop.
+ */
+function shapePoemAudioBuffer(ctx, decodedBuffer, rawTimings) {
+    const sampleRate = decodedBuffer.sampleRate;
+    const totalFrames = decodedBuffer.length;
+    const numChannels = decodedBuffer.numberOfChannels;
+    const outBuffer = ctx.createBuffer(numChannels, totalFrames, sampleRate);
+
+    const ch0 = decodedBuffer.getChannelData(0);
+    let shiftSec = 0;
+    if (Array.isArray(rawTimings) && rawTimings.length > 0 && Array.isArray(rawTimings[0])) {
+        const expectedFirstSec = Number(rawTimings[0][0]) || 0.06;
+        let firstActive = -1;
+        const maxScan = Math.min(totalFrames, Math.floor((expectedFirstSec + 0.35) * sampleRate));
+        for (let i = 0; i < maxScan; i += 1) {
+            if (Math.abs(ch0[i]) > 0.008) {
+                firstActive = i;
+                break;
+            }
+        }
+        if (firstActive >= 0) {
+            const detectedSec = (firstActive / sampleRate) - 0.012;
+            const delta = detectedSec - expectedFirstSec;
+            if (delta > -0.05 && delta < 0.16) {
+                shiftSec = delta;
+            }
+        }
+    }
+
+    const alignedTimings = (rawTimings || []).map((pair) => {
+        const s = Math.max(0, (Number(pair[0]) || 0) + shiftSec);
+        const e = Math.min(decodedBuffer.duration, Math.max(s + 0.05, (Number(pair[1]) || 0) + shiftSec));
+        return [s, e];
+    });
+
+    const fadeInSamples = Math.floor(0.022 * sampleRate);
+    const fadeOutSamples = Math.floor(0.080 * sampleRate);
+
+    for (let ch = 0; ch < numChannels; ch += 1) {
+        const src = decodedBuffer.getChannelData(ch);
+        const dst = outBuffer.getChannelData(ch);
+        dst.fill(0);
+
+        if (!alignedTimings.length) {
+            dst.set(src);
+            const fi = Math.min(fadeInSamples, Math.floor(totalFrames / 4));
+            for (let j = 0; j < fi; j += 1) {
+                dst[j] *= 0.5 * (1 - Math.cos((Math.PI * j) / fi));
+            }
+            const fo = Math.min(fadeOutSamples, Math.floor(totalFrames / 3));
+            for (let j = 0; j < fo; j += 1) {
+                dst[totalFrames - fo + j] *= 0.5 * (1 + Math.cos((Math.PI * j) / fo));
+            }
+            continue;
+        }
+
+        for (let k = 0; k < alignedTimings.length; k += 1) {
+            const [sSec, eSec] = alignedTimings[k];
+            const startIdx = Math.max(0, Math.floor(sSec * sampleRate));
+            const endIdx = Math.min(totalFrames, Math.ceil(eSec * sampleRate));
+            const len = endIdx - startIdx;
+            if (len <= 4) continue;
+
+            for (let i = startIdx; i < endIdx; i += 1) {
+                dst[i] = src[i];
+            }
+
+            const fi = Math.min(fadeInSamples, Math.floor(len / 3));
+            for (let j = 0; j < fi; j += 1) {
+                const w = 0.5 * (1 - Math.cos((Math.PI * j) / fi));
+                dst[startIdx + j] *= w;
+            }
+
+            const fo = Math.min(fadeOutSamples, Math.floor(len / 2));
+            for (let j = 0; j < fo; j += 1) {
+                const w = 0.5 * (1 + Math.cos((Math.PI * j) / fo));
+                dst[endIdx - fo + j] *= w;
+            }
+
+            dst[startIdx] = 0;
+            dst[endIdx - 1] = 0;
+        }
+    }
+
+    return { buffer: outBuffer, timings: alignedTimings };
+}
+
+function fetchAndDecodePoemAudio(poemEntry) {
+    if (!poemEntry?.audio) return Promise.reject(new Error('No poem audio path'));
+    const cacheKey = poemEntry.id || poemEntry.audio;
+    if (poemAudioCache.has(cacheKey)) {
+        return poemAudioCache.get(cacheKey);
+    }
+    const promise = (async () => {
+        const ctx = getPoemAudioCtx();
+        if (!ctx) throw new Error('Web Audio unavailable');
+        const res = await fetch(poemEntry.audio);
+        if (!res.ok) throw new Error(`Poem audio HTTP ${res.status}`);
+        const arrayBuf = await res.arrayBuffer();
+        const rawDecoded = await ctx.decodeAudioData(arrayBuf.slice(0));
+        return shapePoemAudioBuffer(ctx, rawDecoded, poemEntry.lineTimings || []);
+    })().catch((err) => {
+        poemAudioCache.delete(cacheKey);
+        throw err;
+    });
+    poemAudioCache.set(cacheKey, promise);
+    return promise;
+}
+
+function prefetchNextPoemAudio() {
+    try {
+        const pool = activeSingularityPoems();
+        if (!pool.length) return;
+        const nextIdx = (currentPoemIndex + 1) % pool.length;
+        const nextEntry = findSingularityPoemByText(pool[nextIdx]);
+        if (nextEntry?.audio) {
+            fetchAndDecodePoemAudio(nextEntry).catch(() => {});
+        }
+    } catch {
+        /* ignore */
+    }
+}
+
+async function runWebAudioPoemSpeech(poemEntry, items, lineElements, token) {
+    try {
+        const ctx = getPoemAudioCtx();
+        if (!ctx) throw new Error('No AudioContext');
+        const { buffer, timings } = await fetchAndDecodePoemAudio(poemEntry);
+        if (token !== speechQueueToken) return;
+
+        if (ctx.state === 'suspended') {
+            await ctx.resume().catch(() => {});
+        }
+        if (token !== speechQueueToken) return;
+
+        stopPoemWebAudio();
+
+        const source = ctx.createBufferSource();
+        const gain = ctx.createGain();
+        source.buffer = buffer;
+        source.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime + 0.02;
+        const dur = buffer.duration;
+
+        // Schedule a per-packet GainNode envelope matching each line's audio packet.
+        if (timings.length) {
+            gain.gain.setValueAtTime(0.0001, now);
+            for (let k = 0; k < timings.length; k += 1) {
+                const [sSec, eSec] = timings[k];
+                const pktDur = eSec - sSec;
+                if (pktDur <= 0.04) continue;
+                const fi = Math.min(0.020, pktDur * 0.2);
+                const fo = Math.min(0.075, pktDur * 0.35);
+                const tStart = now + sSec;
+                const tEnd = now + eSec;
+                gain.gain.setValueAtTime(0.0001, Math.max(now, tStart - 0.002));
+                gain.gain.linearRampToValueAtTime(1.0, tStart + fi);
+                if (tEnd - fo > tStart + fi) {
+                    gain.gain.setValueAtTime(1.0, tEnd - fo);
+                }
+                gain.gain.linearRampToValueAtTime(0.0001, tEnd);
+            }
+        } else {
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.linearRampToValueAtTime(1.0, now + 0.025);
+            if (dur > 0.12) {
+                gain.gain.setValueAtTime(1.0, now + dur - 0.08);
+            }
+            gain.gain.linearRampToValueAtTime(0.0001, now + dur);
+        }
+
+        activePoemSource = source;
+        activePoemGain = gain;
+        isPoemAudioPlaying = true;
+
+        let currentLine = 0;
+        highlightPoemLine(lineElements, 0);
+
+        if (visualPoemTimer) {
+            clearInterval(visualPoemTimer);
+            visualPoemTimer = null;
+        }
+
+        visualPoemTimer = setInterval(() => {
+            if (token !== speechQueueToken) {
+                clearInterval(visualPoemTimer);
+                visualPoemTimer = null;
+                return;
+            }
+            const elapsed = ctx.currentTime - now;
+            if (elapsed < 0) return;
+            let nextLine = currentLine;
+            for (let k = currentLine + 1; k < timings.length && k < lineElements.length; k += 1) {
+                if (elapsed >= timings[k][0] - 0.03) {
+                    nextLine = k;
+                } else {
+                    break;
+                }
+            }
+            if (nextLine !== currentLine) {
+                currentLine = nextLine;
+                highlightPoemLine(lineElements, currentLine);
+            }
+        }, 55);
+
+        source.onended = () => {
+            if (activePoemSource === source) {
+                activePoemSource = null;
+                activePoemGain = null;
+                isPoemAudioPlaying = false;
+            }
+            if (token === speechQueueToken && visualPoemTimer) {
+                clearInterval(visualPoemTimer);
+                visualPoemTimer = null;
+            }
+            try { source.disconnect(); } catch { /* ignore */ }
+            try { gain.disconnect(); } catch { /* ignore */ }
+        };
+
+        source.start(now);
+        prefetchNextPoemAudio();
+    } catch {
+        if (token !== speechQueueToken) return;
+        runFallbackSpeechQueue(items, lineElements, token);
+    }
+}
+
+function runFallbackSpeechQueue(items, lineElements, token) {
     const synth = window.speechSynthesis;
     if (!synth || !items.length) {
         runVisualPoemScroll(lineElements, token);
@@ -762,6 +1053,15 @@ function runSpeechQueue(items, lineElements, token) {
     };
 
     speakNext();
+}
+
+function runSpeechQueue(items, lineElements, token, poemText) {
+    const poemEntry = findSingularityPoemByText(poemText);
+    if (poemEntry?.audio) {
+        void runWebAudioPoemSpeech(poemEntry, items, lineElements, token);
+        return;
+    }
+    runFallbackSpeechQueue(items, lineElements, token);
 }
 
 function renderIosSingularityPoem(container, poemText) {
@@ -838,7 +1138,7 @@ function speakSingularity(poemText) {
         return;
     }
 
-    setTimeout(() => runSpeechQueue(items, lineElements, token), 50);
+    setTimeout(() => runSpeechQueue(items, lineElements, token, poemText), 50);
 }
 
 let cyclePoemBusy = false;
@@ -849,6 +1149,8 @@ function cyclePoem() {
     if (cyclePoemBusy || nextBtn.disabled) return;
     cyclePoemBusy = true;
 
+    const wasInterrupted = isPoemAudioPlaying
+        || Boolean(window.speechSynthesis?.speaking || window.speechSynthesis?.pending);
     cancelSingularitySpeech();
 
     const finishCycle = () => {
@@ -884,7 +1186,6 @@ function cyclePoem() {
         return;
     }
 
-    const wasInterrupted = window.speechSynthesis?.speaking || window.speechSynthesis?.pending;
     const activeSound = wasInterrupted ? sfx.clearThroat : sfx.transition;
     playSound(activeSound);
 

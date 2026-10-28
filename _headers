@@ -13,3 +13,7 @@
 
 /pages/genesis.html
   Content-Type: text/html; charset=utf-8
+
+/content/poems/audio/*.m4a
+  Content-Type: audio/mp4
+  Cache-Control: public, max-age=31536000, immutable

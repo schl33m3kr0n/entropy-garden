@@ -39,5 +39,11 @@ export async function onRequest(context) {
         return new Response(response.body, { status: response.status, headers });
     }
 
+    if (pathname.endsWith('.m4a') && !type.includes('audio/')) {
+        const headers = new Headers(response.headers);
+        headers.set('Content-Type', 'audio/mp4');
+        return new Response(response.body, { status: response.status, headers });
+    }
+
     return response;
 }

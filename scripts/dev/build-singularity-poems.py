@@ -175,10 +175,27 @@ def build_index() -> int:
         print(f"poems directory missing: {CONTENT_DIR}", file=sys.stderr)
         return 1
 
+    existing_by_id: dict[str, dict] = {}
+    if INDEX_PATH.is_file():
+        try:
+            for item in json.loads(INDEX_PATH.read_text(encoding="utf-8")):
+                if isinstance(item, dict) and "id" in item:
+                    existing_by_id[item["id"]] = item
+        except Exception:
+            pass
+
     poems = [parse_markdown(path) for path in sorted(CONTENT_DIR.glob("*.md"))]
     if not poems:
         print("no markdown poems found in content/poems/", file=sys.stderr)
         return 1
+
+    for poem in poems:
+        prev = existing_by_id.get(poem["id"])
+        if prev and prev.get("text") == poem["text"]:
+            if "audio" in prev:
+                poem["audio"] = prev["audio"]
+            if "lineTimings" in prev:
+                poem["lineTimings"] = prev["lineTimings"]
 
     poems.sort(key=lambda item: (0 if item["tone"] == "safe" else 1, item["order"], item["id"]))
     INDEX_PATH.write_text(
