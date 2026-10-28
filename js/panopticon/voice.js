@@ -1,212 +1,203 @@
-/** Optional device speech for the eye. No API key or remote service required. */
-const synth = globalThis.speechSynthesis;
-const supported = Boolean(synth && globalThis.SpeechSynthesisUtterance);
+/**
+ * Optional panopticon eye voice via in-browser espeak-ng (Spellophone WASM).
+ * Plays PCM through Web Audio with a short fade-out so macOS system-TTS
+ * teardown clicks never happen. GPL-3.0 library loaded from jsDelivr on demand.
+ */
+const SPELL_MOD =
+    'https://cdn.jsdelivr.net/npm/@spelling-creator/spellophone@0.2.1/+esm';
+const FADE_OUT_SEC = 0.07;
+const VOICE_ID = 'en-us';
+
 let enabled = false;
-let active = null;
-let pending = null;
 let button;
 let failure = '';
-let speakRetryTimer = 0;
-let startWatchTimer = 0;
-let spokenStartedAt = 0;
+/** @type {'idle'|'loading'|'speaking'} */
+let playerState = 'idle';
+/** @type {{ text: string }|null} */
+let pending = null;
+let speakGeneration = 0;
 
-/** Retain utterances so Safari/Chrome GC does not drop the audio unit mid-stream. */
-const retainedUtterances = [];
-function retainUtterance(u) {
-    if (!u) return;
-    retainedUtterances.push(u);
-    setTimeout(() => {
-        const idx = retainedUtterances.indexOf(u);
-        if (idx !== -1) retainedUtterances.splice(idx, 1);
-    }, 20000);
+/** @type {import('@spelling-creator/spellophone').Espeak|null} */
+let espeak = null;
+/** @type {Promise<import('@spelling-creator/spellophone').Espeak>|null} */
+let espeakLoading = null;
+/** @type {typeof import('@spelling-creator/spellophone').toFloat32|null} */
+let toFloat32 = null;
+
+/** @type {AudioContext|null} */
+let audioCtx = null;
+/** @type {AudioBufferSourceNode|null} */
+let activeSource = null;
+/** @type {GainNode|null} */
+let activeGain = null;
+
+const supported = typeof WebAssembly !== 'undefined'
+    && typeof AudioContext !== 'undefined';
+
+function getAudioCtx() {
+    if (!audioCtx) {
+        const AC = globalThis.AudioContext || globalThis.webkitAudioContext;
+        audioCtx = new AC();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+    return audioCtx;
 }
 
-let currentEyeVoice = null;
-
-export function pickEyeVoice(voices) {
-    if (!voices?.length) return null;
-    const english = voices.filter(voice => /^en(?:-|_|$)/i.test(voice.lang));
-    const pool = english.length ? english : voices;
-    // Compact local voices tear down cleaner than Apple neural/enhanced (loud end click).
-    const score = voice => {
-        const name = voice.name || '';
-        if (/enhanced|premium|neural|superstar|novelty|sapi[rs]|eddy|flo|reed|shelley|sandy/i.test(name)) {
-            return 0;
+async function ensureEspeak() {
+    if (espeak) return espeak;
+    if (espeakLoading) return espeakLoading;
+    espeakLoading = (async () => {
+        const mod = await import(SPELL_MOD);
+        toFloat32 = mod.toFloat32;
+        const engine = await mod.createEspeak({
+            cdn: 'jsdelivr',
+            languages: ['en'],
+        });
+        try {
+            await engine.loadVoice(VOICE_ID);
+        } catch {
+            try { engine.setVoice(VOICE_ID); } catch { /* keep default */ }
         }
-        if (/samantha|ava|serena|karen|moira|daniel|arthur|fred|victoria|alex/i.test(name)) return 8;
-        if (/google|microsoft/i.test(name) && !voice.localService) return 6;
-        if (voice.default) return 4;
-        if (voice.localService) return 3;
-        return 1;
-    };
-    return pool.slice().sort((a, b) => score(b) - score(a))[0] || null;
+        try { engine.setParameter('rate', 155); } catch { /* optional */ }
+        try { engine.setParameter('pitch', 42); } catch { /* optional */ }
+        espeak = engine;
+        return engine;
+    })().catch((err) => {
+        espeakLoading = null;
+        throw err;
+    });
+    return espeakLoading;
 }
 
-function refreshEyeVoice() {
-    if (!synth) return;
-    const voices = synth.getVoices();
-    if (voices?.length) currentEyeVoice = pickEyeVoice(voices);
-}
-
-function clearSpeakRetry() {
-    if (!speakRetryTimer) return;
-    clearTimeout(speakRetryTimer);
-    speakRetryTimer = 0;
-}
-
-function clearStartWatch() {
-    if (!startWatchTimer) return;
-    clearTimeout(startWatchTimer);
-    startWatchTimer = 0;
-}
-
-function synthBusy() {
-    return Boolean(synth?.speaking || synth?.pending);
-}
-
-function kickSynth() {
-    if (!synth) return;
-    try { synth.cancel(); } catch { /* ignore */ }
-    try { if (synth.paused) synth.resume(); } catch { /* ignore */ }
-}
-
-/** Wait until the synthesizer is idle, then run fn. Avoids canceling mid-utterance. */
-function whenSynthIdle(fn, attempt = 0) {
-    if (document.body.classList.contains('singularity-active')) {
-        clearSpeakRetry();
-        return;
+function stopPlayback() {
+    speakGeneration += 1;
+    const src = activeSource;
+    const gain = activeGain;
+    activeSource = null;
+    activeGain = null;
+    if (gain && audioCtx) {
+        try {
+            const t = audioCtx.currentTime;
+            gain.gain.cancelScheduledValues(t);
+            gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.0001), t);
+            gain.gain.linearRampToValueAtTime(0.0001, t + 0.03);
+        } catch { /* ignore */ }
     }
-    if (!synthBusy()) {
-        clearSpeakRetry();
-        try { if (synth?.paused) synth.resume(); } catch { /* ignore */ }
-        fn();
-        return;
+    if (src) {
+        try { src.stop(audioCtx ? audioCtx.currentTime + 0.035 : undefined); } catch { /* ignore */ }
+        try { src.disconnect(); } catch { /* ignore */ }
     }
-    if (attempt >= 24) {
-        kickSynth();
-        clearSpeakRetry();
-        fn();
-        return;
+    if (gain) {
+        try { gain.disconnect(); } catch { /* ignore */ }
     }
-    clearSpeakRetry();
-    speakRetryTimer = setTimeout(() => whenSynthIdle(fn, attempt + 1), 50);
+    playerState = 'idle';
+    syncButton();
 }
 
-/**
- * Stop eye narration only. Do not cancel speechSynthesis unless this module
- * owns the current utterance — otherwise poem TTS gets killed.
- */
 export function stopEyeVoice() {
     pending = null;
-    clearSpeakRetry();
-    clearStartWatch();
-    spokenStartedAt = 0;
-    const current = active;
-    active = null;
-    if (!synth) return;
-    if (current && synthBusy()) {
-        try {
-            synth.cancel();
-        } catch {
-            /* ignore */
-        }
-    }
+    stopPlayback();
 }
 
 function flushPending() {
     const next = pending;
     pending = null;
-    if (next && enabled) beginSpeak(next.text);
+    if (next && enabled) speakEyeComment(next);
 }
 
-function beginSpeak(text, attempt = 0) {
+function playSamples(samples, sampleRate, generation) {
+    return new Promise((resolve, reject) => {
+        if (generation !== speakGeneration || !enabled) {
+            resolve();
+            return;
+        }
+        if (!toFloat32) {
+            reject(new Error('TTS float converter missing'));
+            return;
+        }
+        const ctx = getAudioCtx();
+        const float = toFloat32(samples);
+        const buffer = ctx.createBuffer(1, float.length, sampleRate);
+        buffer.copyToChannel(float, 0);
+
+        const source = ctx.createBufferSource();
+        const gain = ctx.createGain();
+        source.buffer = buffer;
+        source.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        const dur = buffer.duration;
+        const fade = Math.min(FADE_OUT_SEC, Math.max(0.02, dur * 0.12));
+        gain.gain.setValueAtTime(1, now);
+        if (dur > fade + 0.02) {
+            gain.gain.setValueAtTime(1, now + dur - fade);
+            gain.gain.linearRampToValueAtTime(0.0001, now + dur);
+        } else {
+            gain.gain.linearRampToValueAtTime(0.0001, now + dur);
+        }
+
+        activeSource = source;
+        activeGain = gain;
+        playerState = 'speaking';
+        syncButton();
+
+        const finish = () => {
+            if (activeSource === source) {
+                activeSource = null;
+                activeGain = null;
+            }
+            try { source.disconnect(); } catch { /* ignore */ }
+            try { gain.disconnect(); } catch { /* ignore */ }
+            resolve();
+        };
+
+        source.onended = finish;
+        try {
+            source.start(now);
+        } catch (err) {
+            finish();
+            reject(err);
+        }
+    });
+}
+
+async function beginSpeak(text) {
     if (!supported || !enabled || document.hidden) return;
     if (document.body.classList.contains('singularity-active')) return;
 
-    if (active) {
-        pending = { text };
-        return;
-    }
-
-    if (synthBusy()) {
-        pending = { text };
-        whenSynthIdle(() => flushPending());
-        return;
-    }
-
-    clearStartWatch();
-    spokenStartedAt = 0;
-
-    const clean = String(text || '').replace(/\s+/g, ' ').trim().replace(/[.!?…\s]+$/, '');
+    const clean = String(text || '').replace(/\s+/g, ' ').trim();
     if (!clean) return;
-    const spoken = `${clean}.`;
 
-    const utterance = new SpeechSynthesisUtterance(spoken);
-    retainUtterance(utterance);
+    if (playerState === 'speaking' || playerState === 'loading') {
+        pending = { text: clean };
+        return;
+    }
 
-    if (!currentEyeVoice) refreshEyeVoice();
-    if (currentEyeVoice) utterance.voice = currentEyeVoice;
-    utterance.lang = currentEyeVoice?.lang || 'en-US';
-    utterance.rate = 0.94;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-
-    const done = () => {
-        clearStartWatch();
-        spokenStartedAt = 0;
-        if (active === utterance) active = null;
-    };
-
-    utterance.onstart = () => {
-        failure = '';
-        spokenStartedAt = performance.now();
-        clearStartWatch();
-    };
-
-    utterance.onend = () => {
-        done();
-        whenSynthIdle(() => flushPending());
-    };
-
-    utterance.onerror = event => {
-        done();
-        if (event.error === 'canceled' || event.error === 'interrupted') {
-            whenSynthIdle(() => flushPending());
-            return;
-        }
-        pending = null;
-        failure = event.error || 'speech-failed';
-        enabled = false;
-        syncButton();
-    };
-
-    active = utterance;
-
-    // Chrome sometimes swallows speak() until cancel + retry.
-    startWatchTimer = setTimeout(() => {
-        startWatchTimer = 0;
-        if (active !== utterance || spokenStartedAt) return;
-        active = null;
-        kickSynth();
-        if (attempt < 2 && enabled) {
-            whenSynthIdle(() => beginSpeak(text, attempt + 1));
-            return;
-        }
-        // Keep enabled — leave a retry for the next comment instead of going dark.
-        failure = '';
-        syncButton();
-        whenSynthIdle(() => flushPending());
-    }, 1400);
+    const generation = ++speakGeneration;
+    playerState = 'loading';
+    syncButton();
 
     try {
-        if (synth.paused) synth.resume();
-        synth.speak(utterance);
-    } catch {
-        done();
-        if (attempt < 2 && enabled) {
-            whenSynthIdle(() => beginSpeak(text, attempt + 1));
-            return;
-        }
+        const engine = await ensureEspeak();
+        if (generation !== speakGeneration || !enabled) return;
+
+        const result = engine.synthesize(clean, {
+            rate: 155,
+            pitch: 42,
+            endPause: true,
+        });
+        if (!result?.samples?.length) throw new Error('Empty synthesis');
+
+        await playSamples(result.samples, result.sampleRate, generation);
+        if (generation !== speakGeneration) return;
+        playerState = 'idle';
+        syncButton();
+        flushPending();
+    } catch (err) {
+        if (generation !== speakGeneration) return;
+        console.warn('[Entropy Garden] eye voice failed', err);
+        stopPlayback();
         failure = 'speech-failed';
         enabled = false;
         syncButton();
@@ -214,13 +205,12 @@ function beginSpeak(text, attempt = 0) {
 }
 
 export function speakEyeComment(payload) {
-    if (!supported || !enabled || document.hidden || payload.pre) return;
+    if (!supported || !enabled || document.hidden || payload?.pre) return;
     if (document.body.classList.contains('singularity-active')) return;
-    const text = String(payload.text || '').replace(/\s+/g, ' ').trim();
+    const text = String(payload?.text || '').replace(/\s+/g, ' ').trim();
     if (!text) return;
-    if (active || speakRetryTimer || synthBusy()) {
+    if (playerState === 'speaking' || playerState === 'loading') {
         pending = { text };
-        if (!active) whenSynthIdle(() => flushPending());
         return;
     }
     beginSpeak(text);
@@ -228,9 +218,23 @@ export function speakEyeComment(payload) {
 
 function syncButton() {
     if (!button) return;
-    button.textContent = supported ? (enabled ? 'EYE VOICE ON' : failure ? 'RETRY EYE VOICE' : 'EYE VOICE OFF') : 'EYE VOICE UNAVAILABLE';
+    if (!supported) {
+        button.textContent = 'EYE VOICE UNAVAILABLE';
+        button.disabled = true;
+        button.setAttribute('aria-pressed', 'false');
+        return;
+    }
+    if (!enabled) {
+        button.textContent = failure ? 'RETRY EYE VOICE' : 'EYE VOICE OFF';
+    } else if (playerState === 'loading') {
+        button.textContent = 'EYE VOICE…';
+    } else if (playerState === 'speaking') {
+        button.textContent = 'EYE VOICE ■';
+    } else {
+        button.textContent = 'EYE VOICE ON';
+    }
     button.setAttribute('aria-pressed', String(enabled));
-    button.disabled = !supported;
+    button.disabled = false;
 }
 
 export function initEyeVoice() {
@@ -239,11 +243,7 @@ export function initEyeVoice() {
     button.dataset.voiceBound = 'true';
     syncButton();
     if (!supported) return;
-    refreshEyeVoice();
-    synth.addEventListener?.('voiceschanged', refreshEyeVoice);
-    if (typeof synth.onvoiceschanged !== 'undefined') {
-        synth.onvoiceschanged = refreshEyeVoice;
-    }
+
     const bubble = document.getElementById('panopticon-comment');
     let lastComment = '';
     const readVisibleComment = () => {
@@ -253,36 +253,56 @@ export function initEyeVoice() {
         if (!text || bubble.classList.contains('has-pre')) return false;
         if (text === lastComment) return true;
         lastComment = text;
-        speakEyeComment({text});
+        speakEyeComment({ text });
         return true;
     };
+
     if (bubble) {
         const observer = new MutationObserver(readVisibleComment);
-        observer.observe(bubble, {childList: true, subtree: true, characterData: true,
-            attributes: true, attributeFilter: ['class', 'aria-hidden']});
+        observer.observe(bubble, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ['class', 'aria-hidden'],
+        });
     }
+
     let sawSingularity = document.body.classList.contains('singularity-active');
     const modeObserver = new MutationObserver(() => {
         const now = document.body.classList.contains('singularity-active');
         if (now && !sawSingularity) stopEyeVoice();
         sawSingularity = now;
     });
-    modeObserver.observe(document.body, {attributes: true, attributeFilter: ['class']});
+    modeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
     button.addEventListener('click', () => {
+        // Click while speaking → stop current line, stay enabled.
+        if (enabled && playerState === 'speaking') {
+            stopPlayback();
+            return;
+        }
         enabled = !enabled;
         failure = '';
         syncButton();
         if (enabled) {
             if (document.body.classList.contains('singularity-active')) return;
+            // User gesture unlocks AudioContext + starts WASM fetch.
+            getAudioCtx();
             lastComment = '';
-            kickSynth();
-            whenSynthIdle(() => {
-                if (!enabled || document.body.classList.contains('singularity-active')) return;
-                if (!readVisibleComment()) speakEyeComment({ text: 'Eye voice enabled.' });
+            ensureEspeak().catch(() => {
+                failure = 'speech-failed';
+                enabled = false;
+                syncButton();
             });
+            if (!readVisibleComment()) speakEyeComment({ text: 'Eye voice enabled.' });
+        } else {
+            stopEyeVoice();
         }
-        else stopEyeVoice();
     });
-    document.addEventListener('visibilitychange', () => { if (document.hidden) stopEyeVoice(); });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopEyeVoice();
+    });
     window.addEventListener('pagehide', stopEyeVoice);
 }
