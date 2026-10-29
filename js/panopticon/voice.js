@@ -259,6 +259,7 @@ const EYE_PRONUNCIATIONS = [
     [/\bkanye\s+west\b/gi, "[[k'A:njeI]] west"],
     [/\bkanye('s)?\b/gi, "[[k'A:njeI]]$1"],
     [/\bbodhi\b/gi, 'bo dee'],
+    [/\bpanopticon\b/gi, 'pan op tih con'],
     [/\bfrutiger\s+aero\b/gi, 'froo tih gur air oh'],
     [/\bfrutiger\b/gi, 'froo tih gur'],
     // Verb live/lives = short i; adjective live only before "feed"
@@ -279,6 +280,10 @@ function applyEyePronunciations(text) {
 function softenEyePunctuation(text) {
     return text
         .replace(/(\d)\.(\d)/g, '$1\u2024$2')
+        // Honorifics / titles: "Mr. Krabs" — strip the period so it isn't a pause
+        .replace(/\b(mrs|mr|ms|dr|jr|sr|prof|st|vs)\./gi, '$1')
+        // Middle initials: "Chuck E. Cheese"
+        .replace(/\b([A-Za-z])\.(?=\s+[A-Za-z])/g, '$1')
         .replace(/\.{2,}|…/g, ',')
         .replace(/\./g, ',')
         .replace(/\u2024/g, '.')
@@ -290,6 +295,19 @@ function stripEyeSpeakNoise(text) {
     return text.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
 }
 
+/** $5 → "5 dollars", $1 → "1 dollar"; optional cents. */
+function expandEyeCurrency(text) {
+    return text.replace(/\$(\d+)(?:\.(\d{1,2}))?/g, (_, dollars, cents) => {
+        const d = Number(dollars);
+        const parts = [`${d} ${d === 1 ? 'dollar' : 'dollars'}`];
+        if (cents != null) {
+            const c = cents.length === 1 ? Number(cents) * 10 : Number(cents);
+            if (c > 0) parts.push(`${c} ${c === 1 ? 'cent' : 'cents'}`);
+        }
+        return parts.join(' and ');
+    });
+}
+
 /** God-mode bubbles are ALL CAPS on screen; espeak spells "IT" unless spoken lowercase. */
 function spokenEyeText(text) {
     const clean = String(text || '').replace(/\s+/g, ' ').trim();
@@ -297,7 +315,9 @@ function spokenEyeText(text) {
     const god = document.body.classList.contains('god-mode')
         || document.getElementById('panopticon-comment')?.classList.contains('panopticon-comment-god');
     const cased = god ? clean.toLowerCase() : clean;
-    return applyEyePronunciations(softenEyePunctuation(stripEyeSpeakNoise(cased)));
+    return applyEyePronunciations(
+        softenEyePunctuation(expandEyeCurrency(stripEyeSpeakNoise(cased))),
+    );
 }
 
 export function speakEyeComment(payload) {
