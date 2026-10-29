@@ -32,6 +32,11 @@ let indexUrl = root.appendingPathComponent("content/poems/index.json")
 let audioDir = root.appendingPathComponent("content/poems/audio")
 try fm.createDirectory(at: audioDir, withIntermediateDirectories: true)
 
+let onlyIds = Set(CommandLine.arguments.dropFirst())
+if !onlyIds.isEmpty {
+    fputs("Filtering to \(onlyIds.sorted().joined(separator: ", "))\n", stderr)
+}
+
 let data = try Data(contentsOf: indexUrl)
 var poems = try JSONDecoder().decode([PoemEntry].self, from: data)
 
@@ -52,6 +57,7 @@ let tStart = Date()
 
 for idx in 0..<poems.count {
     let poem = poems[idx]
+    if !onlyIds.isEmpty && !onlyIds.contains(poem.id) { continue }
     let rawLines = poem.text
         .components(separatedBy: .newlines)
         .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
