@@ -6,7 +6,7 @@ import {
     buildSingularityPoemPool,
     loadSingularityPoems,
     poemTitleFromText,
-} from '../data/singularity-poems.data.js';
+} from '../data/singularity-poems.data.js?v=pause-prefs-30';
 
 let currentIndex = 0;
 let uiBound = false;

@@ -19,7 +19,7 @@ import {
     findSingularityPoemByText,
     loadSingularityPoems,
     poemTitleFromText,
-} from '../data/singularity-poems.data.js';
+} from '../data/singularity-poems.data.js?v=pause-prefs-30';
 
 function pushTerminalLog(msg) {
     if (typeof globalThis.pushTerminalLog === 'function') globalThis.pushTerminalLog(msg);

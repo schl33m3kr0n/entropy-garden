@@ -22,7 +22,7 @@ export {
     resumeSingularityPresentation,
     cyclePoem,
     reconcileSingularityPoem,
-} from './facades/singularity.js?v=pause-prefs-29';
+} from './facades/singularity.js?v=pause-prefs-30';
 
 export {
     loadMatrix,
@@ -40,7 +40,7 @@ export { loadCards, initCardsOfChaos } from './facades/cards.js';
 import { perf } from './core/shared.js';
 import { loadMatrix } from './facades/matrix.js?v=caesar-scroll-3';
 import { loadTerminal } from './facades/terminal.js?v=no-pw-autofill-1';
-import { loadSingularity } from './facades/singularity.js?v=pause-prefs-29';
+import { loadSingularity } from './facades/singularity.js?v=pause-prefs-30';
 
 function isIosPoemMode() {
     return perf.isIOS || document.body.classList.contains('ios-ui');
