@@ -259,6 +259,8 @@ const EYE_PRONUNCIATIONS = [
     [/\bkanye\s+west\b/gi, "[[k'A:njeI]] west"],
     [/\bkanye('s)?\b/gi, "[[k'A:njeI]]$1"],
     [/\bbodhi\b/gi, 'bo dee'],
+    [/\bfrutiger\s+aero\b/gi, 'froo tih gur air oh'],
+    [/\bfrutiger\b/gi, 'froo tih gur'],
     // Verb live/lives = short i; adjective live only before "feed"
     [/\blive\s+feed\b/gi, 'liev feed'],
     [/\blives\b/gi, 'livz'],
@@ -283,6 +285,11 @@ function softenEyePunctuation(text) {
         .replace(/,\s*,+/g, ',');
 }
 
+/** Drop symbols espeak would name aloud (e.g. *sigh* → sigh). */
+function stripEyeSpeakNoise(text) {
+    return text.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+}
+
 /** God-mode bubbles are ALL CAPS on screen; espeak spells "IT" unless spoken lowercase. */
 function spokenEyeText(text) {
     const clean = String(text || '').replace(/\s+/g, ' ').trim();
@@ -290,7 +297,7 @@ function spokenEyeText(text) {
     const god = document.body.classList.contains('god-mode')
         || document.getElementById('panopticon-comment')?.classList.contains('panopticon-comment-god');
     const cased = god ? clean.toLowerCase() : clean;
-    return applyEyePronunciations(softenEyePunctuation(cased));
+    return applyEyePronunciations(softenEyePunctuation(stripEyeSpeakNoise(cased)));
 }
 
 export function speakEyeComment(payload) {
