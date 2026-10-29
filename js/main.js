@@ -1,4 +1,4 @@
-import { initEyeVoice } from './panopticon/voice.js?v=43';
+import { initEyeVoice } from './panopticon/voice.js?v=49';
 // Entropy Garden — main entry (lazy-loads terminal, matrix, singularity)
 import { bindPlaylistPlayPause, isPlayPauseShowingPlaying } from './playlist-icons.js';
 import { registerHooks, getHook } from './core/hooks.js';
@@ -96,7 +96,7 @@ import {
     reconcileSingularityPoem,
     stopSingularity3D,
     bootGameAddons,
-} from './lazy.js?v=no-pw-autofill-1';
+} from './lazy.js?v=pause-prefs-29';
 import { registerServiceWorkerAfterInit } from './core/sw-register.js';
 import './cipher/caesar-scroll.js';
 import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios/ios-ui.js';

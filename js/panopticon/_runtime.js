@@ -481,6 +481,16 @@ function rememberPanopticonComment(text) {
     persistPanopticonSeenComments();
 }
 
+/** ?kanye / ?previewKanye=1 — drain Kanye lines first (pronunciation QA). */
+function isPreviewKanye() {
+    try {
+        const params = new URLSearchParams(globalThis.location?.search || '');
+        return params.has('kanye') || params.get('previewKanye') === '1';
+    } catch {
+        return false;
+    }
+}
+
 /**
  * Pick from safe(+gritty) preferring lines not yet saved across visits.
  * When `tod` is set, also skip lines already used this visit (once per visit).
@@ -501,7 +511,14 @@ function pickPanopticonLine(safe, gritty = [], { tod = false } = {}) {
         persistPanopticonSeenComments();
         fresh = candidates.slice();
     }
-    const text = fresh[Math.floor(Math.random() * fresh.length)];
+    let pickFrom = fresh;
+    if (isPreviewKanye()) {
+        const kanye = fresh.filter((t) => /kanye/i.test(t));
+        if (kanye.length) pickFrom = kanye;
+    }
+    const text = isPreviewKanye()
+        ? pickFrom[0]
+        : pickFrom[Math.floor(Math.random() * pickFrom.length)];
     if (tod && text) panopticonTodShownThisVisit.add(text);
     return text || null;
 }
@@ -783,6 +800,14 @@ function schedulePanopticonLateNightCommentSync() {
 function pickPanopticonIdleComment() {
     const pools = globalThis.lorePools;
     if (!pools) return null;
+    // Pronunciation QA: skip TOD/holiday branches and drain Kanye idle lines first.
+    if (isPreviewKanye()) {
+        const line = pickPanopticonLine(
+            pools.panopticonIdleCommentsSafe || [],
+            pools.panopticonIdleCommentsGritty || [],
+        );
+        if (line) return line;
+    }
     if (isChristmas()) {
         const xmas = pools.panopticonIdleCommentsChristmasSafe;
         if (xmas?.length) {

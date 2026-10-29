@@ -3,6 +3,7 @@
  * Plays PCM through Web Audio with a short fade-out so macOS system-TTS
  * teardown clicks never happen. GPL-3.0 library loaded from jsDelivr on demand.
  */
+import { softenTtsPunctuation, toSpellophoneSsml } from '../core/tts-pause.js';
 const SPELL_MOD =
     'https://cdn.jsdelivr.net/npm/@spelling-creator/spellophone@0.2.1/+esm';
 const FADE_OUT_SEC = 0.07;
@@ -231,10 +232,11 @@ async function beginSpeak(text) {
         const engine = await ensureEspeak();
         if (generation !== speakGeneration || !enabled) return;
 
-        const result = engine.synthesize(clean, {
+        const result = engine.synthesize(toSpellophoneSsml(clean), {
             rate: 155,
             pitch: 42,
             endPause: true,
+            ssml: true,
         });
         if (!result?.samples?.length) throw new Error('Empty synthesis');
 
@@ -255,10 +257,13 @@ async function beginSpeak(text) {
 
 /** Respelling / phoneme hints so espeak hits the intended pronunciation. */
 const EYE_PRONUNCIATIONS = [
-    // Stress on first syllable: KAHN-yay (espeak phoneme ' marks stress)
-    [/\bkanye\s+west\b/gi, "[[k'A:njeI]] west"],
-    [/\bkanye('s)?\b/gi, "[[k'A:njeI]]$1"],
+    // Plain respelling — Spellophone ignores [[phoneme]] markup here
+    [/\bkanye\s+west\b/gi, 'khan yay west'],
+    [/\bkanye's\b/gi, 'khan yays'],
+    [/\bkanye\b/gi, 'khan yay'],
     [/\bbodhi\b/gi, 'bo dee'],
+    // Long A / long O chant (not letter-names)
+    [/\bay,\s*oh,\s*ay,\s*oh,\s*ay,\s*oh,\s*ay,\s*oh\b/gi, 'aye, owe, aye, owe, aye, owe, aye, owe'],
     [/\bpanopticon\b/gi, 'pan op tih con'],
     [/\bfrutiger\s+aero\b/gi, 'froo tih gur air oh'],
     [/\bfrutiger\b/gi, 'froo tih gur'],
@@ -274,20 +279,6 @@ function applyEyePronunciations(text) {
         out = out.replace(pattern, replacement);
     }
     return out;
-}
-
-/** Softer clause breaks for espeak — keep decimals, turn sentence stops into commas. */
-function softenEyePunctuation(text) {
-    return text
-        .replace(/(\d)\.(\d)/g, '$1\u2024$2')
-        // Honorifics / titles: "Mr. Krabs" — strip the period so it isn't a pause
-        .replace(/\b(mrs|mr|ms|dr|jr|sr|prof|st|vs)\./gi, '$1')
-        // Middle initials: "Chuck E. Cheese"
-        .replace(/\b([A-Za-z])\.(?=\s+[A-Za-z])/g, '$1')
-        .replace(/\.{2,}|…/g, ',')
-        .replace(/\./g, ',')
-        .replace(/\u2024/g, '.')
-        .replace(/,\s*,+/g, ',');
 }
 
 /** Drop symbols espeak would name aloud (e.g. *sigh* → sigh). */
@@ -316,7 +307,7 @@ function spokenEyeText(text) {
         || document.getElementById('panopticon-comment')?.classList.contains('panopticon-comment-god');
     const cased = god ? clean.toLowerCase() : clean;
     return applyEyePronunciations(
-        softenEyePunctuation(expandEyeCurrency(stripEyeSpeakNoise(cased))),
+        softenTtsPunctuation(expandEyeCurrency(stripEyeSpeakNoise(cased))),
     );
 }
 

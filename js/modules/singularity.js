@@ -1,5 +1,6 @@
 import { sfx, playSound, perf, ICO_SYMBOLS } from '../core/shared.js';
 import { callHook, getHook } from '../core/hooks.js';
+import { applyWebSpeechPausePreferences } from '../core/tts-pause.js';
 import {
     isSingularityActive,
     currentPoemIndex,
@@ -672,7 +673,9 @@ function buildFirefoxPoemScript(items) {
         clean = clean.replace(/[\s.…,;:!?\u2014\u2013-]+$/u, '');
         const words = clean.split(/\s+/).filter(Boolean);
         if (!words.length) return;
-        const lineText = `${words.join(' ')}.`;
+        // Same period/comma pause prefs as eye voice (newlines ≈ long period pause).
+        let lineText = applyWebSpeechPausePreferences(words.join(' '));
+        if (!/[.!?]$/.test(lineText)) lineText += '.';
 
         if (parts.length) {
             parts.push(pause);
@@ -1031,7 +1034,8 @@ function runFallbackSpeechQueue(items, lineElements, token) {
         if (item.lineIndex != null) {
             highlightPoemLine(lineElements, item.lineIndex);
         }
-        const spoken = /[.!?…]$/.test(clean) ? clean : `${clean}.`;
+        let spoken = applyWebSpeechPausePreferences(clean);
+        if (!/[.!?]$/.test(spoken)) spoken += '.';
         const utterance = attachSingularityUtterance(new SpeechSynthesisUtterance(spoken));
 
         utterance.onend = () => {
