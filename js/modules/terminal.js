@@ -277,9 +277,32 @@ function submitTerminalCommand() {
     requestAnimationFrame(scrollTerminalOutputToBottom);
 }
 
+function hardenTermInputAgainstAutofill() {
+    if (!termInput) return;
+    // Browsers ignore autocomplete=off on lone text fields; nonsense + manager
+    // ignore attrs + readonly-until-focus keeps password dropdowns off the CLI.
+    termInput.setAttribute('autocomplete', 'off');
+    termInput.setAttribute('autocapitalize', 'off');
+    termInput.setAttribute('autocorrect', 'off');
+    termInput.setAttribute('spellcheck', 'false');
+    termInput.setAttribute('data-1p-ignore', '');
+    termInput.setAttribute('data-lpignore', 'true');
+    termInput.setAttribute('data-bwignore', 'true');
+    termInput.setAttribute('data-form-type', 'other');
+    termInput.setAttribute('aria-autocomplete', 'none');
+    if (!termInput.name) termInput.name = 'entropy-terminal-cmd';
+    termInput.readOnly = true;
+    const unlock = () => {
+        termInput.readOnly = false;
+    };
+    termInput.addEventListener('focus', unlock);
+    termInput.addEventListener('pointerdown', unlock);
+}
+
 function bindTermInputHandlers() {
     if (termInputHandlersBound || !termInput) return;
     termInputHandlersBound = true;
+    hardenTermInputAgainstAutofill();
 
     termInput.addEventListener('input', () => {
         const soundClone = sfx.keystroke.cloneNode();
@@ -294,6 +317,8 @@ function bindTermInputHandlers() {
     });
 
     termInput.addEventListener('blur', () => {
+        // Re-arm so the next focus doesn't get a password suggestion.
+        termInput.readOnly = true;
         if (!perf.isIOS) setTimeout(resizeCanvas, 120);
     });
 }

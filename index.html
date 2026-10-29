@@ -353,7 +353,23 @@
         <div class="terminal-panel">
             <div id="terminal-output"></div>
             <div id="terminal-input-line">
-                <span>></span><input type="text" id="term-input" tabindex="-1" autocomplete="off" spellcheck="false" />
+                <span>></span><input
+                    type="text"
+                    id="term-input"
+                    name="entropy-terminal-cmd"
+                    tabindex="-1"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                    inputmode="text"
+                    enterkeyhint="enter"
+                    aria-autocomplete="none"
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-bwignore="true"
+                    data-form-type="other"
+                />
             </div>
         </div>
     </div>
@@ -628,7 +644,7 @@
 
     var s = document.createElement('script');
     s.type = 'module';
-    s.src = 'js/main.js?v=eye-voice-37';
+    s.src = 'js/main.js?v=no-pw-autofill-1';
     s.onerror = function () {
         console.error(
             '[Entropy Garden] js/main.js failed to load. '

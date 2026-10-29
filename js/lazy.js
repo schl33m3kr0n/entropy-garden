@@ -12,7 +12,7 @@ export {
     openTerminal,
     getTerminalContainer,
     getTermInput,
-} from './facades/terminal.js?v=caesar-scroll-3';
+} from './facades/terminal.js?v=no-pw-autofill-1';
 
 export {
     loadSingularity,
@@ -39,7 +39,7 @@ export { loadCards, initCardsOfChaos } from './facades/cards.js';
 
 import { perf } from './core/shared.js';
 import { loadMatrix } from './facades/matrix.js?v=caesar-scroll-3';
-import { loadTerminal } from './facades/terminal.js?v=caesar-scroll-3';
+import { loadTerminal } from './facades/terminal.js?v=no-pw-autofill-1';
 import { loadSingularity } from './facades/singularity.js';
 
 function isIosPoemMode() {

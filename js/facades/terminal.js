@@ -1,5 +1,5 @@
 import { registerHook } from '../core/hooks.js';
-import { terminalLoader } from '../loaders/terminal.js?v=caesar-scroll-3';
+import { terminalLoader } from '../loaders/terminal.js?v=no-pw-autofill-1';
 
 const terminalQueue = [];
 

@@ -96,7 +96,7 @@ import {
     reconcileSingularityPoem,
     stopSingularity3D,
     bootGameAddons,
-} from './lazy.js?v=caesar-scroll-3';
+} from './lazy.js?v=no-pw-autofill-1';
 import { registerServiceWorkerAfterInit } from './core/sw-register.js';
 import './cipher/caesar-scroll.js';
 import { initIosUi, scrollIosHudHome, showIosScrollHints } from './ios/ios-ui.js';
