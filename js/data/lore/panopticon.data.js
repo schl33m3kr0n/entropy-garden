@@ -328,7 +328,7 @@
         "we’re glad the subliminal messages brought you here",
         "no synthesizers were harmed in the production of this website",
         "we bring the function into dysfunction",
-        "failure is an option and apparently one of our favorites",
+        "failure is an option and apparently one of management's default strategies",
         "you can't prove the plants are fake",
         "we get that you like her and all, but stealing the roses for her might have been an avoidable misstep",
         "the music was designed to make you slow down, giving us more time to collect revenue",

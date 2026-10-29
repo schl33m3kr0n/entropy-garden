@@ -1,8 +1,12 @@
 [
   {
-    "audio" : "content/poems/audio/descent.m4a",
-    "id" : "descent",
-    "lineTimings" : [
+    "id": "descent",
+    "tone": "safe",
+    "title": "descent",
+    "order": 0,
+    "text": "descent\n\nopen your eyes \nsee through the veil\nreturn earth to eden\nthe prime thread woven beneath our understanding\nforever drifting into one from none and from none to one\nhow can echoes of ourselves sleep & eat while light dances\nthrough clouds of maple in seasons of extremes",
+    "audio": "content/poems/audio/descent.m4a",
+    "lineTimings": [
       [
         0.06,
         0.6293
@@ -35,16 +39,16 @@
         15.0798,
         17.7015
       ]
-    ],
-    "order" : 0,
-    "text" : "descent\n\nopen your eyes \nsee through the veil\nreturn earth to eden\nthe prime thread woven beneath our understanding\nforever drifting into one from none and from none to one\nhow can echoes of ourselves sleep & eat while light dances\nthrough clouds of maple in seasons of extremes",
-    "title" : "descent",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/vertigo-in-c-major.m4a",
-    "id" : "vertigo-in-c-major",
-    "lineTimings" : [
+    "id": "vertigo-in-c-major",
+    "tone": "safe",
+    "title": "vertigo in c major",
+    "order": 1,
+    "text": "vertigo in c major\n\nwhere does the world stop and i begin\nis the mundane baseline worth more than outlandish promises\ni reached out for divine essence\nbut could only grab my own intuition\n\nno scripture just scripts   \nno transcendence just transit   \nno wisdom just wise guys  \nno myth just misunderstanding\n\ngod sees all but still looks away\nto every modicum of singularity\ninfinite iteration emanates",
+    "audio": "content/poems/audio/vertigo-in-c-major.m4a",
+    "lineTimings": [
       [
         0.06,
         1.4102
@@ -93,16 +97,16 @@
         26.2483,
         27.9646
       ]
-    ],
-    "order" : 1,
-    "text" : "vertigo in c major\n\nwhere does the world stop and i begin\nis the mundane baseline worth more than outlandish promises\ni reached out for divine essence\nbut could only grab my own intuition\n\nno scripture just scripts   \nno transcendence just transit   \nno wisdom just wise guys  \nno myth just misunderstanding\n\ngod sees all but still looks away\nto every modicum of singularity\ninfinite iteration emanates",
-    "title" : "vertigo in c major",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/ripples.m4a",
-    "id" : "ripples",
-    "lineTimings" : [
+    "id": "ripples",
+    "tone": "safe",
+    "title": "ripples",
+    "order": 2,
+    "text": "ripples\n\ni stood at a crossroad with no signs\neach path laden with gems and grime\ngenerations before and after me\na mote within an ocean and yet\nwe wield the promethean flame\nof the next day and years after\nwhen truth resists monuments of stone\nnothing escapes prodding lenses\nbut what is concealed\ncan never surface in the vision of babylon\nwhose concrete we both relish in yet fear",
+    "audio": "content/poems/audio/ripples.m4a",
+    "lineTimings": [
       [
         0.06,
         0.6452
@@ -151,16 +155,16 @@
         24.0046,
         26.2882
       ]
-    ],
-    "order" : 2,
-    "text" : "ripples\n\ni stood at a crossroad with no signs\neach path laden with gems and grime\ngenerations before and after me\na mote within an ocean and yet\nwe wield the promethean flame\nof the next day and years after\nwhen truth resists monuments of stone\nnothing escapes prodding lenses\nbut what is concealed\ncan never surface in the vision of babylon\nwhose concrete we both relish in yet fear",
-    "title" : "ripples",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/an-opaque-horizon.m4a",
-    "id" : "an-opaque-horizon",
-    "lineTimings" : [
+    "id": "an-opaque-horizon",
+    "tone": "safe",
+    "title": "an opaque horizon",
+    "order": 3,
+    "text": "an opaque horizon\n\neyes forward\npen and journal behind your back\nno sky bends to human folly\nno matter how high the bricks stack\n\nlate at night\ncrickets sing melodies of serenity\nin the midday\ni bring elegies of memory\n\nreturning to synthesis \nin seasons melancholic\nif confusion were a spirit\ni’d be an alcoholic",
+    "audio": "content/poems/audio/an-opaque-horizon.m4a",
+    "lineTimings": [
       [
         0.06,
         1.2727
@@ -213,16 +217,16 @@
         21.9428,
         23.2096
       ]
-    ],
-    "order" : 3,
-    "text" : "an opaque horizon\n\neyes forward\npen and journal behind your back\nno sky bends to human folly\nno matter how high the bricks stack\n\nlate at night\ncrickets sing melodies of serenity\nin the midday\ni bring elegies of memory\n\nreturning to synthesis \nin seasons melancholic\nif confusion were a spirit\ni’d be an alcoholic",
-    "title" : "an opaque horizon",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/richards.m4a",
-    "id" : "richards",
-    "lineTimings" : [
+    "id": "richards",
+    "tone": "safe",
+    "title": "richards",
+    "order": 4,
+    "text": "richards\n\nyou meet richards every day\nwho can crawl under your skin\nthey have quite a funny way\nof fouling the mood you’re in\n\nrichards can smile\nrichards can frown\nthey can turn a whole room \nupside down\n\nbut don't turn all black and blue\nrichards can still be people\njust the kind of people you—\nwish would eat herbs most lethal",
+    "audio": "content/poems/audio/richards.m4a",
+    "lineTimings": [
       [
         0.06,
         0.7166
@@ -275,86 +279,23 @@
         21.4591,
         23.0554
       ]
-    ],
-    "order" : 4,
-    "text" : "richards\n\nyou meet richards every day\nwho can crawl under your skin\nthey have quite a funny way\nof fouling the mood you’re in\n\nrichards can smile\nrichards can frown\nthey can turn a whole room \nupside down\n\nbut don't turn all black and blue\nrichards can still be people\njust the kind of people you—\nwish would eat herbs most lethal",
-    "title" : "richards",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/bugs-in-the-codex.m4a",
-    "id" : "bugs-in-the-codex",
-    "lineTimings" : [
-      [
-        0.06,
-        1.212
-      ],
-      [
-        1.632,
-        4.9887
-      ],
-      [
-        5.4087,
-        6.5295
-      ],
-      [
-        6.9495,
-        7.7668
-      ],
-      [
-        8.1868,
-        8.8803
-      ],
-      [
-        9.3003,
-        10.1305
-      ],
-      [
-        10.5505,
-        12.0406
-      ],
-      [
-        12.4606,
-        13.9444
-      ],
-      [
-        14.3644,
-        16.1956
-      ],
-      [
-        16.6156,
-        18.0151
-      ],
-      [
-        18.4351,
-        20.1904
-      ],
-      [
-        20.6104,
-        22.1214
-      ],
-      [
-        22.5414,
-        23.7349
-      ],
-      [
-        24.1549,
-        25.6131
-      ],
-      [
-        26.0331,
-        27.5631
-      ]
-    ],
-    "order" : 5,
-    "text" : "bugs in the codex\n\nrecently i’ve been noticing strange errors in this server’s code\neverything glitches: \nin transit\nin the store\neven at home\nnow i’m not one to leave \nbad feedback for the admin\nbut even its most loyal users \nhave to look back and admit\nthe rewards for diligent grinding \nseem to be tapering off\nif this is the new meta\ni’m not surprised people \nare deciding to log off",
-    "title" : "bugs in the codex",
-    "tone" : "safe"
+    "id": "bugs-in-the-codex",
+    "tone": "safe",
+    "title": "bugs in the codex",
+    "order": 5,
+    "text": "bugs in the codex\n\nrecently i’ve been noticing strange errors in this server’s code  \neverything glitches: in transit, in the store, even at home  \nnow i’m not one to leave bad feedback for the admin  \nbut even its most loyal users have to look back and admit  \nthe rewards for diligent grinding seem to be tapering off  \nif this is the new meta, i’m not surprised people are deciding to log off"
   },
   {
-    "audio" : "content/poems/audio/intertwined.m4a",
-    "id" : "intertwined",
-    "lineTimings" : [
+    "id": "intertwined",
+    "tone": "safe",
+    "title": "intertwined",
+    "order": 6,
+    "text": "intertwined\n\nlike an overgrowth i sit \nentangled between triumph and defeat\nif only i could see the day \nwhen mind and soul can meet\nmy heart ruptures at other’s self-destruction \nbut never at my own\ni can never sit with my failures and regrets \nespecially when i’m all alone\nevery day i ask myself in silence\nwhen will my demons resurface?\neven in a time of reason and science\ni still cannot reproduce a purpose\nevery night i ask myself out loud\nhow many people have i hurt today?\neven with my eyes shut and head bowed\ni know that my sabotage was at play",
+    "audio": "content/poems/audio/intertwined.m4a",
+    "lineTimings": [
       [
         0.06,
         0.9178
@@ -423,16 +364,16 @@
         36.4498,
         38.6416
       ]
-    ],
-    "order" : 6,
-    "text" : "intertwined\n\nlike an overgrowth i sit \nentangled between triumph and defeat\nif only i could see the day \nwhen mind and soul can meet\nmy heart ruptures at other’s self-destruction \nbut never at my own\ni can never sit with my failures and regrets \nespecially when i’m all alone\nevery day i ask myself in silence\nwhen will my demons resurface?\neven in a time of reason and science\ni still cannot reproduce a purpose\nevery night i ask myself out loud\nhow many people have i hurt today?\neven with my eyes shut and head bowed\ni know that my sabotage was at play",
-    "title" : "intertwined",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/serpentine.m4a",
-    "id" : "serpentine",
-    "lineTimings" : [
+    "id": "serpentine",
+    "tone": "safe",
+    "title": "serpentine",
+    "order": 7,
+    "text": "serpentine\n\nforever resounding the same 3 notes\nin perfect harmony and disproportion\nboth an ode and elegy to a ghost\nhaunting the echoes of a past incarnation\n\neven in a new body i plunge into circumstance of old\nancient secrets emerging from waves of grain\nbetrothed to sacrament & sacrilege never a specter to behold\nleaves of neon and amber piercing through mirth and disdain\n\nmy country speaks no language \nand yet everyone can understand it\nthe skies of dusk embittered and languished \nand yet rays of past never vanquish\n\nsounds of sand and drums in refrain\nuncovering postulates unquestioned\neden or expansion still can’t explain\nthe inner cries we hail in perplexion",
+    "audio": "content/poems/audio/serpentine.m4a",
+    "lineTimings": [
       [
         0.06,
         0.9937
@@ -501,16 +442,16 @@
         42.6991,
         44.7008
       ]
-    ],
-    "order" : 7,
-    "text" : "serpentine\n\nforever resounding the same 3 notes\nin perfect harmony and disproportion\nboth an ode and elegy to a ghost\nhaunting the echoes of a past incarnation\n\neven in a new body i plunge into circumstance of old\nancient secrets emerging from waves of grain\nbetrothed to sacrament & sacrilege never a specter to behold\nleaves of neon and amber piercing through mirth and disdain\n\nmy country speaks no language \nand yet everyone can understand it\nthe skies of dusk embittered and languished \nand yet rays of past never vanquish\n\nsounds of sand and drums in refrain\nuncovering postulates unquestioned\neden or expansion still can’t explain\nthe inner cries we hail in perplexion",
-    "title" : "serpentine",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/primordial-echoes.m4a",
-    "id" : "primordial-echoes",
-    "lineTimings" : [
+    "id": "primordial-echoes",
+    "tone": "safe",
+    "title": "primordial echoes",
+    "order": 8,
+    "text": "primordial echoes\n\nmeaning corrupted by circumstance\nraising questions tempting fate’s hands\nwinding paths returning to the start\nreverberation added to a clean fart",
+    "audio": "content/poems/audio/primordial-echoes.m4a",
+    "lineTimings": [
       [
         0.06,
         1.3408
@@ -531,16 +472,16 @@
         9.4649,
         11.5444
       ]
-    ],
-    "order" : 8,
-    "text" : "primordial echoes\n\nmeaning corrupted by circumstance\nraising questions tempting fate’s hands\nwinding paths returning to the start\nreverberation added to a clean fart",
-    "title" : "primordial echoes",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/creating-ghosts.m4a",
-    "id" : "creating-ghosts",
-    "lineTimings" : [
+    "id": "creating-ghosts",
+    "tone": "safe",
+    "title": "creating ghosts",
+    "order": 9,
+    "text": "creating ghosts\n\nthe all was one\nthe one was all\nboth were everything\nboth were nothing\neverything had meaning\nmeaning meant nothing\n\nlove was within grasp but jadedness echoed throughout time\nthe wall was plastered in subliminal writing\nhumanity and nature's history of highs and lows\nreduced to unity masquerading as multiplicity\n\ni speak to myself\ni ignore myself\ni joke with myself\ni insult myself\ni hire myself\ni fire myself\ni birth myself\ni kill myself\n\ni communed with a spirit\nbut was haunted by a ghost\n\neverything in sight absorbed \ninto one overarching narrative\nuntil nothing remained\nbut its voice",
+    "audio": "content/poems/audio/creating-ghosts.m4a",
+    "lineTimings": [
       [
         0.06,
         1.208
@@ -641,16 +582,16 @@
         45.6762,
         46.5126
       ]
-    ],
-    "order" : 9,
-    "text" : "creating ghosts\n\nthe all was one\nthe one was all\nboth were everything\nboth were nothing\neverything had meaning\nmeaning meant nothing\n\nlove was within grasp but jadedness echoed throughout time\nthe wall was plastered in subliminal writing\nhumanity and nature's history of highs and lows\nreduced to unity masquerading as multiplicity\n\ni speak to myself\ni ignore myself\ni joke with myself\ni insult myself\ni hire myself\ni fire myself\ni birth myself\ni kill myself\n\ni communed with a spirit\nbut was haunted by a ghost\n\neverything in sight absorbed \ninto one overarching narrative\nuntil nothing remained\nbut its voice",
-    "title" : "creating ghosts",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/genesis.m4a",
-    "id" : "genesis",
-    "lineTimings" : [
+    "id": "genesis",
+    "tone": "safe",
+    "title": "genesis",
+    "order": 10,
+    "text": "genesis\n\na flood of flame\nthe earth inspired\nand spewed forth\nan infernal river\nout of order\ncame chaos\nchained to a perpetual\ncycle of stasis\nfrom which no mortal\nhas broken free\nthe hereafter and therefrom\nsouls give in to flesh\nand wither wistfully\nunder eyes eternal",
+    "audio": "content/poems/audio/genesis.m4a",
+    "lineTimings": [
       [
         0.06,
         0.7885
@@ -711,16 +652,16 @@
         21.3273,
         22.3758
       ]
-    ],
-    "order" : 10,
-    "text" : "genesis\n\na flood of flame\nthe earth inspired\nand spewed forth\nan infernal river\nout of order\ncame chaos\nchained to a perpetual\ncycle of stasis\nfrom which no mortal\nhas broken free\nthe hereafter and therefrom\nsouls give in to flesh\nand wither wistfully\nunder eyes eternal",
-    "title" : "genesis",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/a-paycheck-away-from-eternal-ecstasy.m4a",
-    "id" : "a-paycheck-away-from-eternal-ecstasy",
-    "lineTimings" : [
+    "id": "a-paycheck-away-from-eternal-ecstasy",
+    "tone": "safe",
+    "title": "a paycheck away from eternal ecstasy",
+    "order": 11,
+    "text": "a paycheck away from eternal ecstasy\n\nfancy cupboards and verandas\nthe compensation for sowing confusion\nspread pretty words of propaganda\nto make delusions of conclusions\n\n10 codes and mirandas\nwill leave you with plenty contusions\naccusations of collusion\nthis blood resists all ablutions\n\nas we chase butterflies of paper and plastic\nthe soul cracks and bends out of proportion\ncan’t escape sharp eyes of the basilisk\nor we end up mangled bodies in contortion",
+    "audio": "content/poems/audio/a-paycheck-away-from-eternal-ecstasy.m4a",
+    "lineTimings": [
       [
         0.06,
         2.2509
@@ -773,16 +714,16 @@
         28.9014,
         31.2528
       ]
-    ],
-    "order" : 11,
-    "text" : "a paycheck away from eternal ecstasy\n\nfancy cupboards and verandas\nthe compensation for sowing confusion\nspread pretty words of propaganda\nto make delusions of conclusions\n\n10 codes and mirandas\nwill leave you with plenty contusions\naccusations of collusion\nthis blood resists all ablutions\n\nas we chase butterflies of paper and plastic\nthe soul cracks and bends out of proportion\ncan’t escape sharp eyes of the basilisk\nor we end up mangled bodies in contortion",
-    "title" : "a paycheck away from eternal ecstasy",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/the-middle-path.m4a",
-    "id" : "the-middle-path",
-    "lineTimings" : [
+    "id": "the-middle-path",
+    "tone": "safe",
+    "title": "the middle path",
+    "order": 12,
+    "text": "the middle path\n\nbetween two doorways\nthe seeker peeks through lenses\nforever watching\n\nheaven & earth afflicted with the poison of personal reflection\nbound to corporeal chains never transcending to manifolds ethereal\nunoccasioned by mercy or wrath our sentinel might as well leave his post\n\nembedded between eternity and infinity we finite few can but shoot craps with destiny\nfate is yet another circumstance manifest and still we must take up the flame\nreturning to recursion where the darkness and the light mesh in harmony\n\nbereft of understanding we follow the stars to find more chaos at home\nmisery without recompense and despair knocking against our door\nincantations of old cannot solve enigmas unforetold the scimitar yields to scopes\n\nrebirth and renewal can scrape so much of the ego yet human error persists in chaos\ninsight is our sole remittance but all to return to oblivion by the sands of time\na call with no response we have ourselves alone to turn to for comfort and counsel\n\nour destinations are many but our souls are but one immersed in the prime thread\nif we seek beyond the horizon we find only a reflection and echo of ourselves\nwe few flames forever drift on a mote in eternity and our impetus beckons us forth\n\nthe realm of possibility our last refuge the weight of the past our ball & chain",
+    "audio": "content/poems/audio/the-middle-path.m4a",
+    "lineTimings": [
       [
         0.06,
         0.9126
@@ -863,16 +804,16 @@
         74.0875,
         78.2302
       ]
-    ],
-    "order" : 12,
-    "text" : "the middle path\n\nbetween two doorways\nthe seeker peeks through lenses\nforever watching\n\nheaven & earth afflicted with the poison of personal reflection\nbound to corporeal chains never transcending to manifolds ethereal\nunoccasioned by mercy or wrath our sentinel might as well leave his post\n\nembedded between eternity and infinity we finite few can but shoot craps with destiny\nfate is yet another circumstance manifest and still we must take up the flame\nreturning to recursion where the darkness and the light mesh in harmony\n\nbereft of understanding we follow the stars to find more chaos at home\nmisery without recompense and despair knocking against our door\nincantations of old cannot solve enigmas unforetold the scimitar yields to scopes\n\nrebirth and renewal can scrape so much of the ego yet human error persists in chaos\ninsight is our sole remittance but all to return to oblivion by the sands of time\na call with no response we have ourselves alone to turn to for comfort and counsel\n\nour destinations are many but our souls are but one immersed in the prime thread\nif we seek beyond the horizon we find only a reflection and echo of ourselves\nwe few flames forever drift on a mote in eternity and our impetus beckons us forth\n\nthe realm of possibility our last refuge the weight of the past our ball & chain",
-    "title" : "the middle path",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/corridor-between-worlds.m4a",
-    "id" : "corridor-between-worlds",
-    "lineTimings" : [
+    "id": "corridor-between-worlds",
+    "tone": "safe",
+    "title": "corridor between worlds",
+    "order": 13,
+    "text": "corridor between worlds\n\nthe corridor is long and some say without end\ntrivialities and values dissolve into each other\nas totality engulfs all that humanity can upend\nthis expanse though vast still leads us to wonder\n\ninward epiphanies and epitaphs\nreduced to petty epigrams\none path reaches into infinity\nexcused from halos and pentagrams\n\none line of emotions and motions\nwhere time loses coherence\na single consolation: one notion\nall signs lose their experience",
+    "audio": "content/poems/audio/corridor-between-worlds.m4a",
+    "lineTimings": [
       [
         0.06,
         1.5448
@@ -925,16 +866,16 @@
         30.7819,
         32.6498
       ]
-    ],
-    "order" : 13,
-    "text" : "corridor between worlds\n\nthe corridor is long and some say without end\ntrivialities and values dissolve into each other\nas totality engulfs all that humanity can upend\nthis expanse though vast still leads us to wonder\n\ninward epiphanies and epitaphs\nreduced to petty epigrams\none path reaches into infinity\nexcused from halos and pentagrams\n\none line of emotions and motions\nwhere time loses coherence\na single consolation: one notion\nall signs lose their experience",
-    "title" : "corridor between worlds",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/a-fruit-decayed.m4a",
-    "id" : "a-fruit-decayed",
-    "lineTimings" : [
+    "id": "a-fruit-decayed",
+    "tone": "safe",
+    "title": "a fruit decayed",
+    "order": 14,
+    "text": "a fruit decayed\n\nmultihyphenates hiked to the heights of hyperion\nwitness to revolutions and rising nations\nonly to be drawn into the maws of babylon \ntheir gifts used for profit and alienation\n\nan entropy most potent it brought tears to the demiurge\nwho looks upon civilization no society no a scourge\nout of embers and ashes and swords and clashes no resolutions ever emerge\nsave the crowns and temples whose riches compound double triple converge\n\nwith our eyes to the spying eyes in the walls and skies\nheaven limbo and hell can't compartmentalize\nbetween truth and fiction are fogged lines\nonly the most provocative ever get recognized\n\nalgorithms harvesting our hopes and desires\nseekers and liars speaking of omens most dire\ndreamers lulled by stoats toting lyres\nwarmongers sow oaths of flame and fire\n\nstorefronts bidding for your eyes\nclickbaits fighting for attention\ninfluencers farming hearts and likes\nCEOs collecting your benjamin\n\nthe beast of an expansive inner intuition without bounds\nchained to the ball of the bastion that speaks dollars and pounds\nthe system a machination of mutated replication \nrelaying in perpetual motion the four same old sounds\n\nearth's remains from an age forgotten \nreduced to plastic bags \nthat carry plastic forks plastic cups\nthat feed us microplastics for our plastic bodies\nin our plastic mouths on our plastic faces\nfor a plastic age in our plastic cages",
+    "audio": "content/poems/audio/a-fruit-decayed.m4a",
+    "lineTimings": [
       [
         0.06,
         1.0536
@@ -1059,16 +1000,16 @@
         89.1597,
         91.5794
       ]
-    ],
-    "order" : 14,
-    "text" : "a fruit decayed\n\nmultihyphenates hiked to the heights of hyperion\nwitness to revolutions and rising nations\nonly to be drawn into the maws of babylon \ntheir gifts used for profit and alienation\n\nan entropy most potent it brought tears to the demiurge\nwho looks upon civilization no society no a scourge\nout of embers and ashes and swords and clashes no resolutions ever emerge\nsave the crowns and temples whose riches compound double triple converge\n\nwith our eyes to the spying eyes in the walls and skies\nheaven limbo and hell can't compartmentalize\nbetween truth and fiction are fogged lines\nonly the most provocative ever get recognized\n\nalgorithms harvesting our hopes and desires\nseekers and liars speaking of omens most dire\ndreamers lulled by stoats toting lyres\nwarmongers sow oaths of flame and fire\n\nstorefronts bidding for your eyes\nclickbaits fighting for attention\ninfluencers farming hearts and likes\nCEOs collecting your benjamin\n\nthe beast of an expansive inner intuition without bounds\nchained to the ball of the bastion that speaks dollars and pounds\nthe system a machination of mutated replication \nrelaying in perpetual motion the four same old sounds\n\nearth's remains from an age forgotten \nreduced to plastic bags \nthat carry plastic forks plastic cups\nthat feed us microplastics for our plastic bodies\nin our plastic mouths on our plastic faces\nfor a plastic age in our plastic cages",
-    "title" : "a fruit decayed",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/thoughts-eternal.m4a",
-    "id" : "thoughts-eternal",
-    "lineTimings" : [
+    "id": "thoughts-eternal",
+    "tone": "safe",
+    "title": "thoughts eternal",
+    "order": 15,
+    "text": "thoughts eternal\n\nthough torrential themes tore the tomb\nthrough time the tomb threw tests\nthere to thence top then trough\nthunder turns theory to theology\n\nto every sunrise there are sunsets\nbehind gray clouds light collects\neven in days most dim\nit is our depth who directs\n\nwarm skies over shallow waters\nthe moon a miracle a mirror\nof a sun marooned\na beacon to a beast subsumed\n\nunder shadows enigmatic\nrose and thorn still bloom\nin our stories most erratic\nfull of triumphs and gloom\n\na spirit unbeknownst to man\nbut one who appears often\nin the trading of many a hand\na common thread leads us to soften\n\nthe stone a witness to conflict\nthe diamond within a cure\nephemeral yet it will inflict\na greed we cannot endure\n\na mind that is given to caprice\nis a mind of torrent and chaos\na mind that is given to freeze\nis a mind that rues the loss\n\nthe chimera of a thousand forces\na hydra of many faces\na cerberus of a thousand corpses\na trinity in many places\n\nthe water in which we swim\nunder the moonlight of night\nthe fire over which we burn\nreveals our limits in sight",
+    "audio": "content/poems/audio/thoughts-eternal.m4a",
+    "lineTimings": [
       [
         0.06,
         0.9868
@@ -1217,16 +1158,16 @@
         73.0622,
         74.628
       ]
-    ],
-    "order" : 15,
-    "text" : "thoughts eternal\n\nthough torrential themes tore the tomb\nthrough time the tomb threw tests\nthere to thence top then trough\nthunder turns theory to theology\n\nto every sunrise there are sunsets\nbehind gray clouds light collects\neven in days most dim\nit is our depth who directs\n\nwarm skies over shallow waters\nthe moon a miracle a mirror\nof a sun marooned\na beacon to a beast subsumed\n\nunder shadows enigmatic\nrose and thorn still bloom\nin our stories most erratic\nfull of triumphs and gloom\n\na spirit unbeknownst to man\nbut one who appears often\nin the trading of many a hand\na common thread leads us to soften\n\nthe stone a witness to conflict\nthe diamond within a cure\nephemeral yet it will inflict\na greed we cannot endure\n\na mind that is given to caprice\nis a mind of torrent and chaos\na mind that is given to freeze\nis a mind that rues the loss\n\nthe chimera of a thousand forces\na hydra of many faces\na cerberus of a thousand corpses\na trinity in many places\n\nthe water in which we swim\nunder the moonlight of night\nthe fire over which we burn\nreveals our limits in sight",
-    "title" : "thoughts eternal",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/war.m4a",
-    "id" : "war",
-    "lineTimings" : [
+    "id": "war",
+    "tone": "safe",
+    "title": "war",
+    "order": 16,
+    "text": "war\n\nwhen the petals of violence bloom\n& the sky inherits the fog\nrivers of the heart leave the room\ntheir deltas flooded in smog\n\nthe body a weather forecast\nof thunderous downpours \nthat the roots of plains vast\ndine on for the next course\n\nparables adopt paranoia\nmonoliths earn monograms\nsymbols precede amnesia\nmom & pops become grams\n\nwords turn into projectiles\ncradles become craters\ndeceit looks like wide smiles\nprocess pretends to be greater\n\nan empire built on displacement\na melting pot of expressions\nwe still don’t know what he meant\nby his rabbling intercessions\n\nhiding in the shade\nwhere the light doesn’t hit\nhistory is always made\nbehind doors closed & unlit",
+    "audio": "content/poems/audio/war.m4a",
+    "lineTimings": [
       [
         0.06,
         0.4744
@@ -1327,16 +1268,16 @@
         47.333,
         48.9715
       ]
-    ],
-    "order" : 16,
-    "text" : "war\n\nwhen the petals of violence bloom\n& the sky inherits the fog\nrivers of the heart leave the room\ntheir deltas flooded in smog\n\nthe body a weather forecast\nof thunderous downpours \nthat the roots of plains vast\ndine on for the next course\n\nparables adopt paranoia\nmonoliths earn monograms\nsymbols precede amnesia\nmom & pops become grams\n\nwords turn into projectiles\ncradles become craters\ndeceit looks like wide smiles\nprocess pretends to be greater\n\nan empire built on displacement\na melting pot of expressions\nwe still don’t know what he meant\nby his rabbling intercessions\n\nhiding in the shade\nwhere the light doesn’t hit\nhistory is always made\nbehind doors closed & unlit",
-    "title" : "war",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/buying-into-the-illusion.m4a",
-    "id" : "buying-into-the-illusion",
-    "lineTimings" : [
+    "id": "buying-into-the-illusion",
+    "tone": "safe",
+    "title": "buying into the illusion",
+    "order": 17,
+    "text": "buying into the illusion\n\nwould you run a lemonade stand with a partner\nand take less than half a percent of the profit?\nno?\n\ndoes the thought of owning a curated mansion while people\nstarve on the side of the street bring a smile to your face?\nno?\n\nare you ready to be commodified \ninto the abyss of status and infinite wealth?\nno?\n\nwell too bad\nyou’ve already been integrated\n\nthe machine requires your blood sweat & tears\nyour time allegiance & commitment\nyour unflinching devotion sacrifice & obedience\nyour money programming & ignorance\nyour assets skills and productivity\nyour complacency your apathy your complicity\n\nwhat do you get in return?\n\na stable job that can barely pay rent and essentials\na motley of shiny screens anesthetizing you into compliance\na promising future after your burial\na pleasure pod in exchange for your silence",
+    "audio": "content/poems/audio/buying-into-the-illusion.m4a",
+    "lineTimings": [
       [
         0.06,
         1.3272
@@ -1429,16 +1370,16 @@
         53.0137,
         55.5429
       ]
-    ],
-    "order" : 17,
-    "text" : "buying into the illusion\n\nwould you run a lemonade stand with a partner\nand take less than half a percent of the profit?\nno?\n\ndoes the thought of owning a curated mansion while people\nstarve on the side of the street bring a smile to your face?\nno?\n\nare you ready to be commodified \ninto the abyss of status and infinite wealth?\nno?\n\nwell too bad\nyou’ve already been integrated\n\nthe machine requires your blood sweat & tears\nyour time allegiance & commitment\nyour unflinching devotion sacrifice & obedience\nyour money programming & ignorance\nyour assets skills and productivity\nyour complacency your apathy your complicity\n\nwhat do you get in return?\n\na stable job that can barely pay rent and essentials\na motley of shiny screens anesthetizing you into compliance\na promising future after your burial\na pleasure pod in exchange for your silence",
-    "title" : "buying into the illusion",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/dream.m4a",
-    "id" : "dream",
-    "lineTimings" : [
+    "id": "dream",
+    "tone": "safe",
+    "title": "dream",
+    "order": 18,
+    "text": "dream\n\nthe threshold keeps walking before i can cross it\ni try to catch a dream but it melts right off my palms\nbound twixt marginal prophets and margins of profit\nstretched thin by the tension of cigs and psalms\n\na circle that dwindles and withers with each passing year\na heaviness that multiplies with each drop of a tear\nonly in silence does the world speak so clearly\nan unsteady alliance between the high sky and low sea\n\nunder these tree leaves sit rusted eaves\ndroppings of enrichment into soils resplendent\ngod dips his tea leaves and relieves\nhe prefers his heaven and earth independent\n\nthe circle of crowns seeded in folly\nconsumed by the iron will to divest\nfrom the potomac to the woods of holly\nthey’d truly become one of the best\n\nif an atom bomb were to strike\ni’d appreciate the simplicity it’d bring\nsaints and sinners perish alike\nexistence just another tune to sing",
+    "audio": "content/poems/audio/dream.m4a",
+    "lineTimings": [
       [
         0.06,
         0.5161
@@ -1523,16 +1464,16 @@
         54.1153,
         56.2595
       ]
-    ],
-    "order" : 18,
-    "text" : "dream\n\nthe threshold keeps walking before i can cross it\ni try to catch a dream but it melts right off my palms\nbound twixt marginal prophets and margins of profit\nstretched thin by the tension of cigs and psalms\n\na circle that dwindles and withers with each passing year\na heaviness that multiplies with each drop of a tear\nonly in silence does the world speak so clearly\nan unsteady alliance between the high sky and low sea\n\nunder these tree leaves sit rusted eaves\ndroppings of enrichment into soils resplendent\ngod dips his tea leaves and relieves\nhe prefers his heaven and earth independent\n\nthe circle of crowns seeded in folly\nconsumed by the iron will to divest\nfrom the potomac to the woods of holly\nthey’d truly become one of the best\n\nif an atom bomb were to strike\ni’d appreciate the simplicity it’d bring\nsaints and sinners perish alike\nexistence just another tune to sing",
-    "title" : "dream",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/the-expanding-horizon.m4a",
-    "id" : "the-expanding-horizon",
-    "lineTimings" : [
+    "id": "the-expanding-horizon",
+    "tone": "safe",
+    "title": "the expanding horizon",
+    "order": 19,
+    "text": "the expanding horizon\n\nour estrangement refurbished with each orbit\nplumes of combustion soaring to heights morbid\na single speck that we in contempt forfeit\ngiving pause for a population grown torpid\n\nfor a chance to many stellar systems claim\nby happenstance our entropy yet radiates\nthe collective lattice embroiled in flame\na dream perverse yet its pull never abates\n\nto abandon the promised land for promising plans\na litany of schemes escaping local perdition\nour caged machine still outwardly sifts and scans\nnever minding the global course for collision\n\na concavity in a foundation of concrete\nthe convexity of minds with so-called discretion\nbringing into focus ambitions incomplete\na destiny manifest one of psychotic obsession",
+    "audio": "content/poems/audio/the-expanding-horizon.m4a",
+    "lineTimings": [
       [
         0.06,
         1.4974
@@ -1601,16 +1542,16 @@
         45.1421,
         47.9318
       ]
-    ],
-    "order" : 19,
-    "text" : "the expanding horizon\n\nour estrangement refurbished with each orbit\nplumes of combustion soaring to heights morbid\na single speck that we in contempt forfeit\ngiving pause for a population grown torpid\n\nfor a chance to many stellar systems claim\nby happenstance our entropy yet radiates\nthe collective lattice embroiled in flame\na dream perverse yet its pull never abates\n\nto abandon the promised land for promising plans\na litany of schemes escaping local perdition\nour caged machine still outwardly sifts and scans\nnever minding the global course for collision\n\na concavity in a foundation of concrete\nthe convexity of minds with so-called discretion\nbringing into focus ambitions incomplete\na destiny manifest one of psychotic obsession",
-    "title" : "the expanding horizon",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/the-semantic-fractal.m4a",
-    "id" : "the-semantic-fractal",
-    "lineTimings" : [
+    "id": "the-semantic-fractal",
+    "tone": "safe",
+    "title": "the semantic fractal",
+    "order": 20,
+    "text": "the semantic fractal\n\nwhat is restitution to the indigenous man?\nwhat is retaliation to the ravished woman?\nwhat is retribution to the black man?\nwhat is revolution to those on the margin?\n\nwhat is remission to the cancer patient?\nwhat is rehabilitation to the addict?\nwhat is revision to the ancient?\nwhat is resolution to the death row convict?\n\nwhat is reason to the professor?\nwhat is reason to the proselytizer?\nwhat is revelation to the baptist?\nwhat is religion to the atheist?\n\nwhat is resignation to the tired worker?\nwhat is resignation to the world leader?\nwhat is recognition to the aspiring artist?\nwhat is recognition to the blacklister?\n\nthese different lives with different lenses of the same\nexperiences that fractalize yet are given a single name\nhopes and dreams plots and schemes\nbursting at the seams with many themes\n\na resurrection refracted into raw reality\nan ideal grating against fundamentality\nthe legacy of primordial dimensionality\nthe product of many a failed principality",
+    "audio": "content/poems/audio/the-semantic-fractal.m4a",
+    "lineTimings": [
       [
         0.06,
         1.3868
@@ -1711,238 +1652,23 @@
         61.3841,
         63.7315
       ]
-    ],
-    "order" : 20,
-    "text" : "the semantic fractal\n\nwhat is restitution to the indigenous man?\nwhat is retaliation to the ravished woman?\nwhat is retribution to the black man?\nwhat is revolution to those on the margin?\n\nwhat is remission to the cancer patient?\nwhat is rehabilitation to the addict?\nwhat is revision to the ancient?\nwhat is resolution to the death row convict?\n\nwhat is reason to the professor?\nwhat is reason to the proselytizer?\nwhat is revelation to the baptist?\nwhat is religion to the atheist?\n\nwhat is resignation to the tired worker?\nwhat is resignation to the world leader?\nwhat is recognition to the aspiring artist?\nwhat is recognition to the blacklister?\n\nthese different lives with different lenses of the same\nexperiences that fractalize yet are given a single name\nhopes and dreams plots and schemes\nbursting at the seams with many themes\n\na resurrection refracted into raw reality\nan ideal grating against fundamentality\nthe legacy of primordial dimensionality\nthe product of many a failed principality",
-    "title" : "the semantic fractal",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/the-seeker.m4a",
-    "id" : "the-seeker",
-    "lineTimings" : [
-      [
-        0.06,
-        0.6906
-      ],
-      [
-        1.1106,
-        2.4491
-      ],
-      [
-        2.8691,
-        4.2936
-      ],
-      [
-        4.7136,
-        5.93
-      ],
-      [
-        6.35,
-        7.727
-      ],
-      [
-        8.147,
-        9.3022
-      ],
-      [
-        9.7222,
-        11.3752
-      ],
-      [
-        11.7952,
-        12.8693
-      ],
-      [
-        13.2893,
-        14.955
-      ],
-      [
-        15.375,
-        16.8737
-      ],
-      [
-        17.2937,
-        18.9806
-      ],
-      [
-        19.4006,
-        20.866
-      ],
-      [
-        21.286,
-        22.8885
-      ],
-      [
-        23.3085,
-        24.9026
-      ],
-      [
-        25.3226,
-        26.7892
-      ],
-      [
-        27.2092,
-        28.5466
-      ],
-      [
-        28.9666,
-        30.2898
-      ],
-      [
-        30.7098,
-        32.2881
-      ],
-      [
-        32.7081,
-        34.0548
-      ],
-      [
-        34.4748,
-        35.994
-      ],
-      [
-        36.414,
-        38.0755
-      ],
-      [
-        38.4955,
-        39.9483
-      ],
-      [
-        40.3683,
-        41.8197
-      ],
-      [
-        42.2397,
-        43.1841
-      ],
-      [
-        43.6041,
-        45.2514
-      ],
-      [
-        45.6714,
-        46.9923
-      ],
-      [
-        47.4123,
-        48.6674
-      ],
-      [
-        49.0874,
-        50.5826
-      ],
-      [
-        51.0026,
-        52.3966
-      ],
-      [
-        52.8166,
-        54.2309
-      ],
-      [
-        54.6509,
-        56.1473
-      ],
-      [
-        56.5673,
-        57.7247
-      ],
-      [
-        58.1447,
-        59.7247
-      ],
-      [
-        60.1447,
-        61.5555
-      ],
-      [
-        61.9755,
-        63.3855
-      ],
-      [
-        63.8055,
-        64.9249
-      ],
-      [
-        65.3449,
-        66.9153
-      ],
-      [
-        67.3353,
-        68.8806
-      ],
-      [
-        69.3006,
-        70.5837
-      ],
-      [
-        71.0037,
-        72.1843
-      ],
-      [
-        72.6043,
-        74.3488
-      ],
-      [
-        74.7688,
-        76.0468
-      ],
-      [
-        76.4668,
-        77.9024
-      ],
-      [
-        78.3224,
-        79.6339
-      ],
-      [
-        80.0539,
-        81.4693
-      ],
-      [
-        81.8893,
-        83.4133
-      ],
-      [
-        83.8333,
-        84.9218
-      ],
-      [
-        85.3418,
-        86.5785
-      ],
-      [
-        86.9985,
-        88.3862
-      ],
-      [
-        88.8062,
-        90.2603
-      ],
-      [
-        90.6803,
-        92.0192
-      ],
-      [
-        92.4392,
-        93.8897
-      ],
-      [
-        94.3097,
-        95.6214
-      ]
-    ],
-    "order" : 21,
-    "text" : "the seeker\n\nhe rises at sunset\nhe rests in the sunrise\nin his hand a goblet\nbrimming with the stars’ light\nmany a legend sel-\ndom speaks his common name\namong his company\nfew true friends can he claim\n\nyearning for truths beyond\nhe pores through scriptures old\ncomposing many songs\nhis tunes mercurial gold\nhis conclusions fragment\nbranching into fractals\na long search of lament\nseeking out the capsule\n\nhis charts and diagrams\nlayered over tenfold\nciphers and anagrams\nyet no story can be told\nto what great ends can ex-\nistence itself extend\ninto oblivion\nthese grand metaphors blend\n\nin the mountain's oppress-\nion he is engulfed\nhis mind under compression\nhis lungs full of sulph\nhe searches and searches\nbut the soul conflagrates\nhe cursed a litany\nand left through his old gates\n\nso he ventured forward \nunder crystal moonlight\nthe chaos of order \nabandoned with morbid spite\nwith wings wide spread he dove\nto depths of the unknown\ninto a lonely cove\nlit by a small faint glow\n\nthere he met providence\nforever shapeshifting\nof unknown provenance\nthrough sand he was sifting\nhe asked the man’s business\nno words were uttered\nhe looked at the stillness\nthe man’s corpus fluttered\n\nand after a brief pause\nhe no longer lamented\nhe rises at sunrise\nand rests in the sunset",
-    "title" : "the seeker",
-    "tone" : "safe"
+    "id": "the-seeker",
+    "tone": "safe",
+    "title": "the seeker",
+    "order": 21,
+    "text": "the seeker\n\nhe rises at sunset, he rests in the sunrise  \nin his hand a goblet, brimming with the stars’ light  \nmany a legend seldom speaks his common name  \namong his company, few true friends can he claim\n\nyearning for truths beyond, he pores through scriptures old  \ncomposing many songs, his tunes mercurial gold  \nhis conclusions fragment, branching into fractals  \na long search of lament, seeking out the capsule\n\nhis charts and diagrams, layered over tenfold  \nciphers and anagrams, yet no story can be told  \nto what great ends can existence itself extend  \ninto oblivion, these grand metaphors blend\n\nin the mountain's oppression, he is engulfed  \nhis mind under compression, his lungs full of sulph  \nhe searches and searches, but the soul conflagrates  \nhe cursed a litany, and left through his old gates\n\nso he ventured forward, under crystal moonlight  \nthe chaos of order, abandoned with morbid spite  \nwith wings wide spread he dove to depths unknown  \ninto a lonely cove, lit by a small faint glow\n\nthere he met providence, forever shapeshifting  \nof unknown provenance, through sand he was sifting  \nhe asked the man’s business, no words were uttered  \nhe looked at the stillness, the man’s corpus fluttered\n\nand after a brief pause, he no longer lamented  \nhe rises at sunrise, and rests in the sunset"
   },
   {
-    "audio" : "content/poems/audio/a-distant-reality.m4a",
-    "id" : "a-distant-reality",
-    "lineTimings" : [
+    "id": "a-distant-reality",
+    "tone": "safe",
+    "title": "a distant reality",
+    "order": 22,
+    "text": "a distant reality\n\nThrough all the static and noise\nYour echoes ring the clearest\nThe sweet lilac of your voice\nLike a dream i hold dearest\n\nThe summers & winters pass\nMy silence becomes louder\nThe thoughts long withheld amass\nWith a passing of each hour\n\nMy heart gathers each meeting\nAnd replays them as a song\nThe mask I wear retreating\nRevealing how much I've longed\n\nSpry mornings fade to late nights\nBuried under memories\nOf what could have been had I\nCrossed a distant reality",
+    "audio": "content/poems/audio/a-distant-reality.m4a",
+    "lineTimings": [
       [
         0.06,
         1.2375
@@ -2011,16 +1737,16 @@
         31.187,
         32.6843
       ]
-    ],
-    "order" : 22,
-    "text" : "a distant reality\n\nThrough all the static and noise\nYour echoes ring the clearest\nThe sweet lilac of your voice\nLike a dream i hold dearest\n\nThe summers & winters pass\nMy silence becomes louder\nThe thoughts long withheld amass\nWith a passing of each hour\n\nMy heart gathers each meeting\nAnd replays them as a song\nThe mask I wear retreating\nRevealing how much I've longed\n\nSpry mornings fade to late nights\nBuried under memories\nOf what could have been had I\nCrossed a distant reality",
-    "title" : "a distant reality",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/if-a-tree-falls.m4a",
-    "id" : "if-a-tree-falls",
-    "lineTimings" : [
+    "id": "if-a-tree-falls",
+    "tone": "safe",
+    "title": "if a tree falls",
+    "order": 23,
+    "text": "if a tree falls\n\n'twas the heart that was torn in twain\nvictim to many scorns unnamed\n\nwhat's freedom to the vagabond\nbut an excuse to sever bonds\n\nwas he doomed to isolation\nby the burden of his station\n\nwhen once the land was bucolic\nand the fields were game to frolic\n\nthe illusion of connection\nwas simply exaggeration\n\nshould this one revolving chamber\nease the return to the manger",
+    "audio": "content/poems/audio/if-a-tree-falls.m4a",
+    "lineTimings": [
       [
         0.06,
         1.119
@@ -2073,16 +1799,16 @@
         24.6659,
         26.1883
       ]
-    ],
-    "order" : 23,
-    "text" : "if a tree falls\n\n'twas the heart that was torn in twain\nvictim to many scorns unnamed\n\nwhat's freedom to the vagabond\nbut an excuse to sever bonds\n\nwas he doomed to isolation\nby the burden of his station\n\nwhen once the land was bucolic\nand the fields were game to frolic\n\nthe illusion of connection\nwas simply exaggeration\n\nshould this one revolving chamber\nease the return to the manger",
-    "title" : "if a tree falls",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/this-wretched-soil.m4a",
-    "id" : "this-wretched-soil",
-    "lineTimings" : [
+    "id": "this-wretched-soil",
+    "tone": "safe",
+    "title": "this wretched soil",
+    "order": 24,
+    "text": "this wretched soil\n\namong rivers profane, he searches high and low,\nfor a dosage of rain, that frees him from limbo,\nthe tall trees deny fate, wandering depths below,\nenthralled is the wise sage by wherever the wind blows,\n\nthe initiate ponders the black sun and red moon,\nthis land of perdition where the demons yet loom,\na lone soul moribund, a revelation's postscript\nhis voice a tone high strung, he deciphers the crypt\n\nit yields forbidden fruit, a staff of mercury,\nhidden under dry soot, in lands of perjury,\nhis frail corpus transmutes, from gold to arsenic,\nthe story now concludes, with fate's hands choleric,\n\nhe looks upon his work, with his skin violet,\nthe sage hides behind murk, and remains inviolate",
+    "audio": "content/poems/audio/this-wretched-soil.m4a",
+    "lineTimings": [
       [
         0.06,
         1.1922
@@ -2143,16 +1869,16 @@
         44.9023,
         47.8603
       ]
-    ],
-    "order" : 24,
-    "text" : "this wretched soil\n\namong rivers profane, he searches high and low,\nfor a dosage of rain, that frees him from limbo,\nthe tall trees deny fate, wandering depths below,\nenthralled is the wise sage by wherever the wind blows,\n\nthe initiate ponders the black sun and red moon,\nthis land of perdition where the demons yet loom,\na lone soul moribund, a revelation's postscript\nhis voice a tone high strung, he deciphers the crypt\n\nit yields forbidden fruit, a staff of mercury,\nhidden under dry soot, in lands of perjury,\nhis frail corpus transmutes, from gold to arsenic,\nthe story now concludes, with fate's hands choleric,\n\nhe looks upon his work, with his skin violet,\nthe sage hides behind murk, and remains inviolate",
-    "title" : "this wretched soil",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/the-cyberian-specter.m4a",
-    "id" : "the-cyberian-specter",
-    "lineTimings" : [
+    "id": "the-cyberian-specter",
+    "tone": "safe",
+    "title": "the cyberian specter",
+    "order": 25,
+    "text": "the cyberian specter\n\nthe bricks we build for babylon\nbespoke in leafless birches\nwhat we offer to the amazon\nhides in heedless lurches\n\ndata the new scripture of the aeon\ntrading rosaries for digital service\nseeking out a new eden beyond\nwhile the machine sifts and searches\n\ni fell into the sky and the ground dissolved\nthe blood in my veins turned to chrome\nand poured into the crucible unsolved\nsolemnity a spectacle under the dome",
+    "audio": "content/poems/audio/the-cyberian-specter.m4a",
+    "lineTimings": [
       [
         0.06,
         1.468
@@ -2205,16 +1931,16 @@
         26.5885,
         28.6996
       ]
-    ],
-    "order" : 25,
-    "text" : "the cyberian specter\n\nthe bricks we build for babylon\nbespoke in leafless birches\nwhat we offer to the amazon\nhides in heedless lurches\n\ndata the new scripture of the aeon\ntrading rosaries for digital service\nseeking out a new eden beyond\nwhile the machine sifts and searches\n\ni fell into the sky and the ground dissolved\nthe blood in my veins turned to chrome\nand poured into the crucible unsolved\nsolemnity a spectacle under the dome",
-    "title" : "the cyberian specter",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/the-eternahedron.m4a",
-    "id" : "the-eternahedron",
-    "lineTimings" : [
+    "id": "the-eternahedron",
+    "tone": "safe",
+    "title": "the eternahedron",
+    "order": 26,
+    "text": "the eternahedron\n\nwhat is left of an incarnation\nwho has seen everything\nwhose rights hail from a far nation\nbut here there is not a thing?\n\nout of days dark and nights light\nis the destiny of creation\na sun hidden and a moon in sight\nare they to end in destruction?\n\nwithin these walls rests the master\na prisoner of his own making\nwithout, the slave toils faster\nthe warden against awaking\n\nwithout words a scar cannot heal\nas the harms of the past congeal\nwithin the future, only confusion\nthe present a simple illusion",
+    "audio": "content/poems/audio/the-eternahedron.m4a",
+    "lineTimings": [
       [
         0.06,
         1.1215
@@ -2283,16 +2009,16 @@
         33.0954,
         34.6332
       ]
-    ],
-    "order" : 26,
-    "text" : "the eternahedron\n\nwhat is left of an incarnation\nwho has seen everything\nwhose rights hail from a far nation\nbut here there is not a thing?\n\nout of days dark and nights light\nis the destiny of creation\na sun hidden and a moon in sight\nare they to end in destruction?\n\nwithin these walls rests the master\na prisoner of his own making\nwithout, the slave toils faster\nthe warden against awaking\n\nwithout words a scar cannot heal\nas the harms of the past congeal\nwithin the future, only confusion\nthe present a simple illusion",
-    "title" : "the eternahedron",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/an-unfolding.m4a",
-    "id" : "an-unfolding",
-    "lineTimings" : [
+    "id": "an-unfolding",
+    "tone": "safe",
+    "title": "an unfolding",
+    "order": 27,
+    "text": "an unfolding\n\nan altar to an ambler\nanother aimless ascetic\nat once altered and amber\nafflicted by an ailment iambic\n\na beauty unbeknownst to brooks\nbliss borne of birches of flame\nbrittle yet breathtaking in books\nbestowing badges of what became\n\nthe crimson crescent’s crescendo\na craft of creation crystallizing\na curse, a cry, an incredible credo\ncrested in choruses canalizing\n\nan existential ecstasy of experience\nthe echoes of an excavation\ninexorable to experts ever since\nthe explosion and expansion\n\nyouth yields to years of yonder\nyet the eye yearns for yeses\nyellowed is the yarn of yore\nYahweh yells no ingresses\n\nzen or zeal zipped and zeroed\na zephyr among zoloft zealots\nziggurats and Zion’s zipcode\na zigzag of rezoned secrets",
+    "audio": "content/poems/audio/an-unfolding.m4a",
+    "lineTimings": [
       [
         0.06,
         0.9566
@@ -2393,16 +2119,16 @@
         52.5603,
         54.3673
       ]
-    ],
-    "order" : 27,
-    "text" : "an unfolding\n\nan altar to an ambler\nanother aimless ascetic\nat once altered and amber\nafflicted by an ailment iambic\n\na beauty unbeknownst to brooks\nbliss borne of birches of flame\nbrittle yet breathtaking in books\nbestowing badges of what became\n\nthe crimson crescent’s crescendo\na craft of creation crystallizing\na curse, a cry, an incredible credo\ncrested in choruses canalizing\n\nan existential ecstasy of experience\nthe echoes of an excavation\ninexorable to experts ever since\nthe explosion and expansion\n\nyouth yields to years of yonder\nyet the eye yearns for yeses\nyellowed is the yarn of yore\nYahweh yells no ingresses\n\nzen or zeal zipped and zeroed\na zephyr among zoloft zealots\nziggurats and Zion’s zipcode\na zigzag of rezoned secrets",
-    "title" : "an unfolding",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/the-cosmic-casino.m4a",
-    "id" : "the-cosmic-casino",
-    "lineTimings" : [
+    "id": "the-cosmic-casino",
+    "tone": "safe",
+    "title": "the cosmic casino",
+    "order": 28,
+    "text": "the cosmic casino\n\nbetween polarities sits the lattice\nexpanding locally into infinite depths\nthe duel of dualities an impetus\nfor the prime thread until death\n\na story preceding the primordial\nwhat was nothing was still something\na state of matter beyond corporeal\ntainted with the prospect of becoming\n\na cycle, the prime’s foundation\nin a festival of perpetual recursion\nthe metric most minuscule in relation\nto a refinement making conversions\n\nunderlying the foundation, the tesseract\nof space and time’s insolence\nfields that converge and counteract\nagainst a lonely universal innocence\n\nthe theory, an eternal transmutation\nrevolving, revealing its faces\na forever journey of implication\nof a truth without traces\n\nan eagle of the abyss\nfrom an evolving vantage point\ntoo many factors exist\nfor the house to count all its coins",
+    "audio": "content/poems/audio/the-cosmic-casino.m4a",
+    "lineTimings": [
       [
         0.06,
         1.3094
@@ -2503,16 +2229,16 @@
         56.6183,
         58.6066
       ]
-    ],
-    "order" : 28,
-    "text" : "the cosmic casino\n\nbetween polarities sits the lattice\nexpanding locally into infinite depths\nthe duel of dualities an impetus\nfor the prime thread until death\n\na story preceding the primordial\nwhat was nothing was still something\na state of matter beyond corporeal\ntainted with the prospect of becoming\n\na cycle, the prime’s foundation\nin a festival of perpetual recursion\nthe metric most minuscule in relation\nto a refinement making conversions\n\nunderlying the foundation, the tesseract\nof space and time’s insolence\nfields that converge and counteract\nagainst a lonely universal innocence\n\nthe theory, an eternal transmutation\nrevolving, revealing its faces\na forever journey of implication\nof a truth without traces\n\nan eagle of the abyss\nfrom an evolving vantage point\ntoo many factors exist\nfor the house to count all its coins",
-    "title" : "the cosmic casino",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/a-matter-of-context.m4a",
-    "id" : "a-matter-of-context",
-    "lineTimings" : [
+    "id": "a-matter-of-context",
+    "tone": "safe",
+    "title": "a matter of context",
+    "order": 29,
+    "text": "a matter of context\n\na memory remembered persists through the cosmos\na dream forgotten ripples into one's awakening\na puzzle that resists the solutions only god knows\nsome stories are best left without an ending\n\nconcealed are these frayed synapses\nthe psyche reveals, eclipses, and passes\nthe key to the great beyond collapses\nunder the weight of what a tesseract is\n\nrefractions of questions posed since antiquity\ncontractions of answers recycled in mixed quality\nan adjourned testimony like roses without thorns\na verdict that strikes like the most violent of storms\n\nwhen the heart and feather have been balanced\nwould there be further use of material talents\nwhere the rivers soar and the firmament flows;\na flagrancy unknown to this earthen globe?\n\nsecrets sewn into sequential materiality\nunderlying an interweaving lattice of the surreal\nwhose patterns give rise to a complex musicality\nthat bends intuition on the nature of what’s truly real\n\nthe grand expanse modeled in mandelbrots and fibonaccis\npatterns sheer that they melt the brain like liquid gold\nso ingrained is our fascination and perplexities\nthat spirits high started communicating in italics and bold\n\nthe intricate internal logic of a black box\ndreams resurfacing within commercial blocks\nthe albino raven’s yin, a black swan’s yang\nin the midst of a tempest, a raft a melody sang\n\nwhat is hidden beyond what the plane corporeal\ncan lay claim and name before time immemorial\nthe flash of insight that dissolves into oblivion\nits traces of first light more ancient than vermillion\n\nas we survey the sun from core to corona\nwe have yet to pinpoint one single persona\nof the life sustaining iota in the sky\nso too can something so bright also lie\n\nbeneath every truth lies a deception\nbehind every deception is a kernel of truth\na revelation revered, the true conception\nfor other narratives there is no more room\n\nmystery enshrouded by smoke and mirrors\na story enshrined by its most devout believers\nto the dreamers and seekers, symbols are clearer\nto the pragmatists, the concern is what’s nearer\n\ncan a rose resurrect hope for a better tomorrow,\nor does the carnation reignite the souls borrowed?\nthe trails we tread recorded in many prints\nbut the laughter and tears the trail cannot evince\n\nand should the heavens send down a savior\nto judge human nature and all our behavior\ni hope that the judgment considers context\nof the stories left behind that continue to collect",
+    "audio": "content/poems/audio/a-matter-of-context.m4a",
+    "lineTimings": [
       [
         0.06,
         1.4865
@@ -2725,16 +2451,16 @@
         153.0185,
         155.7472
       ]
-    ],
-    "order" : 29,
-    "text" : "a matter of context\n\na memory remembered persists through the cosmos\na dream forgotten ripples into one's awakening\na puzzle that resists the solutions only god knows\nsome stories are best left without an ending\n\nconcealed are these frayed synapses\nthe psyche reveals, eclipses, and passes\nthe key to the great beyond collapses\nunder the weight of what a tesseract is\n\nrefractions of questions posed since antiquity\ncontractions of answers recycled in mixed quality\nan adjourned testimony like roses without thorns\na verdict that strikes like the most violent of storms\n\nwhen the heart and feather have been balanced\nwould there be further use of material talents\nwhere the rivers soar and the firmament flows;\na flagrancy unknown to this earthen globe?\n\nsecrets sewn into sequential materiality\nunderlying an interweaving lattice of the surreal\nwhose patterns give rise to a complex musicality\nthat bends intuition on the nature of what’s truly real\n\nthe grand expanse modeled in mandelbrots and fibonaccis\npatterns sheer that they melt the brain like liquid gold\nso ingrained is our fascination and perplexities\nthat spirits high started communicating in italics and bold\n\nthe intricate internal logic of a black box\ndreams resurfacing within commercial blocks\nthe albino raven’s yin, a black swan’s yang\nin the midst of a tempest, a raft a melody sang\n\nwhat is hidden beyond what the plane corporeal\ncan lay claim and name before time immemorial\nthe flash of insight that dissolves into oblivion\nits traces of first light more ancient than vermillion\n\nas we survey the sun from core to corona\nwe have yet to pinpoint one single persona\nof the life sustaining iota in the sky\nso too can something so bright also lie\n\nbeneath every truth lies a deception\nbehind every deception is a kernel of truth\na revelation revered, the true conception\nfor other narratives there is no more room\n\nmystery enshrouded by smoke and mirrors\na story enshrined by its most devout believers\nto the dreamers and seekers, symbols are clearer\nto the pragmatists, the concern is what’s nearer\n\ncan a rose resurrect hope for a better tomorrow,\nor does the carnation reignite the souls borrowed?\nthe trails we tread recorded in many prints\nbut the laughter and tears the trail cannot evince\n\nand should the heavens send down a savior\nto judge human nature and all our behavior\ni hope that the judgment considers context\nof the stories left behind that continue to collect",
-    "title" : "a matter of context",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/a-matter-of-when.m4a",
-    "id" : "a-matter-of-when",
-    "lineTimings" : [
+    "id": "a-matter-of-when",
+    "tone": "safe",
+    "title": "a matter of when",
+    "order": 30,
+    "text": "a matter of when\n\nwhat’s the compensation for alienation\nto assume a station for one’s pigmentation\nseeking through the confusion, finding the illusion\nof the conclusions of crowns buried deep in delusion\n\nwhen the leader steps up to the podium\nto repeat their talking points ad nauseam\nall they’re missing is their balloon animals\nthe real work goes to low wage practicals\n\nwhen the stairs collect more steps\nwith each scare of an insufficient check\nwhen you can barely afford to pay rent\nand weigh the pros and cons of living in a tent\n\nsee how far we’ve come in making progress\nas we bet fortunes on a loaded congress\nthat implore us still to trust in the process\nwhile the machine rusts expecting us to acquiesce\n\nthe outcomes on which we gamble is striking, bar none\non who’ll have won the war that’s only just begun\nor how the weather will be when we hit DEFCON 1\na guarantee that the forecast predicts a second sun\n\nthe singularity we’ve built on our backs\nyearning for civilization’s eventual collapse\nwaiting for humanity’s age to elapse\nwe can only seal so many structural cracks\n\nwhen public opinion doesn’t affect public policy\nwe’re just puppets and victims without an apology\nof elites with their own private fleets\nwho are given audience by the highest of seats\n\nwhen private interests intersect with civic duty\nwhat does it mean when the end of an office is more booty?\ngod forbid someone exist and at the same time be fruity\n“not in front of the kids” they say while leaders hide their cruelty\n\nwhen the law puts some people at an advantage\nshould they sulk when paying for the bandage?\nthe burden to manage, to minimize damage\nto the profits of those with the highest point of vantage\n\ncatastrophes and tragedies, symptoms of the system\nwhat does liberty look like when imprisoned from wisdom\nwhen certainty of absolutes comes under question\nclosely observe those who scoff at the mere suggestion",
+    "audio": "content/poems/audio/a-matter-of-when.m4a",
+    "lineTimings": [
       [
         0.06,
         1.0755
@@ -2899,16 +2625,16 @@
         116.2525,
         119.1117
       ]
-    ],
-    "order" : 30,
-    "text" : "a matter of when\n\nwhat’s the compensation for alienation\nto assume a station for one’s pigmentation\nseeking through the confusion, finding the illusion\nof the conclusions of crowns buried deep in delusion\n\nwhen the leader steps up to the podium\nto repeat their talking points ad nauseam\nall they’re missing is their balloon animals\nthe real work goes to low wage practicals\n\nwhen the stairs collect more steps\nwith each scare of an insufficient check\nwhen you can barely afford to pay rent\nand weigh the pros and cons of living in a tent\n\nsee how far we’ve come in making progress\nas we bet fortunes on a loaded congress\nthat implore us still to trust in the process\nwhile the machine rusts expecting us to acquiesce\n\nthe outcomes on which we gamble is striking, bar none\non who’ll have won the war that’s only just begun\nor how the weather will be when we hit DEFCON 1\na guarantee that the forecast predicts a second sun\n\nthe singularity we’ve built on our backs\nyearning for civilization’s eventual collapse\nwaiting for humanity’s age to elapse\nwe can only seal so many structural cracks\n\nwhen public opinion doesn’t affect public policy\nwe’re just puppets and victims without an apology\nof elites with their own private fleets\nwho are given audience by the highest of seats\n\nwhen private interests intersect with civic duty\nwhat does it mean when the end of an office is more booty?\ngod forbid someone exist and at the same time be fruity\n“not in front of the kids” they say while leaders hide their cruelty\n\nwhen the law puts some people at an advantage\nshould they sulk when paying for the bandage?\nthe burden to manage, to minimize damage\nto the profits of those with the highest point of vantage\n\ncatastrophes and tragedies, symptoms of the system\nwhat does liberty look like when imprisoned from wisdom\nwhen certainty of absolutes comes under question\nclosely observe those who scoff at the mere suggestion",
-    "title" : "a matter of when",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/finding-north.m4a",
-    "id" : "finding-north",
-    "lineTimings" : [
+    "id": "finding-north",
+    "tone": "safe",
+    "title": "finding north",
+    "order": 31,
+    "text": "finding north\n\nthe numeral of the bellowing beast below\nthe tetragram of the one almighty above\nthe river east of the garden of eden flows\nwest to the remainder of what is and once was\n\na geometry tempered by endless fire\nwhose symmetry frames one’s outlook\njust as creation can raise itself higher\nit can collapse with a sweep of the foot\n\nthe solitary simplicity of the one called unity\nthe universe collapsed to a single identity\nthe creative impulse of converting none to one\ntreating as the same the moon, earth, and sun\n\nthe all or none, the double edge of duality\nthe source of opposition and polarity\nfrom the shell of the self to that of the other\nit is through difference that we discover\n\nthe troubling paradox of the trinity\nthe minimum prerequisite for stability\nbut also where our predictions quit\nincarnations joined yet somehow split\n\nthe ordered mayhem of multiplicity\nthe challenge and rub of reality\nthence we travail under the ire of ironies\nthe wicked and the wise in a single anomaly\n\na reality of seemingly infinite layers\nmaking sense of multiple sensations\nask for the sight of the soothsayers\nthey’ll ask if it will change the destination\n\nwhere the leviathan meets the behemoth\ncasting shadows over land or water\nwhere the seraphim sit at the zenith\nin their vision the lamb before the slaughter\n\nthe sclera of the sequential sky cerulean\nthe sun, the ever so radiant iris\nan eternal witness to matters vitruvian\nuntil the heart is weighed before osiris\n\nas we orient around providence\nand his litany of covenants,\nshould our matters of substance\npin sacraments against fundaments?\n\nour eyes peering into the heavens\nas they look back at us behind the mist\nour centuries of research and discretion\nto their aeons of patience and gnosis\n\nour timeline is a single path\none wrought of grace and wrath\nyet beneath the compass glass\na familiar cycle comes to pass\n\nbetween material and metaphysical\nemerge questions modern yet biblical\nthese values of fables and vectors\na mosaic of tones and textures\n\nhundreds of millions of years of evolution\ntint the colors of our intention and vision\nour second natures projecting value and direction\non things without weight or dimension\n\nlaying the groundwork for what could be\ntrimming the options based on what should be\npouring the concrete to bolster the concept\ngiving proportions to what was a precept\n\na cycle known to us that rinses and repeats\nwithout a safe haven from the storm to contemplate\nuntil this grand game of life completes\nwhose many rulebooks we still consecrate\n\nto man, everything must possess\na name, a story, and a value\nand from these possessions egress\nidentity, relations, and if fortunate, a statue\n\nto divest such a foundation\nis to deface, alienate, and erase\nbut the soul is the instantiation\nof what can never be misplaced\n\nthe legacy that we leave behind\nour pride and pains in summation\nthe tempest crosses the borderline\nit does not bow to any nation\n\nthe tempest never asks which direction\nit only travels where the air flows\nno middleman in the connection\nfinding north doesn’t require prose",
+    "audio": "content/poems/audio/finding-north.m4a",
+    "lineTimings": [
       [
         0.06,
         1.0766
@@ -3233,16 +2959,16 @@
         202.0286,
         204.2302
       ]
-    ],
-    "order" : 31,
-    "text" : "finding north\n\nthe numeral of the bellowing beast below\nthe tetragram of the one almighty above\nthe river east of the garden of eden flows\nwest to the remainder of what is and once was\n\na geometry tempered by endless fire\nwhose symmetry frames one’s outlook\njust as creation can raise itself higher\nit can collapse with a sweep of the foot\n\nthe solitary simplicity of the one called unity\nthe universe collapsed to a single identity\nthe creative impulse of converting none to one\ntreating as the same the moon, earth, and sun\n\nthe all or none, the double edge of duality\nthe source of opposition and polarity\nfrom the shell of the self to that of the other\nit is through difference that we discover\n\nthe troubling paradox of the trinity\nthe minimum prerequisite for stability\nbut also where our predictions quit\nincarnations joined yet somehow split\n\nthe ordered mayhem of multiplicity\nthe challenge and rub of reality\nthence we travail under the ire of ironies\nthe wicked and the wise in a single anomaly\n\na reality of seemingly infinite layers\nmaking sense of multiple sensations\nask for the sight of the soothsayers\nthey’ll ask if it will change the destination\n\nwhere the leviathan meets the behemoth\ncasting shadows over land or water\nwhere the seraphim sit at the zenith\nin their vision the lamb before the slaughter\n\nthe sclera of the sequential sky cerulean\nthe sun, the ever so radiant iris\nan eternal witness to matters vitruvian\nuntil the heart is weighed before osiris\n\nas we orient around providence\nand his litany of covenants,\nshould our matters of substance\npin sacraments against fundaments?\n\nour eyes peering into the heavens\nas they look back at us behind the mist\nour centuries of research and discretion\nto their aeons of patience and gnosis\n\nour timeline is a single path\none wrought of grace and wrath\nyet beneath the compass glass\na familiar cycle comes to pass\n\nbetween material and metaphysical\nemerge questions modern yet biblical\nthese values of fables and vectors\na mosaic of tones and textures\n\nhundreds of millions of years of evolution\ntint the colors of our intention and vision\nour second natures projecting value and direction\non things without weight or dimension\n\nlaying the groundwork for what could be\ntrimming the options based on what should be\npouring the concrete to bolster the concept\ngiving proportions to what was a precept\n\na cycle known to us that rinses and repeats\nwithout a safe haven from the storm to contemplate\nuntil this grand game of life completes\nwhose many rulebooks we still consecrate\n\nto man, everything must possess\na name, a story, and a value\nand from these possessions egress\nidentity, relations, and if fortunate, a statue\n\nto divest such a foundation\nis to deface, alienate, and erase\nbut the soul is the instantiation\nof what can never be misplaced\n\nthe legacy that we leave behind\nour pride and pains in summation\nthe tempest crosses the borderline\nit does not bow to any nation\n\nthe tempest never asks which direction\nit only travels where the air flows\nno middleman in the connection\nfinding north doesn’t require prose",
-    "title" : "finding north",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/withdrawing-what-is-withheld.m4a",
-    "id" : "withdrawing-what-is-withheld",
-    "lineTimings" : [
+    "id": "withdrawing-what-is-withheld",
+    "tone": "safe",
+    "title": "withdrawing what is withheld",
+    "order": 32,
+    "text": "withdrawing what is withheld\n\nwhen the weeping and wallowing from woe awakens from waist to wrist\na wanton wave of the wan willow, a worsening wound the more we watch\nwould it be wise to well up the weakness or wheel it away to wherever?\nwould we worship the worst of our ways because the weakness wields an iron will?\nor would we worship the winter whittling away at our wants and wishes?\nwhen we wish for what was, we witness a war within\nwithout a warden against our woes, watching what we were warned about\nwest of wisdom do we walk when the wave of what once was washes in\nat wit’s end, the wake of wonder whisked off to the wide world\nwe were not willing to witness the wolf in our woods\nnor did we wish to witness the wings that may wrench us from our own wreckage\nwe walk away from the weeping willow to the wisdom of the walnut\nwhen we wander where the wind whistles and whispers\nthe world washes your worries away, the water we wade in wistfully wanes the words\nour window to withdraw awaits, a fair wage for what we’ve withheld\nand the walls may widen once again where we may finally move forward",
+    "audio": "content/poems/audio/withdrawing-what-is-withheld.m4a",
+    "lineTimings": [
       [
         0.06,
         1.4878
@@ -3311,16 +3037,16 @@
         57.9434,
         61.4904
       ]
-    ],
-    "order" : 32,
-    "text" : "withdrawing what is withheld\n\nwhen the weeping and wallowing from woe awakens from waist to wrist\na wanton wave of the wan willow, a worsening wound the more we watch\nwould it be wise to well up the weakness or wheel it away to wherever?\nwould we worship the worst of our ways because the weakness wields an iron will?\nor would we worship the winter whittling away at our wants and wishes?\nwhen we wish for what was, we witness a war within\nwithout a warden against our woes, watching what we were warned about\nwest of wisdom do we walk when the wave of what once was washes in\nat wit’s end, the wake of wonder whisked off to the wide world\nwe were not willing to witness the wolf in our woods\nnor did we wish to witness the wings that may wrench us from our own wreckage\nwe walk away from the weeping willow to the wisdom of the walnut\nwhen we wander where the wind whistles and whispers\nthe world washes your worries away, the water we wade in wistfully wanes the words\nour window to withdraw awaits, a fair wage for what we’ve withheld\nand the walls may widen once again where we may finally move forward",
-    "title" : "withdrawing what is withheld",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/mr-money.m4a",
-    "id" : "mr-money",
-    "lineTimings" : [
+    "id": "mr-money",
+    "tone": "safe",
+    "title": "mr money",
+    "order": 33,
+    "text": "mr money\n\nwhile 1 in 3 people are stuck living paycheck to paycheck\nmr money owns a pool, a maybach, and a mansion with 8 beds\nyou have bounced payments and second hand raiments\nhe just spent a whole deposit on some customized marble pavement\n\nyou’re stuck living your life in the cage of the wage slave\nhe has two bengal tigers that he calls “rage” and “brave”\nyou live in a food desert and look over twice your age\nhe has an onsite chef, a chauffeur, and a lifted face\n\nyou do what you can to maximize your chances\nwhen he buys some stocks, the market chart dances\nyou create art pieces to spark a conversation\nhe buys blue squares to avoid tiered taxation\n\nyou make your peace with the help of a pastor\nin the back of his mind, he thinks he’s the master\nall your life you were told to hate handouts\nhis dad said that to avoid paying higher amounts\n\nyou work overtime on top of 2 more jobs\nhe worries about which speedster takes which keyfob\nyou pray to god for a way to escape the rat race\nhe asks if his attorney on retainer is the right race\n\nyou play it safe to avoid high medical bills\nhe goes skydiving every week for a view that kills\nyou work half a lifetime to pay off all your loans\nhe likes to throw parties until he’s all skin and bones\n\nyou waste half your check on a traffic citation\nhe gets a slap on the wrist for the same violation\nyou have your heart set on the perfect girl\nhe looks at her and says “let’s give it a whirl”\n\nyou can’t afford to dress casual or fail a drug test\nhe wears polo while snorting coke off a woman’s chest\nyou wonder if you’ll ever have to take from your 401k\nhe makes the same amount and then some in less than a day\n\nyou dream of owning a matte-finish convertible\nhe owns cars that can go sideways and vertical\nyou spend your life keeping up with the joneses\nhe uses a map of his house to find where his phone is\n\nyou wear clothes that cost less than a dime a dozen\nhe buys luxury two-pieces for his second cousin\nyou worry if this is the month you become homeless\nhe prefers his gourmet rotisserie chicken boneless\n\nyou work in hopes of making more than triple digits\nhe multiplies commas in less than a New York minute\nyou never left the borders of your own city limits\nhe visits the Canary Islands dressed as Mr. Peanut\n\nyou shed a tear every time you buy gas or groceries\nhis bank account is arranged like a rosary",
+    "audio": "content/poems/audio/mr-money.m4a",
+    "lineTimings": [
       [
         0.06,
         0.813
@@ -3509,16 +3235,16 @@
         145.3266,
         147.6898
       ]
-    ],
-    "order" : 33,
-    "text" : "mr money\n\nwhile 1 in 3 people are stuck living paycheck to paycheck\nmr money owns a pool, a maybach, and a mansion with 8 beds\nyou have bounced payments and second hand raiments\nhe just spent a whole deposit on some customized marble pavement\n\nyou’re stuck living your life in the cage of the wage slave\nhe has two bengal tigers that he calls “rage” and “brave”\nyou live in a food desert and look over twice your age\nhe has an onsite chef, a chauffeur, and a lifted face\n\nyou do what you can to maximize your chances\nwhen he buys some stocks, the market chart dances\nyou create art pieces to spark a conversation\nhe buys blue squares to avoid tiered taxation\n\nyou make your peace with the help of a pastor\nin the back of his mind, he thinks he’s the master\nall your life you were told to hate handouts\nhis dad said that to avoid paying higher amounts\n\nyou work overtime on top of 2 more jobs\nhe worries about which speedster takes which keyfob\nyou pray to god for a way to escape the rat race\nhe asks if his attorney on retainer is the right race\n\nyou play it safe to avoid high medical bills\nhe goes skydiving every week for a view that kills\nyou work half a lifetime to pay off all your loans\nhe likes to throw parties until he’s all skin and bones\n\nyou waste half your check on a traffic citation\nhe gets a slap on the wrist for the same violation\nyou have your heart set on the perfect girl\nhe looks at her and says “let’s give it a whirl”\n\nyou can’t afford to dress casual or fail a drug test\nhe wears polo while snorting coke off a woman’s chest\nyou wonder if you’ll ever have to take from your 401k\nhe makes the same amount and then some in less than a day\n\nyou dream of owning a matte-finish convertible\nhe owns cars that can go sideways and vertical\nyou spend your life keeping up with the joneses\nhe uses a map of his house to find where his phone is\n\nyou wear clothes that cost less than a dime a dozen\nhe buys luxury two-pieces for his second cousin\nyou worry if this is the month you become homeless\nhe prefers his gourmet rotisserie chicken boneless\n\nyou work in hopes of making more than triple digits\nhe multiplies commas in less than a New York minute\nyou never left the borders of your own city limits\nhe visits the Canary Islands dressed as Mr. Peanut\n\nyou shed a tear every time you buy gas or groceries\nhis bank account is arranged like a rosary",
-    "title" : "mr money",
-    "tone" : "safe"
+    ]
   },
   {
-    "audio" : "content/poems/audio/number-2.m4a",
-    "id" : "number-2",
-    "lineTimings" : [
+    "id": "number-2",
+    "tone": "gritty",
+    "title": "number 2",
+    "order": 0,
+    "text": "number 2\n\nwatch me pee watch me poo\ni strain and i strain until i turn blue\nwatch me pee watch me poo\nit's a code red when i go number 2\nno good sir i don't have the flu\njust a bad case of doo doo on you.\n\ni poopy poop until i scoop out my fruit loops\ni poopy poop like i'm ballin' shooting hoops \ni need a couple loofahs to clean up all my poop\nskibidi bipidi poopy poop poop.\n\nwhen i find myself in times of gloom and doom\ni go to the loo and my ass goes boom boom.\npeople say sometimes i'm obsessed with the doo doo\nbut what's life really if you can't do do you.\n\ni'm a man who feels every doo doo like it's new\ni feel an ecstasy reserved only for a few\nforgot to wipe it's turning into glue\nthat's a statement that i wish wasn't true.\n\ni'm a silly little baka when i unleash the caca\ni pray for anyone who must sit behind my rocker\nit starts as a fart and then a little sputter\nheaven send a savior for this brick of brown butter.\n\ni'll crap on the lawn i'll crap in the coupe\ni'm the scat man i can crap on a loop\nwhen shit hits the fan it's me but we all knew\na-e-i-o-u talk shit and i'll doo doo on you.\n\nwatch me pee watch me poo\ni strain and i strain until i turn blue\nwatch me pee watch me poo\nit's a code red when i go number 2\nlife gets rough but you know what to do\nshit everywhere for the red white and blue.",
+    "audio": "content/poems/audio/number-2.m4a",
+    "lineTimings": [
       [
         0.06,
         0.8185
@@ -3651,16 +3377,16 @@
         83.9674,
         85.9888
       ]
-    ],
-    "order" : 0,
-    "text" : "number 2\n\nwatch me pee watch me poo\ni strain and i strain until i turn blue\nwatch me pee watch me poo\nit's a code red when i go number 2\nno good sir i don't have the flu\njust a bad case of doo doo on you.\n\ni poopy poop until i scoop out my fruit loops\ni poopy poop like i'm ballin' shooting hoops \ni need a couple loofahs to clean up all my poop\nskibidi bipidi poopy poop poop.\n\nwhen i find myself in times of gloom and doom\ni go to the loo and my ass goes boom boom.\npeople say sometimes i'm obsessed with the doo doo\nbut what's life really if you can't do do you.\n\ni'm a man who feels every doo doo like it's new\ni feel an ecstasy reserved only for a few\nforgot to wipe it's turning into glue\nthat's a statement that i wish wasn't true.\n\ni'm a silly little baka when i unleash the caca\ni pray for anyone who must sit behind my rocker\nit starts as a fart and then a little sputter\nheaven send a savior for this brick of brown butter.\n\ni'll crap on the lawn i'll crap in the coupe\ni'm the scat man i can crap on a loop\nwhen shit hits the fan it's me but we all knew\na-e-i-o-u talk shit and i'll doo doo on you.\n\nwatch me pee watch me poo\ni strain and i strain until i turn blue\nwatch me pee watch me poo\nit's a code red when i go number 2\nlife gets rough but you know what to do\nshit everywhere for the red white and blue.",
-    "title" : "number 2",
-    "tone" : "gritty"
+    ]
   },
   {
-    "audio" : "content/poems/audio/daily-affirmations.m4a",
-    "id" : "daily-affirmations",
-    "lineTimings" : [
+    "id": "daily-affirmations",
+    "tone": "gritty",
+    "title": "daily affirmations",
+    "order": 1,
+    "text": "daily affirmations\n\ni am deserving of the 30% discounts at the vasectomy clinic\ni am worthy of free costco samples even if the victim is my stomach\ni can do anything I want apart from what the manager meant by “sir please”\nthese horns tentacles and talons into the world of life I release\n\ni am my own best friend though intimacy is too intimidating\ni am everyone’s ally as long as our paths aren’t too grating\ni am a flower and unfortunately the bees know it too well\nmy body is a temple so who keeps putting graffiti in my well?\n\ni have a choice in my life and god is having second thoughts\ni am restrained and disciplined—gifts my dominatrix brought\nwhat doesn’t kill me makes me stronger but there were lots of close calls\ni cultivate my own garden but only when the police car stalls\n\nthe sky is the definitive limit just ask icarus\ntoday is a new day with inertia most vigorous\npractice makes perfect unless perfection was the symptom\ni focus on the good things in life especially if they’re buxom\n\ni contain multitudes… of bad ideas and cholesterol\nwhen life gives you lemons say thank you—inflation's abysmal\nmy voice matters most in the middle of a symphony\ni am grateful for all i have… borrowed indefinitely\n\ni can see my goals clearly which is why i doubt my choices\ni am intelligent even if the door makes judgmental noises",
+    "audio": "content/poems/audio/daily-affirmations.m4a",
+    "lineTimings": [
       [
         0.06,
         1.2295
@@ -3753,16 +3479,16 @@
         79.5783,
         82.8488
       ]
-    ],
-    "order" : 1,
-    "text" : "daily affirmations\n\ni am deserving of the 30% discounts at the vasectomy clinic\ni am worthy of free costco samples even if the victim is my stomach\ni can do anything I want apart from what the manager meant by “sir please”\nthese horns tentacles and talons into the world of life I release\n\ni am my own best friend though intimacy is too intimidating\ni am everyone’s ally as long as our paths aren’t too grating\ni am a flower and unfortunately the bees know it too well\nmy body is a temple so who keeps putting graffiti in my well?\n\ni have a choice in my life and god is having second thoughts\ni am restrained and disciplined—gifts my dominatrix brought\nwhat doesn’t kill me makes me stronger but there were lots of close calls\ni cultivate my own garden but only when the police car stalls\n\nthe sky is the definitive limit just ask icarus\ntoday is a new day with inertia most vigorous\npractice makes perfect unless perfection was the symptom\ni focus on the good things in life especially if they’re buxom\n\ni contain multitudes… of bad ideas and cholesterol\nwhen life gives you lemons say thank you—inflation's abysmal\nmy voice matters most in the middle of a symphony\ni am grateful for all i have… borrowed indefinitely\n\ni can see my goals clearly which is why i doubt my choices\ni am intelligent even if the door makes judgmental noises",
-    "title" : "daily affirmations",
-    "tone" : "gritty"
+    ]
   },
   {
-    "audio" : "content/poems/audio/real-shit.m4a",
-    "id" : "real-shit",
-    "lineTimings" : [
+    "id": "real-shit",
+    "tone": "gritty",
+    "title": "real shit",
+    "order": 2,
+    "text": "real shit\n\ni’m the shit\nballer type shi\nthat’s that shit\non some real shit\n\ni shit on you\neat my shit\nshit happens?\nyeah, no shit\n\nhello, fine shyt\ni can handle that shit\ni shit you not\ni got the good shit\n\nthis is a shit hole\nwhat is this horse shit?\nwhat in the shit?\nare you shitting me?\n\nyou think you’re hot shit?\nwanna talk shit?\nstop the bullshit\noh, real shit?\n\nnot putting up with this shit\nshut up, shithead\nyou’re dogshit\npiece of shit\n\nshit’s hitting the fan\nwhat’s that shit-eating grin?\nshit’s going down\ni’m gonna rock your shit\n\nwait, oh, shit…\n\nmy shit got rocked\ni’m done with this shit\nthis shit’s wack\nfuckin’ shit\n\naw shit\ni’m so shit\nwhere’s all my shit\nfuck this shit",
+    "audio": "content/poems/audio/real-shit.m4a",
+    "lineTimings": [
       [
         0.06,
         0.737
@@ -3915,10 +3641,6 @@
         54.9369,
         55.8075
       ]
-    ],
-    "order" : 2,
-    "text" : "real shit\n\ni’m the shit\nballer type shi\nthat’s that shit\non some real shit\n\ni shit on you\neat my shit\nshit happens?\nyeah, no shit\n\nhello, fine shyt\ni can handle that shit\ni shit you not\ni got the good shit\n\nthis is a shit hole\nwhat is this horse shit?\nwhat in the shit?\nare you shitting me?\n\nyou think you’re hot shit?\nwanna talk shit?\nstop the bullshit\noh, real shit?\n\nnot putting up with this shit\nshut up, shithead\nyou’re dogshit\npiece of shit\n\nshit’s hitting the fan\nwhat’s that shit-eating grin?\nshit’s going down\ni’m gonna rock your shit\n\nwait, oh, shit…\n\nmy shit got rocked\ni’m done with this shit\nthis shit’s wack\nfuckin’ shit\n\naw shit\ni’m so shit\nwhere’s all my shit\nfuck this shit",
-    "title" : "real shit",
-    "tone" : "gritty"
+    ]
   }
 ]
