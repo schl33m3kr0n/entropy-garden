@@ -255,8 +255,10 @@ async function beginSpeak(text) {
 
 /** Respelling / phoneme hints so espeak hits the intended pronunciation. */
 const EYE_PRONUNCIATIONS = [
-    [/\bkanye\s+west\b/gi, 'kahn yay west'],
-    [/\bkanye('s)?\b/gi, 'kahn yay$1'],
+    // Stress on first syllable: KAHN-yay (espeak phoneme ' marks stress)
+    [/\bkanye\s+west\b/gi, "[[k'A:njeI]] west"],
+    [/\bkanye('s)?\b/gi, "[[k'A:njeI]]$1"],
+    [/\bbodhi\b/gi, 'bo dee'],
 ];
 
 function applyEyePronunciations(text) {
@@ -267,6 +269,16 @@ function applyEyePronunciations(text) {
     return out;
 }
 
+/** Softer clause breaks for espeak — keep decimals, turn sentence stops into commas. */
+function softenEyePunctuation(text) {
+    return text
+        .replace(/(\d)\.(\d)/g, '$1\u2024$2')
+        .replace(/\.{2,}|…/g, ',')
+        .replace(/\./g, ',')
+        .replace(/\u2024/g, '.')
+        .replace(/,\s*,+/g, ',');
+}
+
 /** God-mode bubbles are ALL CAPS on screen; espeak spells "IT" unless spoken lowercase. */
 function spokenEyeText(text) {
     const clean = String(text || '').replace(/\s+/g, ' ').trim();
@@ -274,7 +286,7 @@ function spokenEyeText(text) {
     const god = document.body.classList.contains('god-mode')
         || document.getElementById('panopticon-comment')?.classList.contains('panopticon-comment-god');
     const cased = god ? clean.toLowerCase() : clean;
-    return applyEyePronunciations(cased);
+    return applyEyePronunciations(softenEyePunctuation(cased));
 }
 
 export function speakEyeComment(payload) {
