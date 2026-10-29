@@ -169,7 +169,7 @@
         "i know that smug look is a mask of the insecurity within",
         "we’re always happy to harvest a new soul",
         "yeah… that seems about right",
-        "please reconsider adding your opened third eye to your resume",
+        "please reconsider adding your opened third eye to your résumé",
         "please, do tell me more about your musical ambitions",
         "we’re ranked #1 on international databases",
         "your risk assessment has been adjusted accordingly",
