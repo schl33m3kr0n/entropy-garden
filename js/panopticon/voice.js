@@ -13,8 +13,28 @@ const VOICE_CANDIDATES = [
     'gmw/en-US',
     { language: 'en-us' },
 ];
+const EYE_VOICE_PREF_KEY = 'entropy-garden-eye-voice-v1';
 
-let enabled = false;
+function loadEyeVoicePref() {
+    try {
+        const raw = localStorage.getItem(EYE_VOICE_PREF_KEY);
+        // Default ON for first visit; remember explicit off/on after that.
+        if (raw === null) return true;
+        return raw === '1';
+    } catch {
+        return true;
+    }
+}
+
+function saveEyeVoicePref(on) {
+    try {
+        localStorage.setItem(EYE_VOICE_PREF_KEY, on ? '1' : '0');
+    } catch {
+        /* private mode / quota */
+    }
+}
+
+let enabled = loadEyeVoicePref();
 let button;
 let failure = '';
 /** @type {'idle'|'loading'|'speaking'} */
@@ -329,6 +349,23 @@ export function initEyeVoice() {
     });
     modeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
+    const unlockAudio = () => {
+        if (!enabled || !supported) return;
+        getAudioCtx();
+        ensureEspeak().catch(() => {
+            failure = 'speech-failed';
+            syncButton();
+        });
+    };
+
+    // Browsers need a gesture before AudioContext / WASM playback.
+    if (enabled) {
+        const unlockOnce = () => unlockAudio();
+        window.addEventListener('pointerdown', unlockOnce, { once: true, passive: true });
+        window.addEventListener('keydown', unlockOnce, { once: true });
+        window.addEventListener('touchstart', unlockOnce, { once: true, passive: true });
+    }
+
     button.addEventListener('click', () => {
         // Click while speaking → stop current line, stay enabled.
         if (enabled && playerState === 'speaking') {
@@ -337,15 +374,16 @@ export function initEyeVoice() {
         }
         enabled = !enabled;
         failure = '';
+        saveEyeVoicePref(enabled);
         syncButton();
         if (enabled) {
             if (document.body.classList.contains('singularity-active')) return;
-            // User gesture unlocks AudioContext + starts WASM fetch.
-            getAudioCtx();
+            unlockAudio();
             lastComment = '';
             ensureEspeak().catch(() => {
                 failure = 'speech-failed';
                 enabled = false;
+                saveEyeVoicePref(false);
                 syncButton();
             });
             if (!readVisibleComment()) speakEyeComment({ text: 'Eye voice enabled.' });
