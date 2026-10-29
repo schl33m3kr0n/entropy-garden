@@ -39,9 +39,24 @@ export function usesIosCipherGlyphs() {
     return perf.isIOS || document.body?.classList.contains('ios-ui');
 }
 
-/** Flat green wheel only on iOS. Desktop Safari gets Firefox’s conic/radial color field. */
+/** Flat green/red wheel on iOS only. */
 export function usesLiteCipherWheelPaint() {
     return usesIosCipherGlyphs();
+}
+
+/** Desktop Safari: solid white cipher wheel (not Firefox’s conic rainbow). */
+export function usesWhiteCipherWheelPaint() {
+    return perf.isSafari && !perf.isIOS && !document.body?.classList.contains('ios-ui');
+}
+
+/** Flat fill/stroke for lite (green) or desktop-Safari (white) wheels. */
+export function cipherWheelFlatRgba(alpha, { corrupted = false } = {}) {
+    if (usesWhiteCipherWheelPaint()) {
+        // White needs more opacity than neon green to read on the void.
+        const a = Math.min(1, alpha < 0.2 ? 0.4 : alpha < 0.5 ? 0.9 : alpha);
+        return corrupted ? `rgba(255, 0, 85, ${a})` : `rgba(255, 255, 255, ${a})`;
+    }
+    return corrupted ? `rgba(255, 0, 85, ${alpha})` : `rgba(0, 255, 0, ${alpha})`;
 }
 
 export function pickCipherChar() {
@@ -60,7 +75,7 @@ function applyPerfNumbers() {
     const saf = perf.isSafari;
     const mob = perf.isMobile;
 
-    // liteGfx is iOS-only so desktop Safari keeps the Firefox conic wheel paint.
+    // liteGfx is iOS-only; desktop Safari uses a solid white wheel instead of conic.
     perf.liteGfx = ios;
     perf.dprCap = ios ? 1 : (saf ? 1.5 : (mob ? 1.5 : 2));
     perf.spawnPerFrame = rm ? 12 : (ios ? 2 : (saf ? 4 : (mob ? 4 : 8)));

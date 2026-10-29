@@ -6,6 +6,8 @@ import {
     syncPanopticonRainbow,
     usesIosCipherGlyphs,
     usesLiteCipherWheelPaint,
+    usesWhiteCipherWheelPaint,
+    cipherWheelFlatRgba,
     panopticonEl,
     syncGodModeTriangleSize,
 } from '../core/shared.js';
@@ -279,8 +281,8 @@ function drawClockHandSymbol(img, angleDeg, radius, size, cx, cy) {
     sctx.drawImage(img, 0, 0, s, s);
     sctx.globalCompositeOperation = 'source-in';
 
-    if (usesLiteCipherWheelPaint()) {
-        sctx.fillStyle = isCorrupted ? 'rgba(255, 0, 85, 0.95)' : 'rgba(0, 255, 0, 0.95)';
+    if (usesLiteCipherWheelPaint() || usesWhiteCipherWheelPaint()) {
+        sctx.fillStyle = cipherWheelFlatRgba(0.95, { corrupted: isCorrupted });
     } else {
         // Place the wheel conic origin so this glyph samples the same hue as neighbors
         const gcx = s / 2 - Math.cos(rad) * radius;
@@ -361,8 +363,8 @@ function wheelConicGradient(cx, cy, alpha) {
 
 function drawChannelRings(cx, cy) {
     ctx.lineCap = 'round';
-    ctx.strokeStyle = usesLiteCipherWheelPaint()
-        ? (isCorrupted ? 'rgba(255, 0, 85, 0.16)' : 'rgba(0, 255, 0, 0.16)')
+    ctx.strokeStyle = (usesLiteCipherWheelPaint() || usesWhiteCipherWheelPaint())
+        ? cipherWheelFlatRgba(0.16, { corrupted: isCorrupted })
         : wheelConicGradient(cx, cy, 0.16);
     ctx.lineWidth = perf.isMobile ? 1 : 1.25;
 
@@ -388,8 +390,8 @@ function drawCipherWheels(cx, cy) {
 
     const perGlyphIosColors = usesIosCipherGlyphs();
     if (!perGlyphIosColors) {
-        ctx.fillStyle = usesLiteCipherWheelPaint()
-            ? (isCorrupted ? 'rgba(255, 0, 85, 0.24)' : 'rgba(0, 255, 0, 0.24)')
+        ctx.fillStyle = (usesLiteCipherWheelPaint() || usesWhiteCipherWheelPaint())
+            ? cipherWheelFlatRgba(0.24, { corrupted: isCorrupted })
             : wheelConicGradient(cx, cy, 0.24);
     }
 

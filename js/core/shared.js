@@ -48,6 +48,8 @@ export {
     chars,
     usesIosCipherGlyphs,
     usesLiteCipherWheelPaint,
+    usesWhiteCipherWheelPaint,
+    cipherWheelFlatRgba,
     pickCipherChar,
     perf,
     applyPerfClass,
