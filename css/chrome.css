@@ -531,6 +531,12 @@ body.corrupted #panopticon-eye.panopticon-coffee-time .panopticon-coffee-icon {
     mix-blend-mode: multiply;
 }
 
+/* WebKit often drops SVG gradient fills when mix-blend-mode is set — keep the radial. */
+body.perf-safari .panopticon-socket-inlay-rim {
+    mix-blend-mode: normal;
+    opacity: 0.9;
+}
+
 body.god-mode .panopticon-socket-fill,
 body.god-mode .panopticon-socket-inlay,
 body.god-mode .panopticon-socket-inlay-rim {

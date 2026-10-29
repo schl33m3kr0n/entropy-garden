@@ -34,11 +34,12 @@ const IOS_CIPHER_CHARS =
     CIPHER_NUMERALS_LITE +
     '!?@#$%&*_+=<>[]{}|/~';
 
-/** Smaller glyph pool + flat wheel paint on WebKit (iOS / Safari). */
+/** Smaller glyph pool on real iOS / ios-ui — desktop Safari can use the full set. */
 export function usesIosCipherGlyphs() {
-    return perf.liteGfx || document.body?.classList.contains('ios-ui');
+    return perf.isIOS || document.body?.classList.contains('ios-ui');
 }
 
+/** Flat green wheel only on iOS. Desktop Safari gets Firefox’s conic/radial color field. */
 export function usesLiteCipherWheelPaint() {
     return usesIosCipherGlyphs();
 }
@@ -59,16 +60,17 @@ function applyPerfNumbers() {
     const saf = perf.isSafari;
     const mob = perf.isMobile;
 
-    perf.liteGfx = ios || saf;
-    perf.dprCap = ios ? 1 : (saf ? 1 : (mob ? 1.5 : 2));
-    perf.spawnPerFrame = rm ? 12 : (ios ? 2 : (saf ? 3 : (mob ? 4 : 8)));
-    perf.steadySwapsPerFrame = rm ? 8 : (ios ? 4 : (saf ? 6 : (mob ? 12 : 30)));
+    // liteGfx is iOS-only so desktop Safari keeps the Firefox conic wheel paint.
+    perf.liteGfx = ios;
+    perf.dprCap = ios ? 1 : (saf ? 1.5 : (mob ? 1.5 : 2));
+    perf.spawnPerFrame = rm ? 12 : (ios ? 2 : (saf ? 4 : (mob ? 4 : 8)));
+    perf.steadySwapsPerFrame = rm ? 8 : (ios ? 4 : (saf ? 12 : (mob ? 12 : 30)));
     // iOS: draw every frame — skip 2 made wheel spin stutter at ~20fps
     perf.matrixFrameSkip = rm
         ? 0
-        : (ios ? 0 : (saf ? 2 : (mob ? 1 : 0)));
+        : (ios ? 0 : (saf ? 1 : (mob ? 1 : 0)));
     perf.panopticonFrameSkip = rm ? 0 : (saf && !ios ? 1 : 0);
-    perf.maxCipherRings = ios ? 7 : (saf ? 8 : null);
+    perf.maxCipherRings = ios ? 7 : null;
     perf.cellSpacing = mob ? 1.45 : 1.65;
 }
 
@@ -76,7 +78,7 @@ export const perf = {
     isIOS,
     isSafari,
     isMobile,
-    liteGfx: isIOS || isSafari,
+    liteGfx: isIOS,
     prefersReducedMotion: reducedMotionQuery.matches,
     dprCap: 2,
     spawnPerFrame: 8,
@@ -90,7 +92,7 @@ export const perf = {
 applyPerfNumbers();
 
 export function applyPerfClass() {
-    document.body.classList.toggle('perf-lite', isMobile || perf.prefersReducedMotion || perf.isSafari);
+    document.body.classList.toggle('perf-lite', isMobile || perf.prefersReducedMotion || isIOS);
     document.body.classList.toggle('perf-safari', perf.isSafari);
 }
 
