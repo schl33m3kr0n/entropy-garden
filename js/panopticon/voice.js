@@ -259,6 +259,10 @@ const EYE_PRONUNCIATIONS = [
     [/\bkanye\s+west\b/gi, "[[k'A:njeI]] west"],
     [/\bkanye('s)?\b/gi, "[[k'A:njeI]]$1"],
     [/\bbodhi\b/gi, 'bo dee'],
+    // Verb live/lives = short i; adjective live only before "feed"
+    [/\blive\s+feed\b/gi, 'liev feed'],
+    [/\blives\b/gi, 'livz'],
+    [/\blive\b/gi, 'liv'],
 ];
 
 function applyEyePronunciations(text) {
