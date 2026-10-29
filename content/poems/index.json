@@ -277,7 +277,7 @@
       ]
     ],
     "order" : 4,
-    "text" : "richards\n\nyou meet richards every day\nwho can crawl under your skin\nthey have quite a funny way\nof fouling the mood you’re in\n\nrichards can smile\nrichards can frown\nthey can turn a whole room \nupside down\n\nbut don't turn all black and blue\nrichards can still be people\njust the kind of people you—\nwish would eat herbs most lethal",
+    "text" : "richards\n\nyou meet richards every day\nwho can crawl under your skin\nthey have quite a funny way\nof fouling the mood you’re in\n\nrichards can smile\nrichards can frown\nthey can turn a whole room \nupside down\n\nbut don't turn all black and blue  \nrichards can still be people  \njust the kind of people you  \nwish would eat herbs most lethal",
     "title" : "richards",
     "tone" : "safe"
   },
@@ -1383,23 +1383,39 @@
       ],
       [
         43.0447,
-        46.0564
+        43.9984
       ],
       [
-        46.4764,
-        49.9371
+        44.4184,
+        46.642
       ],
       [
-        50.3571,
-        52.5937
+        47.062,
+        48.678
       ],
       [
-        53.0137,
-        55.5429
+        49.098,
+        51.2085
+      ],
+      [
+        51.6285,
+        52.8924
+      ],
+      [
+        53.3124,
+        54.4102
+      ],
+      [
+        54.8302,
+        55.8081
+      ],
+      [
+        56.2281,
+        57.9826
       ]
     ],
     "order" : 17,
-    "text" : "buying into the illusion\n\nwould you run a lemonade stand with a partner\nand take less than half a percent of the profit?\nno?\n\ndoes the thought of owning a curated mansion while people\nstarve on the side of the street bring a smile to your face?\nno?\n\nare you ready to be commodified \ninto the abyss of status and infinite wealth?\nno?\n\nwell too bad\nyou’ve already been integrated\n\nthe machine requires your blood sweat & tears\nyour time allegiance & commitment\nyour unflinching devotion sacrifice & obedience\nyour money programming & ignorance\nyour assets skills and productivity\nyour complacency your apathy your complicity\n\nwhat do you get in return?\n\na stable job that can barely pay rent and essentials\na motley of shiny screens anesthetizing you into compliance\na promising future after your burial\na pleasure pod in exchange for your silence",
+    "text" : "buying into the illusion\n\nwould you run a lemonade stand with a partner\nand take less than half a percent of the profit?\nno?\n\ndoes the thought of owning a curated mansion while people\nstarve on the side of the street bring a smile to your face?\nno?\n\nare you ready to be commodified \ninto the abyss of status and infinite wealth?\nno?\n\nwell too bad\nyou’ve already been integrated\n\nthe machine requires your blood sweat & tears\nyour time allegiance & commitment\nyour unflinching devotion sacrifice & obedience\nyour money programming & ignorance\nyour assets skills and productivity\nyour complacency your apathy your complicity\n\nwhat do you get in return?\n\na stable job  \nthat can barely pay rent and essentials  \na motley of shiny screens   \nanesthetizing you into compliance  \na promising future   \nafter your burial  \na pleasure pod   \nin exchange for your silence",
     "title" : "buying into the illusion",
     "tone" : "safe"
   },

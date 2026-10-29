@@ -17,7 +17,7 @@ richards can frown
 they can turn a whole room 
 upside down
 
-but don't turn all black and blue
-richards can still be people
-just the kind of people you—
+but don't turn all black and blue  
+richards can still be people  
+just the kind of people you  
 wish would eat herbs most lethal

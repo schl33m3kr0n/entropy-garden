@@ -31,7 +31,11 @@ your complacency your apathy your complicity
 
 what do you get in return?
 
-a stable job that can barely pay rent and essentials
-a motley of shiny screens anesthetizing you into compliance
-a promising future after your burial
-a pleasure pod in exchange for your silence
+a stable job  
+that can barely pay rent and essentials  
+a motley of shiny screens   
+anesthetizing you into compliance  
+a promising future   
+after your burial  
+a pleasure pod   
+in exchange for your silence
