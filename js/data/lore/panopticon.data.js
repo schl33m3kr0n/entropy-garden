@@ -1236,7 +1236,7 @@
             "welcome to the garden: the CIA won a bet over the FBI that you'd click initialize",
             "welcome to the garden: the weed brownies are now everybody else’s problem",
             "welcome to the garden: why don’t you microdose a personality?",
-            "welcome to the garden: Daniel gets separation anxiety when he’s not inhaling toxic chemicals into his lungs",
+            "welcome to the garden: Daniel gets separation anxiety when he’s not filling his lungs with toxic chemicals",
         ]        
     },
         reroll: {
