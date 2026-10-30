@@ -427,6 +427,16 @@
         "you made it this far. that has to count for something...",
         "ngl, i didn’t think you would get this far either if that means anything",
         "we had to adjust our quarterly strategy when you stepped in. i won’t say whether that’s a good or bad thing",
+        "sun’s out, productivity’s optional",
+        "peak daylight hours for avoiding your responsibilities",
+        "somewhere a meeting is starting without you. cherish this",
+        "lunch was an hour ago and you still haven’t decided who you are",
+        "the sun is watching. so are we. different motives",
+        "midday is when the plants gossip hardest. try not to interrupt",
+        "clocking in spiritually while clocking out of everything else",
+        "beautiful day to pretend your inbox isn’t on fire",
+        "afternoon already? time is a suggestion and you’re late for it",
+        "the daylight shift asked me to tell you to hydrate. i’m telling you to leave",
     ],
     panopticonIdleCommentsDayGritty: [
         "shouldn't you be busy working your dead-end job or something?",
@@ -434,6 +444,10 @@
         "oh you're an omnivore, huh? bet you won't eat poop… poser",
         "tragedies come in 3’s, don’t know what that means for the Catholic Church",
         "tragedies come in 3's, that's how we ended up with the Hangover trilogy",
+        "calling out of work to stare at a digital eye is a bold career move",
+        "your boss thinks you’re in a stand-up. we both know you’re upright at best",
+        "day drinkers have meetings. you have this. growth",
+        "HR called it a wellness break. we called it enabling",
     ],
     panopticonIdleCommentsEveningSafe: [
         "go home to your family, dude",
@@ -442,6 +456,14 @@
         "do you really need a late night snack?",
         "so are you gonna, like... eat something or nah?",
         "have you had any water recently? it's good to stay hydrated",
+        "dinner hour. the garden is not a side dish",
+        "golden hour for regretting how you spent the afternoon",
+        "the streetlights are warming up. so should your exit strategy",
+        "evening shift starts with denial and ends with leftovers",
+        "if you’re still here at dinner, the microwave is judging you too",
+        "sunset’s free. staying is a choice we will mock gently",
+        "family dinner is optional. hydration is not. pick one battle",
+        "the day clocked out. you did not. noted",
     ],
     panopticonIdleCommentsEveningGritty: [
         "yeah, so uhh, can we perhaps schedule this mental breakdown for next Saturday?",
@@ -449,21 +471,52 @@
         "i mean, at least you're not yelling slurs in the COD lobby",
         "the night approaches, have you taken your silly billy pills yet?",
         "it has come to my attention that she did indeed farted on my dih",
+        "skipping dinner to argue with a website is a new kind of fasting",
+        "your blood sugar is dropping and so is our patience",
+        "prime time TV is happening without you. tragic, really",
+        "eat something before the raccoons start offering alternatives",
     ],
-    /** Local hour → line (23 = 11pm … 7 = 7am). Hour 2 needs minPostMidnightVisits tab returns after midnight. */
+    /** Local hour → line or line[] (23 = 11pm … 7 = 7am). Hour 2 needs minPostMidnightVisits. */
     panopticonLateNightHourlyComments: {
-        23: "humans were never meant to be creatures of the night. you don't have to be an exception",
-        0: "i'm flattered to count as an obligation in your timeline",
-        1: "you're still here?",
+        23: [
+            "humans were never meant to be creatures of the night. you don't have to be an exception",
+            "eleven pm and you’re still negotiating with the void. bold",
+        ],
+        0: [
+            "i'm flattered to count as an obligation in your timeline",
+            "midnight. new day, same poor decisions",
+        ],
+        1: [
+            "you're still here?",
+            "1am. the plants are asleep. be more like the plants",
+        ],
         2: {
             minPostMidnightVisits: 3,
-            text: "i miss all-nighters as much as the next guy, but this is getting excessive",
+            texts: [
+                "i miss all-nighters as much as the next guy, but this is getting excessive",
+                "2am encore. the ticket stubs are stacking",
+            ],
         },
-        3: "i respect the commitment tbh",
-        4: "yeah, they're still larping as a vampire",
-        5: "feeling comfy in your batcave, champ?",
-        6: "coffee's not gonna fix this, bro",
-        7: "you beat the moon at its own game. your reward is delayed reactions and crankiness. congratulations",
+        3: [
+            "i respect the commitment tbh",
+            "3am club membership renewed without your consent",
+        ],
+        4: [
+            "yeah, they're still larping as a vampire",
+            "4am. even the raccoons filed for overtime",
+        ],
+        5: [
+            "feeling comfy in your batcave, champ?",
+            "5am. birds are warming up. you are cooling off wrong",
+        ],
+        6: [
+            "coffee's not gonna fix this, bro",
+            "6am. coffee won’t resurrect what the night took",
+        ],
+        7: [
+            "you beat the moon at its own game. your reward is delayed reactions and crankiness. congratulations",
+            "7am. you won the night. the receipt is your personality today",
+        ],
     },
     panopticonIdleCommentsChristmasSafe: [
         "the secret elites want you to not only be holly, but jolly this Christmas. brother, it's the middle of winter. the bills are due",

@@ -753,6 +753,13 @@ function notePanopticonPostMidnightReturn(now = new Date()) {
     if (hour >= 0 && hour < 7) panopticonPostMidnightVisits += 1;
 }
 
+function pickFromLateNightLines(lines) {
+    if (!Array.isArray(lines) || !lines.length) return null;
+    const fresh = lines.filter((t) => !panopticonTodShownThisVisit.has(t));
+    const pool = fresh.length ? fresh : lines;
+    return pool[Math.floor(Math.random() * pool.length)] || null;
+}
+
 function pickPanopticonLateNightComment(now = new Date()) {
     if (!isPanopticonLateNightHour(now)) return null;
     const hour = getPanopticonLocalHour(now);
@@ -761,10 +768,13 @@ function pickPanopticonLateNightComment(now = new Date()) {
     const entry = table[hour] ?? table[String(hour)];
     if (!entry) return null;
     if (typeof entry === 'string') return entry;
+    if (Array.isArray(entry)) return pickFromLateNightLines(entry);
     if (entry.minPostMidnightVisits != null) {
         if (panopticonPostMidnightVisits < entry.minPostMidnightVisits) return null;
+        if (Array.isArray(entry.texts)) return pickFromLateNightLines(entry.texts);
         return entry.text ?? null;
     }
+    if (Array.isArray(entry.texts)) return pickFromLateNightLines(entry.texts);
     return entry.text ?? null;
 }
 
