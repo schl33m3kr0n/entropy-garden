@@ -3,7 +3,6 @@
     g.lorePools = g.lorePools || {};
     Object.assign(g.lorePools, {
     panopticonIdleCommentsSafe: [
-
         "whatcha lookin' at?",
         "hi, Squidward",
         "are you feeling it now, Mr. Krabs?",
@@ -416,6 +415,11 @@
         "conspiracy implies there was a thought-out plan",
         "the most disturbing part of our unpaid intern's manifesto was how coherent it was",
         "don't ask Carl about Operation Stripes",
+        "the garden runs on the staff's shadow complexes",
+        "join the dark side. it's a lot cooler in the shadows",
+        "even the journalists have to suspend disbelief when they report on us",
+        "the fish adds a distinct flavor to the percolator",
+        "due to budget cuts, we had to reduce the raccoons' salaries. they've been sending threats ever since",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",
@@ -560,10 +564,12 @@
         "yes, we have an OnlyFans",
         "oh, so when Superman has x-ray vision, he's a hero, but when I do it, I'm committing a 'gross breach of privacy'",
         "so what are you wearing?",
+        "one can achieve ego death without drugs. just ask my dominatrix",
         "Leak, Lick, Leave, preferably in that order",
         "we listen and we don't judge: i like my catheter on the rocks",
         "i'm happiest when my country donates billions of dollars overseas but craps out on affordable healthcare",
         "the state says i’m an individual. i started to have doubts when the grizzly bear entered the room",
+        "if i have 12 quarters and 5 dimes, how much would i have to get back custody of the kids?",
     ],
     panopticonReturnCommentsSafe: [
         "missed me?",
@@ -977,6 +983,7 @@
             "welcome to the garden: we lured in the interns with full-ride scholarships",
             "welcome to the garden: morale has been low since the disintegration incident",
             "welcome to the garden: we hope you brought a barf bag",
+            "welcome to the garden: your joy fuels the interns",
             "welcome to the garden: our ice cream machine is broken",
             "welcome to the garden: please do not disturb Mr. Whiskers during his allocated two-hour break",
             "welcome to the garden: yeah, we use tap water, so what?",
