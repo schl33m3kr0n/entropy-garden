@@ -370,7 +370,7 @@
         "when life gives you lemons, kindly back away slowly. then run",
         "we assure you that the hummingbirds are not wired",
         "police issued warrants for management’s arrest, but they can’t cuff what they can’t see",
-        "the victorian house was here before all of this. anytime the feds invoked eminent domain, their top guy would disappear",
+        "the Victorian house was here before all of this. anytime the feds invoked eminent domain, their top guy would disappear",
         "if you find a lost tour guide, please return them to this realm of existence for a 25% coupon on your next visit",
         "the capstone is supposed to float like that. please don’t ask how",
         "we are not liable for damages to your vehicle during your visit",
@@ -414,6 +414,8 @@
         "the convulsing is expected. stop whining",
         "your doppelgänger is waiting in the basement",
         "conspiracy implies there was a thought-out plan",
+        "the most disturbing part of our unpaid intern's manifesto was how coherent it was",
+        "don't ask Carl about Operation Stripes",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",
