@@ -56,6 +56,9 @@ import {
     panopticonEl,
     togglePanopticonMuted,
     syncPanopticonMuteButton,
+    isCoffeeModeEnabled,
+    setCoffeeModeEnabled,
+    syncPanopticonMorningCoffee,
 } from './core/shared.js';
 import {
     time,
@@ -1188,6 +1191,28 @@ function resetTimeline() {
 
 
 // --- CORRUPTED MODE TOGGLE ---
+function syncCoffeeModeButton() {
+    const btn = document.getElementById('panopticon-coffee-btn');
+    if (!btn) return;
+    const on = isCoffeeModeEnabled();
+    btn.textContent = on ? 'COFFEE MODE ON' : 'COFFEE MODE';
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+
+function toggleCoffeeModeSetting() {
+    const on = setCoffeeModeEnabled(!isCoffeeModeEnabled());
+    syncCoffeeModeButton();
+    syncPanopticonMorningCoffee();
+    if (on) {
+        endIdleDissociation();
+        pushTerminalLog('> COFFEE MODE: eye stays up for an hour before sleep');
+    } else {
+        pushTerminalLog('> COFFEE MODE OFF');
+    }
+    scheduleIdleDissociation();
+    playSound(sfx.click);
+}
+
 function togglePanopticonMuteSetting() {
     const muted = togglePanopticonMuted();
     playSound(sfx.click);
@@ -1623,6 +1648,12 @@ function bindDomEvents() {
     if (panopticonMuteBtn) {
         panopticonMuteBtn.addEventListener('click', togglePanopticonMuteSetting);
     }
+    syncCoffeeModeButton();
+    syncPanopticonMorningCoffee();
+    const panopticonCoffeeBtn = document.getElementById('panopticon-coffee-btn');
+    if (panopticonCoffeeBtn) {
+        panopticonCoffeeBtn.addEventListener('click', toggleCoffeeModeSetting);
+    }
     syncGardenBirdsMuteButton();
     const birdsMuteBtn = document.getElementById('birds-mute-btn');
     if (birdsMuteBtn) {
@@ -1988,6 +2019,7 @@ function startGlitchLoop() {
 
 // --- IDLE DISSOCIATION ENGINE ---
 const IDLE_DISSOCIATION_MS_DEFAULT = 120000; // 2 minutes of inactivity
+const IDLE_DISSOCIATION_MS_COFFEE = 60 * 60 * 1000; // coffee mode: 1 hour before sleep
 const IDLE_DISSOCIATION_ARM_GRACE_MS = 1200; // ignore filter-induced pointer noise
 const IDLE_PTR_RESET_PX = 10; // ignore trackpad/OS jitter when arming the idle timer
 const IDLE_PTR_WAKE_PX = 48; // require a real move to wake from sleep
@@ -1999,13 +2031,15 @@ let idleLastPtr = null;
 function idleDissociationDelayMs() {
     try {
         const raw = new URLSearchParams(globalThis.location?.search || '').get('idle');
-        if (raw == null || raw === '') return IDLE_DISSOCIATION_MS_DEFAULT;
-        const sec = Number(raw);
-        if (!Number.isFinite(sec) || sec <= 0) return IDLE_DISSOCIATION_MS_DEFAULT;
-        return Math.max(1, Math.round(sec * 1000));
+        if (raw != null && raw !== '') {
+            const sec = Number(raw);
+            if (Number.isFinite(sec) && sec > 0) return Math.max(1, Math.round(sec * 1000));
+        }
     } catch {
-        return IDLE_DISSOCIATION_MS_DEFAULT;
+        /* non-browser */
     }
+    if (isCoffeeModeEnabled()) return IDLE_DISSOCIATION_MS_COFFEE;
+    return IDLE_DISSOCIATION_MS_DEFAULT;
 }
 
 function idlePointerCoords(e) {

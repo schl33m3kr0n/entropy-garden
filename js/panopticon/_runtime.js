@@ -1481,11 +1481,33 @@ export function isPanopticonEveningIdleHour(now = new Date()) {
 let panopticonDayPartTimer = null;
 let panopticonCoffeeTimer = null;
 
+const COFFEE_MODE_KEY = 'entropy-garden-coffee-mode-v1';
+
+/** Settings toggle: keep the eye caffeinated (longer idle before sleep). */
+export function isCoffeeModeEnabled() {
+    try {
+        return localStorage.getItem(COFFEE_MODE_KEY) === '1';
+    } catch {
+        return false;
+    }
+}
+
+export function setCoffeeModeEnabled(on) {
+    try {
+        localStorage.setItem(COFFEE_MODE_KEY, on ? '1' : '0');
+    } catch {
+        /* private mode / quota */
+    }
+    syncPanopticonMorningCoffee();
+    return isCoffeeModeEnabled();
+}
+
 /**
  * Local time 09:15–09:30 — coffee cup on the eye.
- * Overrides: ?coffee / ?previewCoffee=1
+ * Overrides: ?coffee / ?previewCoffee=1 · settings COFFEE MODE
  */
 export function isPanopticonMorningCoffeeTime(now = new Date()) {
+    if (isCoffeeModeEnabled()) return true;
     try {
         const params = new URLSearchParams(globalThis.location?.search || '');
         if (params.has('coffee') || params.get('previewCoffee') === '1') return true;
@@ -1523,7 +1545,7 @@ function schedulePanopticonCoffeeSync() {
     }, msUntilNextCoffeeBoundary());
 }
 
-function syncPanopticonMorningCoffee() {
+export function syncPanopticonMorningCoffee() {
     panopticonEl?.classList.toggle(
         'panopticon-coffee-time',
         isPanopticonMorningCoffeeTime(),
