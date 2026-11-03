@@ -83,9 +83,9 @@ bash scripts/dev/serve-local.sh
 
 This experience includes rapid flashing, high-contrast strobing, and glitch effects. A photosensitivity warning is shown before initialize. Use **SAFE MODE** if you want a calmer pass; **chaos mode** leans into the grit.
 
-## Hello World installation
+## The Void installation
 
-Open `pages/hello-world.html`, or choose **HELLO WORLD** in the garden sidebar.
+Open `pages/the-void.html`, or choose **THE VOID** in the garden sidebar.
 This page shares garden tokens (void black, neon green, Avenir) and light HUD chrome
 with the main SPA, while keeping the three-tier pyramid, blinking capstone eye,
 horizontal helix, and fading alchemical symbols as a self-contained canvas piece.
