@@ -70,37 +70,44 @@
     .chrome-tl { top: max(16px, env(safe-area-inset-top)); left: max(18px, env(safe-area-inset-left)); }
     .chrome-tr { top: max(16px, env(safe-area-inset-top)); right: max(18px, env(safe-area-inset-right)); text-align: right; }
     .chrome-bl { bottom: max(16px, env(safe-area-inset-bottom)); left: max(18px, env(safe-area-inset-left)); }
-    .chrome-br {
-      bottom: max(16px, env(safe-area-inset-bottom));
-      right: max(18px, env(safe-area-inset-right));
-      text-align: right;
-      pointer-events: none;
-    }
     .chrome strong { font-weight: 600; color: rgba(0, 255, 0, 0.92); }
     .chrome .dim { color: rgba(0, 255, 0, 0.42); letter-spacing: 0.18em; }
 
     .void-clock {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-      min-width: 12ch;
+      align-items: center;
+      gap: 10px;
+      margin: 0 16px 22px;
       transition: opacity 0.35s ease;
     }
-    .void-clock.is-jumping { opacity: 0.35; }
+    .void-clock.is-jumping { opacity: 0.28; }
     .void-clock-face {
-      font-size: 0.78rem;
-      letter-spacing: 0.12em;
-      color: rgba(0, 255, 0, 0.9);
-      text-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
+      font-size: clamp(28px, 6.5vw, 72px);
+      font-weight: 500;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: #fff;
+      text-shadow:
+        0 0 24px rgba(255, 255, 255, 0.12),
+        0 0 1px rgba(255, 255, 255, 0.5);
       font-variant-numeric: tabular-nums;
+      max-width: min(94vw, 920px);
+      word-break: break-word;
+    }
+    .void-clock-face.is-extreme {
+      letter-spacing: -0.02em;
+      text-shadow:
+        0 0 28px rgba(0, 255, 0, 0.22),
+        0 0 2px rgba(255, 255, 255, 0.55);
     }
     .void-clock-date {
-      font-size: 0.62rem;
-      letter-spacing: 0.2em;
-      color: rgba(0, 255, 0, 0.45);
-      max-width: min(42vw, 220px);
-      line-height: 1.35;
+      font-size: clamp(0.62rem, 1.8vw, 0.78rem);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.42);
+      max-width: min(90vw, 420px);
+      line-height: 1.4;
     }
 
     .void-comment {
@@ -128,18 +135,6 @@
       width: 100%;
       text-align: center;
       padding: 72px 20px 88px;
-    }
-
-    h1 {
-      margin: 0 16px 22px;
-      font-size: clamp(42px, 9vw, 96px);
-      font-weight: 500;
-      letter-spacing: -0.045em;
-      line-height: 0.95;
-      color: #f4fff4;
-      text-shadow:
-        0 0 24px rgba(0, 255, 0, 0.18),
-        0 0 1px rgba(255, 255, 255, 0.4);
     }
 
     .sculptures {
@@ -201,16 +196,12 @@
   <div class="chrome chrome-bl" aria-hidden="true">
     <span class="dim">obs · live</span>
   </div>
-  <div class="chrome chrome-br" aria-live="polite">
-    <div class="void-clock" id="void-clock">
-      <div class="void-clock-face" id="void-clock-face">✶ −13.8 BYA</div>
-      <div class="void-clock-date" id="void-clock-date">ℵ₀ · ∅ · ⊗</div>
-    </div>
-  </div>
-
   <canvas id="sigils" aria-hidden="true"></canvas>
   <main>
-    <h1>hello world</h1>
+    <h1 class="void-clock" id="void-clock" aria-live="polite">
+      <span class="void-clock-face" id="void-clock-face">Tue · Nov 4 · 2025</span>
+      <span class="void-clock-date" id="void-clock-date">· just a Tuesday ·</span>
+    </h1>
     <div class="sculptures">
       <canvas id="helix" role="img" aria-label="A horizontal spinning white double helix beneath the title">A spinning double helix.</canvas>
       <canvas id="pyramid" role="img" aria-label="A rotating black pyramid in three slightly separated tiers making random quarter turns with white edges and an eye icon on the capstone">A rotating three-tier pyramid with white edges.</canvas>
@@ -261,8 +252,57 @@
       "welcome to the void: the only instant of persistence",
     ];
 
-    /** Cosmic clock eras: Big Bang → heat death, with obscure glyphs. */
-    const COSMIC_EPOCHS = [
+    /** Mundane dates pad the pool so cosmic extremes hit harder. */
+    const MUNDANE_EPOCHS = [
+      { when: 'Tue · Nov 4 · 2025', note: 'just a Tuesday' },
+      { when: 'Wed · 9:41 AM', note: 'phone lock screen hour' },
+      { when: 'Thu · after lunch', note: 'digesting' },
+      { when: 'Fri · 4:59 PM', note: 'almost weekend' },
+      { when: 'Mon · morning', note: 'again' },
+      { when: 'last Tuesday', note: 'still unpaid' },
+      { when: 'next Thursday', note: 'calendar invite pending' },
+      { when: 'yesterday', note: 'already gone' },
+      { when: 'tomorrow morning', note: 'alarm set' },
+      { when: 'noonish', note: 'sandwich window' },
+      { when: 'half past whenever', note: 'clocks disagree' },
+      { when: 'Apr 15', note: 'tax day' },
+      { when: 'Jan 1 · 12:01 AM', note: 'resolution already broken' },
+      { when: 'Feb 29 · 2028', note: 'leap day errand' },
+      { when: 'Oct 32', note: 'invalid; proceed anyway' },
+      { when: 'Dec 31 · 11:59 PM', note: 'countdown energy' },
+      { when: '1997', note: 'dial-up nostalgia' },
+      { when: 'Y2K', note: 'everyone survived' },
+      { when: 'Q3', note: 'earnings call' },
+      { when: 'Black Friday', note: 'parking lot combat' },
+      { when: 'daylight saving again', note: 'who asked' },
+      { when: 'password expires Friday', note: 'you will forget' },
+      { when: 'oil change due', note: 'sticker on windshield' },
+      { when: 'dentist · 2:30', note: 'floss theater' },
+      { when: 'grocery run', note: 'milk and regret' },
+      { when: 'rush hour', note: 'standstill' },
+      { when: 'coffee o’clock', note: 'third cup' },
+      { when: '2 weeks notice', note: 'awkward hallway' },
+      { when: 'lease renewal', note: 'fine print' },
+      { when: 'last fiscal year', note: 'spreadsheet haunt' },
+      { when: 'midterms', note: 'caffeine cosmology' },
+      { when: 'spring cleaning', note: 'one drawer done' },
+      { when: 'your birthday · approx.', note: 'cake TBD' },
+      { when: 'five minutes ago', note: 'already lore' },
+      { when: 'the weekend', note: 'theoretical' },
+      { when: 'EST / PST', note: 'wrong call again' },
+      { when: 'Wed · Mar 12 · 2014', note: 'uneventful' },
+      { when: 'Sat · Aug 9 · 2003', note: 'also uneventful' },
+      { when: 'Sun · 7:12 AM', note: 'too early' },
+      { when: 'Thu · 3:14 PM', note: 'pi-adjacent boredom' },
+      { when: 'sometime this month', note: 'vague commitment' },
+      { when: 'end of the week', note: 'moving target' },
+      { when: 'before noon', note: 'optimistic' },
+      { when: 'after the meeting', note: 'another meeting' },
+      { when: 'hold music era', note: 'still on hold' },
+    ];
+
+    /** Extreme eras: Big Bang → heat death, with obscure glyphs. */
+    const EXTREME_EPOCHS = [
       { symbol: '✶', when: 't ≈ 0', note: 'Planck epoch' },
       { symbol: '⊙', when: '−13.8 BYA', note: 'big bang' },
       { symbol: '🜨', when: '−13.8 BYA + 10⁻³² s', note: 'inflation' },
@@ -288,6 +328,7 @@
     const voidClockEl = document.getElementById('void-clock');
     const voidClockFace = document.getElementById('void-clock-face');
     const voidClockDate = document.getElementById('void-clock-date');
+    let lastEpochKey = '';
 
     function pickVoid(list, avoid) {
       if (!list.length) return '';
@@ -313,13 +354,35 @@
       return matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
 
+    function pickEpoch() {
+      // Mostly mundane so extremes feel like a glitch in the calendar.
+      const useExtreme = Math.random() < 0.22;
+      const pool = useExtreme ? EXTREME_EPOCHS : MUNDANE_EPOCHS;
+      let epoch = pool[Math.floor(Math.random() * pool.length)];
+      let key = `${epoch.when}|${epoch.note}`;
+      let guard = 0;
+      while (key === lastEpochKey && guard++ < 8) {
+        epoch = pool[Math.floor(Math.random() * pool.length)];
+        key = `${epoch.when}|${epoch.note}`;
+      }
+      lastEpochKey = key;
+      return { epoch, extreme: useExtreme };
+    }
+
     function renderCosmicClock() {
-      const epoch = COSMIC_EPOCHS[Math.floor(Math.random() * COSMIC_EPOCHS.length)];
-      const face = `${epoch.symbol}  ${epoch.when}`;
-      const date = `${obscureTimeFragment()} · ${epoch.note} · ${obscureTimeFragment()}`;
+      const { epoch, extreme } = pickEpoch();
+      const face = extreme && epoch.symbol
+        ? `${epoch.symbol}  ${epoch.when}`
+        : epoch.when;
+      const date = extreme
+        ? `${obscureTimeFragment()} · ${epoch.note} · ${obscureTimeFragment()}`
+        : `· ${epoch.note} ·`;
       if (voidClockEl) voidClockEl.classList.add('is-jumping');
       globalThis.setTimeout?.(() => {
-        if (voidClockFace) voidClockFace.textContent = face;
+        if (voidClockFace) {
+          voidClockFace.textContent = face;
+          voidClockFace.classList.toggle('is-extreme', extreme);
+        }
         if (voidClockDate) voidClockDate.textContent = date;
         voidClockEl?.classList.remove('is-jumping');
       }, prefersReducedMotion() ? 0 : 280);
