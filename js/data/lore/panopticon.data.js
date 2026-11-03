@@ -438,6 +438,12 @@
         "the tears are real. the drink is compromised",
         "the tears are salty. add them to the fries",
         "management likes to issue demands in passive-aggressive hypotheticals",
+        "whoever writes all this stuff has short guy energy",
+        "the aliens called. they need you to come back to the mothership",
+        "the aliens called: they weren’t happy about Harambe",
+        "bird’s eye view is my default, but security cameras are easy to hack into",
+        "we asked the void what it thought about human history. it replied through our collective imaginations",
+        "get your ‘i got this shirt from the void’ shirt if you make it back",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",

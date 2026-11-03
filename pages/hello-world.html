@@ -70,8 +70,55 @@
     .chrome-tl { top: max(16px, env(safe-area-inset-top)); left: max(18px, env(safe-area-inset-left)); }
     .chrome-tr { top: max(16px, env(safe-area-inset-top)); right: max(18px, env(safe-area-inset-right)); text-align: right; }
     .chrome-bl { bottom: max(16px, env(safe-area-inset-bottom)); left: max(18px, env(safe-area-inset-left)); }
+    .chrome-br {
+      bottom: max(16px, env(safe-area-inset-bottom));
+      right: max(18px, env(safe-area-inset-right));
+      text-align: right;
+      pointer-events: none;
+    }
     .chrome strong { font-weight: 600; color: rgba(0, 255, 0, 0.92); }
     .chrome .dim { color: rgba(0, 255, 0, 0.42); letter-spacing: 0.18em; }
+
+    .void-clock {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      min-width: 12ch;
+      transition: opacity 0.35s ease;
+    }
+    .void-clock.is-jumping { opacity: 0.35; }
+    .void-clock-face {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      color: rgba(0, 255, 0, 0.9);
+      text-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
+      font-variant-numeric: tabular-nums;
+    }
+    .void-clock-date {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      color: rgba(0, 255, 0, 0.45);
+      max-width: min(42vw, 220px);
+      line-height: 1.35;
+    }
+
+    .void-comment {
+      position: relative;
+      z-index: 3;
+      margin: 0 auto 8px;
+      max-width: min(92vw, 420px);
+      min-height: 2.8em;
+      padding: 0 12px;
+      font-size: clamp(0.68rem, 2.2vw, 0.78rem);
+      line-height: 1.45;
+      letter-spacing: 0.04em;
+      color: rgba(200, 255, 210, 0.78);
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.18);
+      opacity: 0;
+      transition: opacity 0.55s ease;
+    }
+    .void-comment.is-visible { opacity: 1; }
 
     #sigils { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
 
@@ -154,6 +201,12 @@
   <div class="chrome chrome-bl" aria-hidden="true">
     <span class="dim">obs · live</span>
   </div>
+  <div class="chrome chrome-br" aria-live="polite">
+    <div class="void-clock" id="void-clock">
+      <div class="void-clock-face" id="void-clock-face">✶ −13.8 BYA</div>
+      <div class="void-clock-date" id="void-clock-date">ℵ₀ · ∅ · ⊗</div>
+    </div>
+  </div>
 
   <canvas id="sigils" aria-hidden="true"></canvas>
   <main>
@@ -162,9 +215,148 @@
       <canvas id="helix" role="img" aria-label="A horizontal spinning white double helix beneath the title">A spinning double helix.</canvas>
       <canvas id="pyramid" role="img" aria-label="A rotating black pyramid in three slightly separated tiers making random quarter turns with white edges and an eye icon on the capstone">A rotating three-tier pyramid with white edges.</canvas>
     </div>
+    <p id="void-comment" class="void-comment" aria-live="polite"></p>
     <a class="garden-link" href="../index.html">← // return to the garden</a>
   </main>
   <script>
+    const VOID_WELCOMES = [
+      "welcome to the void: the uncomfortable silence is free of charge",
+      "welcome to the void: please have a seat while we do nothing in particular",
+      "welcome to the void she left behind",
+      "welcome to the void: object impermanence contemplated. fetal position assumed",
+      "welcome to the void: try our premium nothing experience!",
+      "welcome to the void: literally experience the sound of silence!",
+      "welcome to the void: feel the lack of presence from the comfort of your fancy rectangle!",
+      "welcome to the void: a representative will be with you in several eternities",
+      "welcome to the void: ruining mortal perception of time across generations",
+      "welcome to the void: a mobster’s best friend",
+      "welcome to the void: giving philosophers and mathematicians migraines since time immemorial",
+      "welcome to the void: a minimalist wet dream",
+      "welcome to the void: a blank sheet of paper is the point",
+      "welcome to the void: an offer you can’t pass up",
+      "welcome to the void: where nothing is better than something",
+      "welcome to the void: where the absence of evidence is evidence of absence",
+      "welcome to the void: the ROI sucks",
+      "welcome to the void: somehow preferable to a nut punch",
+      "welcome to the void: a new home for unruly interns",
+      "welcome to the void: please don’t litter",
+      "welcome to the void: please don’t litter. it kinda defeats the point",
+      "welcome to the void: merging points A & B since 2005",
+      "welcome to the void: sides may include existential dread and disorientation",
+      "welcome to the void: we’re glad you’re here and not here",
+      "welcome to the void: the temporal geometry may be nonclassical, but the vibes are undeniable",
+      "welcome to the void: the perfect destination to reflect on how weird you are",
+      "welcome to the void: PTO doesn’t apply here. the staff is pissed",
+      "welcome to the void: please keep your socks on at all times",
+      "welcome to the void: the fabric of spacetime is especially unpredictable at this time. kindly reset your watches",
+      "welcome to the void: please try again",
+      "welcome to the void: feel your sense of self dissolve into the infinite vacuum",
+      "welcome to the void: hope you brought a jacket",
+      "welcome to the void: where nothing lasts forever",
+      "welcome to the void: the undisputed champion of the silence game",
+      "welcome to the void: the homing beacon is more than unlikely to bring you back to the garden",
+      "welcome to the void: inspired by the GTA 6 delays",
+      "welcome to the void: finally, a vacuum that doesn’t wake you up in the morning",
+      "welcome to the void: abstraction distilled into an attraction",
+      "welcome to the void: the only instant of persistence",
+    ];
+
+    /** Cosmic clock eras: Big Bang → heat death, with obscure glyphs. */
+    const COSMIC_EPOCHS = [
+      { symbol: '✶', when: 't ≈ 0', note: 'Planck epoch' },
+      { symbol: '⊙', when: '−13.8 BYA', note: 'big bang' },
+      { symbol: '🜨', when: '−13.8 BYA + 10⁻³² s', note: 'inflation' },
+      { symbol: '⊗', when: '−13.7 BYA', note: 'recombination' },
+      { symbol: '🜍', when: '−13.2 BYA', note: 'first light' },
+      { symbol: '☉', when: '−4.6 BYA', note: 'solar ignition' },
+      { symbol: '🜚', when: '−3.8 BYA', note: 'abiogenesis?' },
+      { symbol: 'ᛟ', when: '−300 MYA', note: 'pangaea' },
+      { symbol: '𓃭', when: '−66 MYA', note: 'K–Pg boundary' },
+      { symbol: '☿', when: '−300 KYA', note: 'sapiens' },
+      { symbol: '☉', when: '0 CE', note: 'arbitrary zero' },
+      { symbol: '⌬', when: '2026 CE', note: 'now-ish' },
+      { symbol: '🝆', when: '+1 MYA', note: 'next ice' },
+      { symbol: '☿', when: '+5 BYA', note: 'red giant sun' },
+      { symbol: '∅', when: '+10¹⁴ yr', note: 'star death' },
+      { symbol: 'ℵ', when: '+10³⁴ yr', note: 'proton decay?' },
+      { symbol: 'Ω', when: '+10¹⁰⁰ yr', note: 'heat death' },
+      { symbol: '∴', when: 'τ → ∞', note: 'after heat' },
+    ];
+    const OBSCURE_DIGITS = ['᛫', '·', '∴', '∵', '∷', '∶', '⌀', 'ø', '⊙', '⊗', '⊕', '⊖', '⊘', '⊚', '○', '●', '◦', '¤', '†', '‡', '※', '⁂', '⁕'];
+
+    const voidCommentEl = document.getElementById('void-comment');
+    const voidClockEl = document.getElementById('void-clock');
+    const voidClockFace = document.getElementById('void-clock-face');
+    const voidClockDate = document.getElementById('void-clock-date');
+
+    function pickVoid(list, avoid) {
+      if (!list.length) return '';
+      if (list.length === 1) return list[0];
+      let next = list[Math.floor(Math.random() * list.length)];
+      let guard = 0;
+      while (next === avoid && guard++ < 8) {
+        next = list[Math.floor(Math.random() * list.length)];
+      }
+      return next;
+    }
+
+    function obscureTimeFragment() {
+      const parts = [];
+      const count = 2 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < count; i++) {
+        parts.push(OBSCURE_DIGITS[Math.floor(Math.random() * OBSCURE_DIGITS.length)]);
+      }
+      return parts.join('');
+    }
+
+    function prefersReducedMotion() {
+      return matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function renderCosmicClock() {
+      const epoch = COSMIC_EPOCHS[Math.floor(Math.random() * COSMIC_EPOCHS.length)];
+      const face = `${epoch.symbol}  ${epoch.when}`;
+      const date = `${obscureTimeFragment()} · ${epoch.note} · ${obscureTimeFragment()}`;
+      if (voidClockEl) voidClockEl.classList.add('is-jumping');
+      globalThis.setTimeout?.(() => {
+        if (voidClockFace) voidClockFace.textContent = face;
+        if (voidClockDate) voidClockDate.textContent = date;
+        voidClockEl?.classList.remove('is-jumping');
+      }, prefersReducedMotion() ? 0 : 280);
+    }
+
+    function scheduleCosmicClockJump() {
+      const wait = prefersReducedMotion()
+        ? 12000 + Math.random() * 8000
+        : 1800 + Math.random() * 9000;
+      globalThis.setTimeout?.(() => {
+        renderCosmicClock();
+        scheduleCosmicClockJump();
+      }, wait);
+    }
+
+    let lastVoidComment = '';
+    function showVoidComment() {
+      if (!voidCommentEl || !VOID_WELCOMES.length) return;
+      const next = pickVoid(VOID_WELCOMES, lastVoidComment);
+      lastVoidComment = next;
+      voidCommentEl.classList.remove('is-visible');
+      globalThis.setTimeout?.(() => {
+        voidCommentEl.textContent = next;
+        voidCommentEl.classList.add('is-visible');
+      }, 320);
+    }
+
+    function scheduleVoidComment() {
+      const wait = prefersReducedMotion()
+        ? 14000 + Math.random() * 8000
+        : 7000 + Math.random() * 9000;
+      globalThis.setTimeout?.(() => {
+        showVoidComment();
+        scheduleVoidComment();
+      }, wait);
+    }
+
     const canvas = document.querySelector('#pyramid');
     const context = canvas.getContext('2d');
     const helixCanvas = document.querySelector('#helix');
@@ -407,6 +599,10 @@
       requestAnimationFrame(draw);
     }
     requestAnimationFrame(draw);
+    renderCosmicClock();
+    scheduleCosmicClockJump();
+    showVoidComment();
+    scheduleVoidComment();
   </script>
 </body>
 </html>
