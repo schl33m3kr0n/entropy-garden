@@ -150,11 +150,18 @@
     #helix { width: clamp(150px, 30vw, 336px); height: clamp(40px, 5.5vw, 62px); }
     #pyramid { width: min(90vw, 480px); height: min(90vw, 430px); }
 
+    .garden-link-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 28px;
+    }
+
     .garden-link {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      margin-top: 28px;
       padding: 10px 16px;
       border: 1px solid rgba(0, 255, 0, 0.35);
       border-radius: var(--radius-sm);
@@ -178,6 +185,17 @@
       box-shadow: 0 0 22px rgba(0, 255, 0, 0.35);
       outline: none;
     }
+
+    .garden-link-sub {
+      min-height: 1em;
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    .garden-link-sub.is-visible { opacity: 1; }
 
     @media (prefers-reduced-motion: reduce) {
       body::after { display: none; }
@@ -207,9 +225,13 @@
       <canvas id="pyramid" role="img" aria-label="A rotating black pyramid in three slightly separated tiers making random quarter turns with white edges and an eye icon on the capstone">A rotating three-tier pyramid with white edges.</canvas>
       <canvas id="helix" role="img" aria-label="A horizontal spinning white double helix beneath the pyramid">A spinning double helix.</canvas>
     </div>
-    <a class="garden-link" href="../index.html">← // return to the garden</a>
+    <div class="garden-link-wrap">
+      <a class="garden-link" id="garden-link" href="../index.html">← // return to the garden</a>
+      <span class="garden-link-sub" id="garden-link-sub" aria-live="polite"></span>
+    </div>
   </main>
   <script>
+    const RETURN_BLOCK_COMMENT = "welcome to the void: you’re not getting away that easily";
     const VOID_WELCOMES = [
       "welcome to the void: the uncomfortable silence is free of charge",
       "welcome to the void: please have a seat while we do nothing in particular",
@@ -250,6 +272,45 @@
       "welcome to the void: finally, a vacuum that doesn’t wake you up in the morning",
       "welcome to the void: abstraction distilled into an attraction",
       "welcome to the void: the only instance of persistence",
+      "welcome to the void: reflection has never been so terrifying",
+      "welcome to the void: come for the tranquility, stay because you can’t find the exit",
+      "welcome to the void: returning visitors have seen the beyond. that’s why we recommend diapers",
+      "welcome to the void: buyer’s remorse is irrelevant",
+      "welcome to the void: try asking nicely",
+      "welcome to the void: the war within has the most unspoken casualties",
+      "welcome to the void: localized entirely in the broom closet",
+      "welcome to the void: somebody thought it would be funny to put a particle accelerator in the broom closet",
+      "welcome to the void: technically outside of terrestrial jurisdiction",
+      "welcome to the void: where management goes after talking to Carl",
+      "welcome to the void: your tulpa will arrive whenever they feel like it",
+      "welcome to the void: you missed the best part",
+      "welcome to the void: please wait as assets download",
+      "welcome to the void: proving that anything can be commodified",
+      "welcome to the void: technically better than a timeshare",
+      "welcome to the void: the voices are the soundtrack",
+      "welcome to the void: where imagination stretches to biblical proportions",
+      "welcome to the void: the distant screams you hear are just the unruly interns",
+      "welcome to the void: the ultimate therapy session",
+      "welcome to the void: map not included",
+      "welcome to the void: on the bright side, we don’t charge a sales tax",
+      "welcome to the Void: you'll find the exit eventually.",
+      "welcome to the Void: please silence your phone.",
+      "welcome to the Void: the air conditioner is currently out of order.",
+      "welcome to the Void: please keep the gum in your pocket.",
+      "welcome to the Void: the attraction nobody asked for.",
+      "welcome to the void: the break from reality you needed without the withdrawal symptoms",
+      "welcome to the void: we asked the void what it thought about politics. you won’t believe what it said next!",
+      "welcome to the void: legal has a lot of questions with very few answers",
+      "welcome to the void: try not to dive in shallow water",
+      "welcome to the void: the path to the exit is a journey in itself",
+      "welcome to the void: your session may be recorded for comedic value",
+      "welcome to the void: please stop yelling slurs into the abyss. our attendants can hear you",
+      "welcome to the void: Mr. Whiskers likes to drop by to fill the silence",
+      "welcome to the void: please hallucinate responsibly",
+      "welcome to the void: just as it was written in the comic strip prophecy",
+      "welcome to the void: surprisingly not a pyramid scheme",
+      "welcome to the void: sponsored by three raccoons in a trench coat",
+      "welcome to the void: not as incognito as you might think",
     ];
 
     /** Mundane dates pad the pool so cosmic extremes hit harder. */
@@ -399,15 +460,22 @@
     }
 
     let lastVoidComment = '';
-    function showVoidComment() {
-      if (!voidCommentEl || !VOID_WELCOMES.length) return;
-      const next = pickVoid(VOID_WELCOMES, lastVoidComment);
+    let voidCommentTimer = 0;
+    let tryAgainTimer = 0;
+    const gardenLink = document.getElementById('garden-link');
+    const gardenLinkSub = document.getElementById('garden-link-sub');
+
+    function showVoidComment(forced) {
+      if (!voidCommentEl) return;
+      const next = forced || pickVoid(VOID_WELCOMES, lastVoidComment);
+      if (!next) return;
       lastVoidComment = next;
       voidCommentEl.classList.remove('is-visible');
-      globalThis.setTimeout?.(() => {
+      globalThis.clearTimeout?.(voidCommentTimer);
+      voidCommentTimer = globalThis.setTimeout?.(() => {
         voidCommentEl.textContent = next;
         voidCommentEl.classList.add('is-visible');
-      }, 320);
+      }, 320) || 0;
     }
 
     function scheduleVoidComment() {
@@ -419,6 +487,24 @@
         scheduleVoidComment();
       }, wait);
     }
+
+    function showTryAgainSubtitle() {
+      if (!gardenLinkSub) return;
+      gardenLinkSub.textContent = 'try again';
+      gardenLinkSub.classList.add('is-visible');
+      globalThis.clearTimeout?.(tryAgainTimer);
+      tryAgainTimer = globalThis.setTimeout?.(() => {
+        gardenLinkSub.classList.remove('is-visible');
+      }, 2200) || 0;
+    }
+
+    gardenLink?.addEventListener('click', (event) => {
+      // Mostly refuses; ~10% actually returns to the garden.
+      if (Math.random() < 0.1) return;
+      event.preventDefault();
+      showVoidComment(RETURN_BLOCK_COMMENT);
+      showTryAgainSubtitle();
+    });
 
     const canvas = document.querySelector('#pyramid');
     const context = canvas.getContext('2d');

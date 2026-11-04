@@ -444,6 +444,8 @@
         "bird’s eye view is my default, but security cameras are easy to hack into",
         "we asked the void what it thought about human history. it replied through our collective imaginations",
         "get your ‘i got this shirt from the void’ shirt if you make it back",
+        "Carl insisted the void was a bad idea. management begged to differ",
+        "we brought tissues",
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",
@@ -1294,6 +1296,14 @@
             "welcome to the garden: the weed brownies are now everybody else’s problem",
             "welcome to the garden: why don’t you microdose a personality?",
             "welcome to the garden: Daniel gets separation anxiety when he’s not filling his lungs with toxic chemicals",
+            "welcome to the garden: off exit 42 of I-1000.",
+            "welcome to the garden: constantly changing location because we can't stay in one place for too long",
+            "welcome to the garden: the disappearances after we set up aren't coincidental.",
+            "welcome to the garden: we hired a ghost to follow you everywhere.",
+            "welcome to the garden: we already sent you a postcard 30 years ago.",
+            "welcome to the garden: the lightning was a paid actor.",
+            "welcome to the garden: Carl was not invited to the potluck.",
+            "welcome to the garden: the adults are talking nonsense",
         ]        
     },
         reroll: {
