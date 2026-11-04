@@ -188,8 +188,11 @@
 
     .garden-link-sub {
       min-height: 1em;
+      max-width: min(92vw, 360px);
+      padding: 0 12px;
       font-size: 0.62rem;
-      letter-spacing: 0.2em;
+      line-height: 1.4;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.55);
       opacity: 0;
@@ -231,7 +234,26 @@
     </div>
   </main>
   <script>
-    const RETURN_BLOCK_COMMENT = "welcome to the void: you’re not getting away that easily";
+    const RETURN_DENY_RANDOM = [
+      "you’re not getting away that easily",
+      "try pressing nicely",
+      "have you tried refreshing?",
+      "ha ha",
+      "c’mon man, you didn’t even give it a chance",
+      "maybe this one will work?",
+      "keep pressing. the void likes that",
+    ];
+    const RETURN_DENY_SEQUENCES = [
+      [
+        "are you sure you wanna do that?",
+        "are you sure you’re sure?",
+        "are you sure you’re sure you’re sure?",
+      ],
+      [
+        "next press will send you back. pinkie promise",
+        "next press is the one. scout’s honor",
+      ],
+    ];
     const VOID_WELCOMES = [
       "welcome to the void: the uncomfortable silence is free of charge",
       "welcome to the void: please have a seat while we do nothing in particular",
@@ -471,7 +493,9 @@
 
     let lastVoidComment = '';
     let voidCommentTimer = 0;
-    let tryAgainTimer = 0;
+    let denySubTimer = 0;
+    let lastRandomDeny = '';
+    let activeDenySequence = null;
     const gardenLink = document.getElementById('garden-link');
     const gardenLinkSub = document.getElementById('garden-link-sub');
 
@@ -498,22 +522,47 @@
       }, wait);
     }
 
-    function showTryAgainSubtitle() {
+    function nextReturnDenyMessage() {
+      if (activeDenySequence) {
+        const line = activeDenySequence.lines[activeDenySequence.index++];
+        if (activeDenySequence.index >= activeDenySequence.lines.length) {
+          activeDenySequence = null;
+        }
+        return line;
+      }
+      // Sequence starts share the pick pool with one-off denials.
+      const choices = [
+        ...RETURN_DENY_RANDOM.map((text) => ({ kind: 'line', text })),
+        ...RETURN_DENY_SEQUENCES.map((lines) => ({ kind: 'seq', lines })),
+      ];
+      let pick = choices[Math.floor(Math.random() * choices.length)];
+      let guard = 0;
+      while (pick.kind === 'line' && pick.text === lastRandomDeny && guard++ < 8) {
+        pick = choices[Math.floor(Math.random() * choices.length)];
+      }
+      if (pick.kind === 'seq') {
+        activeDenySequence = { lines: pick.lines, index: 1 };
+        return pick.lines[0];
+      }
+      lastRandomDeny = pick.text;
+      return pick.text;
+    }
+
+    function showReturnDenySubtitle(message) {
       if (!gardenLinkSub) return;
-      gardenLinkSub.textContent = 'try again';
+      gardenLinkSub.textContent = message;
       gardenLinkSub.classList.add('is-visible');
-      globalThis.clearTimeout?.(tryAgainTimer);
-      tryAgainTimer = globalThis.setTimeout?.(() => {
+      globalThis.clearTimeout?.(denySubTimer);
+      denySubTimer = globalThis.setTimeout?.(() => {
         gardenLinkSub.classList.remove('is-visible');
-      }, 2200) || 0;
+      }, 3200) || 0;
     }
 
     gardenLink?.addEventListener('click', (event) => {
-      // Mostly refuses; ~10% actually returns to the garden.
-      if (Math.random() < 0.1) return;
+      // Finish scripted teases before allowing a lucky escape.
+      if (!activeDenySequence && Math.random() < 0.1) return;
       event.preventDefault();
-      showVoidComment(RETURN_BLOCK_COMMENT);
-      showTryAgainSubtitle();
+      showReturnDenySubtitle(nextReturnDenyMessage());
     });
 
     const canvas = document.querySelector('#pyramid');
