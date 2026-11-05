@@ -300,7 +300,75 @@ const PANOPTICON_WAKE_SETTLE_MS = 360;
 const PANOPTICON_WAKE_HALF_SHUT = 0.52;
 const PANOPTICON_WAKE_BLINK_SHUT = 0.88;
 const PANOPTICON_IDLE_COMMENT_MS = 10000;
+const PANOPTICON_IDLE_SEQUENCE_MS = 5500;
 const PANOPTICON_IDLE_COMMENT_CHANCE = 1;
+/** @type {{ lines: string[], index: number } | null} */
+let activePanopticonCommentSequence = null;
+
+export function armPanopticonCommentSequence(remainingLines) {
+    if (!Array.isArray(remainingLines) || !remainingLines.length) {
+        activePanopticonCommentSequence = null;
+        return;
+    }
+    activePanopticonCommentSequence = { lines: remainingLines.slice(), index: 0 };
+}
+
+export function isPanopticonCommentSequenceActive() {
+    return Boolean(activePanopticonCommentSequence);
+}
+
+function takeNextPanopticonSequenceLine() {
+    if (!activePanopticonCommentSequence) return null;
+    const { lines, index } = activePanopticonCommentSequence;
+    const text = lines[index];
+    activePanopticonCommentSequence.index += 1;
+    if (activePanopticonCommentSequence.index >= lines.length) {
+        activePanopticonCommentSequence = null;
+    }
+    return text || null;
+}
+
+function pickPanopticonIdleLineOrSequence(safe, gritty = []) {
+    if (!Array.isArray(safe) || !safe.length) return null;
+    const sequences = globalThis.lorePools?.panopticonIdleCommentSequencesSafe || [];
+    const pool = (isCorrupted && gritty.length) ? safe.concat(gritty) : safe.slice();
+    const seen = loadPanopticonSeenComments();
+
+    const choices = [
+        ...pool.map((text) => ({ kind: 'line', text })),
+        ...sequences
+            .filter((lines) => Array.isArray(lines) && lines.length >= 2)
+            .map((lines) => ({ kind: 'seq', lines, text: lines[0] })),
+    ];
+
+    let fresh = choices.filter((c) => c.text && !seen.has(c.text));
+    if (!fresh.length) {
+        for (const c of choices) {
+            if (c.text) seen.delete(c.text);
+            if (c.kind === 'seq') {
+                for (const line of c.lines) seen.delete(line);
+            }
+        }
+        persistPanopticonSeenComments();
+        fresh = choices.slice();
+    }
+
+    let pickFrom = fresh;
+    if (isPreviewKanye()) {
+        const kanye = fresh.filter((c) => /kanye/i.test(c.text));
+        if (kanye.length) pickFrom = kanye;
+    }
+
+    const pick = isPreviewKanye()
+        ? pickFrom[0]
+        : pickFrom[Math.floor(Math.random() * pickFrom.length)];
+    if (!pick) return null;
+    if (pick.kind === 'seq') {
+        armPanopticonCommentSequence(pick.lines.slice(1));
+        return pick.lines[0];
+    }
+    return pick.text;
+}
 const PANOPTICON_TAB_RETURN_MIN_MS = 500;
 const PANOPTICON_AWAY_NOTICE_MIN_MS = 300;
 const PANOPTICON_AWAY_NOTICE_MAX_MS = 800;
@@ -810,9 +878,13 @@ function schedulePanopticonLateNightCommentSync() {
 function pickPanopticonIdleComment() {
     const pools = globalThis.lorePools;
     if (!pools) return null;
+
+    const queued = takeNextPanopticonSequenceLine();
+    if (queued) return queued;
+
     // Pronunciation QA: skip TOD/holiday branches and drain Kanye idle lines first.
     if (isPreviewKanye()) {
-        const line = pickPanopticonLine(
+        const line = pickPanopticonIdleLineOrSequence(
             pools.panopticonIdleCommentsSafe || [],
             pools.panopticonIdleCommentsGritty || [],
         );
@@ -860,7 +932,7 @@ function pickPanopticonIdleComment() {
 
     const safe = pools.panopticonIdleCommentsSafe;
     if (!safe?.length) return null;
-    return pickPanopticonLine(safe, pools.panopticonIdleCommentsGritty || []);
+    return pickPanopticonIdleLineOrSequence(safe, pools.panopticonIdleCommentsGritty || []);
 }
 
 function pickPanopticonReturnComment() {
@@ -1046,17 +1118,22 @@ function schedulePanopticonIdleCommentTimer() {
 
     if (!gardenHasStarted || !isGardenReady()) return;
 
+    const delay = isPanopticonCommentSequenceActive()
+        ? PANOPTICON_IDLE_SEQUENCE_MS
+        : PANOPTICON_IDLE_COMMENT_MS;
+
     panopticonIdleCommentTimer = setTimeout(() => {
         syncPanopticonCodeSequenceComments();
         if (!isPanopticonCodeSequenceActive() && canShowPanopticonIdleComment()) {
-            if (Math.random() < PANOPTICON_IDLE_COMMENT_CHANCE) {
+            const forceSequence = isPanopticonCommentSequenceActive();
+            if (forceSequence || Math.random() < PANOPTICON_IDLE_COMMENT_CHANCE) {
                 const text = pickPanopticonIdleComment();
                 if (text) showPanopticonIdleComment(text);
             }
         }
 
         schedulePanopticonIdleCommentTimer();
-    }, PANOPTICON_IDLE_COMMENT_MS);
+    }, delay);
 }
 
 export function resetPanopticonIdleCommentTimer() {

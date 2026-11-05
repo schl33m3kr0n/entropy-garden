@@ -254,14 +254,12 @@
         "next press is the one. scout’s honor",
       ],
     ];
+    /** One-off welcomes — sequences are handled separately so punchlines land. */
     const VOID_WELCOMES = [
       "welcome to the void: the uncomfortable silence is free of charge",
       "welcome to the void: please have a seat while we do nothing in particular",
       "welcome to the void she left behind",
       "welcome to the void: object impermanence contemplated. fetal position assumed",
-      "welcome to the void: try our premium nothing experience!",
-      "welcome to the void: literally experience the sound of silence!",
-      "welcome to the void: feel the lack of presence from the comfort of your fancy rectangle!",
       "welcome to the void: a representative will be with you in several eternities",
       "welcome to the void: ruining mortal perception of time across generations",
       "welcome to the void: a mobster’s best friend",
@@ -269,15 +267,10 @@
       "welcome to the void: a minimalist wet dream",
       "welcome to the void: a blank sheet of paper is the point",
       "welcome to the void: an offer you can’t pass up",
-      "welcome to the void: where nothing is better than something",
       "welcome to the void: where the absence of evidence is evidence of absence",
       "welcome to the void: the ROI sucks",
       "welcome to the void: somehow preferable to a nut punch",
-      "welcome to the void: a new home for unruly interns",
-      "welcome to the void: please don’t litter",
-      "welcome to the void: please don’t litter. it kinda defeats the point",
       "welcome to the void: merging points A & B since 2005",
-      "welcome to the void: side effects may include existential dread and disorientation",
       "welcome to the void: we’re glad you’re here and not here",
       "welcome to the void: the temporal geometry may be nonclassical, but the vibes are undeniable",
       "welcome to the void: the perfect destination to reflect on how weird you are",
@@ -285,64 +278,101 @@
       "welcome to the void: please keep your socks on at all times",
       "welcome to the void: the fabric of spacetime is especially unpredictable at this time. kindly reset your watches",
       "welcome to the void: please try again",
-      "welcome to the void: feel your sense of self dissolve into the infinite vacuum",
       "welcome to the void: hope you brought a jacket",
-      "welcome to the void: where nothing lasts forever",
       "welcome to the void: the undisputed champion of the silence game",
-      "welcome to the void: the homing beacon is more than unlikely to bring you back to the garden",
       "welcome to the void: inspired by the GTA 6 delays",
-      "welcome to the void: finally, a vacuum that doesn’t wake you up in the morning",
       "welcome to the void: abstraction distilled into an attraction",
       "welcome to the void: the only instance of persistence",
       "welcome to the void: reflection has never been so terrifying",
-      "welcome to the void: come for the tranquility, stay because you can’t find the exit",
       "welcome to the void: returning visitors have seen the beyond. that’s why we recommend diapers",
-      "welcome to the void: buyer’s remorse is irrelevant",
       "welcome to the void: try asking nicely",
       "welcome to the void: the war within has the most unspoken casualties",
-      "welcome to the void: localized entirely in the broom closet",
-      "welcome to the void: somebody thought it would be funny to put a particle accelerator in the broom closet",
       "welcome to the void: technically outside of terrestrial jurisdiction",
       "welcome to the void: where management goes after talking to Carl",
       "welcome to the void: your tulpa will arrive whenever they feel like it",
       "welcome to the void: you missed the best part",
       "welcome to the void: please wait as assets download",
-      "welcome to the void: proving that anything can be commodified",
-      "welcome to the void: technically better than a timeshare",
       "welcome to the void: the voices are the soundtrack",
       "welcome to the void: where imagination stretches to biblical proportions",
-      "welcome to the void: the distant screams you hear are just the unruly interns",
-      "welcome to the void: the ultimate therapy session",
-      "welcome to the void: map not included",
-      "welcome to the void: on the bright side, we don’t charge a sales tax",
-      "welcome to the Void: you'll find the exit eventually",
-      "welcome to the Void: please silence your phone",
-      "welcome to the Void: the air conditioner is currently out of order",
-      "welcome to the Void: please keep the gum in your pocket",
       "welcome to the Void: the attraction nobody asked for",
       "welcome to the void: the break from reality you needed without the withdrawal symptoms",
-      "welcome to the void: we asked the void what it thought about politics. you won’t believe what it said next!",
-      "welcome to the void: we gave the void a psychological assessment. we think it's just shy",
       "welcome to the void: legal has a lot of questions with very few answers",
       "welcome to the void: try not to dive in shallow water",
-      "welcome to the void: the path to the exit is a journey in itself",
       "welcome to the void: your session may be recorded for comedic value",
       "welcome to the void: please stop yelling slurs into the abyss. our attendants can hear you",
       "welcome to the void: Mr. Whiskers likes to drop by to fill the silence",
-      "welcome to the void: please hallucinate responsibly",
       "welcome to the void: just as it was written in the comic strip prophecy",
       "welcome to the void: surprisingly not a pyramid scheme",
       "welcome to the void: an oasis from everyone's stupid faces",
-      "welcome to the void: its conversational skills could benefit from improvement",
       "welcome to the void: the quarterlies are increasingly concerned for management's mental health",
       "welcome to the void: somehow doing too little and too much",
       "welcome to the void: Vantablack's patent holders sent a cease-and-desist letter. the void has yet to comment on the matter",
-      "welcome to the void: sponsored by three raccoons in a trench coat",
-      "welcome to the void: not as incognito as you might think",
-      "welcome to the void: we sent it an invitation, but it never RSVP'd",
       "welcome to the void: strong imaginations discouraged",
       "welcome to the void: somehow darker than Adult Swim after midnight",
-      "welcome to the void: fuck you",
+    ];
+    const VOID_WELCOME_SEQUENCES = [
+      [
+        "welcome to the void: please don’t litter",
+        "welcome to the void: please don’t litter. it kinda defeats the point",
+      ],
+      [
+        "welcome to the void: localized entirely in the broom closet",
+        "welcome to the void: somebody thought it would be funny to put a particle accelerator in the broom closet",
+      ],
+      [
+        "welcome to the void: a new home for unruly interns",
+        "welcome to the void: the distant screams you hear are just the unruly interns",
+      ],
+      [
+        "welcome to the void: try our premium nothing experience!",
+        "welcome to the void: literally experience the sound of silence!",
+        "welcome to the void: feel the lack of presence from the comfort of your fancy rectangle!",
+      ],
+      [
+        "welcome to the void: where nothing is better than something",
+        "welcome to the void: where nothing lasts forever",
+      ],
+      [
+        "welcome to the void: finally, a vacuum that doesn’t wake you up in the morning",
+        "welcome to the void: feel your sense of self dissolve into the infinite vacuum",
+      ],
+      [
+        "welcome to the void: come for the tranquility, stay because you can’t find the exit",
+        "welcome to the void: map not included",
+        "welcome to the void: the path to the exit is a journey in itself",
+        "welcome to the Void: you'll find the exit eventually",
+        "welcome to the void: the homing beacon is more than unlikely to bring you back to the garden",
+      ],
+      [
+        "welcome to the void: proving that anything can be commodified",
+        "welcome to the void: technically better than a timeshare",
+        "welcome to the void: on the bright side, we don’t charge a sales tax",
+        "welcome to the void: buyer’s remorse is irrelevant",
+      ],
+      [
+        "welcome to the Void: please silence your phone",
+        "welcome to the Void: please keep the gum in your pocket",
+        "welcome to the Void: the air conditioner is currently out of order",
+      ],
+      [
+        "welcome to the void: the ultimate therapy session",
+        "welcome to the void: please hallucinate responsibly",
+        "welcome to the void: side effects may include existential dread and disorientation",
+      ],
+      [
+        "welcome to the void: sponsored by three raccoons in a trench coat",
+        "welcome to the void: not as incognito as you might think",
+      ],
+      [
+        "welcome to the void: we sent it an invitation, but it never RSVP'd",
+        "welcome to the void: we gave the void a psychological assessment. we think it's just shy",
+        "welcome to the void: its conversational skills could benefit from improvement",
+        "welcome to the void: fuck you",
+      ],
+      [
+        "welcome to the void: we asked the void what it thought about politics. you won’t believe what it said next!",
+        "welcome to the void: fuck you",
+      ],
     ];
 
     /** Mundane dates pad the pool so cosmic extremes hit harder. */
@@ -496,12 +526,37 @@
     let denySubTimer = 0;
     let lastRandomDeny = '';
     let activeDenySequence = null;
+    let activeWelcomeSequence = null;
     const gardenLink = document.getElementById('garden-link');
     const gardenLinkSub = document.getElementById('garden-link-sub');
 
+    function nextVoidWelcome() {
+      if (activeWelcomeSequence) {
+        const line = activeWelcomeSequence.lines[activeWelcomeSequence.index++];
+        if (activeWelcomeSequence.index >= activeWelcomeSequence.lines.length) {
+          activeWelcomeSequence = null;
+        }
+        return line;
+      }
+      const choices = [
+        ...VOID_WELCOMES.map((text) => ({ kind: 'line', text })),
+        ...VOID_WELCOME_SEQUENCES.map((lines) => ({ kind: 'seq', lines })),
+      ];
+      let pick = choices[Math.floor(Math.random() * choices.length)];
+      let guard = 0;
+      while (pick.kind === 'line' && pick.text === lastVoidComment && guard++ < 8) {
+        pick = choices[Math.floor(Math.random() * choices.length)];
+      }
+      if (pick.kind === 'seq') {
+        activeWelcomeSequence = { lines: pick.lines, index: 1 };
+        return pick.lines[0];
+      }
+      return pick.text;
+    }
+
     function showVoidComment(forced) {
       if (!voidCommentEl) return;
-      const next = forced || pickVoid(VOID_WELCOMES, lastVoidComment);
+      const next = forced || nextVoidWelcome();
       if (!next) return;
       lastVoidComment = next;
       voidCommentEl.classList.remove('is-visible');
@@ -513,9 +568,11 @@
     }
 
     function scheduleVoidComment() {
+      // Keep multi-beat bits tighter so the punchline still lands.
+      const inSequence = Boolean(activeWelcomeSequence);
       const wait = prefersReducedMotion()
-        ? 14000 + Math.random() * 8000
-        : 7000 + Math.random() * 9000;
+        ? (inSequence ? 7000 : 14000) + Math.random() * (inSequence ? 4000 : 8000)
+        : (inSequence ? 4200 : 7000) + Math.random() * (inSequence ? 2800 : 9000);
       globalThis.setTimeout?.(() => {
         showVoidComment();
         scheduleVoidComment();

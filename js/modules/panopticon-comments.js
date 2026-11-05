@@ -10,6 +10,10 @@ import {
     perf,
 } from '../core/shared.js';
 import { isCorrupted, gardenHasStarted } from '../core/state.js';
+import {
+    armPanopticonCommentSequence,
+    resetPanopticonIdleCommentTimer,
+} from '../panopticon/_runtime.js';
 
 const HOVER_DEBOUNCE_MS = 900;
 const TYPE_DEBOUNCE_MS = 2400;
@@ -21,9 +25,31 @@ let lastShownText = '';
 let lastShownAt = 0;
 let lastFireAt = 0;
 
+function pickInitWelcomeComment(entry) {
+    const sequences = globalThis.lorePools?.panopticonWelcomeSequencesSafe || [];
+    const safe = entry.safe || [];
+    const gritty = (isCorrupted && entry.gritty?.length) ? entry.gritty : [];
+    const choices = [
+        ...safe.concat(gritty).map((text) => ({ kind: 'line', text })),
+        ...sequences
+            .filter((lines) => Array.isArray(lines) && lines.length >= 2)
+            .map((lines) => ({ kind: 'seq', lines })),
+    ];
+    if (!choices.length) return null;
+    const pick = choices[Math.floor(Math.random() * choices.length)];
+    if (pick.kind === 'seq') {
+        armPanopticonCommentSequence(pick.lines.slice(1));
+        // Continue the bit on the idle ticker so punchlines still land.
+        resetPanopticonIdleCommentTimer();
+        return pick.lines[0];
+    }
+    return pick.text;
+}
+
 function pickComment(triggerId) {
     const entry = globalThis.lorePools?.panopticonTriggerComments?.[triggerId];
     if (!entry?.safe) return null;
+    if (triggerId === 'init') return pickInitWelcomeComment(entry);
     return pickOne(entry.safe, entry.gritty) ?? null;
 }
 
