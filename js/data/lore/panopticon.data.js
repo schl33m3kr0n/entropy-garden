@@ -485,7 +485,7 @@
         "please keep it in your pants",
         "thieves will be microwaved until well-done",
         "yes, we have an OnlyFans",
-        "oh, so when Superman has x-ray vision, he's a hero, but when I do it, I'm committing a 'gross breach of privacy'",
+        "oh, so when Superman has x-ray vision, he's a hero, but when i do it, i'm committing a 'gross breach of privacy'",
         "so what are you wearing?",
         "this just in: everybody can tell you're high",
         "one can achieve ego death without drugs. just ask my dominatrix",
@@ -1416,7 +1416,10 @@
             gritty: ["vibes channel tuned. the eye is the DJ now"],
         },
         modalVault: {
-            safe: ["vault breach authorized. nice loot"],
+            safe: [
+                "vault breach authorized. nice loot",
+                "care-y user and the vault of secrets",
+            ],
             gritty: ["the vault opens. hide your browser history"],
         },
         modalCards: {
@@ -1488,6 +1491,7 @@
                 "don't mind me, i'll just stay suspended in a frozen state until you come back",
                 "just in time actually, i need to replenish the reserves",
                 "will we still recognize each other when you come back?",
+                "i agree, we need some time apart",
             ],
             gritty: [],
         },
