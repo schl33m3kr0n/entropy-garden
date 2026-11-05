@@ -435,30 +435,31 @@
         "we asked the void what it thought about human history. it replied through our collective imaginations",
         "get your ‘i got this shirt from the void’ shirt if you make it back",
     ],
+    // Two-beat conversations: setup → develop / contradict / escalate.
     panopticonIdleCommentSequencesSafe: [
         [
             "Taco Bell: the calm before the storm",
-            "Taco Bell: a temptation that ends with an explosion",
+            "the storm has arrived. we hope you made it home",
         ],
         [
             "San Francisco: where Alcatraz ironically has the best view of the skyline",
-            "Alcatraz: why are there so many birds???",
+            "the birds seem to agree. they’ve occupied the island",
         ],
         [
             "the tears are real. the drink is compromised",
-            "the tears are salty. add them to the fries",
+            "the fries could use more salt. don’t let those tears go to waste",
         ],
         [
             "whoever writes all this stuff has short guy energy",
-            "whoever writes these lines needs a job",
+            "and apparently enough free time to make that everyone’s problem",
         ],
         [
             "the aliens called. they need you to come back to the mothership",
-            "the aliens called: they weren’t happy about Harambe",
+            "apparently, they have some questions about Harambe",
         ],
         [
             "Carl insisted the void was a bad idea. management begged to differ",
-            "we brought tissues",
+            "management went in anyway. we brought tissues",
         ],
     ],
     panopticonIdleCommentsGritty: [
@@ -494,8 +495,12 @@
         "the state says i’m an individual. i started to have doubts when the grizzly bear entered the room",
         "if i have 12 quarters and 5 dimes, how much would i have to get back custody of the kids?",
         "management makes the blunt rotation less recreational",
-        "the raccoons and groundskeepers have maintained an uneasy alliance since the war",
-        "much produce was lost in the war",
+    ],
+    panopticonIdleCommentSequencesGritty: [
+        [
+            "the raccoons and groundskeepers have maintained an uneasy alliance since the war",
+            "much produce was lost. neither side has accepted responsibility",
+        ],
     ],
     panopticonIdleCommentsDaySafe: [
         "the grass ain't gonna touch itself, y'know",

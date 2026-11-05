@@ -330,7 +330,11 @@ function takeNextPanopticonSequenceLine() {
 
 function pickPanopticonIdleLineOrSequence(safe, gritty = []) {
     if (!Array.isArray(safe) || !safe.length) return null;
-    const sequences = globalThis.lorePools?.panopticonIdleCommentSequencesSafe || [];
+    const pools = globalThis.lorePools || {};
+    const sequences = [
+        ...(pools.panopticonIdleCommentSequencesSafe || []),
+        ...((isCorrupted && pools.panopticonIdleCommentSequencesGritty) || []),
+    ];
     const pool = (isCorrupted && gritty.length) ? safe.concat(gritty) : safe.slice();
     const seen = loadPanopticonSeenComments();
 
