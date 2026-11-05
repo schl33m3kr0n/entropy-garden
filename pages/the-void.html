@@ -14,7 +14,7 @@
     html, body {
       margin: 0;
       min-height: 100%;
-      background: var(--void-black);
+      background: #000;
       color: #fff;
       font-family: var(--main-font);
       color-scheme: dark;
@@ -27,32 +27,6 @@
       overflow: hidden;
       position: relative;
       -webkit-font-smoothing: antialiased;
-    }
-
-    /* Soft garden atmosphere — same plate, quieter than the main SPA */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 70% 55% at 50% 42%, rgba(0, 40, 12, 0.35), transparent 70%),
-        url('../assets/img/backgrounds/bkgrnd.webp') center / cover no-repeat;
-      opacity: 0.14;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        linear-gradient(rgba(0, 255, 0, 0.018) 1px, transparent 1px);
-      background-size: 100% 3px;
-      opacity: 0.35;
-      pointer-events: none;
-      z-index: 2;
-      mix-blend-mode: soft-light;
     }
 
     .chrome {
@@ -100,6 +74,11 @@
       text-shadow:
         0 0 28px rgba(0, 255, 0, 0.22),
         0 0 2px rgba(255, 255, 255, 0.55);
+    }
+    .void-clock-face.is-timeline {
+      font-size: clamp(18px, 4.2vw, 42px);
+      letter-spacing: -0.015em;
+      line-height: 1.15;
     }
     .void-clock-date {
       font-size: clamp(0.62rem, 1.8vw, 0.78rem);
@@ -200,9 +179,6 @@
     }
     .garden-link-sub.is-visible { opacity: 1; }
 
-    @media (prefers-reduced-motion: reduce) {
-      body::after { display: none; }
-    }
   </style>
 </head>
 <body>
@@ -445,6 +421,8 @@
       { symbol: 'Ω', when: '+10¹⁰⁰ yr', note: 'heat death' },
       { symbol: '∴', when: 'τ → ∞', note: 'after heat' },
     ];
+    /** Loaded from Mr. Disco’s alternate-history archive. */
+    let TIMELINE_EPOCHS = [];
     const OBSCURE_DIGITS = ['᛫', '·', '∴', '∵', '∷', '∶', '⌀', 'ø', '⊙', '⊗', '⊕', '⊖', '⊘', '⊚', '○', '●', '◦', '¤', '†', '‡', '※', '⁂', '⁕'];
 
     const voidCommentEl = document.getElementById('void-comment');
@@ -477,10 +455,40 @@
       return matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
 
+    function loadTimelineEpochs() {
+      return fetch('../content/index.json')
+        .then((res) => {
+          if (!res.ok) throw new Error(`timeline index: ${res.status}`);
+          return res.json();
+        })
+        .then((articles) => {
+          if (!Array.isArray(articles)) return;
+          TIMELINE_EPOCHS = articles
+            .filter((a) => a && (a.title || a.year))
+            .map((a) => ({
+              when: String(a.title || a.year).trim(),
+              note: String(a.year || 'alternate timeline').trim(),
+              timeline: true,
+            }));
+        })
+        .catch(() => {
+          TIMELINE_EPOCHS = [];
+        });
+    }
+
     function pickEpoch() {
-      // Mostly mundane so extremes feel like a glitch in the calendar.
-      const useExtreme = Math.random() < 0.22;
-      const pool = useExtreme ? EXTREME_EPOCHS : MUNDANE_EPOCHS;
+      // Mundane baseline, alternate timelines often, extremes as calendar glitches.
+      const roll = Math.random();
+      let pool = MUNDANE_EPOCHS;
+      let extreme = false;
+      let timeline = false;
+      if (roll < 0.18) {
+        pool = EXTREME_EPOCHS;
+        extreme = true;
+      } else if (roll < 0.62 && TIMELINE_EPOCHS.length) {
+        pool = TIMELINE_EPOCHS;
+        timeline = true;
+      }
       let epoch = pool[Math.floor(Math.random() * pool.length)];
       let key = `${epoch.when}|${epoch.note}`;
       let guard = 0;
@@ -489,11 +497,11 @@
         key = `${epoch.when}|${epoch.note}`;
       }
       lastEpochKey = key;
-      return { epoch, extreme: useExtreme };
+      return { epoch, extreme, timeline };
     }
 
     function renderCosmicClock() {
-      const { epoch, extreme } = pickEpoch();
+      const { epoch, extreme, timeline } = pickEpoch();
       const face = extreme && epoch.symbol
         ? `${epoch.symbol}  ${epoch.when}`
         : epoch.when;
@@ -505,6 +513,7 @@
         if (voidClockFace) {
           voidClockFace.textContent = face;
           voidClockFace.classList.toggle('is-extreme', extreme);
+          voidClockFace.classList.toggle('is-timeline', Boolean(timeline));
         }
         if (voidClockDate) voidClockDate.textContent = date;
         voidClockEl?.classList.remove('is-jumping');
@@ -864,8 +873,10 @@
       requestAnimationFrame(draw);
     }
     requestAnimationFrame(draw);
-    renderCosmicClock();
-    scheduleCosmicClockJump();
+    loadTimelineEpochs().finally(() => {
+      renderCosmicClock();
+      scheduleCosmicClockJump();
+    });
     showVoidComment();
     scheduleVoidComment();
   </script>
