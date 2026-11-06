@@ -750,7 +750,7 @@
       segments.sort((a, b) => a.a[2] + a.b[2] - b.a[2] - b.b[2]);
       helixContext.lineCap = 'round';
       for (const {a, b, rung} of segments) {
-        helixContext.strokeStyle = 'rgba(220, 255, 220, 0.95)';
+        helixContext.strokeStyle = '#fff';
         helixContext.lineWidth = rung ? 1.2 : 2;
         helixContext.beginPath();
         helixContext.moveTo(a[0], a[1]);
@@ -917,7 +917,7 @@
         context.closePath();
         context.fillStyle = '#050505';
         context.fill();
-        context.strokeStyle = 'rgba(220, 255, 220, 0.92)';
+        context.strokeStyle = '#fff';
         context.stroke();
         if (face.eye) {
           // Draw on the capstone's front plane so the eye follows its rotation.
@@ -947,7 +947,7 @@
             const t = step / 32;
             outline.push([-0.14 + 0.28 * t, 0.76 - 0.065 * Math.sin(Math.PI * t)]);
           }
-          trace(outline, 'rgba(230, 255, 230, 0.95)');
+          trace(outline, '#fff');
           trace(Array.from({length: 49}, (_, index) => {
             const theta = index / 48 * Math.PI * 2;
             return [0.038 * Math.cos(theta), 0.76 + 0.038 * Math.sin(theta)];
