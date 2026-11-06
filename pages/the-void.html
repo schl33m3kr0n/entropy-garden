@@ -375,6 +375,11 @@
       { when: 'Wed · 9:41 AM', note: 'phone lock screen hour' },
       { when: 'Thu · after lunch', note: 'digesting' },
       { when: 'Fri · 4:59 PM', note: 'almost weekend' },
+      { when: 'Tue · 2:17 PM', note: 'nothing to report' },
+      { when: 'May 8', note: 'regular business hours' },
+      { when: 'last Wednesday', note: 'mostly uneventful' },
+      { when: '3:06 PM', note: 'printer maintenance' },
+      { when: 'Q2', note: 'routine review' },
       { when: 'Mon · morning', note: 'again' },
       { when: 'last Tuesday', note: 'still unpaid' },
       { when: 'next Thursday', note: 'calendar invite pending' },
@@ -418,6 +423,65 @@
       { when: 'hold music era', note: 'still on hold' },
     ];
 
+    /** Historical ruptures — denser jokes, separate from mundane Tuesdays. */
+    const RUPTURE_EPOCHS = [
+      { when: 'c. 11,000–4,000 BCE', note: 'food is much easier to kill' },
+      { when: 'c. 2600 BCE', note: 'a pharaoh sees lara croft\'s boobs in a vision and makes it everybody else\'s problem' },
+      { when: 'c. 1850-800 BCE', note: 'writing a shopping list looks less like an elaborate curse for once' },
+      { when: 'c. 1754 BCE', note: 'Hammurabi lays it on thick in the public announcement' },
+      { when: '509 BCE', note: 'Romans decide their king was harshing the vibes' },
+      { when: '480 BCE', note: 'Snyder goes back in time to justify the most unironically homoerotic movie ever' },
+      { when: '336–323 BCE', note: 'a raging bisexual forces his culture from Greece to India' },
+      { when: '44 BCE', note: 'Romans honor their history against monarchy. civil war ensues' },
+      { when: '30 CE', note: 'a Jewish carpenter shares some lasting thoughts' },
+      { when: '476 CE', note: 'the Western Roman Empire suddenly looks a lot less empirey' },
+      { when: '610 CE', note: 'orphaned merchant meets angel in a cave, spreads the message very effectively' },
+      { when: '618–907 CE', note: 'Tang Dynasty gets groovy in all respects' },
+      { when: '793–1066 CE', note: 'Vikings start reaching across Europe\'s dinner table' },
+      { when: '1066 CE', note: 'England acquires a taste for escargot through brute force' },
+      { when: '1206', note: 'ranged equestrians hunger to expand from the steppes' },
+      { when: '1215', note: 'the king of England gets held accountable, eventually leading to a mass exchange of fisticuffs' },
+      { when: '1347–1351', note: 'Europe gets debuffed by spicy bacteria' },
+      { when: '14th century', note: 'Europe becomes nostalgic for togas and a dude with mommy issues' },
+      { when: 'c. 1440–1455', note: 'scribes are outsourced to machines' },
+      { when: '1453', note: 'the Byzantine Empire gets a thorough rebrand by auto makers or something like that' },
+      { when: '1492', note: 'sailors find a new route to India. it is not India. the world was never the same' },
+      { when: '1517', note: 'German monk offers constructive feedback to the Catholic Church. Europe subsequently loses its shit' },
+      { when: '1519–1521', note: 'the Aztecs receive a rude eviction notice effective immediately' },
+      { when: '1543-1687', note: 'Europe gets blinded with science' },
+      { when: '1688–1689', note: 'English Parliament gets its groove on' },
+      { when: '1685–1815', note: 'the CAPTCHA for truth now requires receipts' },
+      { when: '1756–1763', note: 'Europe and its colonies exchange gunpowder and yo mama jokes' },
+      { when: '1760–1840', note: 'humanity unlocks ranked pollution' },
+      { when: '1775–1783', note: 'America is a big boy now' },
+      { when: '1789', note: 'France starts scaring everybody' },
+      { when: '1791–1804', note: 'Haiti quits loud. slaveholders get paranoid' },
+      { when: '1803–1815', note: 'Napoleon redraws the map of Europe. gets too cocky with Russia' },
+      { when: '1808–1826', note: 'Spanish America doesn\'t feel very Spanishy anymore' },
+      { when: '1807', note: 'importing enslaved people is a no-no. progress? barely' },
+      { when: '1839–1860', note: 'China acquires a taste for opium through brute force' },
+      { when: '1848', note: 'Europe wakes up and decides monarchy doesn\'t work. monarchy disagrees' },
+      { when: '1861–1865', note: 'the US fights over "states\' rights"' },
+      { when: 'January 1, 1863', note: 'top hat guy declares what people have been saying was an objectively bad idea' },
+      { when: '1903', note: 'two dudes successfully roleplay as birds' },
+      { when: '1914–1918', note: 'some dude gets shot. now it\'s the rest of the world\'s problem' },
+      { when: '1917', note: 'Communism is cool now' },
+      { when: '1929–1939', note: 'unemployment is trending globally' },
+      { when: '1939–1945', note: 'prejudiced mustache man gets a little too cocky' },
+      { when: 'August 1945', note: 'boom boom' },
+      { when: '1945', note: 'the UN accomplishes something but we\'re not sure what' },
+      { when: '1947', note: 'India moves on from a one-sided relationship with the UK' },
+      { when: '1947–1991', note: 'the threat of nuclear war ruins the potluck' },
+      { when: '1954–1968', note: 'a dude has a dream. the FBI takes it personally' },
+      { when: 'July 20, 1969', note: 'astronauts discover firsthand that the moon is not made of cheese' },
+      { when: 'November 9, 1989', note: 'German graffiti artist asks everyone to leave his tag up' },
+      { when: '1989', note: 'you don\'t need magazines anymore' },
+      { when: '2001', note: 'the world was never the same... again' },
+      { when: '2020s', note: 'the glowing rectangles are getting scary' },
+      { when: 'WW3', note: 'sooner than you’d think' },
+      { when: 'WW4', note: 'Trump didn’t like the election results' },
+    ];
+
     /** Extreme eras: Big Bang → heat death, with obscure glyphs. */
     const EXTREME_EPOCHS = [
       { symbol: '✶', when: 't ≈ 0', note: 'Planck epoch' },
@@ -434,6 +498,7 @@
       { symbol: '⌬', when: '2026 CE', note: 'now-ish' },
       { symbol: '🝆', when: '+1 MYA', note: 'next ice' },
       { symbol: '☿', when: '+5 BYA', note: 'red giant sun' },
+      { symbol: '☉', when: '+5 BYA', note: 'the world was never the same. literally' },
       { symbol: '∅', when: '+10¹⁴ yr', note: 'star death' },
       { symbol: 'ℵ', when: '+10³⁴ yr', note: 'proton decay?' },
       { symbol: 'Ω', when: '+10¹⁰⁰ yr', note: 'heat death' },
@@ -495,14 +560,16 @@
     }
 
     function pickEpoch() {
-      // Mundane baseline, alternate timelines often, extremes as calendar glitches.
+      // Mundane baseline, alternate timelines often, ruptures/extremes as glitches.
       const roll = Math.random();
       let pool = MUNDANE_EPOCHS;
       let extreme = false;
       let timeline = false;
-      if (roll < 0.18) {
+      if (roll < 0.16) {
         pool = EXTREME_EPOCHS;
         extreme = true;
+      } else if (roll < 0.28) {
+        pool = RUPTURE_EPOCHS;
       } else if (roll < 0.62 && TIMELINE_EPOCHS.length) {
         pool = TIMELINE_EPOCHS;
         timeline = true;
