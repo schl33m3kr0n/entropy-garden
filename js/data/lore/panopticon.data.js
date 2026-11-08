@@ -1192,6 +1192,7 @@
             "welcome to the garden: please don’t eat the cheese. it’s not cheese",
             "welcome to the garden: tell your folks you love them",
             "welcome to the garden: we want the best for us, and by us, we mean management",
+            "welcome to the garden: we try to include the void in managerial decisions, but it always abstains",
         ],
         gritty: [
             "you clicked initialize. try doing that more IRL",
