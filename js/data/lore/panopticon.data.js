@@ -434,6 +434,9 @@
         "bird’s eye view is my default, but security cameras are easy to hack into",
         "we asked the void what it thought about human history. it replied through our collective imaginations",
         "get your ‘i got this shirt from the void’ shirt if you make it back",
+        "your feet were always that far away from your head",
+        "Carl emits a social forcefield. you should see it. it’s fascinating",
+        "Carl can make any room feel smaller",
     ],
     // Two-beat conversations: setup → develop / contradict / escalate.
     panopticonIdleCommentSequencesSafe: [
@@ -1193,6 +1196,8 @@
             "welcome to the garden: tell your folks you love them",
             "welcome to the garden: we want the best for us, and by us, we mean management",
             "welcome to the garden: we try to include the void in managerial decisions, but it always abstains",
+            "welcome to the garden: the hallucinations are normal. we just prefer you don't listen to what the entities have to say",
+            "welcome to the garden: Carl can make any room feel smaller",
         ],
         gritty: [
             "you clicked initialize. try doing that more IRL",
