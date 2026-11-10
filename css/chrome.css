@@ -1315,6 +1315,11 @@ body.corrupted .mask-icon {
     -webkit-mask-image: url('../assets/icons/feather.svg');
 }
 
+.mask-icon--void {
+    mask-image: url('../assets/icons/void.svg');
+    -webkit-mask-image: url('../assets/icons/void.svg');
+}
+
 .mask-icon--trophy {
     mask-image: url('../assets/img/ui/eyeball-wings.svg');
     -webkit-mask-image: url('../assets/img/ui/eyeball-wings.svg');

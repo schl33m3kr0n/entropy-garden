@@ -66,6 +66,7 @@ const PRECACHE_URLS = [
     'assets/icons/mr-disco-sidebar.png',
     'assets/icons/vault.svg',
     'assets/icons/cards.svg',
+    'assets/icons/void.svg',
     'assets/icons/play.svg',
     'assets/icons/pause.svg',
     'assets/icons/pizza.svg',
