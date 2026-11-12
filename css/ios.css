@@ -389,8 +389,13 @@ body.ios-ui #hud.active.anim-glitch {
 body.ios-ui #hud h1 {
     font-size: clamp(2rem, 11vw, 3.25rem);
     letter-spacing: 0.12em;
-    padding: 16px 22px 14px;
+    padding: 0;
     line-height: 1.05;
+}
+
+body.ios-ui .hud-title-logo {
+    width: clamp(200px, 68vw, 310px);
+    height: auto;
 }
 
 body.ios-ui .hud-title-card::after {

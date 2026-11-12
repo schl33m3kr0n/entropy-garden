@@ -325,6 +325,12 @@ function applyArrangement(chrome, pondery) {
 export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     if (!h1) return Promise.resolve();
 
+    if (h1.querySelector('.hud-title-logo')) {
+        h1.setAttribute('aria-label', pondery ? TARGET : SOURCE);
+        restoreTitlePresentation(h1, pondery);
+        return Promise.resolve();
+    }
+
     const existingChrome = h1.querySelector('.god-title-chrome');
     if (!pondery && !existingChrome) {
         restorePlainTitle(h1);
@@ -374,5 +380,6 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
 }
 
 export function prepareGodTitle(h1) {
-    if (h1) ensureChrome(h1);
+    if (!h1 || h1.querySelector('.hud-title-logo')) return;
+    ensureChrome(h1);
 }

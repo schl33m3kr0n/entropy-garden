@@ -867,25 +867,15 @@ body.corrupted #terminal-container {
 }
 
 .hud-title-card::after {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    border-radius: var(--radius-xl);
-    background: linear-gradient(90deg,
-        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
-        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
-    );
-    background-size: 200% 100%;
-    background-position: var(--rainbow-offset, 0%) 50%;
-    z-index: -1;
-    padding: 3px;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
+    display: none;
+}
+
+.hud-title-logo {
+    display: block;
+    width: clamp(230px, 38vw, 440px);
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
     pointer-events: none;
 }
 
@@ -975,8 +965,7 @@ h1 {
     font-weight: normal; 
     font-size: 4.5rem; 
     margin: 0; 
-    padding: 22px 40px 18px;
-    transform: translateY(4px);
+    padding: 0;
     text-transform: uppercase; 
     letter-spacing: 6px; 
 
@@ -988,19 +977,6 @@ h1 {
     margin: 0; 
     position: relative; 
     z-index: 100;
-
-
-    /* --- TEXT RAINBOW --- */
-    background: linear-gradient(90deg, 
-        hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), 
-        hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(0, 100%, 50%)
-    );
-    background-size: 200% 100%;
-    background-position: var(--rainbow-offset, 0%) 50%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
 }
 
 /* Title border lives on .hud-title-card; credit sits below the frame in #hud. */

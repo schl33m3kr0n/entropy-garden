@@ -78,6 +78,7 @@ const PRECACHE_URLS = [
     'assets/icons/star.svg',
     'assets/icons/laptop.png',
     'assets/icons/skip.png',
+    'assets/img/ui/entropy-garden-title.png',
     'assets/img/vault/sun-poster.webp',
     'assets/img/vault/ahoy.webp',
 ];
