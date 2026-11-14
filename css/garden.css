@@ -1,6 +1,25 @@
 /* Entropy Garden — matrix, panopticon, artifacts, docking bay */
 
 /* --- GOD MODE --- */
+#hud h1.god-title-shuffling-logo .hud-title-logo {
+    opacity: 0;
+}
+
+.god-title-logo-shuffle {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.god-title-logo-tile {
+    position: absolute;
+    background-repeat: no-repeat;
+    border-radius: 18%;
+    will-change: transform;
+    pointer-events: none;
+}
+
 /* Letter spans can't inherit h1 background-clip:text — syncGodTitleGradient() in
    god-title.js tiles each glyph on the .hud-title-card::after gradient field. */
 h1.god-title-live {

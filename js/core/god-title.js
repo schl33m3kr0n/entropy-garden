@@ -11,6 +11,22 @@ import { registerHook } from './hooks.js';
 
 const SOURCE = 'ENTROPY GARDEN';
 const TARGET = 'PONDERY ARGENT';
+const ENTROPY_LOGO_SRC = 'assets/img/ui/entropy-garden-title.png';
+const PONDERY_LOGO_SRC = 'assets/img/ui/pondery-argent-title.png';
+
+const LOGO_W = 1024;
+const LOGO_H = 314;
+const TILE_PAD = 16;
+const TILE_SIZE = 128 + TILE_PAD * 2; // 160x160 crop around each 128x128 letter
+
+/** 13 letter positions (x, y) in the 1024x314 title graphic: 7 top row, 6 bottom row. */
+const LOGO_SLOTS = [
+    [26, 26], [167, 26], [307, 26], [448, 26], [589, 26], [730, 26], [870, 26],
+    [96, 161], [237, 161], [378, 161], [518, 161], [659, 161], [800, 161],
+];
+
+/** For each source letter index (0..12 in ENTROPYGARDEN), its target slot index (0..12 in PONDERYARGENT). */
+const LOGO_SOURCE_TO_TARGET_SLOT = [4, 2, 12, 5, 1, 0, 6, 9, 7, 8, 3, 10, 11];
 
 /** Matches chrome.css h1 rainbow (200% wide, --rainbow-offset). */
 const HUD_TITLE_GRADIENT = 'linear-gradient(90deg, '
@@ -317,6 +333,112 @@ function applyArrangement(chrome, pondery) {
     if (!pondery) restoreSourceLetters(chrome);
 }
 
+let ponderyPreloaded = false;
+function preloadPonderyLogo() {
+    if (ponderyPreloaded || typeof Image === 'undefined') return;
+    ponderyPreloaded = true;
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = PONDERY_LOGO_SRC;
+}
+
+function clearLogoShuffle(h1) {
+    if (!h1) return;
+    h1.classList.remove('god-title-shuffling-logo');
+    h1.querySelectorAll('.god-title-logo-shuffle').forEach((el) => el.remove());
+}
+
+function applyLogoTitle(h1, logo, pondery) {
+    clearLogoShuffle(h1);
+    const nextSrc = pondery ? PONDERY_LOGO_SRC : ENTROPY_LOGO_SRC;
+    if (logo.getAttribute('src') !== nextSrc) {
+        logo.setAttribute('src', nextSrc);
+    }
+    logo.alt = pondery ? TARGET : SOURCE;
+    h1.setAttribute('aria-label', pondery ? TARGET : SOURCE);
+    restoreTitlePresentation(h1, pondery);
+}
+
+function animateLogoArrangement(h1, logo, pondery, durationMs = 720) {
+    preloadPonderyLogo();
+    titleAnimToken += 1;
+    const token = titleAnimToken;
+    titleAnimating = true;
+
+    clearLogoShuffle(h1);
+    h1.setAttribute('aria-label', pondery ? TARGET : SOURCE);
+    if (pondery) restoreTitlePresentation(h1, true);
+
+    const shuffle = document.createElement('span');
+    shuffle.className = 'god-title-logo-shuffle';
+    shuffle.setAttribute('aria-hidden', 'true');
+
+    const tiles = LOGO_SLOTS.map(([sx, sy], sourceIdx) => {
+        const targetSlotIdx = LOGO_SOURCE_TO_TARGET_SLOT[sourceIdx];
+        const [tx, ty] = LOGO_SLOTS[targetSlotIdx];
+
+        const fromX = pondery ? sx : tx;
+        const fromY = pondery ? sy : ty;
+        const toX = pondery ? tx : sx;
+        const toY = pondery ? ty : sy;
+
+        const cropX = sx - TILE_PAD;
+        const cropY = sy - TILE_PAD;
+
+        const tile = document.createElement('span');
+        tile.className = 'god-title-logo-tile';
+        tile.style.left = `${((fromX - TILE_PAD) / LOGO_W) * 100}%`;
+        tile.style.top = `${((fromY - TILE_PAD) / LOGO_H) * 100}%`;
+        tile.style.width = `${(TILE_SIZE / LOGO_W) * 100}%`;
+        tile.style.height = `${(TILE_SIZE / LOGO_H) * 100}%`;
+        tile.style.backgroundImage = `url("${ENTROPY_LOGO_SRC}")`;
+        tile.style.backgroundSize = `${(LOGO_W / TILE_SIZE) * 100}% ${(LOGO_H / TILE_SIZE) * 100}%`;
+        tile.style.backgroundPosition = `${(cropX / (LOGO_W - TILE_SIZE)) * 100}% ${(cropY / (LOGO_H - TILE_SIZE)) * 100}%`;
+        tile.dataset.dxPct = String(((toX - fromX) / TILE_SIZE) * 100);
+        tile.dataset.dyPct = String(((toY - fromY) / TILE_SIZE) * 100);
+        shuffle.appendChild(tile);
+        return tile;
+    });
+
+    h1.appendChild(shuffle);
+    h1.classList.add('god-title-shuffling-logo');
+
+    return new Promise((resolve) => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (token !== titleAnimToken) {
+                    resolve();
+                    return;
+                }
+                tiles.forEach((tile) => {
+                    tile.style.transition = `transform ${durationMs}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+                    tile.style.transform = `translate(${tile.dataset.dxPct}%, ${tile.dataset.dyPct}%)`;
+                });
+
+                const done = () => {
+                    if (token !== titleAnimToken) {
+                        resolve();
+                        return;
+                    }
+                    titleAnimating = false;
+                    applyLogoTitle(h1, logo, pondery);
+                    resolve();
+                };
+
+                const last = tiles[tiles.length - 1];
+                if (last) {
+                    last.addEventListener('transitionend', (e) => {
+                        if (e.propertyName === 'transform') done();
+                    }, { once: true });
+                    setTimeout(done, durationMs + 80);
+                } else {
+                    done();
+                }
+            });
+        });
+    });
+}
+
 /**
  * @param {HTMLHeadingElement | null} h1
  * @param {boolean} pondery
@@ -325,10 +447,15 @@ function applyArrangement(chrome, pondery) {
 export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
     if (!h1) return Promise.resolve();
 
-    if (h1.querySelector('.hud-title-logo')) {
-        h1.setAttribute('aria-label', pondery ? TARGET : SOURCE);
-        restoreTitlePresentation(h1, pondery);
-        return Promise.resolve();
+    const logo = h1.querySelector('.hud-title-logo');
+    if (logo) {
+        if (!shouldAnimateTitle(animate)) {
+            titleAnimToken += 1;
+            titleAnimating = false;
+            applyLogoTitle(h1, logo, pondery);
+            return Promise.resolve();
+        }
+        return animateLogoArrangement(h1, logo, pondery);
     }
 
     const existingChrome = h1.querySelector('.god-title-chrome');
@@ -380,6 +507,10 @@ export function setGodTitleArrangement(h1, pondery, { animate = true } = {}) {
 }
 
 export function prepareGodTitle(h1) {
-    if (!h1 || h1.querySelector('.hud-title-logo')) return;
+    if (!h1) return;
+    if (h1.querySelector('.hud-title-logo')) {
+        preloadPonderyLogo();
+        return;
+    }
     ensureChrome(h1);
 }
