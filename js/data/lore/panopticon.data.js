@@ -1197,6 +1197,10 @@
             "welcome to the garden: we want the best for us, and by us, we mean management",
             "welcome to the garden: we try to include the void in managerial decisions, but it always abstains",
             "welcome to the garden: the hallucinations are normal, we just prefer you don’t listen to what the entities have to say",
+            "welcome to the garden: you didn't wipe enough",
+            "welcome to the garden: everyone can tell that you didn't shower",
+            "welcome to the garden: the plants remember your stupid faces",
+            "welcome to the garden: we stole your sock... y'know, that sock",
         ],
         gritty: [
             "you clicked initialize. try doing that more IRL",
