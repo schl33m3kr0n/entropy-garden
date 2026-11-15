@@ -1,23 +1,16 @@
 /* Entropy Garden — matrix, panopticon, artifacts, docking bay */
 
 /* --- GOD MODE --- */
-#hud h1.god-title-shuffling-logo .hud-title-logo {
-    opacity: 0;
-}
-
-.god-title-logo-shuffle {
+.hud-title-logo-fade {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
     pointer-events: none;
     z-index: 2;
-}
-
-.god-title-logo-tile {
-    position: absolute;
-    background-repeat: no-repeat;
-    border-radius: 18%;
-    will-change: transform;
-    pointer-events: none;
 }
 
 /* Letter spans can't inherit h1 background-clip:text — syncGodTitleGradient() in
