@@ -268,8 +268,9 @@ const EYE_PRONUNCIATIONS = [
     [/\bpanopticon\b/gi, 'pan op tih con'],
     [/\bfrutiger\s+aero\b/gi, 'froo tih gur air oh'],
     [/\bfrutiger\b/gi, 'froo tih gur'],
-    // Verb live/lives = short i; adjective live only before "feed"
-    [/\blive\s+feed\b/gi, 'liev feed'],
+    // Verb live/lives = short i; noun "lives" and adjective "live" = long i
+    [/\b(our|their|your|my|past|many|human|mortal)\s+lives\b/gi, '$1 lievz'],
+    [/\blive\s+(feed|studio|watched)\b/gi, 'liev $1'],
     [/\blives\b/gi, 'livz'],
     [/\blive\b/gi, 'liv'],
 ];
