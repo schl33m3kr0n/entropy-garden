@@ -262,6 +262,7 @@ const EYE_PRONUNCIATIONS = [
     [/\bkanye's\b/gi, 'khan yays'],
     [/\bkanye\b/gi, 'khan yay'],
     [/\bbodhi\b/gi, 'bo dee'],
+    [/\bharambe\b/gi, 'ha rahm bay'],
     // Long A / long O chant (not letter-names)
     [/\bay,\s*oh,\s*ay,\s*oh,\s*ay,\s*oh,\s*ay,\s*oh\b/gi, 'aye, owe, aye, owe, aye, owe, aye, owe'],
     [/\bpanopticon\b/gi, 'pan op tih con'],

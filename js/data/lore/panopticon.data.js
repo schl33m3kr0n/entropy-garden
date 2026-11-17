@@ -256,7 +256,7 @@
         "now selling produce with 5% less radiation!",
         "our benefits don’t justify our workload",
         "please say you enjoyed the Simpsonwave playlist. Daniel worked really hard on it",
-        "Bob didn't feel like coming in today. Mr. Whiskers will be your new security guard for the day",
+        "Bob didn't feel like coming in today. Mr. Whiskers will step in as the security guard until further notice",
         "sue us for false advertising and we'll show you the fine print on the brochure",
         "the sooner you sign this waiver, the quicker we can show you the glowing fungi room",
         "please don't stare at the hydrangeas. they'll see it as confrontational",
