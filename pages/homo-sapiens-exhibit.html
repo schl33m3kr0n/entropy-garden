@@ -329,10 +329,21 @@
     const telemetryNoteEl = document.getElementById('exhibit-telemetry-note');
 
     let lastComment = '';
+    let commentBag = [];
     let commentTimer = 0;
-    let lastTelemetryIdx = -1;
+    let lastTelemetry = null;
+    let telemetryBag = [];
     let tapWarningTimer = 0;
     let tapCount = 0;
+
+    function shuffleCopy(list) {
+      const copy = [...list];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
 
     function prefersReducedMotion() {
       return matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -352,11 +363,16 @@
 
     function pickComment() {
       if (!EXHIBIT_COMMENTS.length) return '';
-      let next = EXHIBIT_COMMENTS[Math.floor(Math.random() * EXHIBIT_COMMENTS.length)];
-      let guard = 0;
-      while (next === lastComment && guard++ < 10) {
-        next = EXHIBIT_COMMENTS[Math.floor(Math.random() * EXHIBIT_COMMENTS.length)];
+      if (!commentBag.length) {
+        commentBag = shuffleCopy(EXHIBIT_COMMENTS);
+        // Prevent back-to-back repeat across bag boundary (pop pulls from end)
+        if (commentBag.length > 1 && commentBag[commentBag.length - 1] === lastComment) {
+          const swapIdx = Math.floor(Math.random() * (commentBag.length - 1));
+          const lastIdx = commentBag.length - 1;
+          [commentBag[swapIdx], commentBag[lastIdx]] = [commentBag[lastIdx], commentBag[swapIdx]];
+        }
       }
+      const next = commentBag.pop();
       lastComment = next;
       return next;
     }
@@ -384,13 +400,17 @@
     }
 
     function renderTelemetry() {
-      let idx = Math.floor(Math.random() * TELEMETRY_READOUTS.length);
-      let guard = 0;
-      while (idx === lastTelemetryIdx && guard++ < 8) {
-        idx = Math.floor(Math.random() * TELEMETRY_READOUTS.length);
+      if (!TELEMETRY_READOUTS.length) return;
+      if (!telemetryBag.length) {
+        telemetryBag = shuffleCopy(TELEMETRY_READOUTS);
+        if (telemetryBag.length > 1 && telemetryBag[telemetryBag.length - 1] === lastTelemetry) {
+          const swapIdx = Math.floor(Math.random() * (telemetryBag.length - 1));
+          const lastIdx = telemetryBag.length - 1;
+          [telemetryBag[swapIdx], telemetryBag[lastIdx]] = [telemetryBag[lastIdx], telemetryBag[swapIdx]];
+        }
       }
-      lastTelemetryIdx = idx;
-      const item = TELEMETRY_READOUTS[idx];
+      const item = telemetryBag.pop();
+      lastTelemetry = item;
       telemetryEl?.classList.add('is-updating');
       globalThis.setTimeout?.(() => {
         if (telemetryFaceEl) {
