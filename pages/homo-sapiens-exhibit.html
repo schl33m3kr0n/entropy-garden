@@ -440,8 +440,9 @@
 
     let thermostatTemp = 71;
     let thermostatFlash = 0;
-    let tvBazingaTimer = 4200;
-    let tvBazingaActive = 0;
+    let tvEventTimer = 3800;
+    let tvEventActive = 0;
+    let tvEventKind = '';
     let tvShapeTime = 0;
     let tvSceneIndex = 0;
     const glassRipples = [];
@@ -460,6 +461,7 @@
 
     const BUBBLE_TEXTS = ['!', '?', '$', '...', '71°!', 'NO', '?!', '📱'];
     const WEED_BUBBLES = ['*puff*', 'duuude', '...', 'whoa', '🌿'];
+    const FATHER_BUBBLES = ['NO WAY!!', 'OH SHIT!!', 'WHOA!!', 'RUN!!', 'I KNEW IT!!', '!!!'];
 
     const specimens = Array.from({ length: 8 }, (_, i) => {
       const isCarl = i === 0;
@@ -630,28 +632,54 @@
 
       if (thermostatFlash > 0) thermostatFlash = Math.max(0, thermostatFlash - elapsed);
 
-      // Update TV Bazinga cycle
-      if (tvBazingaActive > 0) {
-        tvBazingaActive = Math.max(0, tvBazingaActive - elapsed);
+      // Update intermittent TV broadcast events ('bazinga' and 'father')
+      if (tvEventActive > 0) {
+        tvEventActive = Math.max(0, tvEventActive - elapsed);
+        if (tvEventActive === 0) tvEventKind = '';
       } else {
-        tvBazingaTimer -= elapsed;
-        if (tvBazingaTimer <= 0) {
-          tvBazingaActive = 1800;
-          tvBazingaTimer = 5400 + Math.random() * 5500;
-          // Everyone watching TV or sitting on the couch reacts
+        tvEventTimer -= elapsed;
+        if (tvEventTimer <= 0) {
+          tvEventKind = Math.random() < 0.5 ? 'father' : 'bazinga';
+          tvEventActive = tvEventKind === 'father' ? 2400 : 1800;
+          tvEventTimer = 5000 + Math.random() * 5200;
+
           for (const s of specimens) {
             if (s.isCarl) continue;
-            if (s.state === 'couch_tv') {
-              s.bubble = 'BAZINGA!';
-              s.bubbleTimer = 1700;
-            } else if (s.state === 'couch_weed') {
-              s.bubble = 'hehe';
-              s.bubbleTimer = 1500;
-            } else if (s.state === 'tv' || (s.z < 0.0 && Math.random() < 0.55)) {
-              s.state = 'cheer';
-              s.stateTimer = 1750;
-              s.bubble = 'BAZINGA!';
-              s.bubbleTimer = 1650;
+            if (tvEventKind === 'bazinga') {
+              if (s.state === 'couch_tv') {
+                s.bubble = 'BAZINGA!';
+                s.bubbleTimer = 1700;
+              } else if (s.state === 'couch_weed') {
+                s.bubble = 'hehe';
+                s.bubbleTimer = 1500;
+              } else if (s.state === 'tv' || (s.z < 0.0 && Math.random() < 0.55)) {
+                s.state = 'cheer';
+                s.stateTimer = 1750;
+                s.bubble = 'BAZINGA!';
+                s.bubbleTimer = 1650;
+              }
+            } else if (tvEventKind === 'father') {
+              // Humans within proximity of the TV lose their shit
+              const distFromTv = Math.hypot(s.x - TV_POS.x, s.z - (-0.28));
+              const inProximity = distFromTv < 0.72 || s.state === 'couch_tv' || s.state === 'couch_weed' || s.state === 'tv';
+              if (inProximity) {
+                const msg = FATHER_BUBBLES[Math.floor(Math.random() * FATHER_BUBBLES.length)];
+                if (s.state === 'couch_tv') {
+                  s.bubble = msg;
+                  s.bubbleTimer = 2300;
+                } else if (s.state === 'couch_weed') {
+                  s.bubble = 'WOAH!!';
+                  s.bubbleTimer = 2100;
+                } else {
+                  releaseCouchSlot(s);
+                  s.state = 'freakout';
+                  s.stateTimer = 2350;
+                  s.tx = clampFloor(s.x + (Math.random() - 0.5) * 0.65, 0.68);
+                  s.tz = clampFloor(s.z + (Math.random() - 0.5) * 0.45, 0.48);
+                  s.bubble = msg;
+                  s.bubbleTimer = 2300;
+                }
+              }
             }
           }
         }
@@ -778,6 +806,28 @@
           }
         } else if (s.state === 'cheer') {
           s.stride += elapsed * 0.016;
+        } else if (s.state === 'freakout') {
+          // Sprint wildly in short erratic bursts while flailing
+          s.stride += elapsed * 0.030;
+          const dx = s.tx - s.x;
+          const dz = s.tz - s.z;
+          const dist = Math.hypot(dx, dz);
+          if (dist > 0.04) {
+            const step = Math.min(dist, 0.00052 * elapsed);
+            const nx = clampFloor(s.x + (dx / dist) * step, 0.70);
+            const nz = clampFloor(s.z + (dz / dist) * step, 0.52);
+            if (Math.abs(nx - COUCH_POS.x) > 0.40 || Math.abs(nz - COUCH_POS.z) > 0.14) {
+              s.x = nx;
+              s.z = nz;
+            } else {
+              s.tx = clampFloor((Math.random() - 0.5) * 1.2, 0.68);
+              s.tz = clampFloor(-0.35 + (Math.random() - 0.5) * 0.4, 0.48);
+            }
+            if (Math.abs(dx) > 0.01) s.facing = dx > 0 ? 1 : -1;
+          } else {
+            s.tx = clampFloor(s.x + (Math.random() - 0.5) * 0.6, 0.68);
+            s.tz = clampFloor(s.z + (Math.random() - 0.5) * 0.4, 0.48);
+          }
         }
       }
 
@@ -869,10 +919,12 @@
         ctx.fill();
       } else if (s.state === 'couch_tv') {
         // Sitting on the couch cushion watching the centered TV
-        const cheeringBazinga = tvBazingaActive > 0;
-        const hipY = -unit * 0.05;
-        const shoulderY = -unit * 0.48;
-        const headY = -unit * 0.72;
+        const tvReacting = tvEventActive > 0;
+        const freakout = tvEventActive > 0 && tvEventKind === 'father';
+        const bounce = freakout ? Math.abs(Math.sin(s.stride * 2.4)) * unit * 0.14 : 0;
+        const hipY = -unit * 0.05 - bounce;
+        const shoulderY = -unit * 0.48 - bounce;
+        const headY = -unit * 0.72 - bounce;
 
         // Seated torso
         ctx.lineWidth = Math.max(3.2, unit * 0.25);
@@ -890,9 +942,9 @@
         ctx.lineTo(unit * 0.17, hipY + unit * 0.28);
         ctx.stroke();
 
-        // Arms (raised in a V if BAZINGA is playing, otherwise resting on lap/cushion)
-        if (cheeringBazinga) {
-          const wave = Math.sin(s.stride * 1.6) * unit * 0.05;
+        // Arms (raised/flailing if BAZINGA or YOU ARE (NOT) THE FATHER is playing)
+        if (tvReacting) {
+          const wave = Math.sin(s.stride * (freakout ? 3.2 : 1.6)) * unit * (freakout ? 0.14 : 0.05);
           ctx.beginPath();
           ctx.moveTo(-unit * 0.08, shoulderY + unit * 0.04);
           ctx.lineTo(-unit * 0.38, shoulderY - unit * 0.24 + wave);
@@ -978,10 +1030,12 @@
         ctx.restore();
       } else {
         // Upright specimen (silhouette proportion inspired by the Homo sapiens icon)
-        const swing = (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv' || s.state === 'to_couch')
-          ? Math.sin(s.stride) * 0.22
+        const swing = (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv' || s.state === 'to_couch' || s.state === 'freakout')
+          ? Math.sin(s.stride) * (s.state === 'freakout' ? 0.36 : 0.22)
           : 0;
-        const hop = s.state === 'cheer' ? Math.abs(Math.sin(s.stride)) * unit * 0.14 : 0;
+        const hop = s.state === 'freakout'
+          ? Math.abs(Math.sin(s.stride)) * unit * 0.26
+          : (s.state === 'cheer' ? Math.abs(Math.sin(s.stride)) * unit * 0.14 : 0);
 
         const hipY = -unit * 0.42 - hop;
         const shoulderY = -unit * 0.82 - hop;
@@ -1005,13 +1059,13 @@
         ctx.stroke();
 
         // Arms by behavior state
-        if (s.state === 'cheer') {
-          const wave = Math.sin(s.stride * 1.4) * unit * 0.05;
+        if (s.state === 'cheer' || s.state === 'freakout') {
+          const wave = Math.sin(s.stride * (s.state === 'freakout' ? 2.1 : 1.4)) * unit * (s.state === 'freakout' ? 0.16 : 0.05);
           ctx.beginPath();
           ctx.moveTo(-unit * 0.08, shoulderY + unit * 0.04);
-          ctx.lineTo(-unit * 0.40, shoulderY - unit * 0.24 + wave);
+          ctx.lineTo(-unit * 0.42, shoulderY - unit * 0.26 + wave);
           ctx.moveTo(unit * 0.08, shoulderY + unit * 0.04);
-          ctx.lineTo(unit * 0.40, shoulderY - unit * 0.24 - wave);
+          ctx.lineTo(unit * 0.42, shoulderY - unit * 0.26 - wave);
           ctx.stroke();
         } else if (s.state === 'phone') {
           const dir = s.facing;
@@ -1065,7 +1119,9 @@
       // Speech / reaction bubble
       if (s.bubble) {
         ctx.font = `600 ${Math.max(9, Math.round(unit * 0.34))}px Avenir, "Avenir Next", sans-serif`;
-        ctx.fillStyle = s.bubble === 'BAZINGA!' ? '#0f0' : 'rgba(255, 255, 255, 0.92)';
+        ctx.fillStyle = s.bubble === 'BAZINGA!'
+          ? '#0f0'
+          : (FATHER_BUBBLES.includes(s.bubble) ? '#ff0055' : 'rgba(255, 255, 255, 0.92)');
         ctx.textAlign = 'center';
         const labelY = s.isCarl ? -unit * 1.68 : (onCouch ? -unit * 1.05 : -unit * 1.42);
         ctx.fillText(s.bubble, 0, labelY);
@@ -1320,23 +1376,38 @@
       ctx.translate(vx, vy);
       const vw = Math.min(width, height) * 0.34 * vScale;
       const vh = vw * 0.58;
-      ctx.fillStyle = tvBazingaActive > 0 ? 'rgba(0, 40, 0, 0.94)' : '#050505';
-      ctx.strokeStyle = tvBazingaActive > 0 ? '#0f0' : 'rgba(255, 255, 255, 0.88)';
+      const isBazinga = tvEventActive > 0 && tvEventKind === 'bazinga';
+      const isFather = tvEventActive > 0 && tvEventKind === 'father';
+      ctx.fillStyle = isBazinga
+        ? 'rgba(0, 40, 0, 0.94)'
+        : (isFather ? 'rgba(42, 0, 14, 0.96)' : '#050505');
+      ctx.strokeStyle = isBazinga
+        ? '#0f0'
+        : (isFather ? '#ff0055' : 'rgba(255, 255, 255, 0.88)');
       ctx.lineWidth = 1.5;
-      if (tvBazingaActive > 0) {
-        ctx.shadowColor = 'rgba(0, 255, 0, 0.7)';
+      if (isBazinga || isFather) {
+        ctx.shadowColor = isBazinga ? 'rgba(0, 255, 0, 0.7)' : 'rgba(255, 0, 85, 0.78)';
         ctx.shadowBlur = 16;
       }
       ctx.fillRect(-vw * 0.5, -vh * 0.5, vw, vh);
       ctx.strokeRect(-vw * 0.5, -vh * 0.5, vw, vh);
       ctx.shadowBlur = 0;
 
-      if (tvBazingaActive > 0) {
+      if (isBazinga) {
         ctx.fillStyle = '#0f0';
         ctx.font = `700 ${Math.max(10, Math.round(13 * vScale))}px Avenir, monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('BAZINGA', 0, 0);
+      } else if (isFather) {
+        ctx.fillStyle = '#fff';
+        const fontSize = Math.max(7, Math.round(8.2 * vScale));
+        ctx.font = `700 ${fontSize}px Avenir, monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('YOU ARE NOT', 0, -fontSize * 0.68);
+        ctx.fillStyle = '#ff0055';
+        ctx.fillText('THE FATHER!', 0, fontSize * 0.68);
       } else {
         drawTvShapes(vw, vh);
       }
