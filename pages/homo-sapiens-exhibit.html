@@ -386,6 +386,7 @@
       commentTimer = globalThis.setTimeout?.(() => {
         commentEl.innerHTML = formatExhibitCommentHtml(next);
         commentEl.classList.add('is-visible');
+        triggerCommentInteraction(next);
       }, 320) || 0;
     }
 
@@ -614,6 +615,319 @@
       }
     }
 
+    function triggerTvEvent(kind) {
+      tvEventKind = kind;
+      tvEventActive = kind === 'father' ? 2500 : 1900;
+      tvEventTimer = 5400 + Math.random() * 5200;
+
+      for (const s of specimens) {
+        if (s.isCarl) continue;
+        if (kind === 'bazinga') {
+          if (s.state === 'couch_tv') {
+            s.bubble = 'BAZINGA!';
+            s.bubbleTimer = 1800;
+          } else if (s.state === 'couch_weed') {
+            s.bubble = 'hehe';
+            s.bubbleTimer = 1500;
+          } else if (s.state === 'tv' || (s.z < 0.0 && Math.random() < 0.6)) {
+            s.state = 'cheer';
+            s.stateTimer = 1850;
+            s.bubble = 'BAZINGA!';
+            s.bubbleTimer = 1750;
+          }
+        } else if (kind === 'father') {
+          const distFromTv = Math.hypot(s.x - TV_POS.x, s.z - (-0.28));
+          const inProximity = distFromTv < 0.72 || s.state === 'couch_tv' || s.state === 'couch_weed' || s.state === 'tv';
+          if (inProximity) {
+            const msg = FATHER_BUBBLES[Math.floor(Math.random() * FATHER_BUBBLES.length)];
+            if (s.state === 'couch_tv') {
+              s.bubble = msg;
+              s.bubbleTimer = 2400;
+            } else if (s.state === 'couch_weed') {
+              s.bubble = 'WOAH!!';
+              s.bubbleTimer = 2100;
+            } else {
+              releaseCouchSlot(s);
+              s.state = 'freakout';
+              s.stateTimer = 2400;
+              s.tx = clampFloor(s.x + (Math.random() - 0.5) * 0.65, 0.68);
+              s.tz = clampFloor(s.z + (Math.random() - 0.5) * 0.45, 0.48);
+              s.bubble = msg;
+              s.bubbleTimer = 2400;
+            }
+          }
+        }
+      }
+    }
+
+    function getFloorSpecimens() {
+      return specimens.filter((s) => !s.isCarl && s.state !== 'couch_tv' && s.state !== 'couch_weed');
+    }
+
+    function stageDebatePair(pool, msgA, msgB, duration = 2600) {
+      if (pool.length < 2) return;
+      const [a, b] = pool;
+      releaseCouchSlot(a);
+      releaseCouchSlot(b);
+      a.state = 'argue';
+      b.state = 'argue';
+      a.stateTimer = duration;
+      b.stateTimer = duration;
+      a.facing = b.x >= a.x ? 1 : -1;
+      b.facing = -a.facing;
+      a.bubble = msgA;
+      b.bubble = msgB;
+      a.bubbleTimer = duration - 150;
+      b.bubbleTimer = duration - 150;
+    }
+
+    function triggerCommentInteraction(comment) {
+      if (reducedMotion.matches || !comment) return;
+      const text = comment.toLowerCase();
+      const carl = specimens[0];
+      const floor = getFloorSpecimens();
+
+      if (text.includes('bazinga')) {
+        triggerTvEvent('bazinga');
+        return;
+      }
+
+      if (text.includes('finding the father')) {
+        triggerTvEvent('father');
+        return;
+      }
+
+      if (text.includes('thermostat')) {
+        const runner = floor[0] || specimens[3];
+        if (runner) {
+          releaseCouchSlot(runner);
+          runner.state = 'thermostat';
+          runner.tx = THERMOSTAT_POS.x + 0.14;
+          runner.tz = THERMOSTAT_POS.z;
+          runner.stateTimer = 3600;
+          runner.bubble = 'too cold...';
+          runner.bubbleTimer = 1400;
+        }
+        return;
+      }
+
+      if (text.includes('carl')) {
+        carl.state = 'wander';
+        carl.tx = 0.0;
+        carl.tz = -0.22;
+        carl.stateTimer = 3200;
+        carl.bubble = 'hey guys...';
+        carl.bubbleTimer = 2400;
+        const reactions = ['...', 'uhh', 'nope', '*avoids eye contact*'];
+        floor.forEach((s, idx) => {
+          s.state = 'wander';
+          s.tx = s.x < 0 ? -0.64 : 0.64;
+          s.tz = clampFloor(s.z + (idx % 2 === 0 ? -0.2 : 0.2), 0.48);
+          s.stateTimer = 2600;
+          s.bubble = reactions[idx % reactions.length];
+          s.bubbleTimer = 2100;
+        });
+        return;
+      }
+
+      if (text.includes('fourth wall')) {
+        const glassGazers = floor.slice(0, 3);
+        const lines = ['HEY YOU', 'ARE WE IN A BOX?', "WHO'S WATCHING?"];
+        glassGazers.forEach((s, idx) => {
+          s.state = 'wander';
+          s.tx = (idx - 1) * 0.36;
+          s.tz = 0.50;
+          s.stateTimer = 3200;
+          s.bubble = lines[idx % lines.length];
+          s.bubbleTimer = 2800;
+        });
+        return;
+      }
+
+      if (text.includes('doubt their own existence') || text.includes('childlike wonder')) {
+        const lines = text.includes('wonder')
+          ? ['sigh...', 'taxes...', 'meh']
+          : ['am i real?', '???', 'what is floor'];
+        floor.slice(0, 3).forEach((s, idx) => {
+          s.state = 'existential';
+          s.stateTimer = 3200;
+          s.bubble = lines[idx % lines.length];
+          s.bubbleTimer = 2800;
+        });
+        return;
+      }
+
+      if (text.includes('second brownie') || text.includes('blinker') || text.includes('toxic chemicals')) {
+        const smoker = specimens.find((s) => s.state === 'couch_weed');
+        if (smoker) {
+          smoker.bubble = text.includes('brownie') ? 'uh oh...' : '*COUGH*';
+          smoker.bubbleTimer = 2400;
+          for (let i = 0; i < 3; i++) {
+            weedSmoke.push({
+              x: smoker.x + (Math.random() - 0.5) * 0.08,
+              y: 0.38,
+              z: smoker.z,
+              targetHoleX: AIR_HOLE_X[i % AIR_HOLE_X.length],
+              age: 0,
+              life: 2600,
+              seed: Math.random() * 10,
+            });
+          }
+        }
+        if (floor[0]) {
+          floor[0].state = 'existential';
+          floor[0].stateTimer = 3200;
+          floor[0].bubble = text.includes('brownie') ? 'manual breathing' : 'dizzy...';
+          floor[0].bubbleTimer = 2600;
+        }
+        return;
+      }
+
+      if (text.includes('pixel windows') || text.includes('watching people') || text.includes('family guy') || text.includes('tamagotchis') || text.includes('drown in a pool')) {
+        const tag = text.includes('tamagotchis')
+          ? 'FEED IT!'
+          : (text.includes('drown') ? 'NO LADDER' : (text.includes('family guy') ? 'hehe lois' : '📱'));
+        floor.slice(0, 4).forEach((s) => {
+          s.state = 'phone';
+          s.stateTimer = 3200;
+          s.bubble = tag;
+          s.bubbleTimer = 2200;
+        });
+        return;
+      }
+
+      if (text.includes('color a dress') || text.includes('color spectrum')) {
+        const isDress = text.includes('dress');
+        floor.forEach((s, idx) => {
+          const leftSide = idx % 2 === 0;
+          s.state = 'argue';
+          s.stateTimer = 3000;
+          s.facing = leftSide ? 1 : -1;
+          s.bubble = isDress
+            ? (leftSide ? 'BLUE & BLACK!' : 'WHITE & GOLD!')
+            : (leftSide ? 'TEAM RED!' : 'TEAM BLUE!');
+          s.bubbleTimer = 2700;
+        });
+        return;
+      }
+
+      if (text.includes('little toe')) {
+        if (floor[0]) {
+          floor[0].state = 'freakout';
+          floor[0].stateTimer = 2400;
+          floor[0].tx = clampFloor(floor[0].x + 0.25, 0.66);
+          floor[0].tz = floor[0].z;
+          floor[0].bubble = 'MY TOE!!';
+          floor[0].bubbleTimer = 2200;
+        }
+        if (floor[1]) {
+          floor[1].state = 'cheer';
+          floor[1].stateTimer = 1800;
+          floor[1].bubble = 'lmao';
+          floor[1].bubbleTimer = 1800;
+        }
+        return;
+      }
+
+      if (text.includes('hot pocket')) {
+        if (floor[0]) {
+          floor[0].state = 'existential';
+          floor[0].stateTimer = 2800;
+          floor[0].bubble = 'MY HOT POCKET!';
+          floor[0].bubbleTimer = 2500;
+        }
+        floor.slice(1, 3).forEach((s, idx) => {
+          s.state = 'phone';
+          s.stateTimer = 2800;
+          s.bubble = idx === 0 ? 'POSTING THIS' : 'VIRAL';
+          s.bubbleTimer = 2400;
+        });
+        return;
+      }
+
+      if (text.includes('radioactive spider')) {
+        if (floor[0]) {
+          floor[0].state = 'cheer';
+          floor[0].stateTimer = 2200;
+          floor[0].bubble = 'SPIDER-MAN!';
+          floor[0].bubbleTimer = 2000;
+        }
+        floor.slice(1, 3).forEach((s) => {
+          s.state = 'freakout';
+          s.stateTimer = 2400;
+          s.tx = clampFloor((Math.random() - 0.5) * 1.2, 0.66);
+          s.tz = clampFloor(-0.35 + (Math.random() - 0.5) * 0.3, 0.48);
+          s.bubble = 'AAAH A SPIDER!!';
+          s.bubbleTimer = 2200;
+        });
+        return;
+      }
+
+      if (text.includes('protest against deforestation')) {
+        floor.slice(0, 3).forEach((s, idx) => {
+          s.state = 'cheer';
+          s.stateTimer = 2800;
+          s.bubble = idx === 0 ? 'SAVE TREES!' : (idx === 1 ? '*cardboard*' : '🪧');
+          s.bubbleTimer = 2500;
+        });
+        return;
+      }
+
+      if (text.includes('solitary confinement')) {
+        if (floor[0]) {
+          floor[0].state = 'wander';
+          floor[0].tx = 0.62;
+          floor[0].tz = -0.44;
+          floor[0].stateTimer = 3200;
+          floor[0].bubble = 'TRUST ME BRO';
+          floor[0].bubbleTimer = 2600;
+        }
+        if (floor[1]) {
+          floor[1].state = 'wander';
+          floor[1].tx = 0.42;
+          floor[1].tz = -0.34;
+          floor[1].stateTimer = 3200;
+          floor[1].bubble = 'so wise...';
+          floor[1].bubbleTimer = 2400;
+        }
+        return;
+      }
+
+      if (text.includes('pieces of paper') || text.includes('hoarding wealth')) {
+        stageDebatePair(floor, 'MY PAPER!', text.includes('wealth') ? 'TRICKLE DOWN!' : 'INFLATION!');
+        return;
+      }
+      if (text.includes('banana taped')) {
+        stageDebatePair(floor, '$120K?!', "IT'S ART!");
+        return;
+      }
+      if (text.includes('insurance')) {
+        stageDebatePair(floor, 'DENIED!', 'MY HEAD!!');
+        return;
+      }
+      if (text.includes('trolley problem')) {
+        stageDebatePair(floor, 'PULL IT!', 'MAX SCORE!');
+        return;
+      }
+      if (text.includes('gloves fit')) {
+        stageDebatePair(floor, 'IT FITS!', "NO IT DOESN'T!");
+        return;
+      }
+      if (text.includes('boom stick') || text.includes('wars') || text.includes('table salt') || text.includes('gun rights')) {
+        stageDebatePair(floor, text.includes('salt') ? 'OUR SALT!' : 'BIGGER BOOM!', 'NO MINE!');
+        return;
+      }
+      if (text.includes('mating rituals') || text.includes('fuck, marry')) {
+        stageDebatePair(floor, text.includes('mating') ? '*squeak*' : 'MARRY!', 'UHH...');
+        return;
+      }
+
+      // Subtle general choreography for any other comment
+      if (floor.length >= 2 && Math.random() < 0.6) {
+        stageDebatePair(floor, '!', '?', 1800);
+      }
+    }
+
     function updateSimulation(elapsed) {
       if (reducedMotion.matches) return;
 
@@ -652,49 +966,7 @@
       } else {
         tvEventTimer -= elapsed;
         if (tvEventTimer <= 0) {
-          tvEventKind = Math.random() < 0.5 ? 'father' : 'bazinga';
-          tvEventActive = tvEventKind === 'father' ? 2400 : 1800;
-          tvEventTimer = 5000 + Math.random() * 5200;
-
-          for (const s of specimens) {
-            if (s.isCarl) continue;
-            if (tvEventKind === 'bazinga') {
-              if (s.state === 'couch_tv') {
-                s.bubble = 'BAZINGA!';
-                s.bubbleTimer = 1700;
-              } else if (s.state === 'couch_weed') {
-                s.bubble = 'hehe';
-                s.bubbleTimer = 1500;
-              } else if (s.state === 'tv' || (s.z < 0.0 && Math.random() < 0.55)) {
-                s.state = 'cheer';
-                s.stateTimer = 1750;
-                s.bubble = 'BAZINGA!';
-                s.bubbleTimer = 1650;
-              }
-            } else if (tvEventKind === 'father') {
-              // Humans within proximity of the TV lose their shit
-              const distFromTv = Math.hypot(s.x - TV_POS.x, s.z - (-0.28));
-              const inProximity = distFromTv < 0.72 || s.state === 'couch_tv' || s.state === 'couch_weed' || s.state === 'tv';
-              if (inProximity) {
-                const msg = FATHER_BUBBLES[Math.floor(Math.random() * FATHER_BUBBLES.length)];
-                if (s.state === 'couch_tv') {
-                  s.bubble = msg;
-                  s.bubbleTimer = 2300;
-                } else if (s.state === 'couch_weed') {
-                  s.bubble = 'WOAH!!';
-                  s.bubbleTimer = 2100;
-                } else {
-                  releaseCouchSlot(s);
-                  s.state = 'freakout';
-                  s.stateTimer = 2350;
-                  s.tx = clampFloor(s.x + (Math.random() - 0.5) * 0.65, 0.68);
-                  s.tz = clampFloor(s.z + (Math.random() - 0.5) * 0.45, 0.48);
-                  s.bubble = msg;
-                  s.bubbleTimer = 2300;
-                }
-              }
-            }
-          }
+          triggerTvEvent(Math.random() < 0.5 ? 'father' : 'bazinga');
         }
       }
 
