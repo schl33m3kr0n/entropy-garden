@@ -56,7 +56,8 @@ function setupTrackTitleResizeObserver() {
     trackTitleResizeObserver = new ResizeObserver(() => {
         for (const container of observedTrackTitles) {
             const text = container.dataset.trackTitle;
-            if (text) applyTrackTitleMarquee(container, text, { skipObserve: true });
+            const html = container.dataset.sidebarHtml;
+            if (text) applyTrackTitleMarquee(container, text, { skipObserve: true, html });
         }
     });
 }
@@ -64,6 +65,7 @@ function setupTrackTitleResizeObserver() {
 export function applyTrackTitleMarquee(container, text, options = {}) {
     if (!container) return;
     const displayText = `// ${text}`;
+    const displayHtml = options.html ? `// ${options.html}` : null;
     container.title = text;
     container.dataset.trackTitle = text;
     container.classList.remove('is-scrolling');
@@ -76,7 +78,8 @@ export function applyTrackTitleMarquee(container, text, options = {}) {
     scroll.className = 'track-title-scroll';
     const content = document.createElement('span');
     content.className = 'track-title-content';
-    content.textContent = displayText;
+    if (displayHtml) content.innerHTML = displayHtml;
+    else content.textContent = displayText;
     scroll.appendChild(content);
     container.appendChild(scroll);
 
@@ -90,7 +93,8 @@ export function applyTrackTitleMarquee(container, text, options = {}) {
         scroll.innerHTML = '';
         const primary = document.createElement('span');
         primary.className = 'track-title-content';
-        primary.textContent = displayText;
+        if (displayHtml) primary.innerHTML = displayHtml;
+        else primary.textContent = displayText;
         scroll.appendChild(primary);
 
         if (reducedMotion) {

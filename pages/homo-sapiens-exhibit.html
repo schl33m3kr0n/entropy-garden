@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>The Homo sapiens Exhibit — Entropy Garden</title>
+  <meta name="description" content="A standalone Entropy Garden installation: live observation of Homo sapiens in a glass habitat enclosure.">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g transform='rotate(90 50 50)'><path d='M 10 50 C 30 20, 70 20, 90 50 C 70 80, 30 80, 10 50 Z' stroke='%230f0' stroke-width='4' fill='none' stroke-linejoin='round'/><circle cx='50' cy='50' r='24' stroke='%230f0' stroke-width='1.5' fill='none'/><circle cx='50' cy='50' r='14' stroke='%230f0' stroke-width='2' fill='none'/><circle cx='50' cy='50' r='5' fill='%230f0'/></g></svg>">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #000;
+      color: #fff;
+      font-family: var(--main-font);
+      color-scheme: dark;
+    }
+
+    body {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .chrome {
+      position: fixed;
+      z-index: 4;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(0, 255, 0, 0.72);
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.28);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .chrome-tl { top: max(16px, env(safe-area-inset-top)); left: max(18px, env(safe-area-inset-left)); }
+    .chrome-tr { top: max(16px, env(safe-area-inset-top)); right: max(18px, env(safe-area-inset-right)); text-align: right; }
+    .chrome-bl { bottom: max(16px, env(safe-area-inset-bottom)); left: max(18px, env(safe-area-inset-left)); }
+    .chrome-br { bottom: max(16px, env(safe-area-inset-bottom)); right: max(18px, env(safe-area-inset-right)); text-align: right; }
+    .chrome strong { font-weight: 600; color: rgba(0, 255, 0, 0.92); }
+    .chrome .dim { color: rgba(0, 255, 0, 0.42); letter-spacing: 0.18em; }
+
+    main {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      text-align: center;
+      padding: 52px 20px 64px;
+    }
+
+    .exhibit-comment {
+      position: relative;
+      z-index: 3;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      width: min(94vw, 760px);
+      min-height: clamp(3.2rem, 9vw, 4.8rem);
+      padding: 0 12px;
+      font-size: clamp(15px, 3.3vw, 26px);
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-shadow:
+        0 0 24px rgba(255, 255, 255, 0.12),
+        0 0 1px rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      transition: opacity 0.55s ease;
+      overflow-wrap: anywhere;
+    }
+    .exhibit-comment.is-visible { opacity: 1; }
+    .exhibit-comment i { font-style: italic; }
+
+    .exhibit-telemetry {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin: 0 auto 12px;
+      width: min(94vw, 660px);
+      min-height: clamp(2.1rem, 5.5vw, 2.8rem);
+      transition: opacity 0.35s ease;
+    }
+    .exhibit-telemetry.is-updating { opacity: 0.32; }
+
+    .exhibit-telemetry-face {
+      font-size: clamp(0.66rem, 1.9vw, 0.82rem);
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.78);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.12);
+      font-variant-numeric: tabular-nums;
+      max-width: 100%;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
+
+    .exhibit-telemetry-note {
+      font-size: clamp(0.55rem, 1.5vw, 0.66rem);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.44);
+      max-width: 100%;
+      line-height: 1.4;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      text-align: center;
+      transition: color 0.25s ease, text-shadow 0.25s ease;
+    }
+    .exhibit-telemetry-note.is-alert {
+      color: rgba(0, 255, 0, 0.9);
+      text-shadow: 0 0 12px rgba(0, 255, 0, 0.35);
+    }
+
+    .enclosure-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    canvas {
+      display: block;
+      min-width: 0;
+    }
+
+    #enclosure {
+      width: min(92vw, 560px);
+      height: min(62vw, 350px);
+      min-height: 230px;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .garden-link-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .garden-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border: 1px solid rgba(0, 255, 0, 0.35);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 12, 0, 0.55);
+      color: rgba(0, 255, 0, 0.88);
+      font-family: inherit;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-decoration: none;
+      text-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .garden-link:hover,
+    .garden-link:focus-visible {
+      color: #050505;
+      background: var(--neon-green);
+      border-color: var(--neon-green);
+      text-shadow: none;
+      box-shadow: 0 0 22px rgba(0, 255, 0, 0.35);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="chrome chrome-tl" aria-hidden="true">
+    <strong>Entropy Garden</strong><br>
+    <span class="dim">// node · homo-sapiens-exhibit</span>
+  </div>
+  <div class="chrome chrome-tr" aria-hidden="true">
+    installation 02<br>
+    <span class="dim">enclosure · primate · live</span>
+  </div>
+  <div class="chrome chrome-bl" aria-hidden="true">
+    <span class="dim">obs · habitat 01</span>
+  </div>
+  <div class="chrome chrome-br" aria-hidden="true">
+    <span class="dim">glass · reinforced</span>
+  </div>
+
+  <main>
+    <h1 id="exhibit-comment" class="exhibit-comment" aria-live="polite"></h1>
+    <div class="exhibit-telemetry" id="exhibit-telemetry" aria-live="polite">
+      <span class="exhibit-telemetry-face" id="exhibit-telemetry-face"><i>Homo sapiens</i> · thermostat: 71°F (contested)</span>
+      <span class="exhibit-telemetry-note" id="exhibit-telemetry-note">· please do not tap on the glass ·</span>
+    </div>
+    <div class="enclosure-stage">
+      <canvas id="enclosure" role="img" aria-label="A glass museum enclosure where stick-figure Homo sapiens wander, stare at glowing pixel rectangles, argue over a wall thermostat, react to a television flashing bazinga, and avoid Carl's social forcefield.">A live glass enclosure containing wandering Homo sapiens specimens.</canvas>
+    </div>
+    <div class="garden-link-wrap">
+      <a class="garden-link" id="garden-link" href="../index.html">← // return to the garden</a>
+    </div>
+  </main>
+
+  <script>
+    const EXHIBIT_COMMENTS = [
+      "the homo sapiens exhibit: watch humans argue over who touched the thermostat",
+      "the homo sapiens exhibit: watch humans argue over how to distribute delicate pieces of paper",
+      "the homo sapiens exhibit: watch humans argue over where they can stick their meat-poles",
+      "the homo sapiens exhibit: watch them watch pixel windows for half of their waking life",
+      "the homo sapiens exhibit: watch people lose their shit when the smart man on the tv goes 'bazinga'",
+      "the homo sapiens exhibit: watch humans organize themselves around sections of the color spectrum",
+      "the homo sapiens exhibit: watch humans restructure themselves around unsustainable ideas",
+      "the homo sapiens exhibit: watch humans take advice from dudes who deliberately put themselves in solitary confinement",
+      "the homo sapiens exhibit: watch humans compete over who can destroy the earth with the biggest boom stick",
+      "the homo sapiens exhibit: watch humans invent entirely new fields of science instead of getting a girlfriend",
+      "the homo sapiens exhibit: watch humans make sophisticated simulations only to make their character drown in a pool with no ladder",
+      "the homo sapiens exhibit: watch humans make exceptionally dubious decisions for a \"social experiment\"",
+      "the homo sapiens exhibit: watch humans make cute toy versions of animals they kill",
+      "the homo sapiens exhibit: watch humans argue over who they would fuck, marry, or kill as if they had a chance at any option",
+      "the homo sapiens exhibit: watch humans soup up their cars to find out who can piss off the most people in their HOA",
+      "the homo sapiens exhibit: watch humans get famous for dropping their hot pocket and declaring it online",
+      "the homo sapiens exhibit: watch humans get migraines after talking to their insurance",
+      "the homo sapiens exhibit: watch humans try to explain where they draw the line on which animals they can eat",
+      "the homo sapiens exhibit: watch humans sneer as they maximize the body count in the trolley problem",
+      "the homo sapiens exhibit: watch humans go through the 5 stages of grief every time a celebrity gets too freaky",
+      "the homo sapiens exhibit: watch people get visibly uncomfortable around Carl",
+      "the homo sapiens exhibit: watch people argue over what god’s son looked like",
+      "the homo sapiens exhibit: watch humans panic as their little pieces of paper lose their value",
+      "the homo sapiens exhibit: watch rich people trying to convince themselves that hoarding wealth is beneficial for everyone",
+      "the homo sapiens exhibit: watch humans get irate about a conflict overseas but ignore the fact that you can get a 15% discount on your next ticket to the exhibit",
+      "the homo sapiens exhibit: watch people hurt their employability by watching family guy",
+      "the homo sapiens exhibit: watch people watch people watching people",
+      "the homo sapiens exhibit: watch people break the fourth wall IRL",
+      "the homo sapiens exhibit: watch people intentionally inhale toxic chemicals for a decreasingly satisfying rush",
+      "the homo sapiens exhibit: watch people put more effort into finding the father than raising their own kids",
+      "the homo sapiens exhibit: watch humans take better care of their tamagotchis than themselves",
+      "the homo sapiens exhibit: watch humans pay the price for keeping it in the family",
+      "the homo sapiens exhibit: watch people punish their little toe while walking into a table leg",
+      "the homo sapiens exhibit: watch people fight entire wars over million-year-old biological remains",
+      "the homo sapiens exhibit: watch people make more money off drone music than putting the fries in the bag",
+      "the homo sapiens exhibit: watch humans perform death-defying stunts to advertise a drink that raises their blood pressure a little bit",
+      "the homo sapiens exhibit: watch people doubt their own existence long enough to make their friends and family concerned",
+      "the homo sapiens exhibit: watch people regret eating a second brownie an hour later",
+      "the homo sapiens exhibit: watch people use cardboard to protest against deforestation",
+      "the homo sapiens exhibit: watch people hit a blinker from an unknown cartridge",
+      "the homo sapiens exhibit: watch people blame other people for their own problems",
+      "the homo sapiens exhibit: watch people express themselves with increasingly questionable jewelry implants",
+      "the homo sapiens exhibit: watch people justify their authority with metaphysical endorsements",
+      "the homo sapiens exhibit: watch people somehow dress up as a human spider but make a high-pitched scream when they see a radioactive spider",
+      "the homo sapiens exhibit: watch people perform mating rituals to the sound of a squeaky door",
+      "the homo sapiens exhibit: watch people buy guns for protection only to use it on themselves when she leaves with the kids",
+      "the homo sapiens exhibit: watch people buy a banana taped to a wall for the price of a mansion in a gated community",
+      "the homo sapiens exhibit: watch people milk the same comedic formula until it stops being funny",
+      "the homo sapiens exhibit: watch people download a compressed file only to unzip it again",
+      "the homo sapiens exhibit: watch people trade one form of oppression for another",
+      "the homo sapiens exhibit: watch people fight an entire war over table salt",
+      "the homo sapiens exhibit: watch humans invent a board game where the most powerful piece has to protect the guy in the cuck chair",
+      "the homo sapiens exhibit: watch a game show host act shocked by the answers his own show keeps fishing for",
+      "the homo sapiens exhibit: watch people name the inhabitants of an entire hemisphere after what they think is India and it somehow sticks centuries later",
+      "the homo sapiens exhibit: watch people spend an inordinate amount of time arguing over what color a dress was",
+      "the homo sapiens exhibit: watch people err to the side of caution for once",
+      "the homo sapiens exhibit: watch people take candy from a baby",
+      "the homo sapiens exhibit: watch humans complain about how much effort goes into placing starchy foods on an elevated flat surface",
+      "the homo sapiens exhibit: watch people eating what they think is their savior in the form of carbs",
+      "the homo sapiens exhibit: watch people let their childlike wonder fade",
+      "the homo sapiens exhibit: watch humans collect books until the books start collecting dust",
+      "the homo sapiens exhibit: watch humans argue over whether the gloves fit",
+      "the homo sapiens exhibit: watch humans defend gun rights, then go 'well…' when asked if minorities get them too",
+      "the homo sapiens exhibit: watch people avoid speaking Carl's name",
+    ];
+
+    const TELEMETRY_READOUTS = [
+      { status: 'thermostat: 71°F (contested)', note: 'please do not tap on the glass' },
+      { status: 'enrichment: glowing rectangles · screen time: 54%', note: 'do not feed the specimens' },
+      { status: 'conservation: least concern (self-inflicted)', note: 'specimens may project insecurities' },
+      { status: 'carl social forcefield: 1.8m radius · intact', note: 'flash photography agitates Carl' },
+      { status: 'paper distribution dispute: ongoing', note: 'keep hands away from ventilation slots' },
+      { status: 'cortisol: elevated · bazinga response: conditioned', note: 'enclosure cleaned every fiscal quarter' },
+      { status: 'trolley problem simulation: max casualties selected', note: 'gift shop discount available at exit' },
+      { status: 'sleep cycle: compromised by 3 AM pixel scrolling', note: 'do not make direct eye contact' },
+      { status: 'herd cohesion: polarized by dress color', note: 'tap glass at your own existential risk' },
+      { status: 'insurance hold music: hour 3 · migraine imminent', note: 'attendants are not licensed therapists' },
+    ];
+
+    const TAP_GLASS_WARNINGS = [
+      'please do not tap on the glass',
+      'seriously, stop tapping the glass',
+      'you startled them. happy now?',
+      'Carl noticed you tapping',
+      'the glass is smudge-resistant, not finger-proof',
+      'management logs every glass tap',
+    ];
+
+    const commentEl = document.getElementById('exhibit-comment');
+    const telemetryEl = document.getElementById('exhibit-telemetry');
+    const telemetryFaceEl = document.getElementById('exhibit-telemetry-face');
+    const telemetryNoteEl = document.getElementById('exhibit-telemetry-note');
+
+    let lastComment = '';
+    let commentTimer = 0;
+    let lastTelemetryIdx = -1;
+    let tapWarningTimer = 0;
+    let tapCount = 0;
+
+    function prefersReducedMotion() {
+      return matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function formatExhibitCommentHtml(raw) {
+      return escapeHtml(raw).replace(/homo sapiens/gi, '<i>$&</i>');
+    }
+
+    function pickComment() {
+      if (!EXHIBIT_COMMENTS.length) return '';
+      let next = EXHIBIT_COMMENTS[Math.floor(Math.random() * EXHIBIT_COMMENTS.length)];
+      let guard = 0;
+      while (next === lastComment && guard++ < 10) {
+        next = EXHIBIT_COMMENTS[Math.floor(Math.random() * EXHIBIT_COMMENTS.length)];
+      }
+      lastComment = next;
+      return next;
+    }
+
+    function showExhibitComment(forced) {
+      if (!commentEl) return;
+      const next = forced || pickComment();
+      if (!next) return;
+      commentEl.classList.remove('is-visible');
+      globalThis.clearTimeout?.(commentTimer);
+      commentTimer = globalThis.setTimeout?.(() => {
+        commentEl.innerHTML = formatExhibitCommentHtml(next);
+        commentEl.classList.add('is-visible');
+      }, 320) || 0;
+    }
+
+    function scheduleExhibitComment() {
+      const wait = prefersReducedMotion()
+        ? 13000 + Math.random() * 7000
+        : 6500 + Math.random() * 7500;
+      globalThis.setTimeout?.(() => {
+        showExhibitComment();
+        scheduleExhibitComment();
+      }, wait);
+    }
+
+    function renderTelemetry() {
+      let idx = Math.floor(Math.random() * TELEMETRY_READOUTS.length);
+      let guard = 0;
+      while (idx === lastTelemetryIdx && guard++ < 8) {
+        idx = Math.floor(Math.random() * TELEMETRY_READOUTS.length);
+      }
+      lastTelemetryIdx = idx;
+      const item = TELEMETRY_READOUTS[idx];
+      telemetryEl?.classList.add('is-updating');
+      globalThis.setTimeout?.(() => {
+        if (telemetryFaceEl) {
+          telemetryFaceEl.innerHTML = `<i>Homo sapiens</i> · ${escapeHtml(item.status)}`;
+        }
+        if (telemetryNoteEl && !tapWarningTimer) {
+          telemetryNoteEl.textContent = `· ${item.note} ·`;
+        }
+        telemetryEl?.classList.remove('is-updating');
+      }, prefersReducedMotion() ? 0 : 250);
+    }
+
+    function scheduleTelemetry() {
+      const wait = prefersReducedMotion()
+        ? 12000 + Math.random() * 6000
+        : 4500 + Math.random() * 5500;
+      globalThis.setTimeout?.(() => {
+        renderTelemetry();
+        scheduleTelemetry();
+      }, wait);
+    }
+
+    // --- ENCLOSURE CANVAS SIMULATION ---
+    const canvas = document.getElementById('enclosure');
+    const ctx = canvas.getContext('2d');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+    let thermostatTemp = 71;
+    let thermostatFlash = 0;
+    let tvBazingaTimer = 3500;
+    let tvBazingaActive = 0;
+    const glassRipples = [];
+
+    // Normalized floor coordinates: x in [-0.78, 0.78], z in [-0.62, 0.62]
+    const THERMOSTAT_POS = { x: -0.78, z: -0.25 };
+    const TV_POS = { x: 0.78, z: -0.22 };
+
+    const BUBBLE_TEXTS = ['!', '?', '$', '...', '71°!', 'NO', '?!', '📱'];
+
+    const specimens = Array.from({ length: 8 }, (_, i) => {
+      const isCarl = i === 0;
+      const angle = (i / 8) * Math.PI * 2;
+      return {
+        id: i,
+        isCarl,
+        x: isCarl ? -0.15 : Math.cos(angle) * 0.45,
+        z: isCarl ? 0.12 : Math.sin(angle) * 0.35,
+        tx: 0,
+        tz: 0,
+        vx: 0,
+        vz: 0,
+        facing: Math.random() < 0.5 ? 1 : -1,
+        state: isCarl ? 'wander' : (i % 3 === 0 ? 'phone' : 'wander'),
+        stateTimer: 1200 + Math.random() * 3200,
+        stride: Math.random() * Math.PI * 2,
+        bubble: '',
+        bubbleTimer: 0,
+        partnerId: -1,
+      };
+    });
+
+    function clampFloor(val, max) {
+      return Math.max(-max, Math.min(max, val));
+    }
+
+    function pickNewState(s) {
+      if (s.isCarl) {
+        // Carl mostly wanders slowly or stands awkwardly
+        s.state = Math.random() < 0.65 ? 'wander' : 'idle';
+        s.tx = clampFloor((Math.random() - 0.5) * 1.1, 0.64);
+        s.tz = clampFloor((Math.random() - 0.5) * 0.9, 0.48);
+        s.stateTimer = 2400 + Math.random() * 3200;
+        return;
+      }
+
+      const roll = Math.random();
+      if (roll < 0.30) {
+        s.state = 'wander';
+        s.tx = clampFloor((Math.random() - 0.5) * 1.35, 0.68);
+        s.tz = clampFloor((Math.random() - 0.5) * 1.0, 0.50);
+        s.stateTimer = 1800 + Math.random() * 2800;
+      } else if (roll < 0.52) {
+        s.state = 'phone';
+        s.stateTimer = 2400 + Math.random() * 3600;
+      } else if (roll < 0.66) {
+        s.state = 'thermostat';
+        s.tx = THERMOSTAT_POS.x + 0.14;
+        s.tz = THERMOSTAT_POS.z + (Math.random() - 0.5) * 0.12;
+        s.stateTimer = 3400;
+      } else if (roll < 0.80) {
+        s.state = 'tv';
+        s.tx = TV_POS.x - 0.26 - Math.random() * 0.16;
+        s.tz = TV_POS.z + (Math.random() - 0.5) * 0.28;
+        s.stateTimer = 3800 + Math.random() * 2400;
+      } else if (roll < 0.90) {
+        s.state = 'cheer';
+        s.stateTimer = 1500 + Math.random() * 1400;
+      } else {
+        s.state = 'existential';
+        s.stateTimer = 2600 + Math.random() * 2500;
+        s.bubble = '???';
+        s.bubbleTimer = 2200;
+      }
+    }
+
+    function updateSimulation(elapsed) {
+      if (reducedMotion.matches) return;
+
+      // Update glass tap ripples
+      for (let i = glassRipples.length - 1; i >= 0; i--) {
+        glassRipples[i].age += elapsed;
+        if (glassRipples[i].age >= glassRipples[i].life) {
+          glassRipples.splice(i, 1);
+        }
+      }
+
+      if (thermostatFlash > 0) thermostatFlash = Math.max(0, thermostatFlash - elapsed);
+
+      // Update TV Bazinga cycle
+      if (tvBazingaActive > 0) {
+        tvBazingaActive = Math.max(0, tvBazingaActive - elapsed);
+      } else {
+        tvBazingaTimer -= elapsed;
+        if (tvBazingaTimer <= 0) {
+          tvBazingaActive = 1800;
+          tvBazingaTimer = 5200 + Math.random() * 5500;
+          // Everyone watching TV or nearby loses their minds
+          for (const s of specimens) {
+            if (!s.isCarl && (s.state === 'tv' || (s.x > 0.15 && Math.random() < 0.65))) {
+              s.state = 'cheer';
+              s.stateTimer = 1750;
+              s.bubble = 'BAZINGA!';
+              s.bubbleTimer = 1650;
+            }
+          }
+        }
+      }
+
+      const carl = specimens[0];
+
+      for (const s of specimens) {
+        if (s.bubbleTimer > 0) {
+          s.bubbleTimer = Math.max(0, s.bubbleTimer - elapsed);
+          if (s.bubbleTimer === 0) s.bubble = '';
+        }
+
+        s.stateTimer -= elapsed;
+        if (s.stateTimer <= 0) {
+          pickNewState(s);
+        }
+
+        // Carl's social forcefield: non-Carl specimens veer away if too close
+        if (!s.isCarl) {
+          const dxCarl = s.x - carl.x;
+          const dzCarl = s.z - carl.z;
+          const distCarl = Math.hypot(dxCarl, dzCarl);
+          if (distCarl < 0.27 && distCarl > 0.001) {
+            const push = (0.27 - distCarl) * 0.0032 * elapsed;
+            s.x = clampFloor(s.x + (dxCarl / distCarl) * push, 0.70);
+            s.z = clampFloor(s.z + (dzCarl / distCarl) * push, 0.52);
+            if (!s.bubble && Math.random() < 0.04) {
+              s.bubble = '...';
+              s.bubbleTimer = 1100;
+            }
+          }
+        }
+
+        // Movement for states with target coordinates
+        if (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv') {
+          const dx = s.tx - s.x;
+          const dz = s.tz - s.z;
+          const dist = Math.hypot(dx, dz);
+          const speed = s.isCarl ? 0.00014 : 0.00022;
+          if (dist > 0.025) {
+            const step = Math.min(dist, speed * elapsed);
+            s.x = clampFloor(s.x + (dx / dist) * step, 0.70);
+            s.z = clampFloor(s.z + (dz / dist) * step, 0.52);
+            if (Math.abs(dx) > 0.01) s.facing = dx > 0 ? 1 : -1;
+            s.stride += elapsed * 0.011;
+          } else if (s.state === 'thermostat') {
+            // Reached thermostat — touch it and provoke an argument!
+            thermostatTemp = [68, 69, 71, 72, 74, 75][Math.floor(Math.random() * 6)];
+            thermostatFlash = 1400;
+            s.bubble = `${thermostatTemp}°!`;
+            s.bubbleTimer = 1500;
+            s.state = 'argue';
+            s.stateTimer = 1800;
+            // Pull closest specimen into the thermostat argument
+            let responder = null;
+            let bestD = Infinity;
+            for (const other of specimens) {
+              if (other.id !== s.id && !other.isCarl) {
+                const d = Math.hypot(other.x - s.x, other.z - s.z);
+                if (d < bestD) { bestD = d; responder = other; }
+              }
+            }
+            if (responder) {
+              responder.state = 'argue';
+              responder.stateTimer = 1800;
+              responder.facing = s.x < responder.x ? -1 : 1;
+              responder.bubble = 'WHO TOUCHED IT?!';
+              responder.bubbleTimer = 1650;
+            }
+          } else if (s.state === 'tv') {
+            s.facing = 1;
+          } else if (s.state === 'wander') {
+            s.state = 'idle';
+            s.stateTimer = 900 + Math.random() * 1400;
+          }
+        } else if (s.state === 'argue') {
+          s.stride += elapsed * 0.014;
+          if (!s.bubble && Math.random() < 0.03) {
+            s.bubble = BUBBLE_TEXTS[Math.floor(Math.random() * BUBBLE_TEXTS.length)];
+            s.bubbleTimer = 900;
+          }
+        } else if (s.state === 'cheer') {
+          s.stride += elapsed * 0.016;
+        }
+      }
+
+      // Spontaneous pair arguments when two wandering specimens bump into each other
+      for (let i = 1; i < specimens.length; i++) {
+        for (let j = i + 1; j < specimens.length; j++) {
+          const a = specimens[i];
+          const b = specimens[j];
+          if (a.state === 'wander' && b.state === 'wander') {
+            const d = Math.hypot(a.x - b.x, a.z - b.z);
+            if (d < 0.13 && Math.random() < 0.008) {
+              a.state = 'argue';
+              b.state = 'argue';
+              a.stateTimer = 1600;
+              b.stateTimer = 1600;
+              a.facing = b.x > a.x ? 1 : -1;
+              b.facing = -a.facing;
+              a.bubble = BUBBLE_TEXTS[Math.floor(Math.random() * BUBBLE_TEXTS.length)];
+              b.bubble = BUBBLE_TEXTS[Math.floor(Math.random() * BUBBLE_TEXTS.length)];
+              a.bubbleTimer = 1400;
+              b.bubbleTimer = 1400;
+            }
+          }
+        }
+      }
+    }
+
+    // Project 3D enclosure coordinates (x in [-1, 1], y in [0, 1], z in [-1, 1]) to 2D canvas
+    function projectEnclosure(x, y, z, width, height) {
+      const depthScale = 1 - z * 0.16;
+      const boxW = width * 0.72;
+      const boxH = height * 0.50;
+      const centerX = width * 0.5;
+      const floorCenterY = height * 0.67;
+      const px = centerX + x * (boxW * 0.5) / depthScale;
+      const py = floorCenterY + z * (height * 0.18) - y * boxH / depthScale;
+      return [px, py, 1 / depthScale];
+    }
+
+    function drawSpecimen(s, width, height, time) {
+      const [px, py, scale] = projectEnclosure(s.x, 0, s.z, width, height);
+      const unit = Math.min(width, height) * 0.072 * scale;
+
+      ctx.save();
+      ctx.translate(px, py);
+
+      // Carl's social forcefield ring on the floor
+      if (s.isCarl) {
+        const rx = unit * 2.5;
+        const ry = unit * 0.85;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 255, 0, 0.36)';
+        ctx.lineWidth = 1.1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Subtle floor shadow
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.beginPath();
+      ctx.ellipse(0, 2, unit * 0.38, unit * 0.13, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#fff';
+      ctx.fillStyle = '#fff';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      if (s.state === 'existential') {
+        // Lying flat on the enclosure floor staring upward
+        const dir = s.facing;
+        ctx.lineWidth = Math.max(2.2, unit * 0.16);
+        // Torso flat
+        ctx.beginPath();
+        ctx.moveTo(-dir * unit * 0.15, -unit * 0.08);
+        ctx.lineTo(dir * unit * 0.32, -unit * 0.08);
+        ctx.stroke();
+        // Legs
+        ctx.beginPath();
+        ctx.moveTo(dir * unit * 0.32, -unit * 0.08);
+        ctx.lineTo(dir * unit * 0.62, -unit * 0.03);
+        ctx.moveTo(dir * unit * 0.32, -unit * 0.08);
+        ctx.lineTo(dir * unit * 0.58, -unit * 0.14);
+        ctx.stroke();
+        // Head
+        ctx.beginPath();
+        ctx.arc(-dir * unit * 0.34, -unit * 0.13, unit * 0.16, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Upright specimen (silhouette proportion inspired by the Homo sapiens icon)
+        const swing = (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv')
+          ? Math.sin(s.stride) * 0.22
+          : 0;
+        const hop = s.state === 'cheer' ? Math.abs(Math.sin(s.stride)) * unit * 0.14 : 0;
+
+        const hipY = -unit * 0.42 - hop;
+        const shoulderY = -unit * 0.82 - hop;
+        const headY = -unit * 1.07 - hop;
+
+        // Torso (thick rounded silhouette)
+        ctx.lineWidth = Math.max(3.2, unit * 0.25);
+        ctx.beginPath();
+        ctx.moveTo(0, shoulderY + unit * 0.05);
+        ctx.lineTo(0, hipY);
+        ctx.stroke();
+
+        // Legs
+        ctx.lineWidth = Math.max(2.3, unit * 0.16);
+        const legSpread = unit * 0.21;
+        ctx.beginPath();
+        ctx.moveTo(-unit * 0.05, hipY);
+        ctx.lineTo(-legSpread + swing * unit * 0.5, -hop);
+        ctx.moveTo(unit * 0.05, hipY);
+        ctx.lineTo(legSpread - swing * unit * 0.5, -hop);
+        ctx.stroke();
+
+        // Arms by behavior state
+        if (s.state === 'cheer') {
+          // Iconic raised-V arms pose matching the Homo sapiens sidebar icon
+          const wave = Math.sin(s.stride * 1.4) * unit * 0.05;
+          ctx.beginPath();
+          ctx.moveTo(-unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(-unit * 0.40, shoulderY - unit * 0.24 + wave);
+          ctx.moveTo(unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(unit * 0.40, shoulderY - unit * 0.24 - wave);
+          ctx.stroke();
+        } else if (s.state === 'phone') {
+          // One arm down, one holding a glowing pixel rectangle
+          const dir = s.facing;
+          ctx.beginPath();
+          ctx.moveTo(-dir * unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(-dir * unit * 0.22, hipY + unit * 0.05);
+          ctx.moveTo(dir * unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(dir * unit * 0.30, shoulderY + unit * 0.08);
+          ctx.stroke();
+
+          // Tiny glowing phone rectangle + face glow
+          const phoneX = dir * unit * 0.34;
+          const phoneY = shoulderY + unit * 0.02;
+          ctx.save();
+          ctx.fillStyle = '#0f0';
+          ctx.shadowColor = 'rgba(0, 255, 0, 0.85)';
+          ctx.shadowBlur = 8;
+          ctx.fillRect(phoneX - unit * 0.05, phoneY - unit * 0.09, unit * 0.10, unit * 0.16);
+          ctx.restore();
+        } else if (s.state === 'argue') {
+          // Wild gesturing arms
+          const dir = s.facing;
+          const wave = Math.sin(s.stride * 2.2) * unit * 0.16;
+          ctx.beginPath();
+          ctx.moveTo(dir * unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(dir * unit * 0.42, shoulderY - unit * 0.10 + wave);
+          ctx.moveTo(-dir * unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(dir * unit * 0.28, shoulderY + unit * 0.14 - wave);
+          ctx.stroke();
+        } else {
+          // Default walking / idle arms
+          ctx.beginPath();
+          ctx.moveTo(-unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(-unit * 0.25 - swing * unit * 0.4, hipY + unit * 0.04);
+          ctx.moveTo(unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(unit * 0.25 + swing * unit * 0.4, hipY + unit * 0.04);
+          ctx.stroke();
+        }
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(0, headY, unit * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Carl label tag
+      if (s.isCarl) {
+        ctx.font = `600 ${Math.max(9, Math.round(unit * 0.34))}px Avenir, "Avenir Next", sans-serif`;
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.88)';
+        ctx.textAlign = 'center';
+        ctx.fillText('CARL', 0, -unit * 1.38);
+      }
+
+      // Speech / reaction bubble
+      if (s.bubble) {
+        ctx.font = `600 ${Math.max(9, Math.round(unit * 0.34))}px Avenir, "Avenir Next", sans-serif`;
+        ctx.fillStyle = s.bubble === 'BAZINGA!' ? '#0f0' : 'rgba(255, 255, 255, 0.92)';
+        ctx.textAlign = 'center';
+        const labelY = s.isCarl ? -unit * 1.68 : -unit * 1.42;
+        ctx.fillText(s.bubble, 0, labelY);
+      }
+
+      ctx.restore();
+    }
+
+    function drawHabitatFixtures(width, height) {
+      // 1. Wall Thermostat on left enclosure plane
+      const [tx, ty, tScale] = projectEnclosure(THERMOSTAT_POS.x, 0.42, THERMOSTAT_POS.z, width, height);
+      ctx.save();
+      ctx.translate(tx, ty);
+      const tw = 28 * tScale;
+      const th = 20 * tScale;
+      ctx.fillStyle = '#050505';
+      ctx.strokeStyle = thermostatFlash > 0 ? '#0f0' : 'rgba(255, 255, 255, 0.75)';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(-tw * 0.5, -th * 0.5, tw, th);
+      ctx.strokeRect(-tw * 0.5, -th * 0.5, tw, th);
+      ctx.fillStyle = thermostatFlash > 0 ? '#0f0' : 'rgba(0, 255, 0, 0.78)';
+      ctx.font = `600 ${Math.max(8, Math.round(9 * tScale))}px Avenir, monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${thermostatTemp}°`, 0, 0);
+      ctx.restore();
+
+      // 2. Pixel Window (TV) on right enclosure plane
+      const [vx, vy, vScale] = projectEnclosure(TV_POS.x, 0.44, TV_POS.z, width, height);
+      ctx.save();
+      ctx.translate(vx, vy);
+      const vw = 46 * vScale;
+      const vh = 28 * vScale;
+      ctx.fillStyle = tvBazingaActive > 0 ? 'rgba(0, 40, 0, 0.92)' : '#050505';
+      ctx.strokeStyle = tvBazingaActive > 0 ? '#0f0' : 'rgba(255, 255, 255, 0.82)';
+      ctx.lineWidth = 1.4;
+      if (tvBazingaActive > 0) {
+        ctx.shadowColor = 'rgba(0, 255, 0, 0.65)';
+        ctx.shadowBlur = 14;
+      }
+      ctx.fillRect(-vw * 0.5, -vh * 0.5, vw, vh);
+      ctx.strokeRect(-vw * 0.5, -vh * 0.5, vw, vh);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = tvBazingaActive > 0 ? '#0f0' : 'rgba(255, 255, 255, 0.65)';
+      ctx.font = `600 ${Math.max(7, Math.round(7.5 * vScale))}px Avenir, monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(tvBazingaActive > 0 ? 'BAZINGA' : 'TV · LIVE', 0, 0);
+      ctx.restore();
+    }
+
+    function drawEnclosureBox(width, height, frontOnly) {
+      const corners = {
+        blf: projectEnclosure(-1, 0, 1, width, height),
+        brf: projectEnclosure(1, 0, 1, width, height),
+        blb: projectEnclosure(-1, 0, -1, width, height),
+        brb: projectEnclosure(1, 0, -1, width, height),
+        tlf: projectEnclosure(-1, 1, 1, width, height),
+        trf: projectEnclosure(1, 1, 1, width, height),
+        tlb: projectEnclosure(-1, 1, -1, width, height),
+        trb: projectEnclosure(1, 1, -1, width, height),
+      };
+
+      const line = (a, b) => {
+        ctx.beginPath();
+        ctx.moveTo(a[0], a[1]);
+        ctx.lineTo(b[0], b[1]);
+        ctx.stroke();
+      };
+
+      if (!frontOnly) {
+        // Subtle floor grid inside the glass tank
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.09)';
+        ctx.lineWidth = 1;
+        for (let i = -3; i <= 3; i++) {
+          const t = i / 4;
+          line(
+            projectEnclosure(t, 0, -1, width, height),
+            projectEnclosure(t, 0, 1, width, height)
+          );
+          line(
+            projectEnclosure(-1, 0, t, width, height),
+            projectEnclosure(1, 0, t, width, height)
+          );
+        }
+
+        // Back glass frame & rear pillars
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.38)';
+        ctx.lineWidth = 1.25;
+        line(corners.blb, corners.brb);
+        line(corners.tlb, corners.trb);
+        line(corners.blb, corners.tlb);
+        line(corners.brb, corners.trb);
+
+        // Side depth edges
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+        line(corners.blb, corners.blf);
+        line(corners.brb, corners.brf);
+        line(corners.tlb, corners.tlf);
+        line(corners.trb, corners.trf);
+      } else {
+        // Front glass pane outline
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        line(corners.blf, corners.brf);
+        line(corners.tlf, corners.trf);
+        line(corners.blf, corners.tlf);
+        line(corners.brf, corners.trf);
+
+        // Subtle diagonal glass reflection streaks on the front pane
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+        ctx.lineWidth = 1.1;
+        const gx = corners.tlf[0] + (corners.trf[0] - corners.tlf[0]) * 0.16;
+        const gy = corners.tlf[1] + (corners.blf[1] - corners.tlf[1]) * 0.22;
+        ctx.beginPath();
+        ctx.moveTo(gx, gy);
+        ctx.lineTo(gx - 26, gy + 36);
+        ctx.moveTo(gx + 12, gy - 4);
+        ctx.lineTo(gx - 8, gy + 24);
+        ctx.stroke();
+
+        // Tap-on-glass ripples
+        for (const r of glassRipples) {
+          const p = r.age / r.life;
+          const alpha = (1 - p) * 0.65;
+          ctx.strokeStyle = `rgba(0, 255, 0, ${alpha.toFixed(3)})`;
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.arc(r.x, r.y, 6 + p * 44, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+    }
+
+    canvas.addEventListener('pointerdown', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      glassRipples.push({ x, y, age: 0, life: 700 });
+
+      // Startle specimens inside the enclosure
+      const normX = ((x / rect.width) - 0.5) * 2;
+      for (const s of specimens) {
+        if (Math.abs(s.x - normX) < 0.55) {
+          s.state = 'cheer';
+          s.stateTimer = 1100;
+          s.bubble = s.isCarl ? 'hi.' : '!';
+          s.bubbleTimer = 1100;
+        }
+      }
+
+      if (telemetryNoteEl) {
+        const msg = TAP_GLASS_WARNINGS[tapCount % TAP_GLASS_WARNINGS.length];
+        tapCount++;
+        telemetryNoteEl.textContent = `· ${msg} ·`;
+        telemetryNoteEl.classList.add('is-alert');
+        globalThis.clearTimeout?.(tapWarningTimer);
+        tapWarningTimer = globalThis.setTimeout?.(() => {
+          telemetryNoteEl.classList.remove('is-alert');
+          tapWarningTimer = 0;
+        }, 2400) || 0;
+      }
+    });
+
+    let previousTime;
+    function draw(time) {
+      const elapsed = previousTime === undefined ? 0 : Math.min(time - previousTime, 50);
+      previousTime = time;
+
+      updateSimulation(elapsed);
+
+      const { width, height } = canvas.getBoundingClientRect();
+      const ratio = Math.min(devicePixelRatio || 1, 2);
+      if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+      }
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      drawEnclosureBox(width, height, false);
+      drawHabitatFixtures(width, height);
+
+      // Depth-sort specimens back-to-front by z
+      const sorted = [...specimens].sort((a, b) => a.z - b.z);
+      for (const s of sorted) {
+        drawSpecimen(s, width, height, time);
+      }
+
+      drawEnclosureBox(width, height, true);
+
+      requestAnimationFrame(draw);
+    }
+
+    requestAnimationFrame(draw);
+    showExhibitComment();
+    scheduleExhibitComment();
+    renderTelemetry();
+    scheduleTelemetry();
+  </script>
+</body>
+</html>

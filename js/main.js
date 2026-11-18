@@ -1807,20 +1807,22 @@ function bindCloseControls() {
 const hamburger = document.getElementById('hamburger-icon');
 const sidebar = document.getElementById('sidebar-menu');
 
-function resetSidebarText(textEl, label) {
+function resetSidebarText(textEl, label, htmlLabel = label) {
     textEl.classList.remove('is-scrolling');
     textEl.classList.add('is-static');
     textEl.style.removeProperty('--marquee-duration');
     textEl.style.removeProperty('--marquee-offset');
-    textEl.innerHTML = `<div class="track-title-scroll"><span class="track-title-content">// ${label}</span></div>`;
+    textEl.innerHTML = `<div class="track-title-scroll"><span class="track-title-content">// ${htmlLabel}</span></div>`;
 }
 
 function initSidebarMarquees() {
     document.querySelectorAll('#sidebar-menu .sidebar-text').forEach((textEl) => {
         const label = (textEl.dataset.sidebarLabel || textEl.textContent.trim()).replace(/^\/\/\s*/, '');
+        const htmlLabel = (textEl.dataset.sidebarHtml || textEl.innerHTML.trim()).replace(/^\/\/\s*/, '');
         textEl.dataset.sidebarLabel = label;
+        textEl.dataset.sidebarHtml = htmlLabel;
         textEl.classList.add('track-title-marquee', 'is-static');
-        resetSidebarText(textEl, label);
+        resetSidebarText(textEl, label, htmlLabel);
 
         const li = textEl.closest('li');
         if (!li) return;
@@ -1829,9 +1831,9 @@ function initSidebarMarquees() {
         if (!canHover) return;
 
         li.addEventListener('mouseenter', () => {
-            window.setTimeout(() => applyTrackTitleMarquee(textEl, label), 280);
+            window.setTimeout(() => applyTrackTitleMarquee(textEl, label, { html: htmlLabel }), 280);
         });
-        li.addEventListener('mouseleave', () => resetSidebarText(textEl, label));
+        li.addEventListener('mouseleave', () => resetSidebarText(textEl, label, htmlLabel));
     });
 }
 

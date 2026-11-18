@@ -1296,6 +1296,11 @@ body.corrupted .mask-icon {
     -webkit-mask-image: url('../assets/icons/void.svg');
 }
 
+.mask-icon--homo-sapiens {
+    mask-image: url('../assets/icons/homo-sapiens.png');
+    -webkit-mask-image: url('../assets/icons/homo-sapiens.png');
+}
+
 .mask-icon--trophy {
     mask-image: url('../assets/img/ui/eyeball-wings.svg');
     -webkit-mask-image: url('../assets/img/ui/eyeball-wings.svg');
@@ -2722,7 +2727,15 @@ body.corrupted #birds-mute-btn.is-muted {
     pointer-events: none;
 }
 
-#sidebar-menu ul { list-style: none; padding: 0; margin: 0; }
+#sidebar-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+#sidebar-menu ul::-webkit-scrollbar { display: none; }
 
 #sidebar-menu li {
     padding: 20px 30px;
