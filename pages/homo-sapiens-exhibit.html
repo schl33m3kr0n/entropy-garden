@@ -606,7 +606,7 @@
 
       tvShapeTime += elapsed;
       if (Math.floor((tvShapeTime - elapsed) / 1450) !== Math.floor(tvShapeTime / 1450)) {
-        tvSceneIndex = (tvSceneIndex + 1) % 5;
+        tvSceneIndex = (tvSceneIndex + 1) % 15;
       }
 
       // Update glass tap ripples
@@ -1325,7 +1325,7 @@
           ctx.closePath();
           ctx.fill();
         }
-      } else {
+      } else if (tvSceneIndex === 4) {
         // Scene 4: Cyan semicircle, yellow circle, and crimson rotated square
         const spin = t * 0.9;
         ctx.fillStyle = '#00d8ff';
@@ -1346,6 +1346,218 @@
         ctx.beginPath();
         ctx.arc(-w * 0.24, -h * 0.18, Math.min(w, h) * 0.18, 0, Math.PI * 2);
         ctx.fill();
+      } else if (tvSceneIndex === 5) {
+        // Scene 5: Violet hexagon, spinning golden 6-point star, coral dot
+        const m = Math.min(w, h);
+        const drawPoly = (cx, cy, sides, r, rot) => {
+          ctx.beginPath();
+          for (let i = 0; i < sides; i++) {
+            const a = rot + (i / sides) * Math.PI * 2;
+            const px = cx + Math.cos(a) * r;
+            const py = cy + Math.sin(a) * r;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+          }
+          ctx.closePath();
+          ctx.fill();
+        };
+        ctx.fillStyle = '#8b5cf6';
+        drawPoly(-w * 0.18, 0, 6, m * 0.36, t * 0.6);
+
+        ctx.fillStyle = '#f0c800';
+        drawPoly(w * 0.14, 0, 3, m * 0.34, -t * 1.1);
+        drawPoly(w * 0.14, 0, 3, m * 0.34, -t * 1.1 + Math.PI);
+
+        ctx.fillStyle = '#ff4b3e';
+        ctx.beginPath();
+        ctx.arc(-w * 0.18, 0, m * 0.13, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (tvSceneIndex === 6) {
+        // Scene 6: Four solid Bauhaus quarter-circle arcs breathing outward
+        const r = Math.min(w, h) * 0.34;
+        const gap = (0.04 + Math.sin(t * 2.4) * 0.025) * Math.min(w, h);
+        const quads = [
+          { dx: -gap, dy: -gap, a0: Math.PI, a1: Math.PI * 1.5, c: '#e53a33' },
+          { dx: gap, dy: -gap, a0: Math.PI * 1.5, a1: Math.PI * 2, c: '#00d8ff' },
+          { dx: gap, dy: gap, a0: 0, a1: Math.PI * 0.5, c: '#f0c800' },
+          { dx: -gap, dy: gap, a0: Math.PI * 0.5, a1: Math.PI, c: '#17a37f' },
+        ];
+        for (const q of quads) {
+          ctx.fillStyle = q.c;
+          ctx.beginPath();
+          ctx.moveTo(q.dx, q.dy);
+          ctx.arc(q.dx, q.dy, r, q.a0, q.a1);
+          ctx.closePath();
+          ctx.fill();
+        }
+      } else if (tvSceneIndex === 7) {
+        // Scene 7: Solid neon-lime hourglass flanked by sliding magenta circles
+        const slide = Math.sin(t * 2.2) * h * 0.16;
+        ctx.fillStyle = '#39ff14';
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.24, -h * 0.38);
+        ctx.lineTo(w * 0.24, -h * 0.38);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(w * 0.24, h * 0.38);
+        ctx.lineTo(-w * 0.24, h * 0.38);
+        ctx.lineTo(0, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        const r = Math.min(w, h) * 0.17;
+        ctx.fillStyle = '#ff2a6d';
+        ctx.beginPath();
+        ctx.arc(-w * 0.32, slide, r, 0, Math.PI * 2);
+        ctx.arc(w * 0.32, -slide, r, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (tvSceneIndex === 8) {
+        // Scene 8: Rotating cyan pentagon, orange triangle, yellow base bar
+        const m = Math.min(w, h);
+        ctx.fillStyle = '#f0c800';
+        ctx.fillRect(-w * 0.40, h * 0.24, w * 0.80, h * 0.14);
+
+        ctx.fillStyle = '#00d8ff';
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const a = t * 0.9 + (i / 5) * Math.PI * 2;
+          const px = -w * 0.14 + Math.cos(a) * m * 0.34;
+          const py = -h * 0.06 + Math.sin(a) * m * 0.34;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#ff7a18';
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const a = -t * 1.3 + (i / 3) * Math.PI * 2;
+          const px = w * 0.20 + Math.cos(a) * m * 0.28;
+          const py = -h * 0.06 + Math.sin(a) * m * 0.28;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+      } else if (tvSceneIndex === 9) {
+        // Scene 9: Cobalt octagon with pulsing crimson Swiss cross
+        const m = Math.min(w, h);
+        ctx.fillStyle = '#1877c9';
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+          const a = Math.PI / 8 + (i / 8) * Math.PI * 2;
+          const px = Math.cos(a) * m * 0.42;
+          const py = Math.sin(a) * m * 0.42;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        const s = 0.92 + Math.sin(t * 2.8) * 0.1;
+        ctx.fillStyle = '#e53a33';
+        ctx.fillRect(-m * 0.10 * s, -m * 0.28 * s, m * 0.20 * s, m * 0.56 * s);
+        ctx.fillRect(-m * 0.28 * s, -m * 0.10 * s, m * 0.56 * s, m * 0.20 * s);
+      } else if (tvSceneIndex === 10) {
+        // Scene 10: Slanted solid color parallelograms sliding across the screen
+        const colors = ['#ff2a6d', '#f0c800', '#00d8ff', '#17a37f'];
+        const offset = Math.sin(t * 1.8) * w * 0.08;
+        const barW = w * 0.17;
+        for (let i = 0; i < 4; i++) {
+          const bx = (i - 1.5) * w * 0.22 + offset;
+          ctx.fillStyle = colors[i];
+          ctx.beginPath();
+          ctx.moveTo(bx - barW * 0.5 + w * 0.08, -h * 0.42);
+          ctx.lineTo(bx + barW * 0.5 + w * 0.08, -h * 0.42);
+          ctx.lineTo(bx + barW * 0.5 - w * 0.08, h * 0.42);
+          ctx.lineTo(bx - barW * 0.5 - w * 0.08, h * 0.42);
+          ctx.closePath();
+          ctx.fill();
+        }
+      } else if (tvSceneIndex === 11) {
+        // Scene 11: Emerald trapezoid, violet orb, and golden crescent
+        const m = Math.min(w, h);
+        ctx.fillStyle = '#17a37f';
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.26, h * 0.08);
+        ctx.lineTo(w * 0.26, h * 0.08);
+        ctx.lineTo(w * 0.42, h * 0.40);
+        ctx.lineTo(-w * 0.42, h * 0.40);
+        ctx.closePath();
+        ctx.fill();
+
+        const sway = Math.sin(t * 2.0) * w * 0.06;
+        ctx.fillStyle = '#7c3aed';
+        ctx.beginPath();
+        ctx.arc(-w * 0.18 + sway, -h * 0.12, m * 0.24, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Golden crescent via overlaid cutout circle
+        ctx.fillStyle = '#f0c800';
+        ctx.beginPath();
+        ctx.arc(w * 0.20 - sway, -h * 0.14, m * 0.24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#050505';
+        ctx.beginPath();
+        ctx.arc(w * 0.28 - sway, -h * 0.18, m * 0.20, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (tvSceneIndex === 12) {
+        // Scene 12: Solid pulsing concentric bullseye disks
+        const m = Math.min(w, h);
+        const pulse = 1 + Math.sin(t * 3.0) * 0.06;
+        const rings = [
+          { r: 0.42, c: '#e53a33' },
+          { r: 0.31, c: '#ff7a18' },
+          { r: 0.21, c: '#f0c800' },
+          { r: 0.11, c: '#00d8ff' },
+        ];
+        for (const ring of rings) {
+          ctx.fillStyle = ring.c;
+          ctx.beginPath();
+          ctx.arc(0, 0, m * ring.r * pulse, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (tvSceneIndex === 13) {
+        // Scene 13: Spinning 4-point cyan starburst flanked by magenta & yellow pills
+        const m = Math.min(w, h);
+        const pill = (cx, col) => {
+          const pw = w * 0.13;
+          const ph = h * 0.64;
+          const r = pw * 0.5;
+          ctx.fillStyle = col;
+          ctx.beginPath();
+          ctx.roundRect(cx - pw * 0.5, -ph * 0.5, pw, ph, r);
+          ctx.fill();
+        };
+        pill(-w * 0.34, '#ff2a6d');
+        pill(w * 0.34, '#f0c800');
+
+        ctx.save();
+        ctx.rotate(t * 1.1);
+        ctx.fillStyle = '#00e5ff';
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2;
+          const rad = i % 2 === 0 ? m * 0.38 : m * 0.14;
+          const px = Math.cos(a) * rad;
+          const py = Math.sin(a) * rad;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      } else {
+        // Scene 14: Rippling 5-bar solid color staircase
+        const colors = ['#e53a33', '#ff7a18', '#f0c800', '#17a37f', '#1877c9'];
+        const barW = w * 0.14;
+        for (let i = 0; i < 5; i++) {
+          const bx = (i - 2) * w * 0.17;
+          const frac = 0.28 + 0.52 * (0.5 + 0.5 * Math.sin(t * 2.8 - i * 0.75));
+          const bh = h * frac;
+          ctx.fillStyle = colors[i];
+          ctx.fillRect(bx - barW * 0.5, h * 0.40 - bh, barW, bh);
+        }
       }
 
       ctx.restore();
