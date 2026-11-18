@@ -440,72 +440,155 @@
 
     let thermostatTemp = 71;
     let thermostatFlash = 0;
-    let tvBazingaTimer = 3500;
+    let tvBazingaTimer = 4200;
     let tvBazingaActive = 0;
+    let tvShapeTime = 0;
+    let tvSceneIndex = 0;
     const glassRipples = [];
+    const weedSmoke = [];
 
     // Normalized floor coordinates: x in [-0.78, 0.78], z in [-0.62, 0.62]
     const THERMOSTAT_POS = { x: -0.78, z: -0.25 };
-    const TV_POS = { x: 0.78, z: -0.22 };
+    const TV_POS = { x: 0.0, y: 0.54, z: -0.92 };
+    const COUCH_POS = { x: 0.0, z: 0.14 };
+    const COUCH_SLOTS = [
+      { x: -0.21, z: 0.13, occupant: -1 },
+      { x: 0.0, z: 0.13, occupant: -1 },
+      { x: 0.21, z: 0.13, occupant: -1 },
+    ];
+    const AIR_HOLE_X = [-0.48, 0.0, 0.48];
 
     const BUBBLE_TEXTS = ['!', '?', '$', '...', '71°!', 'NO', '?!', '📱'];
+    const WEED_BUBBLES = ['*puff*', 'duuude', '...', 'whoa', '🌿'];
 
     const specimens = Array.from({ length: 8 }, (_, i) => {
       const isCarl = i === 0;
       const angle = (i / 8) * Math.PI * 2;
-      return {
+      const s = {
         id: i,
         isCarl,
-        x: isCarl ? -0.15 : Math.cos(angle) * 0.45,
-        z: isCarl ? 0.12 : Math.sin(angle) * 0.35,
+        x: isCarl ? -0.45 : Math.cos(angle) * 0.52,
+        z: isCarl ? 0.34 : Math.sin(angle) * 0.38,
         tx: 0,
         tz: 0,
         vx: 0,
         vz: 0,
         facing: Math.random() < 0.5 ? 1 : -1,
         state: isCarl ? 'wander' : (i % 3 === 0 ? 'phone' : 'wander'),
-        stateTimer: 1200 + Math.random() * 3200,
+        stateTimer: 1400 + Math.random() * 3200,
         stride: Math.random() * Math.PI * 2,
         bubble: '',
         bubbleTimer: 0,
         partnerId: -1,
+        couchSlot: -1,
+        couchAction: 'couch_tv',
+        smokePhase: Math.random() * Math.PI * 2,
+        smokeSpawnCooldown: 0,
       };
+      return s;
     });
+
+    // Seat two specimens on the couch right away: one lounging smoking weed, one watching TV
+    specimens[1].couchSlot = 0;
+    COUCH_SLOTS[0].occupant = 1;
+    specimens[1].x = COUCH_SLOTS[0].x;
+    specimens[1].z = COUCH_SLOTS[0].z;
+    specimens[1].state = 'couch_weed';
+    specimens[1].stateTimer = 6500;
+    specimens[1].facing = -1;
+
+    specimens[2].couchSlot = 2;
+    COUCH_SLOTS[2].occupant = 2;
+    specimens[2].x = COUCH_SLOTS[2].x;
+    specimens[2].z = COUCH_SLOTS[2].z;
+    specimens[2].state = 'couch_tv';
+    specimens[2].stateTimer = 5800;
+    specimens[2].facing = 1;
+
+    function releaseCouchSlot(s) {
+      if (s.couchSlot !== -1) {
+        if (COUCH_SLOTS[s.couchSlot]?.occupant === s.id) {
+          COUCH_SLOTS[s.couchSlot].occupant = -1;
+        }
+        s.couchSlot = -1;
+      }
+    }
+
+    function claimFreeCouchSlot(s) {
+      releaseCouchSlot(s);
+      const freeIndices = [];
+      for (let i = 0; i < COUCH_SLOTS.length; i++) {
+        if (COUCH_SLOTS[i].occupant === -1) freeIndices.push(i);
+      }
+      if (!freeIndices.length) return -1;
+      const chosen = freeIndices[Math.floor(Math.random() * freeIndices.length)];
+      COUCH_SLOTS[chosen].occupant = s.id;
+      s.couchSlot = chosen;
+      return chosen;
+    }
 
     function clampFloor(val, max) {
       return Math.max(-max, Math.min(max, val));
     }
 
+    function randomFloorTargetAvoidingCouch() {
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const tx = clampFloor((Math.random() - 0.5) * 1.38, 0.68);
+        const tz = clampFloor((Math.random() - 0.5) * 1.0, 0.50);
+        if (Math.abs(tx - COUCH_POS.x) > 0.44 || Math.abs(tz - COUCH_POS.z) > 0.16) {
+          return { tx, tz };
+        }
+      }
+      return { tx: -0.55, tz: -0.32 };
+    }
+
     function pickNewState(s) {
       if (s.isCarl) {
-        // Carl mostly wanders slowly or stands awkwardly
+        releaseCouchSlot(s);
         s.state = Math.random() < 0.65 ? 'wander' : 'idle';
-        s.tx = clampFloor((Math.random() - 0.5) * 1.1, 0.64);
-        s.tz = clampFloor((Math.random() - 0.5) * 0.9, 0.48);
+        const t = randomFloorTargetAvoidingCouch();
+        s.tx = t.tx;
+        s.tz = t.tz;
         s.stateTimer = 2400 + Math.random() * 3200;
         return;
       }
 
+      releaseCouchSlot(s);
+
       const roll = Math.random();
-      if (roll < 0.30) {
+      if (roll < 0.34) {
+        // Head to the couch to watch TV or lounge and smoke weed
+        const slotIdx = claimFreeCouchSlot(s);
+        if (slotIdx !== -1) {
+          s.state = 'to_couch';
+          s.couchAction = Math.random() < 0.55 ? 'couch_weed' : 'couch_tv';
+          s.tx = COUCH_SLOTS[slotIdx].x;
+          s.tz = COUCH_SLOTS[slotIdx].z;
+          s.stateTimer = 5000;
+          return;
+        }
+      }
+
+      if (roll < 0.50) {
         s.state = 'wander';
-        s.tx = clampFloor((Math.random() - 0.5) * 1.35, 0.68);
-        s.tz = clampFloor((Math.random() - 0.5) * 1.0, 0.50);
+        const t = randomFloorTargetAvoidingCouch();
+        s.tx = t.tx;
+        s.tz = t.tz;
         s.stateTimer = 1800 + Math.random() * 2800;
-      } else if (roll < 0.52) {
+      } else if (roll < 0.66) {
         s.state = 'phone';
         s.stateTimer = 2400 + Math.random() * 3600;
-      } else if (roll < 0.66) {
+      } else if (roll < 0.78) {
         s.state = 'thermostat';
         s.tx = THERMOSTAT_POS.x + 0.14;
         s.tz = THERMOSTAT_POS.z + (Math.random() - 0.5) * 0.12;
         s.stateTimer = 3400;
-      } else if (roll < 0.80) {
+      } else if (roll < 0.88) {
         s.state = 'tv';
-        s.tx = TV_POS.x - 0.26 - Math.random() * 0.16;
-        s.tz = TV_POS.z + (Math.random() - 0.5) * 0.28;
+        s.tx = (Math.random() - 0.5) * 0.55;
+        s.tz = -0.32 + (Math.random() - 0.5) * 0.18;
         s.stateTimer = 3800 + Math.random() * 2400;
-      } else if (roll < 0.90) {
+      } else if (roll < 0.94) {
         s.state = 'cheer';
         s.stateTimer = 1500 + Math.random() * 1400;
       } else {
@@ -519,12 +602,30 @@
     function updateSimulation(elapsed) {
       if (reducedMotion.matches) return;
 
+      tvShapeTime += elapsed;
+      if (Math.floor((tvShapeTime - elapsed) / 1450) !== Math.floor(tvShapeTime / 1450)) {
+        tvSceneIndex = (tvSceneIndex + 1) % 5;
+      }
+
       // Update glass tap ripples
       for (let i = glassRipples.length - 1; i >= 0; i--) {
         glassRipples[i].age += elapsed;
         if (glassRipples[i].age >= glassRipples[i].life) {
           glassRipples.splice(i, 1);
         }
+      }
+
+      // Update rising weed smoke puffs drifting toward the 3 top air holes
+      for (let i = weedSmoke.length - 1; i >= 0; i--) {
+        const puff = weedSmoke[i];
+        puff.age += elapsed;
+        if (puff.age >= puff.life) {
+          weedSmoke.splice(i, 1);
+          continue;
+        }
+        puff.y += elapsed * 0.00022;
+        puff.x += (puff.targetHoleX - puff.x) * elapsed * 0.0006 + Math.sin(puff.age * 0.005 + puff.seed) * 0.00008 * elapsed;
+        puff.z += (0 - puff.z) * elapsed * 0.0005;
       }
 
       if (thermostatFlash > 0) thermostatFlash = Math.max(0, thermostatFlash - elapsed);
@@ -536,10 +637,17 @@
         tvBazingaTimer -= elapsed;
         if (tvBazingaTimer <= 0) {
           tvBazingaActive = 1800;
-          tvBazingaTimer = 5200 + Math.random() * 5500;
-          // Everyone watching TV or nearby loses their minds
+          tvBazingaTimer = 5400 + Math.random() * 5500;
+          // Everyone watching TV or sitting on the couch reacts
           for (const s of specimens) {
-            if (!s.isCarl && (s.state === 'tv' || (s.x > 0.15 && Math.random() < 0.65))) {
+            if (s.isCarl) continue;
+            if (s.state === 'couch_tv') {
+              s.bubble = 'BAZINGA!';
+              s.bubbleTimer = 1700;
+            } else if (s.state === 'couch_weed') {
+              s.bubble = 'hehe';
+              s.bubbleTimer = 1500;
+            } else if (s.state === 'tv' || (s.z < 0.0 && Math.random() < 0.55)) {
               s.state = 'cheer';
               s.stateTimer = 1750;
               s.bubble = 'BAZINGA!';
@@ -562,8 +670,10 @@
           pickNewState(s);
         }
 
-        // Carl's social forcefield: non-Carl specimens veer away if too close
-        if (!s.isCarl) {
+        const onCouch = s.state === 'couch_tv' || s.state === 'couch_weed';
+
+        // Carl's social forcefield: non-Carl floor specimens veer away if too close
+        if (!s.isCarl && !onCouch) {
           const dxCarl = s.x - carl.x;
           const dzCarl = s.z - carl.z;
           const distCarl = Math.hypot(dxCarl, dzCarl);
@@ -578,8 +688,13 @@
           }
         }
 
+        // Keep Carl's wander path away from the couch so he doesn't clip through it
+        if (s.isCarl && Math.abs(s.x - COUCH_POS.x) < 0.42 && Math.abs(s.z - COUCH_POS.z) < 0.16) {
+          s.z = s.z < COUCH_POS.z ? COUCH_POS.z - 0.17 : COUCH_POS.z + 0.17;
+        }
+
         // Movement for states with target coordinates
-        if (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv') {
+        if (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv' || s.state === 'to_couch') {
           const dx = s.tx - s.x;
           const dz = s.tz - s.z;
           const dist = Math.hypot(dx, dz);
@@ -590,6 +705,16 @@
             s.z = clampFloor(s.z + (dz / dist) * step, 0.52);
             if (Math.abs(dx) > 0.01) s.facing = dx > 0 ? 1 : -1;
             s.stride += elapsed * 0.011;
+          } else if (s.state === 'to_couch') {
+            s.x = s.tx;
+            s.z = s.tz;
+            s.state = s.couchAction;
+            s.stateTimer = 5200 + Math.random() * 4800;
+            s.facing = s.couchSlot === 0 ? -1 : (s.couchSlot === 2 ? 1 : (Math.random() < 0.5 ? 1 : -1));
+            if (s.state === 'couch_weed') {
+              s.bubble = WEED_BUBBLES[Math.floor(Math.random() * WEED_BUBBLES.length)];
+              s.bubbleTimer = 1600;
+            }
           } else if (s.state === 'thermostat') {
             // Reached thermostat — touch it and provoke an argument!
             thermostatTemp = [68, 69, 71, 72, 74, 75][Math.floor(Math.random() * 6)];
@@ -598,16 +723,16 @@
             s.bubbleTimer = 1500;
             s.state = 'argue';
             s.stateTimer = 1800;
-            // Pull closest specimen into the thermostat argument
             let responder = null;
             let bestD = Infinity;
             for (const other of specimens) {
-              if (other.id !== s.id && !other.isCarl) {
+              if (other.id !== s.id && !other.isCarl && other.state !== 'couch_tv' && other.state !== 'couch_weed') {
                 const d = Math.hypot(other.x - s.x, other.z - s.z);
                 if (d < bestD) { bestD = d; responder = other; }
               }
             }
             if (responder) {
+              releaseCouchSlot(responder);
               responder.state = 'argue';
               responder.stateTimer = 1800;
               responder.facing = s.x < responder.x ? -1 : 1;
@@ -615,11 +740,36 @@
               responder.bubbleTimer = 1650;
             }
           } else if (s.state === 'tv') {
-            s.facing = 1;
+            s.facing = s.x < 0 ? 1 : -1;
           } else if (s.state === 'wander') {
             s.state = 'idle';
             s.stateTimer = 900 + Math.random() * 1400;
           }
+        } else if (s.state === 'couch_weed') {
+          s.smokePhase += elapsed * 0.0026;
+          s.smokeSpawnCooldown = Math.max(0, s.smokeSpawnCooldown - elapsed);
+          // Exhale smoke puffs periodically that drift up toward the nearest air hole
+          const inhale = Math.sin(s.smokePhase);
+          if (inhale < -0.35 && s.smokeSpawnCooldown <= 0 && weedSmoke.length < 22) {
+            s.smokeSpawnCooldown = 420;
+            const nearestHole = AIR_HOLE_X.reduce((best, hx) =>
+              Math.abs(hx - s.x) < Math.abs(best - s.x) ? hx : best, AIR_HOLE_X[1]);
+            weedSmoke.push({
+              x: s.x + s.facing * 0.03,
+              y: 0.36,
+              z: s.z,
+              targetHoleX: nearestHole,
+              age: 0,
+              life: 2400 + Math.random() * 900,
+              seed: Math.random() * 10,
+            });
+            if (!s.bubble && Math.random() < 0.16) {
+              s.bubble = WEED_BUBBLES[Math.floor(Math.random() * WEED_BUBBLES.length)];
+              s.bubbleTimer = 1400;
+            }
+          }
+        } else if (s.state === 'couch_tv') {
+          s.stride += elapsed * 0.012;
         } else if (s.state === 'argue') {
           s.stride += elapsed * 0.014;
           if (!s.bubble && Math.random() < 0.03) {
@@ -668,7 +818,8 @@
     }
 
     function drawSpecimen(s, width, height, time) {
-      const [px, py, scale] = projectEnclosure(s.x, 0, s.z, width, height);
+      const onCouch = s.state === 'couch_tv' || s.state === 'couch_weed';
+      const [px, py, scale] = projectEnclosure(s.x, onCouch ? 0.11 : 0, s.z, width, height);
       const unit = Math.min(width, height) * 0.072 * scale;
 
       ctx.save();
@@ -688,7 +839,7 @@
         ctx.restore();
       }
 
-      // Subtle floor shadow
+      // Subtle floor/seat shadow
       ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
       ctx.beginPath();
       ctx.ellipse(0, 2, unit * 0.38, unit * 0.13, 0, 0, Math.PI * 2);
@@ -703,25 +854,131 @@
         // Lying flat on the enclosure floor staring upward
         const dir = s.facing;
         ctx.lineWidth = Math.max(2.2, unit * 0.16);
-        // Torso flat
         ctx.beginPath();
         ctx.moveTo(-dir * unit * 0.15, -unit * 0.08);
         ctx.lineTo(dir * unit * 0.32, -unit * 0.08);
         ctx.stroke();
-        // Legs
         ctx.beginPath();
         ctx.moveTo(dir * unit * 0.32, -unit * 0.08);
         ctx.lineTo(dir * unit * 0.62, -unit * 0.03);
         ctx.moveTo(dir * unit * 0.32, -unit * 0.08);
         ctx.lineTo(dir * unit * 0.58, -unit * 0.14);
         ctx.stroke();
-        // Head
         ctx.beginPath();
         ctx.arc(-dir * unit * 0.34, -unit * 0.13, unit * 0.16, 0, Math.PI * 2);
         ctx.fill();
+      } else if (s.state === 'couch_tv') {
+        // Sitting on the couch cushion watching the centered TV
+        const cheeringBazinga = tvBazingaActive > 0;
+        const hipY = -unit * 0.05;
+        const shoulderY = -unit * 0.48;
+        const headY = -unit * 0.72;
+
+        // Seated torso
+        ctx.lineWidth = Math.max(3.2, unit * 0.25);
+        ctx.beginPath();
+        ctx.moveTo(0, shoulderY + unit * 0.05);
+        ctx.lineTo(0, hipY);
+        ctx.stroke();
+
+        // Seated bent legs dropping down the front of the couch
+        ctx.lineWidth = Math.max(2.3, unit * 0.16);
+        ctx.beginPath();
+        ctx.moveTo(-unit * 0.08, hipY);
+        ctx.lineTo(-unit * 0.17, hipY + unit * 0.28);
+        ctx.moveTo(unit * 0.08, hipY);
+        ctx.lineTo(unit * 0.17, hipY + unit * 0.28);
+        ctx.stroke();
+
+        // Arms (raised in a V if BAZINGA is playing, otherwise resting on lap/cushion)
+        if (cheeringBazinga) {
+          const wave = Math.sin(s.stride * 1.6) * unit * 0.05;
+          ctx.beginPath();
+          ctx.moveTo(-unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(-unit * 0.38, shoulderY - unit * 0.24 + wave);
+          ctx.moveTo(unit * 0.08, shoulderY + unit * 0.04);
+          ctx.lineTo(unit * 0.38, shoulderY - unit * 0.24 - wave);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(-unit * 0.08, shoulderY + unit * 0.05);
+          ctx.lineTo(-unit * 0.24, hipY - unit * 0.02);
+          ctx.moveTo(unit * 0.08, shoulderY + unit * 0.05);
+          ctx.lineTo(unit * 0.24, hipY - unit * 0.02);
+          ctx.stroke();
+        }
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(0, headY, unit * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (s.state === 'couch_weed') {
+        // Lounging reclined on the couch smoking weed
+        const dir = s.facing;
+        const hipX = -dir * unit * 0.05;
+        const hipY = -unit * 0.04;
+        const shoulderX = -dir * unit * 0.17;
+        const shoulderY = -unit * 0.43;
+        const headX = -dir * unit * 0.22;
+        const headY = -unit * 0.66;
+
+        // Reclined torso
+        ctx.lineWidth = Math.max(3.2, unit * 0.25);
+        ctx.beginPath();
+        ctx.moveTo(shoulderX, shoulderY + unit * 0.05);
+        ctx.lineTo(hipX, hipY);
+        ctx.stroke();
+
+        // Lounging legs (one bent, one stretched out comfortably)
+        ctx.lineWidth = Math.max(2.3, unit * 0.16);
+        ctx.beginPath();
+        ctx.moveTo(hipX, hipY);
+        ctx.lineTo(hipX + dir * unit * 0.28, hipY + unit * 0.22);
+        ctx.moveTo(hipX, hipY);
+        ctx.lineTo(hipX + dir * unit * 0.10, hipY + unit * 0.27);
+        ctx.stroke();
+
+        // Back arm draped lazily along the couch backrest
+        ctx.beginPath();
+        ctx.moveTo(shoulderX, shoulderY + unit * 0.05);
+        ctx.lineTo(shoulderX - dir * unit * 0.24, shoulderY + unit * 0.03);
+        ctx.stroke();
+
+        // Smoking arm bringing joint toward mouth on inhale
+        const inhale = Math.max(0, Math.sin(s.smokePhase));
+        const handX = headX + dir * unit * (0.20 + (1 - inhale) * 0.11);
+        const handY = headY + unit * (0.06 + (1 - inhale) * 0.16);
+        ctx.beginPath();
+        ctx.moveTo(shoulderX, shoulderY + unit * 0.05);
+        ctx.lineTo(handX, handY);
+        ctx.stroke();
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(headX, headY, unit * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Joint + glowing cherry ember tip
+        const tipX = handX + dir * unit * 0.13;
+        const tipY = handY - unit * 0.06;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = Math.max(1.5, unit * 0.07);
+        ctx.beginPath();
+        ctx.moveTo(handX, handY);
+        ctx.lineTo(tipX, tipY);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.fillStyle = inhale > 0.35 ? '#ff5500' : '#ff8800';
+        ctx.shadowColor = inhale > 0.35 ? 'rgba(255, 85, 0, 0.95)' : 'rgba(0, 255, 0, 0.7)';
+        ctx.shadowBlur = inhale > 0.35 ? 8 : 4;
+        ctx.beginPath();
+        ctx.arc(tipX, tipY, Math.max(1.6, unit * 0.055), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       } else {
         // Upright specimen (silhouette proportion inspired by the Homo sapiens icon)
-        const swing = (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv')
+        const swing = (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv' || s.state === 'to_couch')
           ? Math.sin(s.stride) * 0.22
           : 0;
         const hop = s.state === 'cheer' ? Math.abs(Math.sin(s.stride)) * unit * 0.14 : 0;
@@ -749,7 +1006,6 @@
 
         // Arms by behavior state
         if (s.state === 'cheer') {
-          // Iconic raised-V arms pose matching the Homo sapiens sidebar icon
           const wave = Math.sin(s.stride * 1.4) * unit * 0.05;
           ctx.beginPath();
           ctx.moveTo(-unit * 0.08, shoulderY + unit * 0.04);
@@ -758,7 +1014,6 @@
           ctx.lineTo(unit * 0.40, shoulderY - unit * 0.24 - wave);
           ctx.stroke();
         } else if (s.state === 'phone') {
-          // One arm down, one holding a glowing pixel rectangle
           const dir = s.facing;
           ctx.beginPath();
           ctx.moveTo(-dir * unit * 0.08, shoulderY + unit * 0.04);
@@ -767,7 +1022,6 @@
           ctx.lineTo(dir * unit * 0.30, shoulderY + unit * 0.08);
           ctx.stroke();
 
-          // Tiny glowing phone rectangle + face glow
           const phoneX = dir * unit * 0.34;
           const phoneY = shoulderY + unit * 0.02;
           ctx.save();
@@ -777,7 +1031,6 @@
           ctx.fillRect(phoneX - unit * 0.05, phoneY - unit * 0.09, unit * 0.10, unit * 0.16);
           ctx.restore();
         } else if (s.state === 'argue') {
-          // Wild gesturing arms
           const dir = s.facing;
           const wave = Math.sin(s.stride * 2.2) * unit * 0.16;
           ctx.beginPath();
@@ -787,7 +1040,6 @@
           ctx.lineTo(dir * unit * 0.28, shoulderY + unit * 0.14 - wave);
           ctx.stroke();
         } else {
-          // Default walking / idle arms
           ctx.beginPath();
           ctx.moveTo(-unit * 0.08, shoulderY + unit * 0.04);
           ctx.lineTo(-unit * 0.25 - swing * unit * 0.4, hipY + unit * 0.04);
@@ -815,8 +1067,229 @@
         ctx.font = `600 ${Math.max(9, Math.round(unit * 0.34))}px Avenir, "Avenir Next", sans-serif`;
         ctx.fillStyle = s.bubble === 'BAZINGA!' ? '#0f0' : 'rgba(255, 255, 255, 0.92)';
         ctx.textAlign = 'center';
-        const labelY = s.isCarl ? -unit * 1.68 : -unit * 1.42;
+        const labelY = s.isCarl ? -unit * 1.68 : (onCouch ? -unit * 1.05 : -unit * 1.42);
         ctx.fillText(s.bubble, 0, labelY);
+      }
+
+      ctx.restore();
+    }
+
+    function drawPoly3D(pts, width, height, fill, stroke, lineWidth = 1.2) {
+      ctx.beginPath();
+      pts.forEach(([x, y, z], idx) => {
+        const [px, py] = projectEnclosure(x, y, z, width, height);
+        if (idx === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.closePath();
+      if (fill) {
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+      }
+    }
+
+    function drawCouch(width, height) {
+      const xL = -0.34, xR = 0.34;
+      const armW = 0.05;
+      const zB = 0.06, zF = 0.21;
+      const zBack = 0.18;
+      const ySeat = 0.11;
+      const yArm = 0.18;
+      const yBack = 0.22;
+      const fill = '#050505';
+      const stroke = 'rgba(255, 255, 255, 0.82)';
+
+      ctx.save();
+      ctx.lineJoin = 'round';
+
+      // Seat top cushion surface
+      drawPoly3D([
+        [xL, ySeat, zB],
+        [xR, ySeat, zB],
+        [xR, ySeat, zF],
+        [xL, ySeat, zF],
+      ], width, height, fill, stroke, 1.2);
+
+      // Seat front kickplate
+      drawPoly3D([
+        [xL, 0, zF],
+        [xR, 0, zF],
+        [xR, ySeat, zF],
+        [xL, ySeat, zF],
+      ], width, height, fill, stroke, 1.2);
+
+      // Seat cushion seams (3 cushions)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.36)';
+      ctx.lineWidth = 1;
+      for (const cx of [-0.11, 0.11]) {
+        const [p1x, p1y] = projectEnclosure(cx, ySeat, zB, width, height);
+        const [p2x, p2y] = projectEnclosure(cx, ySeat, zF, width, height);
+        const [p3x, p3y] = projectEnclosure(cx, 0, zF, width, height);
+        ctx.beginPath();
+        ctx.moveTo(p1x, p1y);
+        ctx.lineTo(p2x, p2y);
+        ctx.lineTo(p3x, p3y);
+        ctx.stroke();
+      }
+
+      // Low lounge backrest along rear/front edge so seated humans stay clearly visible
+      drawPoly3D([
+        [xL, ySeat, zBack],
+        [xR, ySeat, zBack],
+        [xR, yBack, zBack],
+        [xL, yBack, zBack],
+      ], width, height, fill, stroke, 1.25);
+
+      // Left armrest
+      drawPoly3D([
+        [xL - armW, yArm, zB],
+        [xL, yArm, zB],
+        [xL, yArm, zF],
+        [xL - armW, yArm, zF],
+      ], width, height, fill, stroke, 1.2);
+      drawPoly3D([
+        [xL - armW, 0, zF],
+        [xL, 0, zF],
+        [xL, yArm, zF],
+        [xL - armW, yArm, zF],
+      ], width, height, fill, stroke, 1.2);
+
+      // Right armrest
+      drawPoly3D([
+        [xR, yArm, zB],
+        [xR + armW, yArm, zB],
+        [xR + armW, yArm, zF],
+        [xR, yArm, zF],
+      ], width, height, fill, stroke, 1.2);
+      drawPoly3D([
+        [xR, 0, zF],
+        [xR + armW, 0, zF],
+        [xR + armW, yArm, zF],
+        [xR, yArm, zF],
+      ], width, height, fill, stroke, 1.2);
+
+      ctx.restore();
+    }
+
+    function drawWeedSmoke(width, height) {
+      for (const puff of weedSmoke) {
+        const p = puff.age / puff.life;
+        const [px, py, scale] = projectEnclosure(puff.x, Math.min(0.98, puff.y), puff.z, width, height);
+        const r = (3.5 + p * 11) * scale;
+        const alpha = Math.sin(Math.PI * p) * 0.42;
+        ctx.save();
+        ctx.strokeStyle = `rgba(210, 255, 210, ${alpha.toFixed(3)})`;
+        ctx.fillStyle = `rgba(180, 255, 180, ${(alpha * 0.35).toFixed(3)})`;
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function drawTvShapes(vw, vh) {
+      const t = tvShapeTime * 0.001;
+      const w = vw * 0.86;
+      const h = vh * 0.80;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(-w * 0.5, -h * 0.5, w, h);
+      ctx.clip();
+
+      if (tvSceneIndex === 0) {
+        // Scene 0: Solid red circle, golden yellow triangle, cobalt blue vertical bar
+        const shift = Math.sin(t * 1.8) * w * 0.05;
+        ctx.fillStyle = '#1877c9';
+        ctx.fillRect(w * 0.14 - shift, -h * 0.38, w * 0.22, h * 0.76);
+
+        ctx.fillStyle = '#e53a33';
+        ctx.beginPath();
+        ctx.arc(-w * 0.22 + shift, -h * 0.04, Math.min(w, h) * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#f0c800';
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.04, -h * 0.36);
+        ctx.lineTo(w * 0.22, h * 0.36);
+        ctx.lineTo(-w * 0.30, h * 0.36);
+        ctx.closePath();
+        ctx.fill();
+      } else if (tvSceneIndex === 1) {
+        // Scene 1: Solid color blocks (Mondrian / De Stijl composition)
+        const pulse = Math.sin(t * 2.2) * 0.04;
+        ctx.fillStyle = '#e53a33';
+        ctx.fillRect(-w * 0.46, -h * 0.44, w * (0.48 + pulse), h * 0.52);
+
+        ctx.fillStyle = '#f0c800';
+        ctx.fillRect(w * (0.08 + pulse), -h * 0.44, w * 0.38, h * 0.34);
+
+        ctx.fillStyle = '#0f669b';
+        ctx.fillRect(-w * 0.46, h * 0.14, w * 0.34, h * 0.30);
+
+        ctx.fillStyle = '#17a37f';
+        ctx.fillRect(-w * 0.06, -h * 0.04, w * 0.52, h * 0.48);
+      } else if (tvSceneIndex === 2) {
+        // Scene 2: Emerald diamond, magenta disk, and orange horizontal bar
+        const bob = Math.cos(t * 2.0) * h * 0.06;
+        ctx.fillStyle = '#ff7a18';
+        ctx.fillRect(-w * 0.42, h * 0.16, w * 0.84, h * 0.22);
+
+        ctx.fillStyle = '#17a37f';
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.18, -h * 0.38 + bob);
+        ctx.lineTo(w * 0.08, -h * 0.02 + bob);
+        ctx.lineTo(-w * 0.18, h * 0.34 + bob);
+        ctx.lineTo(-w * 0.44, -h * 0.02 + bob);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#ff2a6d';
+        ctx.beginPath();
+        ctx.arc(w * 0.22, -h * 0.08 - bob, Math.min(w, h) * 0.26, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (tvSceneIndex === 3) {
+        // Scene 3: Three bold solid colored triangles / chevrons (blue, yellow, red)
+        const colors = ['#1877c9', '#f0c800', '#e53a33'];
+        for (let i = 0; i < 3; i++) {
+          const cx = (i - 1) * w * 0.29;
+          const lift = Math.sin(t * 2.5 + i * 1.1) * h * 0.07;
+          ctx.fillStyle = colors[i];
+          ctx.beginPath();
+          ctx.moveTo(cx, -h * 0.34 + lift);
+          ctx.lineTo(cx + w * 0.15, h * 0.32 + lift);
+          ctx.lineTo(cx - w * 0.15, h * 0.32 + lift);
+          ctx.closePath();
+          ctx.fill();
+        }
+      } else {
+        // Scene 4: Cyan semicircle, yellow circle, and crimson rotated square
+        const spin = t * 0.9;
+        ctx.fillStyle = '#00d8ff';
+        ctx.beginPath();
+        ctx.arc(-w * 0.16, h * 0.12, Math.min(w, h) * 0.34, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(w * 0.22, -h * 0.06);
+        ctx.rotate(spin);
+        ctx.fillStyle = '#e53a33';
+        const sq = Math.min(w, h) * 0.38;
+        ctx.fillRect(-sq * 0.5, -sq * 0.5, sq, sq);
+        ctx.restore();
+
+        ctx.fillStyle = '#f0c800';
+        ctx.beginPath();
+        ctx.arc(-w * 0.24, -h * 0.18, Math.min(w, h) * 0.18, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       ctx.restore();
@@ -841,28 +1314,64 @@
       ctx.fillText(`${thermostatTemp}°`, 0, 0);
       ctx.restore();
 
-      // 2. Pixel Window (TV) on right enclosure plane
-      const [vx, vy, vScale] = projectEnclosure(TV_POS.x, 0.44, TV_POS.z, width, height);
+      // 2. Centered, larger Pixel Window (TV) on the back wall
+      const [vx, vy, vScale] = projectEnclosure(TV_POS.x, TV_POS.y, TV_POS.z, width, height);
       ctx.save();
       ctx.translate(vx, vy);
-      const vw = 46 * vScale;
-      const vh = 28 * vScale;
-      ctx.fillStyle = tvBazingaActive > 0 ? 'rgba(0, 40, 0, 0.92)' : '#050505';
-      ctx.strokeStyle = tvBazingaActive > 0 ? '#0f0' : 'rgba(255, 255, 255, 0.82)';
-      ctx.lineWidth = 1.4;
+      const vw = Math.min(width, height) * 0.34 * vScale;
+      const vh = vw * 0.58;
+      ctx.fillStyle = tvBazingaActive > 0 ? 'rgba(0, 40, 0, 0.94)' : '#050505';
+      ctx.strokeStyle = tvBazingaActive > 0 ? '#0f0' : 'rgba(255, 255, 255, 0.88)';
+      ctx.lineWidth = 1.5;
       if (tvBazingaActive > 0) {
-        ctx.shadowColor = 'rgba(0, 255, 0, 0.65)';
-        ctx.shadowBlur = 14;
+        ctx.shadowColor = 'rgba(0, 255, 0, 0.7)';
+        ctx.shadowBlur = 16;
       }
       ctx.fillRect(-vw * 0.5, -vh * 0.5, vw, vh);
       ctx.strokeRect(-vw * 0.5, -vh * 0.5, vw, vh);
       ctx.shadowBlur = 0;
-      ctx.fillStyle = tvBazingaActive > 0 ? '#0f0' : 'rgba(255, 255, 255, 0.65)';
-      ctx.font = `600 ${Math.max(7, Math.round(7.5 * vScale))}px Avenir, monospace`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(tvBazingaActive > 0 ? 'BAZINGA' : 'TV · LIVE', 0, 0);
+
+      if (tvBazingaActive > 0) {
+        ctx.fillStyle = '#0f0';
+        ctx.font = `700 ${Math.max(10, Math.round(13 * vScale))}px Avenir, monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('BAZINGA', 0, 0);
+      } else {
+        drawTvShapes(vw, vh);
+      }
       ctx.restore();
+    }
+
+    function drawCeilingAirHoles(width, height) {
+      for (const hx of AIR_HOLE_X) {
+        const [topX, topY, scale] = projectEnclosure(hx, 1.0, 0.0, width, height);
+        const [botX, botY] = projectEnclosure(hx, 0.965, 0.0, width, height);
+        const rx = Math.min(width, height) * 0.064 * scale;
+        const ry = rx * 0.32;
+
+        ctx.save();
+        // Dark interior hole cutout
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.ellipse(topX, topY, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Lower grommet depth ring (glass thickness)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.42)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.ellipse(botX, botY, rx * 0.96, ry * 0.96, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Upper lid rim
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.ellipse(topX, topY, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
     }
 
     function drawEnclosureBox(width, height, frontOnly) {
@@ -958,10 +1467,19 @@
       const normX = ((x / rect.width) - 0.5) * 2;
       for (const s of specimens) {
         if (Math.abs(s.x - normX) < 0.55) {
-          s.state = 'cheer';
-          s.stateTimer = 1100;
-          s.bubble = s.isCarl ? 'hi.' : '!';
-          s.bubbleTimer = 1100;
+          if (s.state === 'couch_weed') {
+            s.bubble = 'chill...';
+            s.bubbleTimer = 1200;
+          } else if (s.state === 'couch_tv') {
+            s.bubble = '!';
+            s.bubbleTimer = 1100;
+          } else {
+            releaseCouchSlot(s);
+            s.state = 'cheer';
+            s.stateTimer = 1100;
+            s.bubble = s.isCarl ? 'hi.' : '!';
+            s.bubbleTimer = 1100;
+          }
         }
       }
 
@@ -995,14 +1513,28 @@
       ctx.clearRect(0, 0, width, height);
 
       drawEnclosureBox(width, height, false);
+      drawCeilingAirHoles(width, height);
       drawHabitatFixtures(width, height);
 
-      // Depth-sort specimens back-to-front by z
+      // Depth-sort specimens back-to-front around the couch
       const sorted = [...specimens].sort((a, b) => a.z - b.z);
       for (const s of sorted) {
-        drawSpecimen(s, width, height, time);
+        const onCouch = s.state === 'couch_tv' || s.state === 'couch_weed';
+        if (!onCouch && s.z < COUCH_POS.z - 0.02) {
+          drawSpecimen(s, width, height, time);
+        }
       }
 
+      drawCouch(width, height);
+
+      for (const s of sorted) {
+        const onCouch = s.state === 'couch_tv' || s.state === 'couch_weed';
+        if (onCouch || s.z >= COUCH_POS.z - 0.02) {
+          drawSpecimen(s, width, height, time);
+        }
+      }
+
+      drawWeedSmoke(width, height);
       drawEnclosureBox(width, height, true);
 
       requestAnimationFrame(draw);
