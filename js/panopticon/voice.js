@@ -264,6 +264,7 @@ const EYE_PRONUNCIATIONS = [
     [/\bbodhi\b/gi, 'bo dee'],
     [/\bharambe\b/gi, 'ha rahm bay'],
     [/\brn\b/gi, 'right now'],
+    [/\bngl\b/gi, 'not gonna lie'],
     // Long A / long O chant (not letter-names)
     [/\bay,\s*oh,\s*ay,\s*oh,\s*ay,\s*oh,\s*ay,\s*oh\b/gi, 'aye, owe, aye, owe, aye, owe, aye, owe'],
     [/\bpanopticon\b/gi, 'pan op tih con'],
