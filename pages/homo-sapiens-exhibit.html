@@ -1351,12 +1351,6 @@
         const ry = rx * 0.32;
 
         ctx.save();
-        // Dark interior hole cutout
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.ellipse(topX, topY, rx, ry, 0, 0, Math.PI * 2);
-        ctx.fill();
-
         // Lower grommet depth ring (glass thickness)
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.42)';
         ctx.lineWidth = 1.1;
@@ -1513,7 +1507,6 @@
       ctx.clearRect(0, 0, width, height);
 
       drawEnclosureBox(width, height, false);
-      drawCeilingAirHoles(width, height);
       drawHabitatFixtures(width, height);
 
       // Depth-sort specimens back-to-front around the couch
@@ -1535,6 +1528,7 @@
       }
 
       drawWeedSmoke(width, height);
+      drawCeilingAirHoles(width, height);
       drawEnclosureBox(width, height, true);
 
       requestAnimationFrame(draw);
