@@ -503,7 +503,10 @@
 
     // Normalized floor coordinates: x in [-0.78, 0.78], z in [-0.62, 0.62]
     const THERMOSTAT_POS = { x: -0.78, z: -0.25 };
+    const DOOR_POS = { x: -1.0, zMin: 0.18, zMax: 0.56, zCenter: 0.37, height: 0.56 };
     const TV_POS = { x: 0.0, y: 0.54, z: -0.92 };
+    let doorOpen = 0;
+    let doorTargetOpen = 0;
     const COUCH_POS = { x: 0.0, z: 0.14 };
     const COUCH_SLOTS = [
       { x: -0.21, z: 0.13, occupant: -1 },
@@ -600,6 +603,28 @@
     function pickNewState(s) {
       if (s.isCarl) {
         releaseCouchSlot(s);
+        if (s.state === 'outside') {
+          s.state = 'entering';
+          s.x = -1.08;
+          s.z = DOOR_POS.zCenter;
+          s.tx = -0.46;
+          s.tz = 0.34;
+          s.facing = 1;
+          s.stateTimer = 4600;
+          s.bubble = Math.random() < 0.5 ? "i'm back." : 'hey guys...';
+          s.bubbleTimer = 2200;
+          return;
+        }
+        if (Math.random() < 0.34) {
+          s.state = 'leaving';
+          s.tx = -1.12;
+          s.tz = DOOR_POS.zCenter;
+          s.facing = -1;
+          s.stateTimer = 5200;
+          s.bubble = Math.random() < 0.5 ? 'bye guys...' : 'be right back';
+          s.bubbleTimer = 1800;
+          return;
+        }
         s.state = Math.random() < 0.65 ? 'wander' : 'idle';
         const t = randomFloorTargetAvoidingCouch();
         s.tx = t.tx;
@@ -751,12 +776,24 @@
       }
 
       if (text.includes('carl')) {
-        carl.state = 'wander';
-        carl.tx = 0.0;
-        carl.tz = -0.22;
-        carl.stateTimer = 3200;
-        carl.bubble = 'hey guys...';
-        carl.bubbleTimer = 2400;
+        if (carl.state === 'outside') {
+          carl.state = 'entering';
+          carl.x = -1.08;
+          carl.z = DOOR_POS.zCenter;
+          carl.tx = -0.35;
+          carl.tz = 0.30;
+          carl.facing = 1;
+          carl.stateTimer = 4200;
+          carl.bubble = "i'm back.";
+          carl.bubbleTimer = 2400;
+        } else {
+          carl.state = 'wander';
+          carl.tx = 0.0;
+          carl.tz = -0.22;
+          carl.stateTimer = 3200;
+          carl.bubble = 'hey guys...';
+          carl.bubbleTimer = 2400;
+        }
         const reactions = ['...', 'uhh', 'nope', '*avoids eye contact*'];
         floor.forEach((s, idx) => {
           s.state = 'wander';
@@ -1098,6 +1135,13 @@
 
       const carl = specimens[0];
 
+      // Animate left-wall door smoothly when Carl is entering or leaving
+      doorTargetOpen = (
+        (carl.state === 'leaving' && carl.x < -0.58) ||
+        (carl.state === 'entering' && carl.x < -0.56)
+      ) ? 1 : 0;
+      doorOpen += (doorTargetOpen - doorOpen) * Math.min(1, elapsed * 0.008);
+
       for (const s of specimens) {
         if (s.bubbleTimer > 0) {
           s.bubbleTimer = Math.max(0, s.bubbleTimer - elapsed);
@@ -1111,8 +1155,8 @@
 
         const onCouch = s.state === 'couch_tv' || s.state === 'couch_weed';
 
-        // Carl's social forcefield: non-Carl floor specimens veer away if too close
-        if (!s.isCarl && !onCouch) {
+        // Carl's social forcefield: non-Carl floor specimens veer away if Carl is inside
+        if (!s.isCarl && !onCouch && carl.state !== 'outside') {
           const dxCarl = s.x - carl.x;
           const dzCarl = s.z - carl.z;
           const distCarl = Math.hypot(dxCarl, dzCarl);
@@ -1128,12 +1172,39 @@
         }
 
         // Keep Carl's wander path away from the couch so he doesn't clip through it
-        if (s.isCarl && Math.abs(s.x - COUCH_POS.x) < 0.42 && Math.abs(s.z - COUCH_POS.z) < 0.16) {
+        if (s.isCarl && s.state !== 'outside' && Math.abs(s.x - COUCH_POS.x) < 0.42 && Math.abs(s.z - COUCH_POS.z) < 0.16) {
           s.z = s.z < COUCH_POS.z ? COUCH_POS.z - 0.17 : COUCH_POS.z + 0.17;
         }
 
-        // Movement for states with target coordinates
-        if (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv' || s.state === 'to_couch') {
+        // Carl leaving / entering through the left-wall door
+        if (s.isCarl && (s.state === 'leaving' || s.state === 'entering')) {
+          const dx = s.tx - s.x;
+          const dz = s.tz - s.z;
+          const dist = Math.hypot(dx, dz);
+          if (dist > 0.025) {
+            const step = Math.min(dist, 0.00017 * elapsed);
+            s.x += (dx / dist) * step;
+            s.z = clampFloor(s.z + (dz / dist) * step, 0.54);
+            if (Math.abs(dx) > 0.01) s.facing = dx > 0 ? 1 : -1;
+            s.stride += elapsed * 0.011;
+          } else if (s.state === 'leaving') {
+            s.state = 'outside';
+            s.stateTimer = 5000 + Math.random() * 4500;
+            s.bubble = '';
+            s.bubbleTimer = 0;
+            const relieved = specimens.find((o) => !o.isCarl && !o.bubble);
+            if (relieved) {
+              relieved.bubble = Math.random() < 0.5 ? 'phew...' : "he's gone";
+              relieved.bubbleTimer = 1600;
+            }
+          } else {
+            s.state = 'wander';
+            const t = randomFloorTargetAvoidingCouch();
+            s.tx = t.tx;
+            s.tz = t.tz;
+            s.stateTimer = 2600 + Math.random() * 2800;
+          }
+        } else if (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv' || s.state === 'to_couch') {
           const dx = s.tx - s.x;
           const dz = s.tz - s.z;
           const dist = Math.hypot(dx, dz);
@@ -1279,11 +1350,15 @@
     }
 
     function drawSpecimen(s, width, height, time) {
+      if (s.state === 'outside') return;
       const onCouch = s.state === 'couch_tv' || s.state === 'couch_weed';
       const [px, py, scale] = projectEnclosure(s.x, onCouch ? 0.11 : 0, s.z, width, height);
       const unit = Math.min(width, height) * 0.072 * scale;
 
       ctx.save();
+      if (s.x < -0.94) {
+        ctx.globalAlpha = Math.max(0, 1 - (-0.94 - s.x) / 0.16);
+      }
       ctx.translate(px, py);
 
       // Carl's social forcefield ring on the floor
@@ -1441,7 +1516,7 @@
         ctx.restore();
       } else {
         // Upright specimen (silhouette proportion inspired by the Homo sapiens icon)
-        const swing = (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv' || s.state === 'to_couch' || s.state === 'freakout')
+        const swing = (s.state === 'wander' || s.state === 'thermostat' || s.state === 'tv' || s.state === 'to_couch' || s.state === 'freakout' || s.state === 'leaving' || s.state === 'entering')
           ? Math.sin(s.stride) * (s.state === 'freakout' ? 0.36 : 0.22)
           : 0;
         const hop = s.state === 'freakout'
@@ -2379,7 +2454,59 @@
       ctx.restore();
     }
 
+    function drawLeftDoor(width, height) {
+      const { x, zMin, zMax, height: dh } = DOOR_POS;
+      const doorWidthZ = zMax - zMin;
+
+      // Doorframe outline on left glass wall
+      drawPoly3D([
+        [x, 0, zMin],
+        [x, 0, zMax],
+        [x, dh, zMax],
+        [x, dh, zMin],
+      ], width, height, doorOpen > 0.05 ? 'rgba(0, 255, 0, 0.05)' : null, 'rgba(255, 255, 255, 0.82)', 1.35);
+
+      // Tiny status LED above the doorframe (green when open / Carl in transit)
+      const [ledX, ledY, ledScale] = projectEnclosure(x, dh + 0.06, (zMin + zMax) * 0.5, width, height);
+      ctx.save();
+      ctx.fillStyle = doorOpen > 0.08 ? '#0f0' : 'rgba(255, 255, 255, 0.35)';
+      if (doorOpen > 0.08) {
+        ctx.shadowColor = 'rgba(0, 255, 0, 0.85)';
+        ctx.shadowBlur = 8;
+      }
+      ctx.beginPath();
+      ctx.arc(ledX, ledY, Math.max(1.8, 2.2 * ledScale), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Swinging door leaf hinged at (x, zMin), opening outward to the left
+      const angle = doorOpen * Math.PI * 0.46;
+      const leafX = x - Math.sin(angle) * doorWidthZ * 0.72;
+      const leafZ = zMin + Math.cos(angle) * doorWidthZ;
+      drawPoly3D([
+        [x, 0, zMin],
+        [leafX, 0, leafZ],
+        [leafX, dh, leafZ],
+        [x, dh, zMin],
+      ], width, height, 'rgba(8, 12, 8, 0.75)', doorOpen > 0.08 ? 'rgba(0, 255, 0, 0.85)' : 'rgba(255, 255, 255, 0.75)', 1.25);
+
+      // Door handle dot near the swinging edge
+      const hFrac = 0.82;
+      const hx = x + (leafX - x) * hFrac;
+      const hz = zMin + (leafZ - zMin) * hFrac;
+      const [hpx, hpy, hScale] = projectEnclosure(hx, dh * 0.46, hz, width, height);
+      ctx.save();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(hpx, hpy, Math.max(1.4, 1.8 * hScale), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     function drawHabitatFixtures(width, height) {
+      // 0. Left-wall access door for Carl
+      drawLeftDoor(width, height);
+
       // 1. Wall Thermostat on left enclosure plane
       const [tx, ty, tScale] = projectEnclosure(THERMOSTAT_POS.x, 0.42, THERMOSTAT_POS.z, width, height);
       ctx.save();
@@ -2559,6 +2686,7 @@
       // Startle specimens inside the enclosure
       const normX = ((x / rect.width) - 0.5) * 2;
       for (const s of specimens) {
+        if (s.state === 'outside' || s.state === 'leaving' || s.state === 'entering') continue;
         if (Math.abs(s.x - normX) < 0.55) {
           if (s.state === 'couch_weed') {
             s.bubble = 'chill...';
