@@ -1148,9 +1148,11 @@
           if (s.bubbleTimer === 0) s.bubble = '';
         }
 
-        s.stateTimer -= elapsed;
-        if (s.stateTimer <= 0) {
-          pickNewState(s);
+        if (s.state !== 'leaving' && s.state !== 'entering') {
+          s.stateTimer -= elapsed;
+          if (s.stateTimer <= 0) {
+            pickNewState(s);
+          }
         }
 
         const onCouch = s.state === 'couch_tv' || s.state === 'couch_weed';
@@ -1189,7 +1191,7 @@
             s.stride += elapsed * 0.011;
           } else if (s.state === 'leaving') {
             s.state = 'outside';
-            s.stateTimer = 5000 + Math.random() * 4500;
+            s.stateTimer = 7000 + Math.random() * 6000;
             s.bubble = '';
             s.bubbleTimer = 0;
             const relieved = specimens.find((o) => !o.isCarl && !o.bubble);
