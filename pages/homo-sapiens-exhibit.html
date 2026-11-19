@@ -299,6 +299,45 @@
       "the homo sapiens exhibit: watch humans argue over whether the gloves fit",
       "the homo sapiens exhibit: watch humans defend gun rights, then go 'well…' when asked if minorities get them too",
       "the homo sapiens exhibit: watch people avoid speaking Carl's name",
+      "the homo sapiens exhibit: watch people pretend to be attentive in a one-sided conversation",
+      "the homo sapiens exhibit: watch people on the verge of a mental breakdown before finally finding the right chardonnay in the wine aisle",
+      "the homo sapiens exhibit: watch humans imagine what we look like",
+      "the homo sapiens exhibit: watch people simulate a coordinated seizure and have the gall to tell the opponent that they've been served",
+      "the homo sapiens exhibit: watch people get entertained by music that tells them exactly what to do",
+      "the homo sapiens exhibit: watch people get even more depressed after having a drink because they were depressed",
+      "the homo sapiens exhibit: watch people get embarrassed when someone sees them in their underwear but strut confidently in a bikini",
+      "the homo sapiens exhibit: watch people enable other people's bad habits because they gave up trying to fix them a long time ago",
+      "the homo sapiens exhibit: watch people put more effort into shitposting than their relationships with friends and family",
+      "the homo sapiens exhibit: watch humans get too invested in their headcanons",
+      "the homo sapiens exhibit: watch people get mad when they learn what their species is called",
+      "the homo sapiens exhibit: watch people feel guilty for not rounding up at checkout",
+      "the homo sapiens exhibit: watch people complete their rite of passage by cussing out their first shitty driver",
+      "the homo sapiens exhibit: watch people get their license from a cereal box",
+      "the homo sapiens exhibit: watch people talking and stuff",
+      "the homo sapiens exhibit: watch people consider talking for 5 hours a worthwhile pastime",
+      "the homo sapiens exhibit: watch humans close their eyes and hallucinate for a third of their entire lifespan",
+      "the homo sapiens exhibit: watch a dude sit under a tree for 7 weeks and come to the conclusion that meditation is pretty cool",
+      "the homo sapiens exhibit: watch people decide at the last minute in human history that war crimes are bad",
+      "the homo sapiens exhibit: watch people get unreasonably satisfied when they relieve themselves",
+      "the homo sapiens exhibit: watch humans discover themselves with literal cartoon characters",
+      "the homo sapiens exhibit: watch humans reject in others what they see in themselves",
+      "the homo sapiens exhibit: watch humans pinpoint where it all went wrong to the Cincinnati Zoo",
+      "the homo sapiens exhibit: watch humans base an entire school of psychology on a dude with mommy issues",
+      "the homo sapiens exhibit: watch humans engage in rap battles to see who can compliment the other more skillfully",
+      "the homo sapiens exhibit: watch humans explain the joke and still hear crickets",
+      "the homo sapiens exhibit: watch people steal lunch money and try to transfer their skills into adulthood",
+      "the homo sapiens exhibit: watch people prep their lotion and tissue for 5 minutes only to last under 1",
+      "the homo sapiens exhibit: watch people ask for the wifi password before saying hello at a cafe",
+      "the homo sapiens exhibit: watch lawmakers start pointing fingers when a bill gets killed",
+      "the homo sapiens exhibit: watch people file a no-contact order after a game of monopoly",
+      "the homo sapiens exhibit: watch the whole gang get into all sorts of hijinks and misadventures",
+      "the homo sapiens exhibit: watch people explain the entire Star Wars franchise better than the Bible",
+      "the homo sapiens exhibit: watch judges give harsher sentences because they didn't eat breakfast",
+      "the homo sapiens exhibit: watch humans marvel at the abundance of modern life until they realize how much of it is trying to kill them",
+      "the homo sapiens exhibit: watch humanity emerge from darkness only to get light pollution complaints from the neighbors",
+      "the homo sapiens exhibit: watch humans add to an exhaustive list of reasons we don't reply to their texts",
+      "the homo sapiens exhibit: watch humans hyperventilate at the mention of a mortgage",
+      "the homo sapiens exhibit: watch humans scroll past the fine print to hit ‘agree’",
     ];
 
     const TELEMETRY_READOUTS = [
@@ -919,6 +958,93 @@
       }
       if (text.includes('mating rituals') || text.includes('fuck, marry')) {
         stageDebatePair(floor, text.includes('mating') ? '*squeak*' : 'MARRY!', 'UHH...');
+        return;
+      }
+      if (text.includes('coordinated seizure') || text.includes('music that tells them')) {
+        floor.slice(0, 3).forEach((s, idx) => {
+          s.state = 'freakout';
+          s.stateTimer = 2600;
+          s.tx = clampFloor((idx - 1) * 0.35, 0.66);
+          s.tz = clampFloor(-0.25 + (idx % 2) * 0.25, 0.48);
+          s.bubble = text.includes('seizure')
+            ? (idx === 0 ? 'SERVED!!' : 'OHHH!!')
+            : (idx === 0 ? 'SLIDE LEFT!' : 'CRISS CROSS!');
+          s.bubbleTimer = 2400;
+        });
+        return;
+      }
+      if (text.includes('one-sided conversation') || text.includes('explain the joke')) {
+        stageDebatePair(
+          floor,
+          text.includes('joke') ? 'GET IT??' : 'SO ANYWAY...',
+          text.includes('joke') ? '*crickets*' : 'uh huh...'
+        );
+        return;
+      }
+      if (text.includes('rap battles')) {
+        stageDebatePair(floor, 'NICE SHOES!', 'GREAT HAIR!');
+        return;
+      }
+      if (text.includes('monopoly') || text.includes('lawmakers')) {
+        stageDebatePair(
+          floor,
+          text.includes('monopoly') ? 'BOARDWALK!!' : 'YOUR FAULT!',
+          text.includes('monopoly') ? 'NEVER SPEAK TO ME!' : 'NO YOURS!'
+        );
+        return;
+      }
+      if (text.includes('mortgage')) {
+        floor.slice(0, 2).forEach((s, idx) => {
+          s.state = 'freakout';
+          s.stateTimer = 2500;
+          s.tx = clampFloor(s.x + (idx === 0 ? -0.3 : 0.3), 0.66);
+          s.tz = s.z;
+          s.bubble = idx === 0 ? '7% APR?!' : '*hyperventilating*';
+          s.bubbleTimer = 2300;
+        });
+        return;
+      }
+      if (text.includes('close their eyes and hallucinate') || text.includes('sit under a tree')) {
+        floor.slice(0, 3).forEach((s, idx) => {
+          s.state = 'existential';
+          s.stateTimer = 3200;
+          s.bubble = text.includes('tree') ? (idx === 0 ? 'ommm...' : 'cool.') : 'zzz...';
+          s.bubbleTimer = 2800;
+        });
+        return;
+      }
+      if (text.includes('wifi password') || text.includes('scroll past the fine print') || text.includes('shitposting')) {
+        const tag = text.includes('wifi') ? 'WIFI PASS?' : (text.includes('fine print') ? '[ AGREE ]' : 'POSTED.');
+        floor.slice(0, 3).forEach((s) => {
+          s.state = 'phone';
+          s.stateTimer = 3000;
+          s.bubble = tag;
+          s.bubbleTimer = 2400;
+        });
+        return;
+      }
+      if (text.includes('species is called')) {
+        stageDebatePair(floor, 'HOMO WHAT?!', 'IT MEANS HUMAN!');
+        return;
+      }
+      if (text.includes('cincinnati zoo')) {
+        floor.slice(0, 2).forEach((s, idx) => {
+          s.state = 'existential';
+          s.stateTimer = 3000;
+          s.bubble = idx === 0 ? '2016...' : 'RIP';
+          s.bubbleTimer = 2600;
+        });
+        return;
+      }
+      if (text.includes('hijinks')) {
+        floor.forEach((s) => {
+          s.state = 'freakout';
+          s.stateTimer = 2400;
+          s.tx = clampFloor((Math.random() - 0.5) * 1.25, 0.66);
+          s.tz = clampFloor((Math.random() - 0.5) * 0.85, 0.48);
+          s.bubble = 'HIJINKS!';
+          s.bubbleTimer = 2100;
+        });
         return;
       }
 
