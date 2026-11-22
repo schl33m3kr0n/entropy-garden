@@ -561,7 +561,7 @@
     let tvEventActive = 0;
     let tvEventKind = '';
     let tvShapeTime = 0;
-    const TV_SCENE_COUNT = 35;
+    const TV_SCENE_COUNT = 36;
     let tvSceneBag = shuffleCopy(Array.from({ length: TV_SCENE_COUNT }, (_, i) => i));
     let tvSceneIndex = tvSceneBag.pop();
     function nextTvScene() {
@@ -1149,6 +1149,9 @@
           s.bubbleTimer = 2600;
         });
         return;
+      }
+      if (text.includes('cartoon characters')) {
+        tvSceneIndex = 35;
       }
       if (text.includes('hijinks')) {
         floor.forEach((s) => {
@@ -2519,7 +2522,7 @@
         const sq = m * 0.18;
         ctx.fillRect(-sq * 0.5, -sq * 0.5, sq, sq);
         ctx.restore();
-      } else {
+      } else if (tvSceneIndex === 34) {
         // Scene 34: Retro 7-bar solid SMPTE broadcast color bars
         const colors = ['#f5f0dc', '#f0c800', '#00d8ff', '#39ff14', '#ff2a6d', '#e53a33', '#1877c9'];
         const bw = w / colors.length;
@@ -2528,6 +2531,56 @@
           ctx.fillStyle = colors[i];
           ctx.fillRect(-w * 0.5 + i * bw, -h * 0.46 + wave, bw + 0.5, h * 0.92);
         }
+      } else {
+        // Scene 35: Jumping yellow square & pink 5-pointed star (SpongeBob & Patrick)
+        const m = Math.min(w, h);
+        const floorY = h * 0.34;
+        const jumpH = h * 0.34;
+
+        // Yellow square on the left
+        const sqPhase = t * 5.2;
+        const sqBounce = Math.abs(Math.sin(sqPhase));
+        const sqStretch = 1 + (sqBounce - 0.35) * 0.16;
+        const sqSquash = 1 / sqStretch;
+        const sqSize = m * 0.38;
+        const sqX = -w * 0.21;
+        const sqY = floorY - sqBounce * jumpH - (sqSize * sqStretch) * 0.5;
+
+        ctx.save();
+        ctx.translate(sqX, sqY);
+        ctx.rotate(Math.sin(sqPhase * 0.5) * 0.08 * sqBounce);
+        ctx.scale(sqSquash, sqStretch);
+        ctx.fillStyle = '#f7d800';
+        ctx.fillRect(-sqSize * 0.5, -sqSize * 0.5, sqSize, sqSize);
+        ctx.restore();
+
+        // Pink 5-pointed star on the right
+        const stPhase = t * 5.2 - 0.75;
+        const stBounce = Math.abs(Math.sin(stPhase));
+        const stStretch = 1 + (stBounce - 0.35) * 0.16;
+        const stSquash = 1 / stStretch;
+        const outerR = m * 0.25;
+        const innerR = outerR * 0.46;
+        const stX = w * 0.21;
+        const stY = floorY - stBounce * jumpH - (outerR * stStretch) * 0.82;
+
+        ctx.save();
+        ctx.translate(stX, stY);
+        ctx.rotate(Math.sin(stPhase * 0.5) * -0.10 * stBounce);
+        ctx.scale(stSquash, stStretch);
+        ctx.fillStyle = '#ff6699';
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 === 0 ? outerR : innerR;
+          const a = -Math.PI * 0.5 + (i * Math.PI) / 5;
+          const px = Math.cos(a) * r;
+          const py = Math.sin(a) * r;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
       }
 
       ctx.restore();
