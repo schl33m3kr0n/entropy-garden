@@ -338,6 +338,60 @@
       "the homo sapiens exhibit: watch humans add to an exhaustive list of reasons we don't reply to their texts",
       "the homo sapiens exhibit: watch humans hyperventilate at the mention of a mortgage",
       "the homo sapiens exhibit: watch humans scroll past the fine print to hit ‘agree’",
+      "the homo sapiens exhibit: watch people complain about the weather a little bit too much",
+      "the homo sapiens exhibit: watch people get awkward around their crush",
+      "the homo sapiens exhibit: watch people forget why they went to a different room",
+      "the homo sapiens exhibit: watch people put anything in their mouth for the right price",
+      "the homo sapiens exhibit: watch people choose small hills to die on",
+      "the homo sapiens exhibit: watch people realize how much they actually signed up for on an RV trip",
+      "the homo sapiens exhibit: watch people laugh at people hurting themselves on the glowing rectangles in both portrait and landscape mode",
+      "the homo sapiens exhibit: watch people build procedurally generated worlds as an excuse for not going outside",
+      "the homo sapiens exhibit: watch humans ruin a movie with terrible sequels",
+      "the homo sapiens exhibit: watch people install a v8 engine on a shopping cart",
+      "the homo sapiens exhibit: watch people look in the mirror and think about their life decisions after smoking a couple bowls",
+      "the homo sapiens exhibit: watch people praise the sun for thousands of years and suddenly start asking too many pointed questions",
+      "the homo sapiens exhibit: watch humans industrialize and face the consequences",
+      "the homo sapiens exhibit: watch humans workshop their profanity after losing a bet",
+      "the homo sapiens exhibit: watch people do more in their virtual house than what they ever do in their real house",
+      "the homo sapiens exhibit: watch people send a reel to the friend that already sent them the same one",
+      "the homo sapiens exhibit: watch humans shitpost while they shit",
+      "the homo sapiens exhibit: watch people listen to songs about killing people and doing drugs while they drive to their 9 to 5",
+      "the homo sapiens exhibit: watch people predict Armageddon every other year",
+      "the homo sapiens exhibit: watch interpreters throw up gang signs and try to pass it off as ASL",
+      "the homo sapiens exhibit: watch democrats praise satan and dance on newborn babies",
+      "the homo sapiens exhibit: watch republicans cry when you mention the OJ verdict",
+      "the homo sapiens exhibit: watch democrats bring sharia law to the states",
+      "the homo sapiens exhibit: watch republicans launch another crusade",
+      "the homo sapiens exhibit: watch democrats and republicans go silent about some rich dude with an island or whatever",
+      "the homo sapiens exhibit: watch democrats choose a literal jackass as their mascot and run with it for almost 2 centuries",
+      "the homo sapiens exhibit: watch bipartisan confusion occur whenever the great switch comes up",
+      "the homo sapiens exhibit: watch republicans, represented by an elephant, not address the elephant in the room",
+      "the homo sapiens exhibit: watch democrats study their little red books",
+      "the homo sapiens exhibit: watch republicans pretend they've read the bible",
+      "the homo sapiens exhibit: watch republicans get uncomfortable around gender identity and still watch the latest transformers movie",
+      "the homo sapiens exhibit: watch people say a lot by saying very little",
+      "the homo sapiens exhibit: watch people say a lot while saying very little",
+      "the homo sapiens exhibit: watch people blame themselves for tragedies when they should be blaming the demiurge",
+      "the homo sapiens exhibit: watch people live their truth... really badly",
+      "the homo sapiens exhibit: watch republicans make a citizen's arrest at thanksgiving because their in-law fit the description",
+      "the homo sapiens exhibit: watch people write about watching people do stuff",
+      "the homo sapiens exhibit: watch people make shitposts about a guy complaining about bad copper",
+      "the homo sapiens exhibit: watch people get uncomfortably self-aware of the way they talk",
+    ];
+
+    const EXHIBIT_COMMENT_SEQUENCES = [
+      [
+        "the homo sapiens exhibit: watch democrats try to bubble wrap the entire country",
+        "the homo sapiens exhibit: watch republicans try to pop them",
+      ],
+      [
+        "the homo sapiens exhibit: watch democrats try to use a safety net",
+        "the homo sapiens exhibit: watch republicans use it to catch endangered fish",
+      ],
+      [
+        "the homo sapiens exhibit: watch democrats try to use a safety net",
+        "the homo sapiens exhibit: watch republicans convince themselves it would trickle down naturally",
+      ],
     ];
 
     const TELEMETRY_READOUTS = [
@@ -370,6 +424,7 @@
     let lastComment = '';
     let commentBag = [];
     let commentTimer = 0;
+    let activeCommentSequence = null;
     let lastTelemetry = null;
     let telemetryBag = [];
     let tapWarningTimer = 0;
@@ -401,19 +456,40 @@
     }
 
     function pickComment() {
-      if (!EXHIBIT_COMMENTS.length) return '';
+      if (activeCommentSequence) {
+        const line = activeCommentSequence.lines[activeCommentSequence.index++];
+        if (activeCommentSequence.index >= activeCommentSequence.lines.length) {
+          activeCommentSequence = null;
+        }
+        lastComment = line;
+        return line;
+      }
+      if (!EXHIBIT_COMMENTS.length && !EXHIBIT_COMMENT_SEQUENCES.length) return '';
       if (!commentBag.length) {
-        commentBag = shuffleCopy(EXHIBIT_COMMENTS);
+        const entries = [
+          ...EXHIBIT_COMMENTS.map((text) => ({ kind: 'line', text })),
+          ...EXHIBIT_COMMENT_SEQUENCES.map((lines) => ({ kind: 'seq', lines })),
+        ];
+        commentBag = shuffleCopy(entries);
         // Prevent back-to-back repeat across bag boundary (pop pulls from end)
-        if (commentBag.length > 1 && commentBag[commentBag.length - 1] === lastComment) {
+        if (
+          commentBag.length > 1 &&
+          commentBag[commentBag.length - 1].kind === 'line' &&
+          commentBag[commentBag.length - 1].text === lastComment
+        ) {
           const swapIdx = Math.floor(Math.random() * (commentBag.length - 1));
           const lastIdx = commentBag.length - 1;
           [commentBag[swapIdx], commentBag[lastIdx]] = [commentBag[lastIdx], commentBag[swapIdx]];
         }
       }
       const next = commentBag.pop();
-      lastComment = next;
-      return next;
+      if (next.kind === 'seq') {
+        activeCommentSequence = { lines: next.lines, index: 1 };
+        lastComment = next.lines[0];
+        return next.lines[0];
+      }
+      lastComment = next.text;
+      return next.text;
     }
 
     function showExhibitComment(forced) {
@@ -430,9 +506,10 @@
     }
 
     function scheduleExhibitComment() {
+      const inSequence = Boolean(activeCommentSequence);
       const wait = prefersReducedMotion()
-        ? 13000 + Math.random() * 7000
-        : 6500 + Math.random() * 7500;
+        ? (inSequence ? 7000 : 13000) + Math.random() * (inSequence ? 4000 : 7000)
+        : (inSequence ? 4200 : 6500) + Math.random() * (inSequence ? 2400 : 7500);
       globalThis.setTimeout?.(() => {
         showExhibitComment();
         scheduleExhibitComment();
