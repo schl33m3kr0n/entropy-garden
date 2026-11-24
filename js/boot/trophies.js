@@ -20,6 +20,7 @@
         { id: 'genesis_gate', title: 'Genesis Gate', desc: 'Vault genesis reel opened.' },
         { id: 'vault_sun', title: 'Solar Uncapped', desc: 'The sun played in the vault.' },
         { id: 'avid_reader', title: 'Avid Reader', desc: 'Every timeline in the archive, retrieved.' },
+        { id: 'sixteen_bit_buddha', title: '16-Bit Buddha', desc: 'Twelve hours of unbroken nothing in the void.' },
     ];
 
     const ALT_HISTORY_SEEN_KEY = 'entropy-garden-alt-history-seen-v1';

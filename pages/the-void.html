@@ -195,6 +195,50 @@
     }
     .garden-link-sub.is-visible { opacity: 1; }
 
+    .mask-icon {
+      display: inline-block;
+      flex-shrink: 0;
+      background-color: var(--neon-green);
+      mask-size: contain;
+      -webkit-mask-size: contain;
+      mask-repeat: no-repeat;
+      -webkit-mask-repeat: no-repeat;
+      mask-position: center;
+      -webkit-mask-position: center;
+    }
+
+    .mask-icon--trophy {
+      mask-image: url('../assets/icons/trophy.svg');
+      -webkit-mask-image: url('../assets/icons/trophy.svg');
+    }
+
+    .trophy-unlock-flash {
+      position: fixed;
+      top: 16%;
+      left: 50%;
+      z-index: 1000001;
+      pointer-events: none;
+      transform: translateX(-50%);
+      animation: trophyUnlockFlash 1.35s ease forwards;
+    }
+
+    .trophy-unlock-flash-icon.mask-icon {
+      width: 72px;
+      height: 72px;
+      display: block;
+    }
+
+    @keyframes trophyUnlockFlash {
+      0% { opacity: 0; transform: translateX(-50%) scale(0.65); }
+      10% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+      20% { opacity: 0.12; transform: translateX(-50%) scale(1); }
+      30% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+      40% { opacity: 0.12; transform: translateX(-50%) scale(1); }
+      50% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+      60% { opacity: 0; transform: translateX(-50%) scale(0.95); }
+      100% { opacity: 0; transform: translateX(-50%) scale(0.95); visibility: hidden; }
+    }
+
   </style>
 </head>
 <body>
@@ -225,6 +269,7 @@
       <span class="garden-link-sub" id="garden-link-sub" aria-live="polite"></span>
     </div>
   </main>
+  <script src="../js/boot/trophies.js"></script>
   <script>
     const RETURN_DENY_RANDOM = [
       "you’re not getting away that easily",
@@ -932,12 +977,99 @@
 
     let lastVoidComment = '';
     let voidCommentTimer = 0;
+    let voidCommentCycleTimer = 0;
+    let voidCommentLocked = false;
     let denySubTimer = 0;
     let lastRandomDeny = '';
     let activeDenySequence = null;
     let activeWelcomeSequence = null;
     const gardenLink = document.getElementById('garden-link');
     const gardenLinkSub = document.getElementById('garden-link-sub');
+
+    const MIN_MS = 60 * 1000;
+    const HOUR_MS = 60 * MIN_MS;
+    const VOID_WAIT_MILESTONES = [
+      { atMs: 1 * MIN_MS, text: "1 minute... beginner's luck" },
+      { atMs: 2 * MIN_MS, text: "2 minutes... not bad" },
+      { atMs: 3 * MIN_MS, text: "3 minutes... you did nothing for the length of an average song" },
+      { atMs: 4 * MIN_MS, text: "4 minutes... a comfortable meditation session" },
+      { atMs: 5 * MIN_MS, text: "5 minutes... this is starting to get serious" },
+      { atMs: 6 * MIN_MS, text: "6 minutes... wow, you're a pro" },
+      { atMs: 7 * MIN_MS, text: "7 minutes... now someone's showing off" },
+      { atMs: 8 * MIN_MS, text: "8 minutes... do you do this often?" },
+      { atMs: 9 * MIN_MS, text: "9 minutes... look out guys, we got a buddha in the building" },
+      { atMs: 10 * MIN_MS, text: "10 minutes... you've reached enlightenment. you can stop now" },
+      { atMs: 30 * MIN_MS, text: "30 minutes... you didn't stop, now you're trapped here" },
+      { atMs: 1 * HOUR_MS, text: "1 hour... seriously bro, the commitment to the bit is getting concerning" },
+      { atMs: 2 * HOUR_MS, text: "2 hours... bro, are you asleep?" },
+      { atMs: 3 * HOUR_MS, text: "3 hours... hallucinate anything yet?" },
+      { atMs: 4 * HOUR_MS, text: "4 hours... committed to the bit... but at what cost?" },
+      { atMs: 5 * HOUR_MS, text: "5 hours... at least you're not doomscrolling, i guess" },
+      { atMs: 6 * HOUR_MS, text: "6 hours... patience is a virtue, but only if there's something to look forward to" },
+      { atMs: 7 * HOUR_MS, text: "7 hours... you could've slept this entire time. that would've been more helpful than whatever you're trying to prove" },
+      { atMs: 8 * HOUR_MS, text: "8 hours... did you forget to turn off the computer?" },
+      { atMs: 9 * HOUR_MS, text: "9 hours... it's okay if you did, it's just that it might make everything slower" },
+      { atMs: 10 * HOUR_MS, text: "10 hours... silly question, but are you dead? you don't have to answer if you are" },
+      { atMs: 11 * HOUR_MS, text: "11 hours... now it's just getting awkward" },
+      {
+        atMs: 12 * HOUR_MS,
+        text: "12 hours... i think it's about time we go our separate ways",
+        trophy: 'sixteen_bit_buddha',
+        redirect: '../index.html',
+      },
+    ];
+    const voidEnteredAt = Date.now();
+    let nextVoidMilestoneIdx = 0;
+
+    function awardVoidTrophy(trophyId) {
+      if (typeof globalThis.unlockTrophy === 'function') {
+        globalThis.unlockTrophy(trophyId);
+        return;
+      }
+      try {
+        const key = 'entropy-garden-trophies-v1';
+        const raw = localStorage.getItem(key);
+        const arr = raw ? JSON.parse(raw) : [];
+        const set = new Set(Array.isArray(arr) ? arr : []);
+        if (!set.has(trophyId)) {
+          set.add(trophyId);
+          localStorage.setItem(key, JSON.stringify([...set]));
+        }
+      } catch {
+        /* private mode / quota */
+      }
+    }
+
+    function checkVoidWaitMilestones() {
+      if (nextVoidMilestoneIdx >= VOID_WAIT_MILESTONES.length) return;
+      const elapsedMs = Date.now() - voidEnteredAt;
+      let triggered = null;
+      while (
+        nextVoidMilestoneIdx < VOID_WAIT_MILESTONES.length &&
+        elapsedMs >= VOID_WAIT_MILESTONES[nextVoidMilestoneIdx].atMs
+      ) {
+        triggered = VOID_WAIT_MILESTONES[nextVoidMilestoneIdx];
+        nextVoidMilestoneIdx += 1;
+      }
+      if (!triggered) return;
+
+      activeWelcomeSequence = null;
+      globalThis.clearTimeout?.(voidCommentCycleTimer);
+      showVoidComment(triggered.text);
+
+      if (triggered.trophy) {
+        awardVoidTrophy(triggered.trophy);
+      }
+
+      if (triggered.redirect) {
+        voidCommentLocked = true;
+        globalThis.setTimeout?.(() => {
+          window.location.href = triggered.redirect;
+        }, 4500);
+      } else {
+        scheduleVoidComment(14000);
+      }
+    }
 
     function nextVoidWelcome() {
       if (activeWelcomeSequence) {
@@ -964,7 +1096,7 @@
     }
 
     function showVoidComment(forced) {
-      if (!voidCommentEl) return;
+      if (!voidCommentEl || (voidCommentLocked && !forced)) return;
       const next = forced || nextVoidWelcome();
       if (!next) return;
       lastVoidComment = next;
@@ -976,16 +1108,21 @@
       }, 320) || 0;
     }
 
-    function scheduleVoidComment() {
+    function scheduleVoidComment(overrideWaitMs) {
+      if (voidCommentLocked) return;
       // Keep multi-beat bits tighter so the punchline still lands.
       const inSequence = Boolean(activeWelcomeSequence);
-      const wait = prefersReducedMotion()
-        ? (inSequence ? 7000 : 14000) + Math.random() * (inSequence ? 4000 : 8000)
-        : (inSequence ? 4200 : 7000) + Math.random() * (inSequence ? 2800 : 9000);
-      globalThis.setTimeout?.(() => {
+      const wait = typeof overrideWaitMs === 'number'
+        ? overrideWaitMs
+        : prefersReducedMotion()
+          ? (inSequence ? 7000 : 14000) + Math.random() * (inSequence ? 4000 : 8000)
+          : (inSequence ? 4200 : 7000) + Math.random() * (inSequence ? 2800 : 9000);
+      globalThis.clearTimeout?.(voidCommentCycleTimer);
+      voidCommentCycleTimer = globalThis.setTimeout?.(() => {
+        if (voidCommentLocked) return;
         showVoidComment();
         scheduleVoidComment();
-      }, wait);
+      }, wait) || 0;
     }
 
     function nextReturnDenyMessage() {
@@ -1279,6 +1416,11 @@
     });
     showVoidComment();
     scheduleVoidComment();
+    globalThis.setInterval?.(checkVoidWaitMilestones, 1000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) checkVoidWaitMilestones();
+    });
+    window.addEventListener('focus', checkVoidWaitMilestones);
   </script>
 </body>
 </html>
