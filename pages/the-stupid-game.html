@@ -458,12 +458,12 @@
       const COLOR_BY_ID = Object.fromEntries(COLORS.map((c) => [c.id, c]));
 
       const PERSONAS = [
-        { name: 'ALICE', role: 'Aggressive', style: 'aggressive' },
-        { name: 'BOB', role: 'Economist', style: 'economist' },
+        { name: 'ALPHA', role: 'Aggressive', style: 'aggressive' },
+        { name: 'BRAVO', role: 'Economist', style: 'economist' },
         { name: 'CHARLIE', role: 'Detective', style: 'detective' },
-        { name: 'DAVID', role: 'Opportunist', style: 'opportunist' },
-        { name: 'EVE', role: 'Strategist', style: 'political' },
-        { name: 'FRANK', role: 'Chaotic', style: 'chaotic' },
+        { name: 'DELTA', role: 'Opportunist', style: 'opportunist' },
+        { name: 'ECHO', role: 'Strategist', style: 'political' },
+        { name: 'FOXTROT', role: 'Chaotic', style: 'chaotic' },
       ];
 
       const STARTS = [
@@ -1011,7 +1011,7 @@
         const target = state.players[state.selectedId];
         const canAct = Boolean(me && me.alive && state.phase === 'orders');
         if (!me) {
-          targetBarEl.innerHTML = `<span>6-AI Simulation Mode (Alice, Bob, Charlie, David, Eve, Frank)</span>`;
+          targetBarEl.innerHTML = `<span>6-AI Simulation Mode (Alpha, Bravo, Charlie, Delta, Echo, Foxtrot)</span>`;
         } else if (!target || !target.alive || target.isHuman) {
           targetBarEl.innerHTML = `<span>Select an opponent above</span>`;
         } else if (!target.revealedPublic && !target.knownBy.has(me.id)) {
