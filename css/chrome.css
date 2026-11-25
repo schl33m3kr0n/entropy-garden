@@ -1301,6 +1301,11 @@ body.corrupted .mask-icon {
     -webkit-mask-image: url('../assets/icons/homo-sapiens.png');
 }
 
+.mask-icon--stupid-game {
+    mask-image: url('../assets/icons/stupid-game.svg');
+    -webkit-mask-image: url('../assets/icons/stupid-game.svg');
+}
+
 .mask-icon--trophy {
     mask-image: url('../assets/img/ui/eyeball-wings.svg');
     -webkit-mask-image: url('../assets/img/ui/eyeball-wings.svg');
