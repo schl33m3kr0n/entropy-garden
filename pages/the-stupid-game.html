@@ -1190,6 +1190,7 @@
           alive: true,
           revealedPublic: false,
           knownBy: new Set([idx]), // player IDs who know this player's color
+          ruledOutColors: new Set(), // colors proven not to belong to this player
           ruledOutByHuman: new Set(),
           bounty: 0,
           eliminatedRound: null,
@@ -1301,12 +1302,10 @@
         state.phase = 'orders';
         resetHumanOrderDefaults();
         showToast(`Die rolled ${roll}: +${roll} CR deposited to all surviving Checks.`);
-        renderAll();
 
-        // In 6-AI Simulation mode, AI can also trigger trials/resurrections before orders resolve
-        if (gameMode === 'sim') {
-          maybeRunAiCommunalPotPolitics();
-        }
+        // AIs may invoke Communal Pot trials/resurrections when the pot is funded
+        maybeRunAiCommunalPotPolitics();
+        renderAll();
       }
 
       // --- AI DECISION ENGINE ---
@@ -1346,45 +1345,58 @@
           return { guessTarget: null, guessColorId: null, destCol: ai.col, destRow: ai.row, killTarget: null };
         }
 
-        // 1. Color Guess: choose an unknown survivor
-        const unknownTargets = others.filter((p) => !ai.knownBy && !p.knownBy.has(ai.id) && !p.revealedPublic);
+        // 1. Color Guess: prefer nearest or richest unrevealed survivor, filtering out ruled-out colors
         const unguessed = others.filter((p) => !p.knownBy.has(ai.id) && !p.revealedPublic);
         let guessTarget = null;
         let guessColorId = null;
 
         if (unguessed.length) {
-          guessTarget = unguessed[Math.floor(Math.random() * unguessed.length)];
+          unguessed.sort((a, b) => manhattan(ai, a) - manhattan(ai, b));
+          guessTarget = ai.style === 'chaotic'
+            ? unguessed[Math.floor(Math.random() * unguessed.length)]
+            : unguessed[0];
+
           const knownColors = new Set(
             state.players
-              .filter((p) => p.knownBy.has(ai.id) || p.revealedPublic)
+              .filter((p) => p.id === ai.id || p.knownBy.has(ai.id) || p.revealedPublic || !p.alive)
               .map((p) => p.colorId),
           );
-          const pool = COLORS.filter((c) => !knownColors.has(c.id));
-          const pickPool = pool.length ? pool : COLORS;
+          const pool = COLORS.filter(
+            (c) => !knownColors.has(c.id) && !guessTarget.ruledOutColors.has(c.id),
+          );
+          const fallbackPool = COLORS.filter((c) => !knownColors.has(c.id));
+          const pickPool = pool.length ? pool : fallbackPool.length ? fallbackPool : COLORS;
           guessColorId = pickPool[Math.floor(Math.random() * pickPool.length)].id;
         }
 
         // 2. Donations / Bounties by persona
-        if (ai.style === 'political' && ai.credits >= 5 && state.communalPot >= 7 && state.communalPot < 10) {
-          const donate = Math.min(2, ai.credits - 3);
+        if (ai.style === 'political' && ai.credits >= 6 && state.communalPot >= 7 && state.communalPot < 10) {
+          const donate = Math.min(2, ai.credits - 4);
           if (donate > 0) {
             ai.credits -= donate;
             state.communalPot += donate;
             state.anonymousDonationsTotal += donate;
             addLog(`An anonymous donor contributed <strong>${donate} CR</strong> to the Communal Pot.`);
           }
-        } else if (ai.style === 'chaotic' && ai.credits >= 6 && Math.random() < 0.25) {
+        } else if (ai.style === 'chaotic' && ai.credits >= 8 && Math.random() < 0.25) {
           ai.credits -= 1;
           state.communalPot += 1;
           state.anonymousDonationsTotal += 1;
           addLog(`An anonymous donor tossed <strong>1 CR</strong> into the Communal Pot for reasons unknown.`);
+        } else if ((ai.style === 'economist' || ai.style === 'detective') && ai.credits >= 9 && Math.random() < 0.35) {
+          const richTargets = others.filter((p) => p.revealedPublic || p.credits >= 6);
+          if (richTargets.length) {
+            const bt = richTargets[Math.floor(Math.random() * richTargets.length)];
+            ai.credits -= 2;
+            bt.bounty += 2;
+            addLog(`<strong>${ai.name}</strong> placed a <strong>+2 CR bounty</strong> on <strong>${bt.name}</strong> (Bounty: <strong>${bt.bounty} CR</strong>).`);
+          }
         }
 
-        // 3. Look for identified targets (including target if guess succeeds!)
+        // 3. Look for identified targets to assassinate
         const identifiedTargets = others.filter((p) => p.knownBy.has(ai.id) || p.revealedPublic);
         let primaryTarget = null;
         if (identifiedTargets.length) {
-          // Prioritize high bounty or nearest target
           identifiedTargets.sort((a, b) => {
             const scoreA = manhattan(ai, a) - a.bounty * 1.5;
             const scoreB = manhattan(ai, b) - b.bounty * 1.5;
@@ -1400,31 +1412,26 @@
         if (primaryTarget && ai.credits >= 3) {
           const adj = adjacentCoordTo(primaryTarget.col, primaryTarget.row, ai.col, ai.row);
           const distToAdj = manhattan(ai, adj);
-          const maxMoveBudget = ai.style === 'economist'
-            ? Math.min(2, ai.credits - 3)
-            : ai.credits - 3;
+          const maxMoveBudget = ai.credits - 3;
 
           if (distToAdj <= maxMoveBudget) {
             destCol = adj.col;
             destRow = adj.row;
             killTarget = primaryTarget;
           } else if (maxMoveBudget > 0) {
-            const step = stepToward(ai.col, ai.row, adj.col, adj.row, Math.min(2, maxMoveBudget));
+            const step = stepToward(ai.col, ai.row, adj.col, adj.row, maxMoveBudget);
             destCol = step.col;
             destRow = step.row;
           }
-        } else if (ai.revealedPublic && ai.credits >= 2) {
-          // Evade if publicly revealed
-          const neighbors = [
-            { col: ai.col + 1, row: ai.row },
-            { col: ai.col - 1, row: ai.row },
-            { col: ai.col, row: ai.row + 1 },
-            { col: ai.col, row: ai.row - 1 },
-          ].filter((pt) => pt.col >= 0 && pt.col < 8 && pt.row >= 0 && pt.row < 8);
-          if (neighbors.length) {
-            const pick = neighbors[Math.floor(Math.random() * neighbors.length)];
-            destCol = pick.col;
-            destRow = pick.row;
+        } else if (guessTarget && ai.credits >= 4) {
+          // Stalk closer to the guess target so if the guess lands (now or next round), we are within striking distance!
+          const adj = adjacentCoordTo(guessTarget.col, guessTarget.row, ai.col, ai.row);
+          const distToAdj = manhattan(ai, adj);
+          const stalkBudget = Math.min(2, ai.credits - 3);
+          if (distToAdj > 0 && stalkBudget > 0) {
+            const step = stepToward(ai.col, ai.row, adj.col, adj.row, stalkBudget);
+            destCol = step.col;
+            destRow = step.row;
           }
         }
 
@@ -1495,32 +1502,38 @@
             addLog(
               `<strong>${actor.name}</strong> correctly identified <strong>${target.name}</strong> as <strong>${guessedColor.label.toUpperCase()}</strong>! Identity revealed.`,
             );
-            // If an AI just identified someone and is within range + has 3 CR, allow opportunistic kill
-            if (!actor.isHuman && !plan.killTarget) {
+            // If an AI just identified someone and can reach orthogonal adjacency + pay 3 CR, go for the kill!
+            if (!actor.isHuman && !plan.killTarget && actor.credits >= 3) {
               const adj = adjacentCoordTo(target.col, target.row, actor.col, actor.row);
               const d = manhattan(actor, adj);
-              if (d + 3 <= actor.credits && d <= 2) {
+              if (d + 3 <= actor.credits) {
                 plan.destCol = adj.col;
                 plan.destRow = adj.row;
                 plan.killTarget = target;
+              } else if (actor.credits > 3) {
+                const step = stepToward(actor.col, actor.row, adj.col, adj.row, actor.credits - 3);
+                plan.destCol = step.col;
+                plan.destRow = step.row;
               }
             }
           } else {
+            target.ruledOutColors.add(plan.guessColorId);
             if (actor.isHuman) {
               target.ruledOutByHuman.add(plan.guessColorId);
               addLog(
                 `<strong>YOU</strong> guessed <strong>${target.name}</strong> was ${guessedColor.label} — <em>incorrect</em>.`,
               );
             } else {
-              addLog(`<strong>${actor.name}</strong> submitted an incorrect color guess on <strong>${target.name}</strong>.`);
+              addLog(`<strong>${actor.name}</strong> guessed <strong>${target.name}</strong> was ${guessedColor.label} — <em>incorrect</em>.`);
             }
           }
         });
 
-        // 4. Simultaneous Movement Execution
+        // 4. Simultaneous Movement Execution (with pursuit tracking for active assassination orders)
+        // First apply non-assassin movements so assassins can intercept targets within their movement budget
         aliveAtStart.forEach((actor) => {
           const plan = plans.get(actor.id);
-          if (!plan) return;
+          if (!plan || plan.killTarget) return;
           const stepCost = manhattan(actor, { col: plan.destCol, row: plan.destRow });
           if (stepCost > 0 && stepCost <= actor.credits) {
             const fromStr = coordToStr(actor.col, actor.row);
@@ -1530,6 +1543,32 @@
             actor.row = plan.destRow;
             addLog(
               `<strong>${actor.name}</strong> moved <strong>${fromStr} → ${toStr}</strong> (<em>−${stepCost} CR</em>).`,
+            );
+          }
+        });
+
+        // Now move players with an assassination order (assassins intercept target's new position if affordable)
+        aliveAtStart.forEach((actor) => {
+          const plan = plans.get(actor.id);
+          if (!plan || !plan.killTarget) return;
+          const target = plan.killTarget;
+          if (target.alive && manhattan({ col: plan.destCol, row: plan.destRow }, target) !== 1) {
+            const adj = adjacentCoordTo(target.col, target.row, actor.col, actor.row);
+            const distToNewAdj = manhattan(actor, adj);
+            if (distToNewAdj + 3 <= actor.credits) {
+              plan.destCol = adj.col;
+              plan.destRow = adj.row;
+            }
+          }
+          const stepCost = manhattan(actor, { col: plan.destCol, row: plan.destRow });
+          if (stepCost > 0 && stepCost <= actor.credits) {
+            const fromStr = coordToStr(actor.col, actor.row);
+            const toStr = coordToStr(plan.destCol, plan.destRow);
+            actor.credits -= stepCost;
+            actor.col = plan.destCol;
+            actor.row = plan.destRow;
+            addLog(
+              `<strong>${actor.name}</strong> pursued <strong>${fromStr} → ${toStr}</strong> (<em>−${stepCost} CR</em>).`,
             );
           }
         });
@@ -1931,8 +1970,8 @@
                 : `<span style="color:rgba(0,255,0,0.7);">IDENTITY COVERT</span>`;
 
             let ruledOutHtml = '';
-            if (!isKnown && p.ruledOutByHuman.size > 0) {
-              const names = [...p.ruledOutByHuman].map((cid) => COLOR_BY_ID[cid].label).join(', ');
+            if (!isKnown && p.ruledOutColors.size > 0) {
+              const names = [...p.ruledOutColors].map((cid) => COLOR_BY_ID[cid].label).join(', ');
               ruledOutHtml = `<div class="tsg-ruled-out">Ruled out: ${names}</div>`;
             }
 
