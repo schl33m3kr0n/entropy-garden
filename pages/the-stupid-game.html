@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>The Stupid Game — Entropy Garden</title>
-  <meta name="description" content="Six players. Six secret colors. One survivor.">
   <meta name="color-scheme" content="dark">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g transform='rotate(90 50 50)'><path d='M 10 50 C 30 20, 70 20, 90 50 C 70 80, 30 80, 10 50 Z' stroke='%230f0' stroke-width='4' fill='none' stroke-linejoin='round'/><circle cx='50' cy='50' r='24' stroke='%230f0' stroke-width='1.5' fill='none'/><circle cx='50' cy='50' r='14' stroke='%230f0' stroke-width='2' fill='none'/><circle cx='50' cy='50' r='5' fill='%230f0'/></g></svg>">
   <link rel="stylesheet" href="../css/tokens.css">
@@ -22,741 +21,316 @@
 
     body {
       min-height: 100svh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
-      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 28px 12px;
       -webkit-font-smoothing: antialiased;
-      padding: 40px 14px 36px;
     }
 
     .chrome {
       position: fixed;
-      z-index: 20;
+      z-index: 10;
       font-size: 0.65rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: rgba(0, 255, 0, 0.72);
-      text-shadow: 0 0 10px rgba(0, 255, 0, 0.28);
       pointer-events: none;
       user-select: none;
     }
-
     .chrome-tl { top: max(12px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); }
     .chrome-tr { top: max(12px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); text-align: right; }
-    .chrome-bl { bottom: max(12px, env(safe-area-inset-bottom)); left: max(16px, env(safe-area-inset-left)); }
-    .chrome-br { bottom: max(12px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); text-align: right; }
-    .chrome strong { font-weight: 600; color: rgba(0, 255, 0, 0.92); }
-    .chrome .dim { color: rgba(0, 255, 0, 0.42); letter-spacing: 0.18em; }
+    .chrome strong { color: rgba(0, 255, 0, 0.92); }
+    .chrome .dim { color: rgba(0, 255, 0, 0.42); }
 
     main {
-      position: relative;
-      z-index: 3;
-      width: min(1120px, 100%);
-      margin: 0 auto;
-    }
-
-    .tsg-header {
+      width: min(460px, 96vw);
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
       gap: 10px;
-      margin-bottom: 12px;
     }
 
-    .tsg-title {
+    h1 {
       margin: 0;
-      font-size: clamp(1.15rem, 2.5vw, 1.55rem);
+      font-size: 1.15rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
       font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: #fff;
-      text-shadow: 0 0 18px rgba(0, 255, 0, 0.22);
     }
 
-    .tsg-toolbar {
+    .ticker {
+      min-height: 1.35em;
+      font-size: 0.74rem;
+      color: rgba(255, 255, 255, 0.82);
+      text-align: center;
+    }
+    .ticker strong { color: var(--neon-green, #0f0); }
+
+    /* Top HUD strip: Die + Round + Pot + New */
+    .hud-bar {
+      width: 100%;
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .tsg-btn {
-      appearance: none;
-      border: 1px solid rgba(0, 255, 0, 0.4);
-      border-radius: var(--radius-sm, 4px);
-      background: rgba(0, 16, 0, 0.65);
-      color: rgba(0, 255, 0, 0.92);
-      font-family: inherit;
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 6px 11px;
-      cursor: pointer;
-      transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
-    }
-
-    .tsg-btn:hover:not(:disabled),
-    .tsg-btn:focus-visible:not(:disabled) {
-      background: var(--neon-green, #0f0);
-      color: #050505;
-      border-color: var(--neon-green, #0f0);
-      box-shadow: 0 0 16px rgba(0, 255, 0, 0.35);
-      outline: none;
-    }
-
-    .tsg-btn:disabled {
-      opacity: 0.32;
-      cursor: not-allowed;
-    }
-
-    .tsg-btn--primary {
-      background: rgba(0, 255, 0, 0.16);
-      border-color: rgba(0, 255, 0, 0.85);
-      color: #fff;
-      padding: 8px 14px;
-      font-size: 0.72rem;
-    }
-
-    .tsg-btn--danger {
-      border-color: rgba(255, 51, 85, 0.65);
-      color: #ff6b88;
-      background: rgba(35, 0, 10, 0.65);
-    }
-    .tsg-btn--danger:hover:not(:disabled),
-    .tsg-btn--danger:focus-visible:not(:disabled) {
-      background: #ff3355;
-      border-color: #ff3355;
-      color: #050505;
-      box-shadow: 0 0 16px rgba(255, 51, 85, 0.4);
-    }
-
-    .tsg-btn--gold {
-      border-color: rgba(247, 216, 0, 0.65);
-      color: #ffe45e;
-      background: rgba(35, 26, 0, 0.65);
-    }
-    .tsg-btn--gold:hover:not(:disabled),
-    .tsg-btn--gold:focus-visible:not(:disabled) {
-      background: #f7d800;
-      border-color: #f7d800;
-      color: #050505;
-      box-shadow: 0 0 16px rgba(247, 216, 0, 0.4);
-    }
-
-    /* 3-Column Layout */
-    .tsg-layout {
-      display: grid;
-      grid-template-columns: 270px minmax(300px, 1fr) 295px;
-      gap: 12px;
-      align-items: start;
-    }
-
-    @media (max-width: 1020px) {
-      .tsg-layout {
-        grid-template-columns: 1fr 1fr;
-      }
-      .tsg-col-board {
-        grid-column: 1 / -1;
-        order: -1;
-      }
-    }
-
-    @media (max-width: 680px) {
-      .tsg-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .tsg-panel {
-      border: 1px solid rgba(0, 255, 0, 0.26);
-      border-radius: var(--radius-md, 8px);
-      background: rgba(4, 10, 4, 0.84);
-      padding: 10px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
-    }
-
-    /* Communal Pot */
-    .tsg-bank-card {
-      border: 1px solid rgba(247, 216, 0, 0.45);
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid rgba(0, 255, 0, 0.28);
       border-radius: 6px;
-      background: rgba(24, 18, 0, 0.55);
-      padding: 8px 10px;
-      margin-bottom: 10px;
+      background: rgba(0, 14, 4, 0.7);
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
     }
 
-    .tsg-bank-header {
-      display: flex;
+    .die-pill {
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
+      gap: 6px;
+      font-weight: 700;
+      color: var(--neon-green, #0f0);
     }
 
-    .tsg-bank-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
+    .die-face {
+      font-size: 1.25rem;
+      line-height: 1;
+      display: inline-block;
+      transition: transform 0.22s ease;
+    }
+    .die-face.spin { transform: rotate(180deg) scale(1.15); }
+
+    .pot-pill {
       color: #ffe45e;
       font-weight: 700;
     }
 
-    .tsg-bank-amount {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #fff;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .tsg-bank-actions {
+    /* 6 Player Checks Strip (3x2 grid) */
+    .players-grid {
+      width: 100%;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
     }
 
-    /* Compact Player Checks */
-    .tsg-checks-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .tsg-check {
-      border: 1px solid rgba(0, 255, 0, 0.24);
-      border-left: 3px solid rgba(0, 255, 0, 0.65);
+    .p-chip {
+      appearance: none;
+      border: 1px solid rgba(0, 255, 0, 0.25);
       border-radius: 5px;
-      background: rgba(8, 16, 10, 0.92);
-      padding: 7px 9px;
-      font-variant-numeric: tabular-nums;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .tsg-check.is-human {
-      border-color: rgba(0, 255, 0, 0.65);
-      border-left-color: #0f0;
-    }
-
-    .tsg-check.is-eliminated {
-      opacity: 0.42;
-      border-color: rgba(255, 51, 85, 0.35);
-      border-left-color: #ff3355;
-      background: rgba(16, 4, 8, 0.65);
-    }
-
-    .tsg-check-row {
+      background: rgba(8, 16, 10, 0.9);
+      color: #fff;
+      font-family: inherit;
+      padding: 6px 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
+      gap: 5px;
+      cursor: pointer;
+      font-size: 0.68rem;
+      font-variant-numeric: tabular-nums;
+      transition: border-color 0.15s ease, background 0.15s ease;
     }
 
-    .tsg-check-id {
+    .p-chip:hover:not(:disabled) {
+      border-color: rgba(0, 255, 0, 0.75);
+    }
+
+    .p-chip.is-selected {
+      border-color: #f7d800;
+      box-shadow: 0 0 10px rgba(247, 216, 0, 0.28);
+    }
+
+    .p-chip.is-kill-target {
+      border-color: #ff3355;
+      background: rgba(45, 6, 16, 0.75);
+    }
+
+    .p-chip.is-dead {
+      opacity: 0.32;
+      cursor: default;
+      text-decoration: line-through;
+    }
+
+    .p-left {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 5px;
       min-width: 0;
     }
 
-    .tsg-swatch {
-      width: 14px;
-      height: 14px;
+    .dot {
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1.5px solid rgba(255, 255, 255, 0.7);
-      font-size: 0.55rem;
+      border: 1.5px solid rgba(255, 255, 255, 0.75);
+      display: inline-grid;
+      place-items: center;
+      font-size: 0.5rem;
       font-weight: 700;
       flex-shrink: 0;
     }
 
-    .tsg-check-name {
-      font-size: 0.78rem;
+    .p-cr {
+      color: var(--neon-green, #0f0);
       font-weight: 700;
-      color: #fff;
-      letter-spacing: 0.05em;
     }
 
-    .tsg-check-coord {
-      font-size: 0.62rem;
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .tsg-check-right {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .tsg-bounty-tag {
-      padding: 1px 5px;
-      border-radius: 4px;
-      font-size: 0.58rem;
-      font-weight: 700;
-      color: #ffe45e;
-      background: rgba(247, 216, 0, 0.16);
-      border: 1px solid rgba(247, 216, 0, 0.45);
-    }
-
-    .tsg-check-balance {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #0f0;
-      background: rgba(0, 255, 0, 0.1);
-      border: 1px solid rgba(0, 255, 0, 0.3);
-      padding: 1px 6px;
-      border-radius: 4px;
-    }
-
-    .tsg-check.is-eliminated .tsg-check-balance {
-      color: #ff6b88;
-      border-color: rgba(255, 51, 85, 0.35);
-      background: rgba(255, 51, 85, 0.1);
-    }
-
-    /* Visual color deduction pips on each check */
-    .tsg-deduction-pips {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .tsg-pip {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      position: relative;
-    }
-    .tsg-pip.is-ruled-out {
-      opacity: 0.22;
-    }
-    .tsg-pip.is-ruled-out::after {
-      content: '';
-      position: absolute;
-      left: -1px;
-      right: -1px;
-      top: 3px;
-      height: 1.5px;
-      background: #ff3355;
-      transform: rotate(-45deg);
-    }
-
-    /* Center Column: Die Bar + 8x8 Board */
-    .tsg-round-bar {
+    /* Inline Popover Bar: Guess Color or Kill */
+    .target-bar {
+      width: 100%;
+      min-height: 36px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 8px 10px;
-      margin-bottom: 10px;
-      border: 1px solid rgba(0, 255, 0, 0.28);
+      gap: 8px;
+      padding: 5px 10px;
+      border: 1px solid rgba(0, 255, 0, 0.22);
       border-radius: 6px;
-      background: rgba(0, 18, 4, 0.72);
+      background: rgba(4, 10, 5, 0.85);
+      font-size: 0.68rem;
     }
 
-    .tsg-die-box {
+    .swatches {
       display: flex;
+      gap: 6px;
       align-items: center;
-      gap: 10px;
     }
 
-    .tsg-die-cube {
-      width: 38px;
-      height: 38px;
-      border-radius: 7px;
-      border: 1.5px solid var(--neon-green, #0f0);
-      background: #050c05;
-      color: var(--neon-green, #0f0);
-      display: grid;
-      place-items: center;
-      font-size: 1.45rem;
-      box-shadow: 0 0 14px rgba(0, 255, 0, 0.22);
-      user-select: none;
-      transition: transform 0.25s ease;
-    }
-    .tsg-die-cube.is-rolling {
-      transform: rotate(180deg) scale(1.12);
-    }
-
-    .tsg-round-num {
-      font-size: 0.76rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      color: #fff;
-    }
-
-    .tsg-round-sub {
-      font-size: 0.62rem;
-      color: rgba(0, 255, 0, 0.8);
-    }
-
-    .tsg-board-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-    }
-
-    .tsg-board-grid {
-      display: grid;
-      grid-template-columns: 18px repeat(8, 1fr);
-      gap: 4px;
-      width: min(100%, 450px);
-      aspect-ratio: 9 / 8.6;
-      user-select: none;
-    }
-
-    .tsg-axis-label {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.62rem;
-      font-weight: 700;
-      color: rgba(0, 255, 0, 0.55);
-    }
-
-    .tsg-cell {
+    .swatch-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      padding: 0;
       position: relative;
-      border: 1px solid rgba(0, 255, 0, 0.2);
-      border-radius: 5px;
+    }
+    .swatch-btn.is-active {
+      border-color: #0f0;
+      box-shadow: 0 0 8px #0f0;
+      transform: scale(1.12);
+    }
+    .swatch-btn.is-out {
+      opacity: 0.2;
+    }
+
+    /* 8x8 Board */
+    .board {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 3px;
+      aspect-ratio: 1;
+      user-select: none;
+    }
+
+    .cell {
+      position: relative;
+      border: 1px solid rgba(0, 255, 0, 0.18);
+      border-radius: 4px;
       background: rgba(6, 14, 8, 0.85);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      min-height: 36px;
-      transition: border-color 0.14s ease, background 0.14s ease;
     }
+    .cell:hover { border-color: rgba(0, 255, 0, 0.7); }
+    .cell.is-you { border-color: #0f0; }
+    .cell.is-dest { border-color: #f7d800; background: rgba(55, 48, 0, 0.55); }
+    .cell.is-adj { border-color: rgba(255, 51, 85, 0.6); }
 
-    .tsg-cell:hover {
-      border-color: rgba(0, 255, 0, 0.75);
-      background: rgba(0, 40, 12, 0.75);
-    }
-
-    .tsg-cell.is-own-pos {
-      border-color: rgba(0, 255, 0, 0.85);
-      box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.22);
-    }
-
-    .tsg-cell.is-planned-dest {
-      border-color: #f7d800;
-      background: rgba(55, 48, 0, 0.65);
-      box-shadow: 0 0 10px rgba(247, 216, 0, 0.32);
-    }
-
-    .tsg-cell.is-kill-range {
-      border-color: rgba(255, 51, 85, 0.75);
-      background: rgba(45, 6, 16, 0.52);
-    }
-
-    .tsg-cell-coord {
+    .coord {
       position: absolute;
-      top: 2px;
+      top: 1px;
       left: 3px;
-      font-size: 0.46rem;
-      color: rgba(255, 255, 255, 0.25);
+      font-size: 0.44rem;
+      color: rgba(255, 255, 255, 0.22);
       pointer-events: none;
     }
 
-    .tsg-cell-cost {
-      position: absolute;
-      bottom: 1px;
-      right: 3px;
-      font-size: 0.48rem;
-      color: rgba(0, 255, 0, 0.6);
-      pointer-events: none;
-    }
-
-    .tsg-pieces-stack {
+    .pieces {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
       gap: 2px;
-      z-index: 2;
-    }
-
-    .tsg-piece {
-      width: 21px;
-      height: 21px;
-      border-radius: 50%;
-      display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.56rem;
-      font-weight: 800;
-      border: 2px solid rgba(255, 255, 255, 0.88);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
-      position: relative;
     }
 
-    .tsg-piece.is-you::after {
-      content: '';
-      position: absolute;
-      inset: -4px;
+    .piece {
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
-      border: 1.5px dashed #0f0;
+      border: 1.5px solid #fff;
+      display: grid;
+      place-items: center;
+      font-size: 0.54rem;
+      font-weight: 800;
+    }
+    .piece.mine {
+      box-shadow: 0 0 0 2px #000, 0 0 0 3.5px #0f0;
     }
 
-    /* Right Column: Minimal Action Cards */
-    .tsg-card {
-      border: 1px solid rgba(0, 255, 0, 0.2);
-      border-radius: 6px;
-      background: rgba(0, 12, 4, 0.55);
-      padding: 8px 9px;
-      margin-bottom: 8px;
-    }
-
-    .tsg-card-head {
+    /* Bottom Action Bar */
+    .actions-bar {
+      width: 100%;
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
       justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 0.64rem;
-      font-weight: 700;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(0, 255, 0, 0.4);
+      border-radius: 4px;
+      background: rgba(0, 16, 0, 0.65);
+      color: rgba(0, 255, 0, 0.92);
+      font-family: inherit;
+      font-size: 0.66rem;
+      font-weight: 600;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    .tsg-cost-tag {
-      color: var(--neon-green, #0f0);
-      font-size: 0.62rem;
-    }
-
-    .tsg-select {
-      width: 100%;
-      background: #040a05;
-      color: #fff;
-      border: 1px solid rgba(0, 255, 0, 0.38);
-      border-radius: 4px;
-      padding: 6px 8px;
-      font-family: inherit;
-      font-size: 0.68rem;
-    }
-
-    /* Color Swatch Picker for Guessing */
-    .tsg-swatch-picker {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      margin-top: 7px;
-    }
-
-    .tsg-pick-dot {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.35);
+      padding: 7px 10px;
       cursor: pointer;
-      position: relative;
-      transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
     }
-
-    .tsg-pick-dot:hover:not(:disabled) {
-      transform: scale(1.12);
+    .btn:hover:not(:disabled) {
+      background: var(--neon-green, #0f0);
+      color: #050505;
     }
-
-    .tsg-pick-dot.is-selected {
+    .btn:disabled {
+      opacity: 0.28;
+      cursor: not-allowed;
+    }
+    .btn--main {
+      flex: 1;
+      background: rgba(0, 255, 0, 0.18);
       border-color: #0f0;
-      box-shadow: 0 0 0 2px #000, 0 0 12px #0f0;
-      transform: scale(1.12);
+      color: #fff;
+      font-size: 0.72rem;
     }
-
-    .tsg-pick-dot.is-eliminated-color {
-      opacity: 0.25;
+    .btn--kill {
+      border-color: #ff3355;
+      color: #ff6b88;
+      background: rgba(40, 0, 12, 0.65);
     }
-
-    .tsg-pick-dot.is-eliminated-color::after {
-      content: '×';
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #ff3355;
-    }
-
-    .tsg-row {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .tsg-toast {
-      min-height: 1.2em;
-      margin: 2px 0 6px;
-      font-size: 0.63rem;
-      color: #ffe45e;
-      text-align: center;
-    }
-
-    /* Compact Feed */
-    .tsg-log {
-      max-height: 155px;
-      overflow-y: auto;
-      border: 1px solid rgba(0, 255, 0, 0.18);
-      border-radius: 6px;
-      background: rgba(0, 6, 2, 0.9);
-      padding: 6px 8px;
-      font-size: 0.62rem;
-      line-height: 1.4;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .tsg-log-entry {
-      border-bottom: 1px dashed rgba(0, 255, 0, 0.1);
-      padding-bottom: 3px;
-      color: rgba(255, 255, 255, 0.82);
-    }
-    .tsg-log-entry strong { color: var(--neon-green, #0f0); }
-    .tsg-log-entry.is-kill { color: #ff8098; }
-    .tsg-log-entry.is-trial { color: #ffe45e; }
-    .tsg-log-entry.is-resurrect { color: #63e6ff; }
-
-    /* Modal */
-    .tsg-modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: rgba(0, 0, 0, 0.84);
-      place-items: center;
-      padding: 16px;
-    }
-    .tsg-modal-backdrop.is-open { display: grid; }
-
-    .tsg-modal-card {
-      width: min(460px, 95vw);
-      max-height: 88svh;
-      overflow-y: auto;
-      border: 1px solid var(--neon-green, #0f0);
-      border-left: 4px solid var(--neon-green, #0f0);
-      border-radius: 8px;
-      background: #050b06;
-      padding: 16px;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.92);
-    }
-
-    .tsg-modal-card h2 {
-      margin: 0 0 10px;
-      font-size: 0.85rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--neon-green, #0f0);
-    }
-
-    .tsg-vote-list {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin: 10px 0;
-    }
-
-    .tsg-vote-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 5px 8px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 4px;
-      font-size: 0.68rem;
-    }
-
-    .tsg-pot-chart {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin: 10px 0;
-    }
-
-    .tsg-pot-bar-row {
-      display: grid;
-      grid-template-columns: 75px 1fr 44px;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.65rem;
-    }
-
-    .tsg-pot-bar-track {
-      height: 10px;
-      border-radius: 3px;
-      background: rgba(255, 255, 255, 0.08);
-      overflow: hidden;
-    }
-
-    .tsg-pot-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #0f0, #f7d800);
-    }
-
-    .garden-link-wrap {
-      display: flex;
-      justify-content: center;
-      margin-top: 12px;
+    .btn--kill.is-on,
+    .btn--kill:hover:not(:disabled) {
+      background: #ff3355;
+      color: #050505;
     }
 
     .garden-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border: 1px solid rgba(0, 255, 0, 0.35);
-      border-radius: var(--radius-sm, 4px);
-      background: rgba(0, 12, 0, 0.55);
-      color: rgba(0, 255, 0, 0.88);
-      font-family: inherit;
-      font-size: 0.68rem;
+      margin-top: 4px;
+      padding: 7px 13px;
+      border: 1px solid rgba(0, 255, 0, 0.32);
+      border-radius: 4px;
+      background: rgba(0, 12, 0, 0.5);
+      color: rgba(0, 255, 0, 0.85);
+      font-size: 0.65rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       text-decoration: none;
     }
-    .garden-link:hover,
-    .garden-link:focus-visible {
+    .garden-link:hover {
+      background: #0f0;
       color: #050505;
-      background: var(--neon-green, #0f0);
-      border-color: var(--neon-green, #0f0);
-      outline: none;
-    }
-
-    .mask-icon {
-      display: inline-block;
-      background-color: var(--neon-green, #0f0);
-      mask-size: contain;
-      -webkit-mask-size: contain;
-      mask-repeat: no-repeat;
-      -webkit-mask-repeat: no-repeat;
-      mask-position: center;
-      -webkit-mask-position: center;
-    }
-    .mask-icon--trophy {
-      mask-image: url('../assets/icons/trophy.svg');
-      -webkit-mask-image: url('../assets/icons/trophy.svg');
-    }
-    .trophy-unlock-flash {
-      position: fixed;
-      top: 16%;
-      left: 50%;
-      z-index: 1000001;
-      pointer-events: none;
-      transform: translateX(-50%);
-      animation: trophyUnlockFlash 1.35s ease forwards;
-    }
-    .trophy-unlock-flash-icon.mask-icon { width: 72px; height: 72px; display: block; }
-    @keyframes trophyUnlockFlash {
-      0% { opacity: 0; transform: translateX(-50%) scale(0.65); }
-      10%, 30%, 50% { opacity: 1; transform: translateX(-50%) scale(1.12); }
-      20%, 40% { opacity: 0.12; transform: translateX(-50%) scale(1); }
-      60%, 100% { opacity: 0; transform: translateX(-50%) scale(0.95); visibility: hidden; }
     }
   </style>
 </head>
@@ -766,125 +340,42 @@
     <span class="dim">// the-stupid-game</span>
   </div>
   <div class="chrome chrome-tr" aria-hidden="true">
-    6 players · 6 colors<br>
-    <span class="dim">1 survivor</span>
+    1c move · 3c kill<br>
+    <span class="dim">10c trial · 15c revive</span>
   </div>
 
   <main>
-    <header class="tsg-header">
-      <h1 class="tsg-title">THE STUPID GAME</h1>
-      <div class="tsg-toolbar">
-        <button type="button" id="btn-mode" class="tsg-btn">1P vs. AI</button>
-        <button type="button" id="btn-auto-sim" class="tsg-btn" hidden>AUTO: OFF</button>
-        <button type="button" id="btn-peek-colors" class="tsg-btn" hidden>PEEK: OFF</button>
-        <button type="button" id="btn-new-game" class="tsg-btn">↻ NEW</button>
-      </div>
-    </header>
+    <h1>THE STUPID GAME</h1>
+    <div id="ticker" class="ticker" aria-live="polite">Roll the die to start Round 1.</div>
 
-    <div class="tsg-layout">
-      <!-- LEFT: POT & CHECKS -->
-      <section class="tsg-panel" aria-label="Pot and Checks">
-        <div class="tsg-bank-card">
-          <div class="tsg-bank-header">
-            <span class="tsg-bank-label">COMMUNAL POT</span>
-            <span id="pot-amount" class="tsg-bank-amount">00 CR</span>
-          </div>
-          <div class="tsg-bank-actions">
-            <button type="button" id="btn-open-trial" class="tsg-btn tsg-btn--gold" disabled>⚖️ TRIAL (10c)</button>
-            <button type="button" id="btn-open-resurrect" class="tsg-btn" disabled>✚ REVIVE (15c)</button>
-          </div>
-        </div>
-
-        <div id="checks-list" class="tsg-checks-list"></div>
-      </section>
-
-      <!-- CENTER: DIE & 8x8 BOARD -->
-      <section class="tsg-panel tsg-col-board" aria-label="Board">
-        <div class="tsg-round-bar">
-          <div class="tsg-die-box">
-            <div id="die-cube" class="tsg-die-cube" aria-live="polite">⚂</div>
-            <div>
-              <div id="round-label" class="tsg-round-num">ROUND 1</div>
-              <div id="phase-label" class="tsg-round-sub">Roll die for credits</div>
-            </div>
-          </div>
-          <button type="button" id="btn-phase-action" class="tsg-btn tsg-btn--primary">ROLL DIE</button>
-        </div>
-
-        <div class="tsg-board-wrap">
-          <div id="board-grid" class="tsg-board-grid" role="grid" aria-label="8 by 8 board"></div>
-        </div>
-      </section>
-
-      <!-- RIGHT: COMPACT ORDERS & STORE -->
-      <section class="tsg-panel" aria-label="Actions">
-        <div id="store-toast" class="tsg-toast" aria-live="polite"></div>
-
-        <!-- 1. GUESS COLOR -->
-        <div class="tsg-card">
-          <div class="tsg-card-head">
-            <span>🔍 GUESS COLOR</span>
-            <span class="tsg-cost-tag">FREE</span>
-          </div>
-          <select id="select-guess-target" class="tsg-select" aria-label="Guess target"></select>
-          <div id="swatch-picker" class="tsg-swatch-picker" role="radiogroup" aria-label="Pick color"></div>
-        </div>
-
-        <!-- 2. MOVE (click board) -->
-        <div class="tsg-card">
-          <div class="tsg-card-head">
-            <span>✥ MOVE (TAP BOARD)</span>
-            <span id="move-cost-label" class="tsg-cost-tag">0c</span>
-          </div>
-          <div class="tsg-row" style="justify-content:space-between;font-size:0.72rem;">
-            <span id="move-plan-text" style="font-weight:700;color:#ffe45e;">D4 → D4</span>
-            <button type="button" id="btn-stay-coord" class="tsg-btn">STAY (0c)</button>
-          </div>
-        </div>
-
-        <!-- 3. ASSASSINATE -->
-        <div class="tsg-card">
-          <div class="tsg-card-head">
-            <span>🗡️ KILL (1 SPACE)</span>
-            <span class="tsg-cost-tag">3 CR</span>
-          </div>
-          <select id="select-kill-target" class="tsg-select" aria-label="Kill target"></select>
-        </div>
-
-        <!-- 4. BOUNTY & POT DONATION -->
-        <div class="tsg-card">
-          <div class="tsg-card-head">
-            <span>💰 BOUNTY &amp; POT</span>
-            <span id="your-balance-badge" class="tsg-cost-tag">3 CR</span>
-          </div>
-          <div class="tsg-row" style="margin-bottom:6px;">
-            <select id="select-bounty-target" class="tsg-select" aria-label="Bounty target"></select>
-            <button type="button" id="btn-place-bounty" class="tsg-btn tsg-btn--gold">🎯 +2c</button>
-          </div>
-          <div class="tsg-row">
-            <button type="button" id="btn-donate-1" class="tsg-btn" style="flex:1;">+1c POT</button>
-            <button type="button" id="btn-donate-3" class="tsg-btn" style="flex:1;">+3c POT</button>
-            <button type="button" id="btn-donate-inf" class="tsg-btn tsg-btn--danger" style="flex:1;">∞c</button>
-          </div>
-        </div>
-
-        <!-- FEED -->
-        <div id="round-log" class="tsg-log" role="log" aria-live="polite"></div>
-      </section>
+    <!-- Top Strip -->
+    <div class="hud-bar">
+      <span class="die-pill"><span id="die-face" class="die-face">🎲</span> <span id="round-text">R1</span></span>
+      <span id="move-text">Move: 0c</span>
+      <span id="pot-text" class="pot-pill">POT: 0c</span>
+      <button type="button" id="btn-reset" class="btn" style="padding:3px 8px;">↻</button>
     </div>
 
-    <div class="garden-link-wrap">
-      <a class="garden-link" href="../index.html">← // return to the garden</a>
+    <!-- 6 Player Checks -->
+    <div id="players-grid" class="players-grid"></div>
+
+    <!-- Context Bar for Selected Player (Guess Color OR Kill) -->
+    <div id="target-bar" class="target-bar"></div>
+
+    <!-- 8x8 Board -->
+    <div id="board" class="board" role="grid" aria-label="8 by 8 board"></div>
+
+    <!-- Bottom Controls -->
+    <div class="actions-bar">
+      <button type="button" id="btn-donate" class="btn" disabled>+1c POT</button>
+      <button type="button" id="btn-inf" class="btn" disabled>∞c</button>
+      <button type="button" id="btn-trial" class="btn" disabled>⚖️ 10c</button>
+      <button type="button" id="btn-revive" class="btn" disabled>✚ 15c</button>
+      <button type="button" id="btn-main" class="btn btn--main">ROLL DIE</button>
     </div>
+
+    <a class="garden-link" href="../index.html">← // return to the garden</a>
   </main>
-
-  <!-- MODAL -->
-  <div id="tsg-modal" class="tsg-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="tsg-modal-title">
-    <div class="tsg-modal-card">
-      <h2 id="tsg-modal-title">// TRIBUNAL</h2>
-      <div id="tsg-modal-body"></div>
-    </div>
-  </div>
 
   <script src="../js/boot/trophies.js"></script>
   <script>
@@ -898,1113 +389,473 @@
         { id: 'WHITE', label: 'White', hex: '#f4f4f6', text: '#050505', short: 'W' },
       ];
       const COLOR_BY_ID = Object.fromEntries(COLORS.map((c) => [c.id, c]));
-
-      const PERSONAS = [
-        { name: 'ALICE', role: 'Aggressive', style: 'aggressive' },
-        { name: 'BOB', role: 'Economist', style: 'economist' },
-        { name: 'CHARLIE', role: 'Detective', style: 'detective' },
-        { name: 'DAVID', role: 'Opportunist', style: 'opportunist' },
-        { name: 'EVE', role: 'Strategist', style: 'political' },
-        { name: 'FRANK', role: 'Chaotic', style: 'chaotic' },
+      const NAMES = ['YOU', 'ALICE', 'BOB', 'CHARLIE', 'DAVID', 'EVE'];
+      const STARTS = [
+        { col: 3, row: 3 }, { col: 1, row: 1 }, { col: 3, row: 5 },
+        { col: 6, row: 1 }, { col: 5, row: 3 }, { col: 6, row: 5 },
       ];
-
-      const START_COORDS = [
-        { col: 3, row: 3 },
-        { col: 1, row: 1 },
-        { col: 3, row: 5 },
-        { col: 6, row: 1 },
-        { col: 5, row: 3 },
-        { col: 6, row: 5 },
-      ];
-
       const DIE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 
-      let gameMode = 'human';
-      let autoSim = false;
-      let autoSimTimer = 0;
-      let peekAllColors = false;
+      const tickerEl = document.getElementById('ticker');
+      const dieFaceEl = document.getElementById('die-face');
+      const roundTextEl = document.getElementById('round-text');
+      const moveTextEl = document.getElementById('move-text');
+      const potTextEl = document.getElementById('pot-text');
+      const playersGridEl = document.getElementById('players-grid');
+      const targetBarEl = document.getElementById('target-bar');
+      const boardEl = document.getElementById('board');
+      const btnDonate = document.getElementById('btn-donate');
+      const btnInf = document.getElementById('btn-inf');
+      const btnTrial = document.getElementById('btn-trial');
+      const btnRevive = document.getElementById('btn-revive');
+      const btnMain = document.getElementById('btn-main');
+      const btnReset = document.getElementById('btn-reset');
+
       let state = null;
 
-      const btnMode = document.getElementById('btn-mode');
-      const btnAutoSim = document.getElementById('btn-auto-sim');
-      const btnPeekColors = document.getElementById('btn-peek-colors');
-      const btnNewGame = document.getElementById('btn-new-game');
-
-      const potAmountEl = document.getElementById('pot-amount');
-      const btnOpenTrial = document.getElementById('btn-open-trial');
-      const btnOpenResurrect = document.getElementById('btn-open-resurrect');
-      const checksListEl = document.getElementById('checks-list');
-
-      const dieCubeEl = document.getElementById('die-cube');
-      const roundLabelEl = document.getElementById('round-label');
-      const phaseLabelEl = document.getElementById('phase-label');
-      const btnPhaseAction = document.getElementById('btn-phase-action');
-      const boardGridEl = document.getElementById('board-grid');
-
-      const yourBalanceBadge = document.getElementById('your-balance-badge');
-      const storeToastEl = document.getElementById('store-toast');
-
-      const selectGuessTarget = document.getElementById('select-guess-target');
-      const swatchPickerEl = document.getElementById('swatch-picker');
-      const moveCostLabel = document.getElementById('move-cost-label');
-      const movePlanText = document.getElementById('move-plan-text');
-      const btnStayCoord = document.getElementById('btn-stay-coord');
-      const selectKillTarget = document.getElementById('select-kill-target');
-      const selectBountyTarget = document.getElementById('select-bounty-target');
-      const btnPlaceBounty = document.getElementById('btn-place-bounty');
-      const btnDonate1 = document.getElementById('btn-donate-1');
-      const btnDonate3 = document.getElementById('btn-donate-3');
-      const btnDonateInf = document.getElementById('btn-donate-inf');
-      const roundLogEl = document.getElementById('round-log');
-
-      const modalBackdrop = document.getElementById('tsg-modal');
-      const modalTitleEl = document.getElementById('tsg-modal-title');
-      const modalBodyEl = document.getElementById('tsg-modal-body');
-
       function shuffle(arr) {
-        const copy = [...arr];
-        for (let i = copy.length - 1; i > 0; i--) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [copy[i], copy[j]] = [copy[j], copy[i]];
+          [a[i], a[j]] = [a[j], a[i]];
         }
-        return copy;
+        return a;
       }
 
-      function coordToStr(col, row) {
-        return `${String.fromCharCode(65 + col)}${row + 1}`;
-      }
+      const coordStr = (c, r) => `${String.fromCharCode(65 + c)}${r + 1}`;
+      const dist = (a, b) => Math.abs(a.col - b.col) + Math.abs(a.row - b.row);
 
-      function manhattan(a, b) {
-        return Math.abs(a.col - b.col) + Math.abs(a.row - b.row);
-      }
-
-      function showToast(msg) {
-        if (storeToastEl) storeToastEl.textContent = msg;
-      }
-
-      function awardStupidGameTrophy() {
-        if (typeof globalThis.unlockTrophy === 'function') {
-          globalThis.unlockTrophy('stupid_game');
-          return;
-        }
-        try {
-          const key = 'entropy-garden-trophies-v1';
-          const raw = localStorage.getItem(key);
-          const arr = raw ? JSON.parse(raw) : [];
-          const set = new Set(Array.isArray(arr) ? arr : []);
-          if (!set.has('stupid_game')) {
-            set.add('stupid_game');
-            localStorage.setItem(key, JSON.stringify([...set]));
-          }
-        } catch {
-          /* ignore */
-        }
-      }
-
-      function initGame() {
-        stopAutoSim();
-        closeModal();
-        const shuffledColors = shuffle(COLORS);
-        const starts = shuffle(START_COORDS);
-
-        const roster = gameMode === 'human'
-          ? [
-              { name: 'YOU', role: 'You', style: 'human', isHuman: true },
-              ...PERSONAS.slice(0, 5).map((p) => ({ ...p, isHuman: false })),
-            ]
-          : PERSONAS.map((p) => ({ ...p, isHuman: false }));
-
-        const players = roster.map((p, idx) => ({
-          id: idx,
-          name: p.name,
-          role: p.role,
-          style: p.style,
-          isHuman: p.isHuman,
-          colorId: shuffledColors[idx].id,
+      function init() {
+        const colors = shuffle(COLORS);
+        const starts = shuffle(STARTS);
+        const players = NAMES.map((name, id) => ({
+          id,
+          name,
+          isHuman: id === 0,
+          colorId: colors[id].id,
           credits: 3,
-          col: starts[idx].col,
-          row: starts[idx].row,
+          col: starts[id].col,
+          row: starts[id].row,
           alive: true,
-          revealedPublic: false,
-          knownBy: new Set([idx]),
-          ruledOutColors: new Set(),
-          bounty: 0,
-          eliminatedRound: null,
-          potContribution: 0,
+          revealed: id === 0,
+          ruledOut: new Set(),
         }));
 
         state = {
           round: 1,
-          phase: 'roll',
-          lastRoll: null,
-          communalPot: 0,
-          trialUsedThisRound: false,
-          resurrectUsedThisRound: false,
+          phase: 'roll', // 'roll' | 'orders' | 'over'
+          pot: 0,
           players,
-          humanOrders: {
-            guessTargetId: '',
-            guessColorId: '',
-            destCol: players[0].col,
-            destRow: players[0].row,
-            killTargetId: '',
-          },
-          logs: [],
-          winner: null,
+          selectedId: 1,
+          guessColorId: COLORS[0].id,
+          destCol: players[0].col,
+          destRow: players[0].row,
+          killId: null,
         };
 
-        if (players[0].isHuman) {
-          const c = COLOR_BY_ID[players[0].colorId];
-          addLog(`You are <strong>${c.label.toUpperCase()}</strong> @ <strong>${coordToStr(players[0].col, players[0].row)}</strong>.`);
-        } else {
-          addLog(`<strong>6-AI SIM</strong> ready.`);
-        }
-
-        resetHumanOrderDefaults();
-        showToast('');
-        renderAll();
+        const myCol = COLOR_BY_ID[players[0].colorId];
+        setTicker(`You are <strong>${myCol.label}</strong> @ <strong>${coordStr(players[0].col, players[0].row)}</strong>. Roll the die.`);
+        pickDefaultSelection();
+        render();
       }
 
-      function getHuman() {
-        return state?.players.find((p) => p.isHuman) || null;
+      function setTicker(html) {
+        tickerEl.innerHTML = html;
       }
 
       function survivors() {
-        return state ? state.players.filter((p) => p.alive) : [];
+        return state.players.filter((p) => p.alive);
       }
 
-      function eliminatedPlayers() {
-        return state ? state.players.filter((p) => !p.alive) : [];
+      function deadPlayers() {
+        return state.players.filter((p) => !p.alive);
       }
 
-      function addLog(html, cls = '') {
-        if (!state) return;
-        state.logs.unshift({ html, cls });
-        if (state.logs.length > 80) state.logs.length = 80;
+      function knownColorSet() {
+        return new Set(state.players.filter((p) => p.revealed || !p.alive).map((p) => p.colorId));
       }
 
-      function resetHumanOrderDefaults() {
-        const human = getHuman();
-        if (!human) return;
-        state.humanOrders.destCol = human.col;
-        state.humanOrders.destRow = human.row;
-        state.humanOrders.killTargetId = '';
+      function pickDefaultSelection() {
+        const me = state.players[0];
+        state.destCol = me.col;
+        state.destRow = me.row;
+        state.killId = null;
 
-        const unrevealed = state.players.filter(
-          (p) => p.alive && p.id !== human.id && !p.knownBy.has(human.id) && !p.revealedPublic,
-        );
-        state.humanOrders.guessTargetId = unrevealed.length ? String(unrevealed[0].id) : '';
-
-        const knownColors = new Set(
-          state.players
-            .filter((p) => p.isHuman || p.knownBy.has(human.id) || p.revealedPublic || !p.alive)
-            .map((p) => p.colorId),
-        );
-        const target = unrevealed[0];
-        const candidateColors = COLORS.filter(
-          (c) => !knownColors.has(c.id) && (!target || !target.ruledOutColors.has(c.id)),
-        );
-        state.humanOrders.guessColorId = candidateColors.length
-          ? candidateColors[0].id
-          : COLORS[0].id;
+        const others = survivors().filter((p) => p.id !== 0);
+        if (!others.length) return;
+        const cur = state.players[state.selectedId];
+        if (!cur || !cur.alive || cur.id === 0) {
+          state.selectedId = others[0].id;
+        }
+        syncDefaultGuessColor();
       }
 
-      function rollDieAndDistributeIncome() {
-        if (!state || state.phase !== 'roll') return;
+      function syncDefaultGuessColor() {
+        const target = state.players[state.selectedId];
+        const known = knownColorSet();
+        const valid = COLORS.find((c) => !known.has(c.id) && (!target || !target.ruledOut.has(c.id)));
+        if (valid) state.guessColorId = valid.id;
+      }
+
+      // --- TURN STEP 1: ROLL DIE ---
+      function rollDie() {
         const roll = 1 + Math.floor(Math.random() * 6);
-        state.lastRoll = roll;
-        state.trialUsedThisRound = false;
-        state.resurrectUsedThisRound = false;
+        dieFaceEl.textContent = DIE_FACES[roll - 1];
+        dieFaceEl.classList.add('spin');
+        setTimeout(() => dieFaceEl.classList.remove('spin'), 220);
 
-        dieCubeEl.classList.add('is-rolling');
-        setTimeout(() => dieCubeEl.classList.remove('is-rolling'), 240);
-
-        survivors().forEach((p) => {
-          p.credits += roll;
-        });
-
-        addLog(`<strong>R${state.round}</strong> ${DIE_FACES[roll - 1]} <strong>+${roll}c</strong> to all`);
+        survivors().forEach((p) => { p.credits += roll; });
         state.phase = 'orders';
-        resetHumanOrderDefaults();
-        showToast(`+${roll} CR to all survivors`);
-        maybeRunAiCommunalPotPolitics();
-        renderAll();
+        pickDefaultSelection();
+        setTicker(`Rolled <strong>${roll}</strong> (+${roll}c each). Click a player to guess/kill &amp; tap board to move.`);
+        render();
       }
 
-      function stepToward(fromCol, fromRow, toCol, toRow, maxSteps) {
-        let c = fromCol;
-        let r = fromRow;
-        let rem = maxSteps;
-        while (rem > 0 && (c !== toCol || r !== toRow)) {
-          if (Math.abs(toCol - c) >= Math.abs(toRow - r) && c !== toCol) {
-            c += toCol > c ? 1 : -1;
-          } else if (r !== toRow) {
-            r += toRow > r ? 1 : -1;
-          }
-          rem--;
+      // --- SIMPLE UNIFIED AI ---
+      function stepToward(from, to, steps) {
+        let c = from.col, r = from.row, s = steps;
+        while (s > 0 && (c !== to.col || r !== to.row)) {
+          if (Math.abs(to.col - c) >= Math.abs(to.row - r) && c !== to.col) c += to.col > c ? 1 : -1;
+          else if (r !== to.row) r += to.row > r ? 1 : -1;
+          s--;
         }
         return { col: c, row: r };
       }
 
-      function adjacentCoordTo(targetCol, targetRow, fromCol, fromRow) {
-        const candidates = [
-          { col: targetCol, row: targetRow + 1 },
-          { col: targetCol, row: targetRow - 1 },
-          { col: targetCol + 1, row: targetRow },
-          { col: targetCol - 1, row: targetRow },
-        ].filter((pt) => pt.col >= 0 && pt.col < 8 && pt.row >= 0 && pt.row < 8);
-        candidates.sort(
-          (a, b) =>
-            manhattan({ col: fromCol, row: fromRow }, a) -
-            manhattan({ col: fromCol, row: fromRow }, b),
-        );
-        return candidates[0] || { col: targetCol, row: targetRow };
+      function closestAdj(target, from) {
+        const pts = [
+          { col: target.col + 1, row: target.row },
+          { col: target.col - 1, row: target.row },
+          { col: target.col, row: target.row + 1 },
+          { col: target.col, row: target.row - 1 },
+        ].filter((p) => p.col >= 0 && p.col < 8 && p.row >= 0 && p.row < 8);
+        pts.sort((a, b) => dist(from, a) - dist(from, b));
+        return pts[0] || { col: target.col, row: target.row };
       }
 
-      function planAiOrders(ai) {
-        const others = survivors().filter((p) => p.id !== ai.id);
-        if (!others.length) {
-          return { guessTarget: null, guessColorId: null, destCol: ai.col, destRow: ai.row, killTarget: null };
+      // --- TURN STEP 2: RESOLVE ORDERS ---
+      function endTurn() {
+        const me = state.players[0];
+        const events = [];
+
+        // 1. Human Guess
+        if (me.alive && state.selectedId) {
+          const target = state.players[state.selectedId];
+          if (target && target.alive && !target.revealed) {
+            const c = COLOR_BY_ID[state.guessColorId];
+            if (target.colorId === state.guessColorId) {
+              target.revealed = true;
+              events.push(`You ID'd <strong>${target.name}</strong> (${c.label})!`);
+            } else {
+              target.ruledOut.add(state.guessColorId);
+              events.push(`${target.name} ≠ ${c.label}.`);
+            }
+          }
         }
 
-        const unguessed = others.filter((p) => !p.knownBy.has(ai.id) && !p.revealedPublic);
-        let guessTarget = null;
-        let guessColorId = null;
-
-        if (unguessed.length) {
-          unguessed.sort((a, b) => manhattan(ai, a) - manhattan(ai, b));
-          guessTarget = ai.style === 'chaotic'
-            ? unguessed[Math.floor(Math.random() * unguessed.length)]
-            : unguessed[0];
-
-          const knownColors = new Set(
-            state.players
-              .filter((p) => p.id === ai.id || p.knownBy.has(ai.id) || p.revealedPublic || !p.alive)
-              .map((p) => p.colorId),
+        // 2. AI Guesses (simple: pick 1 unrevealed opponent & 1 untried color)
+        survivors().forEach((ai) => {
+          if (ai.isHuman) return;
+          const hidden = survivors().filter((p) => p.id !== ai.id && (!p.revealed || p.id === 0));
+          if (!hidden.length) return;
+          const target = hidden[Math.floor(Math.random() * hidden.length)];
+          const known = new Set(
+            state.players.filter((p) => p.id === ai.id || (p.revealed && p.id !== 0) || !p.alive).map((p) => p.colorId),
           );
-          const pool = COLORS.filter(
-            (c) => !knownColors.has(c.id) && !guessTarget.ruledOutColors.has(c.id),
-          );
-          const fallbackPool = COLORS.filter((c) => !knownColors.has(c.id));
-          const pickPool = pool.length ? pool : fallbackPool.length ? fallbackPool : COLORS;
-          guessColorId = pickPool[Math.floor(Math.random() * pickPool.length)].id;
-        }
-
-        if (ai.style === 'political' && ai.credits >= 6 && state.communalPot >= 7 && state.communalPot < 10) {
-          const donate = Math.min(2, ai.credits - 4);
-          if (donate > 0) {
-            ai.credits -= donate;
-            state.communalPot += donate;
-            addLog(`Anon donated <strong>+${donate}c</strong> → Pot`);
+          const pool = COLORS.filter((c) => !known.has(c.id) && !target.ruledOut.has(c.id));
+          const pick = (pool.length ? pool : COLORS)[Math.floor(Math.random() * (pool.length || COLORS.length))];
+          if (target.colorId === pick.id) {
+            target.revealed = true;
+            events.push(`<strong>${ai.name}</strong> ID'd <strong>${target.name}</strong>!`);
+          } else {
+            target.ruledOut.add(pick.id);
           }
-        } else if ((ai.style === 'economist' || ai.style === 'detective') && ai.credits >= 9 && Math.random() < 0.35) {
-          const richTargets = others.filter((p) => p.revealedPublic || p.credits >= 6);
-          if (richTargets.length) {
-            const bt = richTargets[Math.floor(Math.random() * richTargets.length)];
-            ai.credits -= 2;
-            bt.bounty += 2;
-            addLog(`<strong>${ai.name}</strong> 🎯 +2c on <strong>${bt.name}</strong>`);
-          }
-        }
-
-        const identifiedTargets = others.filter((p) => p.knownBy.has(ai.id) || p.revealedPublic);
-        let primaryTarget = null;
-        if (identifiedTargets.length) {
-          identifiedTargets.sort((a, b) => (manhattan(ai, a) - a.bounty * 1.5) - (manhattan(ai, b) - b.bounty * 1.5));
-          primaryTarget = identifiedTargets[0];
-        }
-
-        let destCol = ai.col;
-        let destRow = ai.row;
-        let killTarget = null;
-
-        if (primaryTarget && ai.credits >= 3) {
-          const adj = adjacentCoordTo(primaryTarget.col, primaryTarget.row, ai.col, ai.row);
-          const distToAdj = manhattan(ai, adj);
-          const maxMoveBudget = ai.credits - 3;
-
-          if (distToAdj <= maxMoveBudget) {
-            destCol = adj.col;
-            destRow = adj.row;
-            killTarget = primaryTarget;
-          } else if (maxMoveBudget > 0) {
-            const step = stepToward(ai.col, ai.row, adj.col, adj.row, maxMoveBudget);
-            destCol = step.col;
-            destRow = step.row;
-          }
-        } else if (guessTarget && ai.credits >= 4) {
-          const adj = adjacentCoordTo(guessTarget.col, guessTarget.row, ai.col, ai.row);
-          const distToAdj = manhattan(ai, adj);
-          const stalkBudget = Math.min(2, ai.credits - 3);
-          if (distToAdj > 0 && stalkBudget > 0) {
-            const step = stepToward(ai.col, ai.row, adj.col, adj.row, stalkBudget);
-            destCol = step.col;
-            destRow = step.row;
-          }
-        }
-
-        return { guessTarget, guessColorId, destCol, destRow, killTarget };
-      }
-
-      function executeRoundOrders() {
-        if (!state || state.phase !== 'orders') return;
-
-        const aliveAtStart = survivors();
-        const plans = new Map();
-
-        const human = getHuman();
-        if (human && human.alive) {
-          const moveCost = manhattan(human, {
-            col: state.humanOrders.destCol,
-            row: state.humanOrders.destRow,
-          });
-          const killTarget = state.humanOrders.killTargetId !== ''
-            ? state.players[Number(state.humanOrders.killTargetId)]
-            : null;
-          const killCost = killTarget ? 3 : 0;
-
-          if (moveCost + killCost > human.credits) {
-            showToast(`Need ${moveCost + killCost} CR (have ${human.credits} CR)`);
-            return;
-          }
-
-          const guessTarget = state.humanOrders.guessTargetId !== ''
-            ? state.players[Number(state.humanOrders.guessTargetId)]
-            : null;
-
-          plans.set(human.id, {
-            guessTarget,
-            guessColorId: state.humanOrders.guessColorId,
-            destCol: state.humanOrders.destCol,
-            destRow: state.humanOrders.destRow,
-            killTarget,
-          });
-        }
-
-        aliveAtStart.forEach((p) => {
-          if (!p.isHuman) plans.set(p.id, planAiOrders(p));
         });
 
-        // 1. Guesses
-        aliveAtStart.forEach((actor) => {
-          const plan = plans.get(actor.id);
-          if (!plan || !plan.guessTarget || !plan.guessColorId) return;
-          const target = plan.guessTarget;
-          if (!target.alive) return;
+        // 3. Human Move
+        if (me.alive) {
+          const cost = dist(me, { col: state.destCol, row: state.destRow });
+          if (cost > 0 && cost <= me.credits) {
+            me.credits -= cost;
+            me.col = state.destCol;
+            me.row = state.destRow;
+          }
+        }
 
-          const guessedColor = COLOR_BY_ID[plan.guessColorId];
-          if (target.colorId === plan.guessColorId) {
-            target.knownBy.add(actor.id);
-            target.revealedPublic = true;
-            addLog(`<strong>${actor.name}</strong> ID'd <strong>${target.name}</strong> = <strong>${guessedColor.label}</strong>!`);
-            if (!actor.isHuman && !plan.killTarget && actor.credits >= 3) {
-              const adj = adjacentCoordTo(target.col, target.row, actor.col, actor.row);
-              const d = manhattan(actor, adj);
-              if (d + 3 <= actor.credits) {
-                plan.destCol = adj.col;
-                plan.destRow = adj.row;
-                plan.killTarget = target;
-              } else if (actor.credits > 3) {
-                const step = stepToward(actor.col, actor.row, adj.col, adj.row, actor.credits - 3);
-                plan.destCol = step.col;
-                plan.destRow = step.row;
+        // 4. Human Kill
+        if (me.alive && state.killId !== null) {
+          const victim = state.players[state.killId];
+          if (victim && victim.alive && victim.revealed && me.credits >= 3) {
+            if (dist(me, victim) > 1) {
+              const adj = closestAdj(victim, me);
+              const d = dist(me, adj);
+              if (d + 3 <= me.credits) {
+                me.credits -= d;
+                me.col = adj.col;
+                me.row = adj.row;
               }
             }
-          } else {
-            target.ruledOutColors.add(plan.guessColorId);
-            if (actor.isHuman) {
-              addLog(`<strong>YOU</strong>: ${target.name} ≠ ${guessedColor.label}`);
+            if (dist(me, victim) === 1 && me.credits >= 3) {
+              me.credits -= 3;
+              killPlayer(victim, `🗡️ by YOU`, events);
             }
           }
-        });
+        }
 
-        // 2. Non-assassin moves
-        aliveAtStart.forEach((actor) => {
-          const plan = plans.get(actor.id);
-          if (!plan || plan.killTarget) return;
-          const stepCost = manhattan(actor, { col: plan.destCol, row: plan.destRow });
-          if (stepCost > 0 && stepCost <= actor.credits) {
-            actor.credits -= stepCost;
-            actor.col = plan.destCol;
-            actor.row = plan.destRow;
+        // 5. AI Move & Kill (simple: chase nearest revealed player; kill if 1 space away & >= 3c)
+        survivors().forEach((ai) => {
+          if (ai.isHuman || !ai.alive) return;
+          const targets = survivors().filter((p) => p.id !== ai.id && (p.id !== 0 ? p.revealed : p.ruledOut.size >= 3));
+          const allOthers = survivors().filter((p) => p.id !== ai.id);
+          const pool = targets.length ? targets : allOthers;
+          if (!pool.length) return;
+
+          pool.sort((a, b) => dist(ai, a) - dist(ai, b));
+          const target = pool[0];
+          const adj = closestAdj(target, ai);
+          const d = dist(ai, adj);
+
+          if (targets.includes(target) && d + 3 <= ai.credits) {
+            ai.credits -= d + 3;
+            ai.col = adj.col;
+            ai.row = adj.row;
+            killPlayer(target, `🗡️ by <strong>${ai.name}</strong>`, events);
+          } else if (ai.credits > 3 && d > 0) {
+            const step = stepToward(ai, adj, Math.min(2, ai.credits - 3));
+            const moved = dist(ai, step);
+            ai.credits -= moved;
+            ai.col = step.col;
+            ai.row = step.row;
           }
         });
 
-        // 3. Assassin pursuit moves
-        aliveAtStart.forEach((actor) => {
-          const plan = plans.get(actor.id);
-          if (!plan || !plan.killTarget) return;
-          const target = plan.killTarget;
-          if (target.alive && manhattan({ col: plan.destCol, row: plan.destRow }, target) !== 1) {
-            const adj = adjacentCoordTo(target.col, target.row, actor.col, actor.row);
-            const distToNewAdj = manhattan(actor, adj);
-            if (distToNewAdj + 3 <= actor.credits) {
-              plan.destCol = adj.col;
-              plan.destRow = adj.row;
-            }
-          }
-          const stepCost = manhattan(actor, { col: plan.destCol, row: plan.destRow });
-          if (stepCost > 0 && stepCost <= actor.credits) {
-            actor.credits -= stepCost;
-            actor.col = plan.destCol;
-            actor.row = plan.destRow;
-          }
-        });
+        // 6. Simple AI Pot usage (Trial at 10c, Revive at 15c)
+        if (survivors().length > 2 && state.pot >= 15 && deadPlayers().length && Math.random() < 0.35) {
+          const revived = deadPlayers()[0];
+          revivePlayer(revived, events);
+        } else if (survivors().length > 2 && state.pot >= 10 && Math.random() < 0.4) {
+          const alive = survivors();
+          const accused = alive[Math.floor(Math.random() * alive.length)];
+          runTrial(accused, events);
+        }
 
-        // 4. Assassinations
-        aliveAtStart.forEach((actor) => {
-          if (!actor.alive) return;
-          const plan = plans.get(actor.id);
-          if (!plan || !plan.killTarget) return;
-          const target = plan.killTarget;
-          if (!target.alive) return;
-
-          const knowsColor = target.knownBy.has(actor.id) || target.revealedPublic;
-          if (!knowsColor || actor.credits < 3) return;
-          if (manhattan(actor, target) !== 1) {
-            if (actor.isHuman) showToast(`${target.name} out of 1-space range`);
-            return;
-          }
-
-          actor.credits -= 3;
-          eliminatePlayer(target, actor, `🗡️ by ${actor.name}`);
-        });
-
-        if (checkGameOver()) {
-          renderAll();
+        // 7. Check Game Over
+        const left = survivors();
+        if (left.length <= 1) {
+          state.phase = 'over';
+          const w = left[0] || me;
+          setTicker(`🏆 <strong>${w.name}</strong> (${COLOR_BY_ID[w.colorId].label}) wins with ${w.credits}c!`);
+          if (w.isHuman) globalThis.unlockTrophy?.('stupid_game');
+          render();
           return;
         }
 
         state.round += 1;
         state.phase = 'roll';
-        resetHumanOrderDefaults();
-        renderAll();
+        pickDefaultSelection();
+        if (events.length) setTicker(events.slice(0, 2).join(' · '));
+        else setTicker(`Round ${state.round} ready. Roll the die.`);
+        render();
       }
 
-      function eliminatePlayer(victim, killer, reasonText) {
+      function killPlayer(victim, how, events) {
         victim.alive = false;
-        victim.revealedPublic = true;
-        victim.eliminatedRound = state.round;
-        const forfeited = victim.credits;
+        victim.revealed = true;
+        state.pot += victim.credits;
+        events.push(`<strong>${victim.name}</strong> ${how} (+${victim.credits}c → Pot)`);
         victim.credits = 0;
-        victim.potContribution += forfeited;
-        state.communalPot += forfeited;
-
-        const c = COLOR_BY_ID[victim.colorId];
-        let bountyMsg = '';
-        if (victim.bounty > 0 && killer && killer.alive) {
-          killer.credits += victim.bounty;
-          bountyMsg = ` · <strong>${killer.name}</strong> +${victim.bounty}c🎯`;
-          victim.bounty = 0;
-        }
-
-        addLog(
-          `<strong>${victim.name}</strong> (${c.label}) ${reasonText} · <strong>+${forfeited}c → Pot</strong>${bountyMsg}`,
-          'is-kill',
-        );
       }
 
-      function maybeRunAiCommunalPotPolitics() {
-        if (!state || state.phase !== 'orders') return;
-        const alive = survivors();
-        if (alive.length <= 2) return;
-
-        const dead = eliminatedPlayers();
-        if (state.communalPot >= 15 && dead.length > 0 && !state.resurrectUsedThisRound && Math.random() < 0.45) {
-          const sponsor = alive.find((p) => p.style === 'political' || p.style === 'chaotic') || alive[0];
-          const target = dead[Math.floor(Math.random() * dead.length)];
-          performResurrection(sponsor, target);
-          if (checkGameOver()) return;
-        }
-
-        if (state.communalPot >= 10 && !state.trialUsedThisRound && Math.random() < 0.65) {
-          const nominator = alive.find((p) => p.style === 'economist' || p.style === 'political') || alive[0];
-          const candidates = alive.filter((p) => p.id !== nominator.id);
-          candidates.sort((a, b) => (b.credits + b.bounty * 2) - (a.credits + a.bounty * 2));
-          const accused = candidates[0];
-          if (accused) runAutomatedTrial(nominator, accused);
-        }
-      }
-
-      function computeAiVote(voter, accused, nominator) {
-        if (voter.id === accused.id) return false;
-        if (voter.id === nominator.id) return true;
-        let guiltyProb = 0.55;
-        if (accused.revealedPublic) guiltyProb += 0.18;
-        if (accused.credits >= 8) guiltyProb += 0.15;
-        if (accused.bounty > 0) guiltyProb += 0.2;
-        return Math.random() < guiltyProb;
-      }
-
-      function runAutomatedTrial(nominator, accused) {
-        state.communalPot -= 10;
-        state.trialUsedThisRound = true;
+      function runTrial(accused, events) {
+        if (state.pot < 10 || !accused.alive) return;
+        state.pot -= 10;
         const voters = survivors();
-        let guiltyCount = 0;
+        let yes = 0;
         voters.forEach((v) => {
-          if (computeAiVote(v, accused, nominator)) guiltyCount++;
+          if (v.id === accused.id) return;
+          if (v.isHuman || Math.random() < 0.6) yes++;
         });
-
-        const majority = guiltyCount > voters.length / 2;
-        if (majority) {
-          eliminatePlayer(accused, nominator, `⚖️ Tribunal (${guiltyCount}/${voters.length})`);
-          checkGameOver();
+        if (yes > voters.length / 2) {
+          killPlayer(accused, `⚖️ convicted (${yes}/${voters.length})`, events);
         } else {
-          addLog(`⚖️ <strong>${accused.name}</strong> acquitted (${guiltyCount}/${voters.length})`, 'is-trial');
+          events.push(`⚖️ <strong>${accused.name}</strong> acquitted (${yes}/${voters.length})`);
         }
       }
 
-      function openHumanTrialModal() {
-        const human = getHuman();
-        if (!human || !human.alive || state.communalPot < 10 || state.trialUsedThisRound) return;
-        const targets = survivors().filter((p) => p.id !== human.id);
-        if (!targets.length) return;
-
-        modalTitleEl.textContent = '// TRIBUNAL (10 POT CR)';
-        const optionsHtml = targets
-          .map((p) => `<option value="${p.id}">${p.name} — ${p.credits} CR</option>`)
-          .join('');
-
-        modalBodyEl.innerHTML = `
-          <div class="tsg-row" style="margin:10px 0;">
-            <select id="modal-trial-accused" class="tsg-select">${optionsHtml}</select>
-            <button type="button" id="modal-btn-call-vote" class="tsg-btn tsg-btn--gold">⚖️ VOTE</button>
-          </div>
-          <div id="modal-trial-result"></div>
-          <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-            <button type="button" id="modal-btn-close" class="tsg-btn">CLOSE</button>
-          </div>
-        `;
-        modalBackdrop.classList.add('is-open');
-
-        document.getElementById('modal-btn-close').onclick = closeModal;
-        document.getElementById('modal-btn-call-vote').onclick = () => {
-          const accusedId = Number(document.getElementById('modal-trial-accused').value);
-          const accused = state.players[accusedId];
-          if (!accused || !accused.alive || state.communalPot < 10 || state.trialUsedThisRound) return;
-
-          state.communalPot -= 10;
-          state.trialUsedThisRound = true;
-
-          const voters = survivors();
-          let guiltyCount = 0;
-          const rowsHtml = voters
-            .map((v) => {
-              const guilty = v.isHuman ? true : computeAiVote(v, accused, human);
-              if (guilty) guiltyCount++;
-              return `<div class="tsg-vote-row">
-                <span><strong>${v.name}</strong></span>
-                <span style="color:${guilty ? '#ff6b88' : '#0f0'};font-weight:700;">${guilty ? 'GUILTY' : 'NOT GUILTY'}</span>
-              </div>`;
-            })
-            .join('');
-
-          const majority = guiltyCount > voters.length / 2;
-          if (majority) {
-            eliminatePlayer(accused, human, `⚖️ Tribunal (${guiltyCount}/${voters.length})`);
-          } else {
-            addLog(`⚖️ <strong>${accused.name}</strong> acquitted (${guiltyCount}/${voters.length})`, 'is-trial');
-          }
-
-          document.getElementById('modal-btn-call-vote').disabled = true;
-          document.getElementById('modal-trial-result').innerHTML = `
-            <div class="tsg-vote-list">${rowsHtml}</div>
-            <div style="font-size:0.75rem;font-weight:700;color:${majority ? '#ff6b88' : '#ffe45e'};">
-              ${majority ? `${accused.name} ELIMINATED` : `${accused.name} ACQUITTED`}
-            </div>
-          `;
-          resetHumanOrderDefaults();
-          checkGameOver();
-          renderAll();
-        };
-      }
-
-      function findOpenSpawnCoord() {
-        const occupied = new Set(survivors().map((p) => `${p.col},${p.row}`));
-        for (const pt of shuffle(START_COORDS)) {
-          if (!occupied.has(`${pt.col},${pt.row}`)) return pt;
-        }
-        return { col: 0, row: 0 };
-      }
-
-      function performResurrection(sponsor, target) {
-        if (!target || target.alive || state.communalPot < 15) return;
-        state.communalPot -= 15;
-        state.resurrectUsedThisRound = true;
-        const spawn = findOpenSpawnCoord();
+      function revivePlayer(target, events) {
+        if (state.pot < 15 || target.alive) return;
+        state.pot -= 15;
         target.alive = true;
         target.credits = 3;
-        target.col = spawn.col;
-        target.row = spawn.row;
-        target.eliminatedRound = null;
-
-        addLog(`✚ <strong>${target.name}</strong> revived @ ${coordToStr(spawn.col, spawn.row)} (3c)`, 'is-resurrect');
+        events.push(`✚ <strong>${target.name}</strong> revived (3c)`);
       }
 
-      function openHumanResurrectModal() {
-        const human = getHuman();
-        const dead = eliminatedPlayers();
-        if (!human || !human.alive || state.communalPot < 15 || !dead.length || state.resurrectUsedThisRound) return;
+      // --- RENDER ---
+      function render() {
+        const me = state.players[0];
+        roundTextEl.textContent = `R${state.round}`;
+        potTextEl.textContent = `POT: ${state.pot}c`;
+        const moveCost = me.alive ? dist(me, { col: state.destCol, row: state.destRow }) : 0;
+        const killCost = state.killId !== null ? 3 : 0;
+        moveTextEl.textContent = me.alive ? `Cost: ${moveCost + killCost}/${me.credits}c` : 'SPECTATING';
 
-        modalTitleEl.textContent = '// REVIVE (15 POT CR)';
-        const optionsHtml = dead
-          .map((p) => `<option value="${p.id}">${p.name} (${COLOR_BY_ID[p.colorId].label})</option>`)
-          .join('');
-
-        modalBodyEl.innerHTML = `
-          <div class="tsg-row" style="margin:10px 0;">
-            <select id="modal-resurrect-target" class="tsg-select">${optionsHtml}</select>
-            <button type="button" id="modal-btn-confirm-resurrect" class="tsg-btn tsg-btn--primary">✚ REVIVE</button>
-          </div>
-          <div style="display:flex;justify-content:flex-end;">
-            <button type="button" id="modal-btn-close" class="tsg-btn">CLOSE</button>
-          </div>
-        `;
-        modalBackdrop.classList.add('is-open');
-
-        document.getElementById('modal-btn-close').onclick = closeModal;
-        document.getElementById('modal-btn-confirm-resurrect').onclick = () => {
-          const targetId = Number(document.getElementById('modal-resurrect-target').value);
-          performResurrection(human, state.players[targetId]);
-          closeModal();
-          renderAll();
-        };
-      }
-
-      function closeModal() {
-        modalBackdrop.classList.remove('is-open');
-      }
-
-      function checkGameOver() {
-        const alive = survivors();
-        if (alive.length > 1) return false;
-
-        stopAutoSim();
-        state.phase = 'gameover';
-        const winner = alive[0] || state.players[0];
-        state.winner = winner;
-
-        addLog(`🏆 <strong>${winner.name}</strong> wins (${winner.credits}c)!`);
-        if (winner.isHuman || gameMode === 'sim') awardStupidGameTrophy();
-        setTimeout(showPostGameModal, 300);
-        return true;
-      }
-
-      function showPostGameModal() {
-        if (!state || !state.winner) return;
-        const w = state.winner;
-        const wc = COLOR_BY_ID[w.colorId];
-        modalTitleEl.textContent = `🏆 WINNER: ${w.name} (${wc.label.toUpperCase()})`;
-
-        const maxContrib = Math.max(1, ...state.players.map((p) => p.potContribution));
-        const rowsHtml = state.players
-          .map((p) => {
-            const c = COLOR_BY_ID[p.colorId];
-            return `<div class="tsg-vote-row">
-              <span><span class="tsg-swatch" style="background:${c.hex};vertical-align:middle;margin-right:6px;"></span><strong>${p.name}</strong></span>
-              <span>${p.alive ? 'WINNER' : `R${p.eliminatedRound || '?'}`} · <strong>${p.credits}c</strong></span>
-            </div>`;
-          })
-          .join('');
-
-        const barsHtml = state.players
-          .map((p) => {
-            const pct = Math.round((p.potContribution / maxContrib) * 100);
-            return `<div class="tsg-pot-bar-row">
-              <span>${p.name}</span>
-              <div class="tsg-pot-bar-track"><div class="tsg-pot-bar-fill" style="width:${pct}%"></div></div>
-              <span style="text-align:right;color:#ffe45e;">${p.potContribution}c</span>
-            </div>`;
-          })
-          .join('');
-
-        modalBodyEl.innerHTML = `
-          <div class="tsg-vote-list">${rowsHtml}</div>
-          <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:#ffe45e;margin-top:8px;">Pot Contributions (${state.communalPot}c)</div>
-          <div class="tsg-pot-chart">${barsHtml}</div>
-          <div style="display:flex;justify-content:space-between;gap:8px;margin-top:12px;">
-            <button type="button" id="modal-btn-rematch" class="tsg-btn tsg-btn--primary">↻ PLAY AGAIN</button>
-            <button type="button" id="modal-btn-dismiss" class="tsg-btn">CLOSE</button>
-          </div>
-        `;
-        modalBackdrop.classList.add('is-open');
-        document.getElementById('modal-btn-rematch').onclick = () => initGame();
-        document.getElementById('modal-btn-dismiss').onclick = closeModal;
-      }
-
-      // --- RENDERING ---
-      function renderChecks() {
-        const human = getHuman();
-        potAmountEl.textContent = `${String(state.communalPot).padStart(2, '0')} CR`;
-
-        const canHumanUsePot = Boolean(human && human.alive && state.phase === 'orders');
-        btnOpenTrial.disabled = !(canHumanUsePot && state.communalPot >= 10 && !state.trialUsedThisRound);
-        btnOpenResurrect.disabled = !(
-          canHumanUsePot &&
-          state.communalPot >= 15 &&
-          eliminatedPlayers().length > 0 &&
-          !state.resurrectUsedThisRound
-        );
-
-        const globallyKnownColors = new Set(
-          state.players
-            .filter((p) => p.isHuman || p.revealedPublic || !p.alive || (human && p.knownBy.has(human.id)))
-            .map((p) => p.colorId),
-        );
-
-        checksListEl.innerHTML = state.players
-          .map((p) => {
-            const isKnown =
-              p.isHuman ||
-              p.revealedPublic ||
-              !p.alive ||
-              peekAllColors ||
-              (human && p.knownBy.has(human.id));
-            const c = COLOR_BY_ID[p.colorId];
-
-            const swatchHtml = isKnown
-              ? `<span class="tsg-swatch" style="background:${c.hex};color:${c.text};">${c.short}</span>`
-              : `<span class="tsg-swatch" style="background:transparent;border-style:dashed;color:#888;">?</span>`;
-
-            const coordText = !p.alive
-              ? `OUT R${p.eliminatedRound}`
-              : isKnown
-                ? coordToStr(p.col, p.row)
-                : '';
-
-            const bountyHtml = p.bounty > 0
-              ? `<span class="tsg-bounty-tag">🎯+${p.bounty}c</span>`
-              : '';
-
-            // Show 6 tiny color pips with slashes on ruled-out colors
-            let pipsHtml = '';
-            if (!isKnown && p.alive) {
-              const dots = COLORS.map((col) => {
-                const out = p.ruledOutColors.has(col.id) || globallyKnownColors.has(col.id);
-                return `<span class="tsg-pip${out ? ' is-ruled-out' : ''}" style="background:${col.hex};" title="${col.label}"></span>`;
-              }).join('');
-              pipsHtml = `<div class="tsg-deduction-pips">${dots}</div>`;
-            }
-
-            return `
-              <article class="tsg-check${p.isHuman ? ' is-human' : ''}${!p.alive ? ' is-eliminated' : ''}">
-                <div class="tsg-check-row">
-                  <div class="tsg-check-id">
-                    ${swatchHtml}
-                    <span class="tsg-check-name">${p.name}</span>
-                    <span class="tsg-check-coord">${coordText}</span>
-                  </div>
-                  <div class="tsg-check-right">
-                    ${bountyHtml}
-                    <span class="tsg-check-balance">${p.credits}c</span>
-                  </div>
-                </div>
-                ${pipsHtml}
-              </article>
-            `;
-          })
-          .join('');
-      }
-
-      function renderBoard() {
-        const human = getHuman();
-        const destCol = human ? state.humanOrders.destCol : -1;
-        const destRow = human ? state.humanOrders.destRow : -1;
-
-        const cells = [];
-        for (let r = 7; r >= 0; r--) {
-          cells.push(`<div class="tsg-axis-label">${r + 1}</div>`);
-          for (let c = 0; c < 8; c++) {
-            const coord = coordToStr(c, r);
-            const occupants = state.players.filter((p) => p.alive && p.col === c && p.row === r);
-            const isOwnPos = Boolean(human && human.alive && human.col === c && human.row === r);
-            const isPlannedDest = Boolean(human && human.alive && destCol === c && destRow === r);
-            const isKillRange = Boolean(
-              human && human.alive && Math.abs(destCol - c) + Math.abs(destRow - r) === 1,
-            );
-
-            const stepCost = human && human.alive ? manhattan(human, { col: c, row: r }) : null;
-
-            const piecesHtml = occupants
-              .map((p) => {
-                const colObj = COLOR_BY_ID[p.colorId];
-                const known =
-                  p.isHuman ||
-                  p.revealedPublic ||
-                  peekAllColors ||
-                  (human && p.knownBy.has(human.id));
-                const tag = known ? p.name[0] : colObj.short;
-                return `<span class="tsg-piece${p.isHuman ? ' is-you' : ''}" style="background:${colObj.hex};color:${colObj.text};" title="${known ? p.name : colObj.label}">${tag}</span>`;
-              })
-              .join('');
-
-            const classes = [
-              'tsg-cell',
-              isOwnPos ? 'is-own-pos' : '',
-              isPlannedDest ? 'is-planned-dest' : '',
-              isKillRange ? 'is-kill-range' : '',
-            ]
-              .filter(Boolean)
-              .join(' ');
-
-            cells.push(`
-              <div class="${classes}" role="gridcell" data-col="${c}" data-row="${r}">
-                <span class="tsg-cell-coord">${coord}</span>
-                <div class="tsg-pieces-stack">${piecesHtml}</div>
-                ${stepCost !== null && stepCost > 0 ? `<span class="tsg-cell-cost">${stepCost}c</span>` : ''}
-              </div>
-            `);
-          }
-        }
-
-        cells.push(`<div class="tsg-axis-label"></div>`);
-        for (let c = 0; c < 8; c++) {
-          cells.push(`<div class="tsg-axis-label">${String.fromCharCode(65 + c)}</div>`);
-        }
-
-        boardGridEl.innerHTML = cells.join('');
-        boardGridEl.querySelectorAll('.tsg-cell').forEach((cellEl) => {
-          cellEl.addEventListener('click', () => {
-            const h = getHuman();
-            if (!h || !h.alive || state.phase !== 'orders') return;
-            const col = Number(cellEl.dataset.col);
-            const row = Number(cellEl.dataset.row);
-            const cost = manhattan(h, { col, row });
-            if (cost > h.credits) {
-              showToast(`Need ${cost}c (have ${h.credits}c)`);
-              return;
-            }
-            state.humanOrders.destCol = col;
-            state.humanOrders.destRow = row;
-            renderAll();
-          });
-        });
-      }
-
-      function renderControls() {
-        const human = getHuman();
-        roundLabelEl.textContent = `ROUND ${state.round}`;
-        dieCubeEl.textContent = state.lastRoll ? DIE_FACES[state.lastRoll - 1] : '🎲';
-
-        if (state.phase === 'gameover') {
-          phaseLabelEl.textContent = state.winner ? `Winner: ${state.winner.name}` : 'Done';
-          btnPhaseAction.textContent = '↻ NEW';
-        } else if (state.phase === 'roll') {
-          phaseLabelEl.textContent = 'Roll die for income';
-          btnPhaseAction.textContent = 'ROLL DIE';
-        } else {
-          phaseLabelEl.textContent = `+${state.lastRoll}c · Choose orders`;
-          btnPhaseAction.textContent = 'EXECUTE';
-        }
-
-        if (!human) {
-          yourBalanceBadge.textContent = 'SIM';
-          setStoreControlsDisabled(true);
-          return;
-        }
-
-        yourBalanceBadge.textContent = human.alive ? `${human.credits} CR` : 'OUT';
-        const canAct = human.alive && state.phase === 'orders';
-        setStoreControlsDisabled(!canAct);
-
-        // 1. Guess Target
-        const guessCandidates = survivors().filter((p) => p.id !== human.id);
-        selectGuessTarget.innerHTML = guessCandidates
-          .map((p) => {
-            const known = p.knownBy.has(human.id) || p.revealedPublic;
-            const tag = known ? ` (${COLOR_BY_ID[p.colorId].label})` : '';
-            const sel = String(p.id) === String(state.humanOrders.guessTargetId) ? ' selected' : '';
-            return `<option value="${p.id}"${sel}>${p.name}${tag}</option>`;
-          })
-          .join('');
-
-        // Color Swatch Dots
-        const selectedTarget =
-          state.humanOrders.guessTargetId !== ''
-            ? state.players[Number(state.humanOrders.guessTargetId)]
-            : null;
-        const knownColors = new Set(
-          state.players
-            .filter((p) => p.isHuman || p.knownBy.has(human.id) || p.revealedPublic || !p.alive)
-            .map((p) => p.colorId),
-        );
-
-        swatchPickerEl.innerHTML = COLORS.map((c) => {
-          const isOut = knownColors.has(c.id) || selectedTarget?.ruledOutColors.has(c.id);
-          const isSel = c.id === state.humanOrders.guessColorId;
-          return `<button type="button" class="tsg-pick-dot${isSel ? ' is-selected' : ''}${isOut ? ' is-eliminated-color' : ''}" data-color="${c.id}" style="background:${c.hex};" title="${c.label}" ${!canAct ? 'disabled' : ''}></button>`;
+        // 1. 6 Player Chips
+        playersGridEl.innerHTML = state.players.map((p) => {
+          const c = COLOR_BY_ID[p.colorId];
+          const dot = p.revealed || !p.alive
+            ? `<span class="dot" style="background:${c.hex};color:${c.text};">${c.short}</span>`
+            : `<span class="dot" style="border-style:dashed;color:#888;">?</span>`;
+          const sel = p.id === state.selectedId ? ' is-selected' : '';
+          const kill = p.id === state.killId ? ' is-kill-target' : '';
+          const dead = !p.alive ? ' is-dead' : '';
+          return `<button type="button" class="p-chip${sel}${kill}${dead}" data-id="${p.id}" ${!p.alive ? 'disabled' : ''}>
+            <span class="p-left">${dot}<span>${p.name}</span></span>
+            <span class="p-cr">${p.credits}c</span>
+          </button>`;
         }).join('');
 
-        swatchPickerEl.querySelectorAll('.tsg-pick-dot').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            state.humanOrders.guessColorId = btn.dataset.color;
-            renderControls();
+        playersGridEl.querySelectorAll('.p-chip').forEach((btn) => {
+          btn.onclick = () => {
+            const id = Number(btn.dataset.id);
+            if (id === 0) return;
+            state.selectedId = id;
+            syncDefaultGuessColor();
+            render();
+          };
+        });
+
+        // 2. Context Bar for Selected Opponent
+        const target = state.players[state.selectedId];
+        const canAct = me.alive && state.phase === 'orders';
+        if (!target || !target.alive || target.id === 0) {
+          targetBarEl.innerHTML = `<span>Select an opponent above</span>`;
+        } else if (!target.revealed) {
+          const known = knownColorSet();
+          const swatches = COLORS.map((c) => {
+            const out = known.has(c.id) || target.ruledOut.has(c.id);
+            const act = c.id === state.guessColorId;
+            return `<button type="button" class="swatch-btn${act ? ' is-active' : ''}${out ? ' is-out' : ''}" data-col="${c.id}" style="background:${c.hex};" title="${c.label}" ${!canAct ? 'disabled' : ''}></button>`;
+          }).join('');
+          targetBarEl.innerHTML = `<span>Guess <strong>${target.name}</strong>:</span><div class="swatches">${swatches}</div>`;
+          targetBarEl.querySelectorAll('.swatch-btn').forEach((b) => {
+            b.onclick = () => {
+              state.guessColorId = b.dataset.col;
+              render();
+            };
           });
-        });
-
-        // 2. Move display
-        const moveDist = manhattan(human, {
-          col: state.humanOrders.destCol,
-          row: state.humanOrders.destRow,
-        });
-        moveCostLabel.textContent = `${moveDist} CR`;
-        movePlanText.textContent = `${coordToStr(human.col, human.row)} → ${coordToStr(state.humanOrders.destCol, state.humanOrders.destRow)}`;
-
-        // 3. Kill Target
-        selectKillTarget.innerHTML =
-          `<option value="">— None —</option>` +
-          guessCandidates
-            .map((p) => {
-              const known = p.knownBy.has(human.id) || p.revealedPublic;
-              const dist = manhattan(
-                { col: state.humanOrders.destCol, row: state.humanOrders.destRow },
-                p,
-              );
-              const tag = `${known ? COLOR_BY_ID[p.colorId].label : '?'} · ${dist === 1 ? '1-space ✓' : `${dist}sp`}`;
-              const sel = String(p.id) === String(state.humanOrders.killTargetId) ? ' selected' : '';
-              return `<option value="${p.id}"${sel}>${p.name} (${tag})</option>`;
-            })
-            .join('');
-
-        // 4. Bounty Target
-        selectBountyTarget.innerHTML = guessCandidates
-          .map((p) => `<option value="${p.id}">${p.name}${p.bounty ? ` (+${p.bounty}c)` : ''}</option>`)
-          .join('');
-      }
-
-      function setStoreControlsDisabled(disabled) {
-        [
-          selectGuessTarget,
-          btnStayCoord,
-          selectKillTarget,
-          selectBountyTarget,
-          btnPlaceBounty,
-          btnDonate1,
-          btnDonate3,
-          btnDonateInf,
-        ].forEach((el) => {
-          if (el) el.disabled = disabled;
-        });
-      }
-
-      function renderLog() {
-        roundLogEl.innerHTML = state.logs
-          .map((entry) => `<div class="tsg-log-entry ${entry.cls || ''}">${entry.html}</div>`)
-          .join('');
-      }
-
-      function renderAll() {
-        renderChecks();
-        renderBoard();
-        renderControls();
-        renderLog();
-      }
-
-      btnPhaseAction.addEventListener('click', () => {
-        if (!state) return;
-        if (state.phase === 'gameover') initGame();
-        else if (state.phase === 'roll') rollDieAndDistributeIncome();
-        else if (state.phase === 'orders') executeRoundOrders();
-      });
-
-      selectGuessTarget.addEventListener('change', () => {
-        state.humanOrders.guessTargetId = selectGuessTarget.value;
-        renderControls();
-      });
-
-      selectKillTarget.addEventListener('change', () => {
-        state.humanOrders.killTargetId = selectKillTarget.value;
-        renderControls();
-      });
-
-      btnStayCoord.addEventListener('click', () => {
-        const human = getHuman();
-        if (!human || !human.alive || state.phase !== 'orders') return;
-        state.humanOrders.destCol = human.col;
-        state.humanOrders.destRow = human.row;
-        renderAll();
-      });
-
-      btnPlaceBounty.addEventListener('click', () => {
-        const human = getHuman();
-        if (!human || !human.alive || state.phase !== 'orders') return;
-        if (human.credits < 2) {
-          showToast('Need 2 CR');
-          return;
-        }
-        const target = state.players[Number(selectBountyTarget.value)];
-        if (!target || !target.alive) return;
-        human.credits -= 2;
-        target.bounty += 2;
-        addLog(`<strong>YOU</strong> 🎯 +2c on <strong>${target.name}</strong>`);
-        renderAll();
-      });
-
-      function donateCredits(amount) {
-        const human = getHuman();
-        if (!human || !human.alive || state.phase !== 'orders') return;
-        if (human.credits < amount) {
-          showToast(`Need ${amount} CR`);
-          return;
-        }
-        human.credits -= amount;
-        state.communalPot += amount;
-        addLog(`Anon <strong>+${amount}c</strong> → Pot`);
-        renderAll();
-      }
-
-      btnDonate1.addEventListener('click', () => donateCredits(1));
-      btnDonate3.addEventListener('click', () => donateCredits(3));
-      btnDonateInf.addEventListener('click', () => {
-        showToast('DECLINED: Insufficient ∞ CR');
-      });
-
-      btnOpenTrial.addEventListener('click', openHumanTrialModal);
-      btnOpenResurrect.addEventListener('click', openHumanResurrectModal);
-      btnNewGame.addEventListener('click', () => initGame());
-
-      btnMode.addEventListener('click', () => {
-        gameMode = gameMode === 'human' ? 'sim' : 'human';
-        btnMode.textContent = gameMode === 'human' ? '1P vs. AI' : '6-AI SIM';
-        btnAutoSim.hidden = gameMode !== 'sim';
-        btnPeekColors.hidden = gameMode !== 'sim';
-        if (gameMode === 'human') {
-          peekAllColors = false;
-          btnPeekColors.textContent = 'PEEK: OFF';
-        }
-        initGame();
-      });
-
-      function stopAutoSim() {
-        autoSim = false;
-        clearInterval(autoSimTimer);
-        autoSimTimer = 0;
-        if (btnAutoSim) btnAutoSim.textContent = 'AUTO: OFF';
-      }
-
-      btnAutoSim.addEventListener('click', () => {
-        if (autoSim) {
-          stopAutoSim();
-          return;
-        }
-        autoSim = true;
-        btnAutoSim.textContent = 'AUTO: ON';
-        autoSimTimer = setInterval(() => {
-          if (!state || state.phase === 'gameover') {
-            stopAutoSim();
-            return;
+        } else {
+          const c = COLOR_BY_ID[target.colorId];
+          const isKilling = state.killId === target.id;
+          const d = dist({ col: state.destCol, row: state.destRow }, target);
+          targetBarEl.innerHTML = `
+            <span><strong>${target.name}</strong> is <strong style="color:${c.hex};">${c.label}</strong> @ ${coordStr(target.col, target.row)} (${d === 1 ? '1-space ✓' : `${d}sp`})</span>
+            <button type="button" id="btn-toggle-kill" class="btn btn--kill${isKilling ? ' is-on' : ''}" ${!canAct || me.credits < 3 ? 'disabled' : ''}>
+              ${isKilling ? '🗡️ KILL QUEUED (3c)' : '🗡️ KILL (3c)'}
+            </button>
+          `;
+          const kBtn = document.getElementById('btn-toggle-kill');
+          if (kBtn) {
+            kBtn.onclick = () => {
+              state.killId = isKilling ? null : target.id;
+              if (state.killId !== null && dist({ col: state.destCol, row: state.destRow }, target) !== 1) {
+                const adj = closestAdj(target, me);
+                if (dist(me, adj) + 3 <= me.credits) {
+                  state.destCol = adj.col;
+                  state.destRow = adj.row;
+                }
+              }
+              render();
+            };
           }
-          if (state.phase === 'roll') rollDieAndDistributeIncome();
-          else if (state.phase === 'orders') executeRoundOrders();
-        }, 1100);
-      });
+        }
 
-      btnPeekColors.addEventListener('click', () => {
-        peekAllColors = !peekAllColors;
-        btnPeekColors.textContent = `PEEK: ${peekAllColors ? 'ON' : 'OFF'}`;
-        renderAll();
-      });
+        // 3. 8x8 Board
+        const cells = [];
+        for (let r = 7; r >= 0; r--) {
+          for (let c = 0; c < 8; c++) {
+            const here = state.players.filter((p) => p.alive && p.col === c && p.row === r);
+            const isYou = me.alive && me.col === c && me.row === r;
+            const isDest = me.alive && state.destCol === c && state.destRow === r;
+            const isAdj = me.alive && Math.abs(state.destCol - c) + Math.abs(state.destRow - r) === 1;
+            const pieces = here.map((p) => {
+              const col = COLOR_BY_ID[p.colorId];
+              const label = p.revealed ? p.name[0] : col.short;
+              return `<span class="piece${p.isHuman ? ' mine' : ''}" style="background:${col.hex};color:${col.text};">${label}</span>`;
+            }).join('');
+            cells.push(`<div class="cell${isYou ? ' is-you' : ''}${isDest ? ' is-dest' : ''}${isAdj ? ' is-adj' : ''}" data-c="${c}" data-r="${r}">
+              <span class="coord">${coordStr(c, r)}</span>
+              <div class="pieces">${pieces}</div>
+            </div>`);
+          }
+        }
+        boardEl.innerHTML = cells.join('');
+        boardEl.querySelectorAll('.cell').forEach((cell) => {
+          cell.onclick = () => {
+            if (!canAct) return;
+            const c = Number(cell.dataset.c);
+            const r = Number(cell.dataset.r);
+            const cost = dist(me, { col: c, row: r }) + (state.killId !== null ? 3 : 0);
+            if (cost > me.credits) {
+              setTicker(`Need ${cost}c (you have ${me.credits}c).`);
+              return;
+            }
+            state.destCol = c;
+            state.destRow = r;
+            render();
+          };
+        });
 
-      initGame();
+        // 4. Bottom Action Buttons
+        btnDonate.disabled = !(canAct && me.credits >= 1);
+        btnInf.disabled = !canAct;
+        btnTrial.disabled = !(canAct && state.pot >= 10 && target && target.alive && target.id !== 0);
+        btnRevive.disabled = !(canAct && state.pot >= 15 && deadPlayers().length > 0);
+
+        if (state.phase === 'over') btnMain.textContent = '↻ PLAY AGAIN';
+        else if (state.phase === 'roll') btnMain.textContent = 'ROLL DIE';
+        else btnMain.textContent = 'END TURN';
+      }
+
+      btnMain.onclick = () => {
+        if (state.phase === 'over') init();
+        else if (state.phase === 'roll') rollDie();
+        else endTurn();
+      };
+
+      btnDonate.onclick = () => {
+        const me = state.players[0];
+        if (me.credits < 1) return;
+        me.credits -= 1;
+        state.pot += 1;
+        setTicker(`Donated <strong>1c</strong> anonymously to the Pot.`);
+        render();
+      };
+
+      btnInf.onclick = () => {
+        setTicker(`<strong>DECLINED:</strong> Insufficient infinity (∞c).`);
+      };
+
+      btnTrial.onclick = () => {
+        const target = state.players[state.selectedId];
+        if (!target || !target.alive || target.id === 0 || state.pot < 10) return;
+        const ev = [];
+        runTrial(target, ev);
+        setTicker(ev[0] || 'Trial complete.');
+        if (survivors().length <= 1) state.phase = 'over';
+        render();
+      };
+
+      btnRevive.onclick = () => {
+        const dead = deadPlayers()[0];
+        if (!dead || state.pot < 15) return;
+        const ev = [];
+        revivePlayer(dead, ev);
+        setTicker(ev[0]);
+        render();
+      };
+
+      btnReset.onclick = init;
+      init();
     })();
   </script>
 </body>
