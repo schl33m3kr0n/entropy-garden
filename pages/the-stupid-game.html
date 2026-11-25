@@ -333,6 +333,34 @@
       color: #050505;
     }
 
+    .rules-box {
+      display: none;
+      width: 100%;
+      padding: 8px 11px;
+      border: 1px solid rgba(0, 255, 0, 0.28);
+      border-radius: 6px;
+      background: rgba(0, 14, 4, 0.88);
+      font-size: 0.65rem;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.84);
+    }
+    .rules-box.is-open { display: block; }
+    .rules-box ul {
+      margin: 0;
+      padding-left: 15px;
+    }
+    .rules-box strong { color: var(--neon-green, #0f0); }
+
+    .board-legend {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      font-size: 0.59rem;
+      color: rgba(255, 255, 255, 0.56);
+    }
+
     .garden-link {
       margin-top: 4px;
       padding: 7px 13px;
@@ -367,14 +395,26 @@
 
     <!-- Top Strip -->
     <div class="hud-bar">
-      <span class="die-pill"><span id="die-face" class="die-face">🎲</span> <span id="round-text">R1</span></span>
-      <span id="move-text">0c</span>
-      <span id="pot-text" class="pot-pill">POT: 0c</span>
+      <span class="die-pill" title="Roll 1d6 each round — every survivor earns that many credits"><span id="die-face" class="die-face">🎲</span> <span id="round-text">R1</span></span>
+      <span id="move-text" title="Planned order cost / your available credits">0c</span>
+      <span id="pot-text" class="pot-pill" title="Communal Pot (fed by dead players' credits &amp; donations)">POT: 0c</span>
       <div class="hud-btns">
-        <button type="button" id="btn-mode" class="btn" style="padding:3px 7px;">1P</button>
+        <button type="button" id="btn-rules" class="btn" style="padding:3px 7px;" aria-expanded="false">? RULES</button>
+        <button type="button" id="btn-mode" class="btn" style="padding:3px 7px;" title="Toggle 1P vs. 6-AI Simulation">1P</button>
         <button type="button" id="btn-auto" class="btn" style="padding:3px 7px;" hidden>AUTO</button>
-        <button type="button" id="btn-reset" class="btn" style="padding:3px 7px;">↻</button>
+        <button type="button" id="btn-reset" class="btn" style="padding:3px 7px;" title="New Match">↻</button>
       </div>
+    </div>
+
+    <div id="rules-box" class="rules-box">
+      <ul>
+        <li><strong>Goal:</strong> 6 players, 6 secret colors (R, Y, B, G, K, W). Start with <strong>3c</strong> each. Last survivor wins.</li>
+        <li><strong>Die Roll:</strong> Each round, a 1–6 die roll gives every survivor that many credits.</li>
+        <li><strong>Guess (1/round, Free):</strong> Click a player chip and pick a color dot. A right guess exposes their color &amp; piece.</li>
+        <li><strong>Move (1c/step) &amp; Kill (3c):</strong> Tap any board square to move. Stand <strong>1 orthogonal space</strong> (N/S/E/W) from an exposed target to kill them for <strong>3c</strong>.</li>
+        <li><strong>The Pot:</strong> Dead players' credits + anonymous donations enter the Communal Pot.</li>
+        <li><strong>Bounty (2c) · Trial (10c Pot) · Revive (15c Pot):</strong> Put a <strong>+2c</strong> bounty on the selected player (paid to their killer), spend <strong>10c from the Pot</strong> for a majority-vote execution anywhere, or spend <strong>15c from the Pot</strong> to revive a dead player with <strong>3c</strong>.</li>
+      </ul>
     </div>
 
     <!-- 6 Player Checks -->
@@ -385,14 +425,19 @@
 
     <!-- 8x8 Board -->
     <div id="board" class="board" role="grid" aria-label="8 by 8 board"></div>
+    <div class="board-legend">
+      <span><strong style="color:#0f0;">Green Ring:</strong> You</span>
+      <span><strong style="color:#f7d800;">Gold Square:</strong> Move (1c/step)</span>
+      <span><strong style="color:#ff3355;">Red Squares:</strong> 1-Space Kill Range</span>
+    </div>
 
     <!-- Bottom Controls -->
     <div class="actions-bar">
-      <button type="button" id="btn-bounty" class="btn" disabled>🎯 2c</button>
-      <button type="button" id="btn-donate" class="btn" disabled>+1c POT</button>
-      <button type="button" id="btn-inf" class="btn" disabled>∞c</button>
-      <button type="button" id="btn-trial" class="btn" disabled>⚖️ 10c</button>
-      <button type="button" id="btn-revive" class="btn" disabled>✚ 15c</button>
+      <button type="button" id="btn-bounty" class="btn" title="Spend 2c to place a bounty on the selected player" disabled>🎯 BOUNTY 2c</button>
+      <button type="button" id="btn-donate" class="btn" title="Anonymously donate 1c to the Communal Pot" disabled>DONATE 1c</button>
+      <button type="button" id="btn-inf" class="btn" title="Anonymous philanthropy (costs ∞ credits)" disabled>DONATE ∞c</button>
+      <button type="button" id="btn-trial" class="btn" title="Spend 10 Pot credits to put the selected player on trial (majority vote kills)" disabled>⚖️ TRIAL 10c</button>
+      <button type="button" id="btn-revive" class="btn" title="Spend 15 Pot credits to revive an eliminated player with 3c" disabled>✚ REVIVE 15c</button>
       <button type="button" id="btn-main" class="btn btn--main">ROLL DIE</button>
     </div>
 
@@ -436,6 +481,8 @@
       const targetBarEl = document.getElementById('target-bar');
       const boardEl = document.getElementById('board');
       const btnMode = document.getElementById('btn-mode');
+      const btnRules = document.getElementById('btn-rules');
+      const rulesBox = document.getElementById('rules-box');
       const btnAuto = document.getElementById('btn-auto');
       const btnReset = document.getElementById('btn-reset');
       const btnBounty = document.getElementById('btn-bounty');
@@ -1104,6 +1151,11 @@
         revivePlayer(me, dead, ev);
         setTicker(ev[0]);
         render();
+      };
+
+      btnRules.onclick = () => {
+        const open = rulesBox.classList.toggle('is-open');
+        btnRules.setAttribute('aria-expanded', String(open));
       };
 
       btnMode.onclick = () => {
