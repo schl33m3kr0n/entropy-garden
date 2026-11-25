@@ -47,7 +47,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
     }
 
     h1 {
@@ -60,24 +60,24 @@
 
     .ticker {
       min-height: 1.35em;
-      font-size: 0.74rem;
-      color: rgba(255, 255, 255, 0.82);
+      font-size: 0.73rem;
+      color: rgba(255, 255, 255, 0.84);
       text-align: center;
     }
     .ticker strong { color: var(--neon-green, #0f0); }
 
-    /* Top HUD strip: Die + Round + Pot + New */
+    /* Top HUD strip: Die + Round + Pot + Mode/New */
     .hud-bar {
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       padding: 6px 10px;
       border: 1px solid rgba(0, 255, 0, 0.28);
       border-radius: 6px;
       background: rgba(0, 14, 4, 0.7);
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-variant-numeric: tabular-nums;
     }
 
@@ -102,6 +102,11 @@
       font-weight: 700;
     }
 
+    .hud-btns {
+      display: flex;
+      gap: 4px;
+    }
+
     /* 6 Player Checks Strip (3x2 grid) */
     .players-grid {
       width: 100%;
@@ -121,9 +126,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 5px;
+      gap: 4px;
       cursor: pointer;
-      font-size: 0.68rem;
+      font-size: 0.67rem;
       font-variant-numeric: tabular-nums;
       transition: border-color 0.15s ease, background 0.15s ease;
     }
@@ -167,24 +172,36 @@
       flex-shrink: 0;
     }
 
+    .p-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .p-bounty {
+      color: #ffe45e;
+      font-size: 0.58rem;
+      font-weight: 700;
+    }
+
     .p-cr {
       color: var(--neon-green, #0f0);
       font-weight: 700;
     }
 
-    /* Inline Popover Bar: Guess Color or Kill */
+    /* Inline Popover Bar: Guess Color / Kill / Bounty */
     .target-bar {
       width: 100%;
       min-height: 36px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       padding: 5px 10px;
       border: 1px solid rgba(0, 255, 0, 0.22);
       border-radius: 6px;
       background: rgba(4, 10, 5, 0.85);
-      font-size: 0.68rem;
+      font-size: 0.67rem;
     }
 
     .swatches {
@@ -272,7 +289,7 @@
       width: 100%;
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
       justify-content: space-between;
     }
 
@@ -283,11 +300,11 @@
       background: rgba(0, 16, 0, 0.65);
       color: rgba(0, 255, 0, 0.92);
       font-family: inherit;
-      font-size: 0.66rem;
+      font-size: 0.64rem;
       font-weight: 600;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 7px 10px;
+      padding: 7px 9px;
       cursor: pointer;
     }
     .btn:hover:not(:disabled) {
@@ -303,7 +320,7 @@
       background: rgba(0, 255, 0, 0.18);
       border-color: #0f0;
       color: #fff;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
     }
     .btn--kill {
       border-color: #ff3355;
@@ -351,15 +368,19 @@
     <!-- Top Strip -->
     <div class="hud-bar">
       <span class="die-pill"><span id="die-face" class="die-face">🎲</span> <span id="round-text">R1</span></span>
-      <span id="move-text">Move: 0c</span>
+      <span id="move-text">0c</span>
       <span id="pot-text" class="pot-pill">POT: 0c</span>
-      <button type="button" id="btn-reset" class="btn" style="padding:3px 8px;">↻</button>
+      <div class="hud-btns">
+        <button type="button" id="btn-mode" class="btn" style="padding:3px 7px;">1P</button>
+        <button type="button" id="btn-auto" class="btn" style="padding:3px 7px;" hidden>AUTO</button>
+        <button type="button" id="btn-reset" class="btn" style="padding:3px 7px;">↻</button>
+      </div>
     </div>
 
     <!-- 6 Player Checks -->
     <div id="players-grid" class="players-grid"></div>
 
-    <!-- Context Bar for Selected Player (Guess Color OR Kill) -->
+    <!-- Context Bar for Selected Player (Guess Color OR Kill + Bounty) -->
     <div id="target-bar" class="target-bar"></div>
 
     <!-- 8x8 Board -->
@@ -367,6 +388,7 @@
 
     <!-- Bottom Controls -->
     <div class="actions-bar">
+      <button type="button" id="btn-bounty" class="btn" disabled>🎯 2c</button>
       <button type="button" id="btn-donate" class="btn" disabled>+1c POT</button>
       <button type="button" id="btn-inf" class="btn" disabled>∞c</button>
       <button type="button" id="btn-trial" class="btn" disabled>⚖️ 10c</button>
@@ -389,7 +411,16 @@
         { id: 'WHITE', label: 'White', hex: '#f4f4f6', text: '#050505', short: 'W' },
       ];
       const COLOR_BY_ID = Object.fromEntries(COLORS.map((c) => [c.id, c]));
-      const NAMES = ['YOU', 'ALICE', 'BOB', 'CHARLIE', 'DAVID', 'EVE'];
+
+      const PERSONAS = [
+        { name: 'ALICE', role: 'Aggressive', style: 'aggressive' },
+        { name: 'BOB', role: 'Economist', style: 'economist' },
+        { name: 'CHARLIE', role: 'Detective', style: 'detective' },
+        { name: 'DAVID', role: 'Opportunist', style: 'opportunist' },
+        { name: 'EVE', role: 'Strategist', style: 'political' },
+        { name: 'FRANK', role: 'Chaotic', style: 'chaotic' },
+      ];
+
       const STARTS = [
         { col: 3, row: 3 }, { col: 1, row: 1 }, { col: 3, row: 5 },
         { col: 6, row: 1 }, { col: 5, row: 3 }, { col: 6, row: 5 },
@@ -404,13 +435,18 @@
       const playersGridEl = document.getElementById('players-grid');
       const targetBarEl = document.getElementById('target-bar');
       const boardEl = document.getElementById('board');
+      const btnMode = document.getElementById('btn-mode');
+      const btnAuto = document.getElementById('btn-auto');
+      const btnReset = document.getElementById('btn-reset');
+      const btnBounty = document.getElementById('btn-bounty');
       const btnDonate = document.getElementById('btn-donate');
       const btnInf = document.getElementById('btn-inf');
       const btnTrial = document.getElementById('btn-trial');
       const btnRevive = document.getElementById('btn-revive');
       const btnMain = document.getElementById('btn-main');
-      const btnReset = document.getElementById('btn-reset');
 
+      let gameMode = 'human'; // 'human' | 'sim'
+      let autoTimer = 0;
       let state = null;
 
       function shuffle(arr) {
@@ -425,26 +461,45 @@
       const coordStr = (c, r) => `${String.fromCharCode(65 + c)}${r + 1}`;
       const dist = (a, b) => Math.abs(a.col - b.col) + Math.abs(a.row - b.row);
 
+      function stopAuto() {
+        if (autoTimer) {
+          clearInterval(autoTimer);
+          autoTimer = 0;
+        }
+        btnAuto.textContent = 'AUTO';
+      }
+
       function init() {
+        stopAuto();
         const colors = shuffle(COLORS);
         const starts = shuffle(STARTS);
-        const players = NAMES.map((name, id) => ({
+        const roster = gameMode === 'human'
+          ? [{ name: 'YOU', role: 'You', style: 'human', isHuman: true }, ...PERSONAS.slice(0, 5).map((p) => ({ ...p, isHuman: false }))]
+          : PERSONAS.map((p) => ({ ...p, isHuman: false }));
+
+        const players = roster.map((p, id) => ({
           id,
-          name,
-          isHuman: id === 0,
+          name: p.name,
+          role: p.role,
+          style: p.style,
+          isHuman: p.isHuman,
           colorId: colors[id].id,
           credits: 3,
           col: starts[id].col,
           row: starts[id].row,
           alive: true,
-          revealed: id === 0,
-          ruledOut: new Set(),
+          revealedPublic: false,
+          knownBy: new Set([id]),
+          ruledOutColors: new Set(),
+          bounty: 0,
         }));
 
         state = {
           round: 1,
-          phase: 'roll', // 'roll' | 'orders' | 'over'
+          phase: 'roll',
           pot: 0,
+          trialUsed: false,
+          reviveUsed: false,
           players,
           selectedId: 1,
           guessColorId: COLORS[0].id,
@@ -453,14 +508,22 @@
           killId: null,
         };
 
-        const myCol = COLOR_BY_ID[players[0].colorId];
-        setTicker(`You are <strong>${myCol.label}</strong> @ <strong>${coordStr(players[0].col, players[0].row)}</strong>. Roll the die.`);
+        if (players[0].isHuman) {
+          const myCol = COLOR_BY_ID[players[0].colorId];
+          setTicker(`You are <strong>${myCol.label}</strong> @ <strong>${coordStr(players[0].col, players[0].row)}</strong>. Roll the die.`);
+        } else {
+          setTicker(`<strong>6-AI SIM</strong> ready. Roll die or toggle AUTO.`);
+        }
         pickDefaultSelection();
         render();
       }
 
       function setTicker(html) {
         tickerEl.innerHTML = html;
+      }
+
+      function getHuman() {
+        return state.players.find((p) => p.isHuman) || null;
       }
 
       function survivors() {
@@ -472,20 +535,28 @@
       }
 
       function knownColorSet() {
-        return new Set(state.players.filter((p) => p.revealed || !p.alive).map((p) => p.colorId));
+        const me = getHuman();
+        return new Set(
+          state.players
+            .filter((p) => p.isHuman || p.revealedPublic || !p.alive || (me && p.knownBy.has(me.id)))
+            .map((p) => p.colorId),
+        );
       }
 
       function pickDefaultSelection() {
-        const me = state.players[0];
-        state.destCol = me.col;
-        state.destRow = me.row;
+        const me = getHuman();
+        if (me) {
+          state.destCol = me.col;
+          state.destRow = me.row;
+        }
         state.killId = null;
 
-        const others = survivors().filter((p) => p.id !== 0);
+        const others = survivors().filter((p) => !p.isHuman);
         if (!others.length) return;
         const cur = state.players[state.selectedId];
-        if (!cur || !cur.alive || cur.id === 0) {
-          state.selectedId = others[0].id;
+        if (!cur || !cur.alive || cur.isHuman) {
+          const unrev = others.find((p) => !p.revealedPublic) || others[0];
+          state.selectedId = unrev.id;
         }
         syncDefaultGuessColor();
       }
@@ -493,159 +564,261 @@
       function syncDefaultGuessColor() {
         const target = state.players[state.selectedId];
         const known = knownColorSet();
-        const valid = COLORS.find((c) => !known.has(c.id) && (!target || !target.ruledOut.has(c.id)));
+        const valid = COLORS.find((c) => !known.has(c.id) && (!target || !target.ruledOutColors.has(c.id)));
         if (valid) state.guessColorId = valid.id;
       }
 
-      // --- TURN STEP 1: ROLL DIE ---
+      // --- PHASE 1: ROLL DIE ---
       function rollDie() {
         const roll = 1 + Math.floor(Math.random() * 6);
         dieFaceEl.textContent = DIE_FACES[roll - 1];
         dieFaceEl.classList.add('spin');
         setTimeout(() => dieFaceEl.classList.remove('spin'), 220);
 
+        state.trialUsed = false;
+        state.reviveUsed = false;
         survivors().forEach((p) => { p.credits += roll; });
         state.phase = 'orders';
         pickDefaultSelection();
-        setTicker(`Rolled <strong>${roll}</strong> (+${roll}c each). Click a player to guess/kill &amp; tap board to move.`);
+
+        const polEvents = [];
+        maybeRunAiCommunalPotPolitics(polEvents);
+        if (checkGameOver(polEvents)) {
+          render();
+          return;
+        }
+
+        const msg = polEvents.length
+          ? `Rolled <strong>${roll}</strong> (+${roll}c) · ${polEvents[0]}`
+          : `Rolled <strong>${roll}</strong> (+${roll}c each). Pick orders &amp; End Turn.`;
+        setTicker(msg);
         render();
       }
 
-      // --- SIMPLE UNIFIED AI ---
-      function stepToward(from, to, steps) {
-        let c = from.col, r = from.row, s = steps;
-        while (s > 0 && (c !== to.col || r !== to.row)) {
-          if (Math.abs(to.col - c) >= Math.abs(to.row - r) && c !== to.col) c += to.col > c ? 1 : -1;
-          else if (r !== to.row) r += to.row > r ? 1 : -1;
-          s--;
+      // --- AI PERSONA DECISION ENGINE ---
+      function stepToward(fromCol, fromRow, toCol, toRow, maxSteps) {
+        let c = fromCol, r = fromRow, rem = maxSteps;
+        while (rem > 0 && (c !== toCol || r !== toRow)) {
+          if (Math.abs(toCol - c) >= Math.abs(toRow - r) && c !== toCol) c += toCol > c ? 1 : -1;
+          else if (r !== toRow) r += toRow > r ? 1 : -1;
+          rem--;
         }
         return { col: c, row: r };
       }
 
-      function closestAdj(target, from) {
-        const pts = [
-          { col: target.col + 1, row: target.row },
-          { col: target.col - 1, row: target.row },
-          { col: target.col, row: target.row + 1 },
-          { col: target.col, row: target.row - 1 },
-        ].filter((p) => p.col >= 0 && p.col < 8 && p.row >= 0 && p.row < 8);
-        pts.sort((a, b) => dist(from, a) - dist(from, b));
-        return pts[0] || { col: target.col, row: target.row };
+      function adjacentCoordTo(targetCol, targetRow, fromCol, fromRow) {
+        const candidates = [
+          { col: targetCol, row: targetRow + 1 },
+          { col: targetCol, row: targetRow - 1 },
+          { col: targetCol + 1, row: targetRow },
+          { col: targetCol - 1, row: targetRow },
+        ].filter((pt) => pt.col >= 0 && pt.col < 8 && pt.row >= 0 && pt.row < 8);
+        candidates.sort((a, b) => dist({ col: fromCol, row: fromRow }, a) - dist({ col: fromCol, row: fromRow }, b));
+        return candidates[0] || { col: targetCol, row: targetRow };
       }
 
-      // --- TURN STEP 2: RESOLVE ORDERS ---
+      function planAiOrders(ai, events) {
+        const others = survivors().filter((p) => p.id !== ai.id);
+        if (!others.length) {
+          return { guessTarget: null, guessColorId: null, destCol: ai.col, destRow: ai.row, killTarget: null };
+        }
+
+        // 1. Color Guess: prefer nearest unrevealed survivor (or random for Frank/chaotic)
+        const unguessed = others.filter((p) => !p.knownBy.has(ai.id) && !p.revealedPublic);
+        let guessTarget = null;
+        let guessColorId = null;
+
+        if (unguessed.length) {
+          unguessed.sort((a, b) => dist(ai, a) - dist(ai, b));
+          guessTarget = ai.style === 'chaotic'
+            ? unguessed[Math.floor(Math.random() * unguessed.length)]
+            : unguessed[0];
+
+          const knownColors = new Set(
+            state.players
+              .filter((p) => p.id === ai.id || p.knownBy.has(ai.id) || p.revealedPublic || !p.alive)
+              .map((p) => p.colorId),
+          );
+          const pool = COLORS.filter((c) => !knownColors.has(c.id) && !guessTarget.ruledOutColors.has(c.id));
+          const fallbackPool = COLORS.filter((c) => !knownColors.has(c.id));
+          const pickPool = pool.length ? pool : fallbackPool.length ? fallbackPool : COLORS;
+          guessColorId = pickPool[Math.floor(Math.random() * pickPool.length)].id;
+        }
+
+        // 2. Persona Donations & Bounties
+        if (ai.style === 'political' && ai.credits >= 6 && state.pot >= 7 && state.pot < 10) {
+          const donate = Math.min(2, ai.credits - 4);
+          if (donate > 0) {
+            ai.credits -= donate;
+            state.pot += donate;
+            events.push(`Anon +${donate}c → Pot`);
+          }
+        } else if (ai.style === 'chaotic' && ai.credits >= 8 && Math.random() < 0.25) {
+          ai.credits -= 1;
+          state.pot += 1;
+          events.push(`Anon +1c → Pot`);
+        } else if ((ai.style === 'economist' || ai.style === 'detective') && ai.credits >= 9 && Math.random() < 0.35) {
+          const richTargets = others.filter((p) => p.revealedPublic || p.credits >= 6);
+          if (richTargets.length) {
+            const bt = richTargets[Math.floor(Math.random() * richTargets.length)];
+            ai.credits -= 2;
+            bt.bounty += 2;
+            events.push(`<strong>${ai.name}</strong> 🎯+2c on <strong>${bt.name}</strong>`);
+          }
+        }
+
+        // 3. Stalk or Assassinate Identified Targets
+        const identifiedTargets = others.filter((p) => p.knownBy.has(ai.id) || p.revealedPublic);
+        let primaryTarget = null;
+        if (identifiedTargets.length) {
+          identifiedTargets.sort((a, b) => (dist(ai, a) - a.bounty * 1.5) - (dist(ai, b) - b.bounty * 1.5));
+          primaryTarget = identifiedTargets[0];
+        }
+
+        let destCol = ai.col;
+        let destRow = ai.row;
+        let killTarget = null;
+
+        if (primaryTarget && ai.credits >= 3) {
+          const adj = adjacentCoordTo(primaryTarget.col, primaryTarget.row, ai.col, ai.row);
+          const distToAdj = dist(ai, adj);
+          const maxMoveBudget = ai.credits - 3;
+
+          if (distToAdj <= maxMoveBudget) {
+            destCol = adj.col;
+            destRow = adj.row;
+            killTarget = primaryTarget;
+          } else if (maxMoveBudget > 0) {
+            const step = stepToward(ai.col, ai.row, adj.col, adj.row, maxMoveBudget);
+            destCol = step.col;
+            destRow = step.row;
+          }
+        } else if (guessTarget && ai.credits >= 4) {
+          const adj = adjacentCoordTo(guessTarget.col, guessTarget.row, ai.col, ai.row);
+          const distToAdj = dist(ai, adj);
+          const stalkBudget = Math.min(2, ai.credits - 3);
+          if (distToAdj > 0 && stalkBudget > 0) {
+            const step = stepToward(ai.col, ai.row, adj.col, adj.row, stalkBudget);
+            destCol = step.col;
+            destRow = step.row;
+          }
+        }
+
+        return { guessTarget, guessColorId, destCol, destRow, killTarget };
+      }
+
+      // --- PHASE 2: EXECUTE ROUND ORDERS ---
       function endTurn() {
-        const me = state.players[0];
+        if (!state || state.phase !== 'orders') return;
+        const aliveAtStart = survivors();
+        const plans = new Map();
         const events = [];
 
-        // 1. Human Guess
-        if (me.alive && state.selectedId) {
-          const target = state.players[state.selectedId];
-          if (target && target.alive && !target.revealed) {
-            const c = COLOR_BY_ID[state.guessColorId];
-            if (target.colorId === state.guessColorId) {
-              target.revealed = true;
-              events.push(`You ID'd <strong>${target.name}</strong> (${c.label})!`);
-            } else {
-              target.ruledOut.add(state.guessColorId);
-              events.push(`${target.name} ≠ ${c.label}.`);
-            }
+        const me = getHuman();
+        if (me && me.alive) {
+          const moveCost = dist(me, { col: state.destCol, row: state.destRow });
+          const killTarget = state.killId !== null ? state.players[state.killId] : null;
+          const killCost = killTarget ? 3 : 0;
+          if (moveCost + killCost > me.credits) {
+            setTicker(`Need ${moveCost + killCost}c (you have ${me.credits}c).`);
+            return;
           }
+          const guessTarget = state.selectedId ? state.players[state.selectedId] : null;
+          plans.set(me.id, {
+            guessTarget: guessTarget && !guessTarget.revealedPublic ? guessTarget : null,
+            guessColorId: state.guessColorId,
+            destCol: state.destCol,
+            destRow: state.destRow,
+            killTarget,
+          });
         }
 
-        // 2. AI Guesses (simple: pick 1 unrevealed opponent & 1 untried color)
-        survivors().forEach((ai) => {
-          if (ai.isHuman) return;
-          const hidden = survivors().filter((p) => p.id !== ai.id && (!p.revealed || p.id === 0));
-          if (!hidden.length) return;
-          const target = hidden[Math.floor(Math.random() * hidden.length)];
-          const known = new Set(
-            state.players.filter((p) => p.id === ai.id || (p.revealed && p.id !== 0) || !p.alive).map((p) => p.colorId),
-          );
-          const pool = COLORS.filter((c) => !known.has(c.id) && !target.ruledOut.has(c.id));
-          const pick = (pool.length ? pool : COLORS)[Math.floor(Math.random() * (pool.length || COLORS.length))];
-          if (target.colorId === pick.id) {
-            target.revealed = true;
-            events.push(`<strong>${ai.name}</strong> ID'd <strong>${target.name}</strong>!`);
-          } else {
-            target.ruledOut.add(pick.id);
-          }
+        aliveAtStart.forEach((p) => {
+          if (!p.isHuman) plans.set(p.id, planAiOrders(p, events));
         });
 
-        // 3. Human Move
-        if (me.alive) {
-          const cost = dist(me, { col: state.destCol, row: state.destRow });
-          if (cost > 0 && cost <= me.credits) {
-            me.credits -= cost;
-            me.col = state.destCol;
-            me.row = state.destRow;
-          }
-        }
+        // 1. Resolve Color Guesses (unlocks same-round ambush!)
+        aliveAtStart.forEach((actor) => {
+          const plan = plans.get(actor.id);
+          if (!plan || !plan.guessTarget || !plan.guessColorId) return;
+          const target = plan.guessTarget;
+          if (!target.alive) return;
 
-        // 4. Human Kill
-        if (me.alive && state.killId !== null) {
-          const victim = state.players[state.killId];
-          if (victim && victim.alive && victim.revealed && me.credits >= 3) {
-            if (dist(me, victim) > 1) {
-              const adj = closestAdj(victim, me);
-              const d = dist(me, adj);
-              if (d + 3 <= me.credits) {
-                me.credits -= d;
-                me.col = adj.col;
-                me.row = adj.row;
+          const guessedColor = COLOR_BY_ID[plan.guessColorId];
+          if (target.colorId === plan.guessColorId) {
+            target.knownBy.add(actor.id);
+            target.revealedPublic = true;
+            events.push(`<strong>${actor.name}</strong> ID'd <strong>${target.name}</strong> (${guessedColor.label})!`);
+            if (!actor.isHuman && !plan.killTarget && actor.credits >= 3) {
+              const adj = adjacentCoordTo(target.col, target.row, actor.col, actor.row);
+              const d = dist(actor, adj);
+              if (d + 3 <= actor.credits) {
+                plan.destCol = adj.col;
+                plan.destRow = adj.row;
+                plan.killTarget = target;
+              } else if (actor.credits > 3) {
+                const step = stepToward(actor.col, actor.row, adj.col, adj.row, actor.credits - 3);
+                plan.destCol = step.col;
+                plan.destRow = step.row;
               }
             }
-            if (dist(me, victim) === 1 && me.credits >= 3) {
-              me.credits -= 3;
-              killPlayer(victim, `🗡️ by YOU`, events);
+          } else {
+            target.ruledOutColors.add(plan.guessColorId);
+            if (actor.isHuman) {
+              events.push(`${target.name} ≠ ${guessedColor.label}`);
             }
-          }
-        }
-
-        // 5. AI Move & Kill (simple: chase nearest revealed player; kill if 1 space away & >= 3c)
-        survivors().forEach((ai) => {
-          if (ai.isHuman || !ai.alive) return;
-          const targets = survivors().filter((p) => p.id !== ai.id && (p.id !== 0 ? p.revealed : p.ruledOut.size >= 3));
-          const allOthers = survivors().filter((p) => p.id !== ai.id);
-          const pool = targets.length ? targets : allOthers;
-          if (!pool.length) return;
-
-          pool.sort((a, b) => dist(ai, a) - dist(ai, b));
-          const target = pool[0];
-          const adj = closestAdj(target, ai);
-          const d = dist(ai, adj);
-
-          if (targets.includes(target) && d + 3 <= ai.credits) {
-            ai.credits -= d + 3;
-            ai.col = adj.col;
-            ai.row = adj.row;
-            killPlayer(target, `🗡️ by <strong>${ai.name}</strong>`, events);
-          } else if (ai.credits > 3 && d > 0) {
-            const step = stepToward(ai, adj, Math.min(2, ai.credits - 3));
-            const moved = dist(ai, step);
-            ai.credits -= moved;
-            ai.col = step.col;
-            ai.row = step.row;
           }
         });
 
-        // 6. Simple AI Pot usage (Trial at 10c, Revive at 15c)
-        if (survivors().length > 2 && state.pot >= 15 && deadPlayers().length && Math.random() < 0.35) {
-          const revived = deadPlayers()[0];
-          revivePlayer(revived, events);
-        } else if (survivors().length > 2 && state.pot >= 10 && Math.random() < 0.4) {
-          const alive = survivors();
-          const accused = alive[Math.floor(Math.random() * alive.length)];
-          runTrial(accused, events);
-        }
+        // 2. Move non-assassins first
+        aliveAtStart.forEach((actor) => {
+          const plan = plans.get(actor.id);
+          if (!plan || plan.killTarget) return;
+          const stepCost = dist(actor, { col: plan.destCol, row: plan.destRow });
+          if (stepCost > 0 && stepCost <= actor.credits) {
+            actor.credits -= stepCost;
+            actor.col = plan.destCol;
+            actor.row = plan.destRow;
+          }
+        });
 
-        // 7. Check Game Over
-        const left = survivors();
-        if (left.length <= 1) {
-          state.phase = 'over';
-          const w = left[0] || me;
-          setTicker(`🏆 <strong>${w.name}</strong> (${COLOR_BY_ID[w.colorId].label}) wins with ${w.credits}c!`);
-          if (w.isHuman) globalThis.unlockTrophy?.('stupid_game');
+        // 3. Move assassins with pursuit interception
+        aliveAtStart.forEach((actor) => {
+          const plan = plans.get(actor.id);
+          if (!plan || !plan.killTarget) return;
+          const target = plan.killTarget;
+          if (target.alive && dist({ col: plan.destCol, row: plan.destRow }, target) !== 1) {
+            const adj = adjacentCoordTo(target.col, target.row, actor.col, actor.row);
+            const distToNewAdj = dist(actor, adj);
+            if (distToNewAdj + 3 <= actor.credits) {
+              plan.destCol = adj.col;
+              plan.destRow = adj.row;
+            }
+          }
+          const stepCost = dist(actor, { col: plan.destCol, row: plan.destRow });
+          if (stepCost > 0 && stepCost <= actor.credits) {
+            actor.credits -= stepCost;
+            actor.col = plan.destCol;
+            actor.row = plan.destRow;
+          }
+        });
+
+        // 4. Resolve Proximity Assassinations (1 orthogonal space, 3 CR)
+        aliveAtStart.forEach((actor) => {
+          if (!actor.alive) return;
+          const plan = plans.get(actor.id);
+          if (!plan || !plan.killTarget) return;
+          const target = plan.killTarget;
+          if (!target.alive) return;
+
+          const knowsColor = target.knownBy.has(actor.id) || target.revealedPublic;
+          if (!knowsColor || actor.credits < 3 || dist(actor, target) !== 1) return;
+
+          actor.credits -= 3;
+          eliminatePlayer(target, actor, `🗡️ by <strong>${actor.name}</strong>`, events);
+        });
+
+        if (checkGameOver(events)) {
           render();
           return;
         }
@@ -658,66 +831,129 @@
         render();
       }
 
-      function killPlayer(victim, how, events) {
+      function eliminatePlayer(victim, killer, how, events) {
         victim.alive = false;
-        victim.revealed = true;
-        state.pot += victim.credits;
-        events.push(`<strong>${victim.name}</strong> ${how} (+${victim.credits}c → Pot)`);
+        victim.revealedPublic = true;
+        const forfeited = victim.credits;
         victim.credits = 0;
+        state.pot += forfeited;
+
+        let bountyNote = '';
+        if (victim.bounty > 0 && killer && killer.alive) {
+          killer.credits += victim.bounty;
+          bountyNote = ` (+${victim.bounty}c🎯)`;
+          victim.bounty = 0;
+        }
+        events.unshift(`<strong>${victim.name}</strong> ${how} (+${forfeited}c → Pot)${bountyNote}`);
       }
 
-      function runTrial(accused, events) {
-        if (state.pot < 10 || !accused.alive) return;
-        state.pot -= 10;
-        const voters = survivors();
-        let yes = 0;
-        voters.forEach((v) => {
-          if (v.id === accused.id) return;
-          if (v.isHuman || Math.random() < 0.6) yes++;
-        });
-        if (yes > voters.length / 2) {
-          killPlayer(accused, `⚖️ convicted (${yes}/${voters.length})`, events);
-        } else {
-          events.push(`⚖️ <strong>${accused.name}</strong> acquitted (${yes}/${voters.length})`);
+      // --- COMMUNAL POT POLITICS (TRIBUNALS & RESURRECTIONS) ---
+      function maybeRunAiCommunalPotPolitics(events) {
+        if (!state || state.phase !== 'orders') return;
+        const alive = survivors();
+        if (alive.length <= 2) return;
+
+        const dead = deadPlayers();
+        if (state.pot >= 15 && dead.length > 0 && !state.reviveUsed && Math.random() < 0.45) {
+          const sponsor = alive.find((p) => p.style === 'political' || p.style === 'chaotic') || alive[0];
+          const target = dead[Math.floor(Math.random() * dead.length)];
+          revivePlayer(sponsor, target, events);
+        }
+
+        if (state.pot >= 10 && !state.trialUsed && Math.random() < 0.65) {
+          const nominator = alive.find((p) => p.style === 'economist' || p.style === 'political') || alive[0];
+          const candidates = alive.filter((p) => p.id !== nominator.id);
+          candidates.sort((a, b) => (b.credits + b.bounty * 2) - (a.credits + a.bounty * 2));
+          if (candidates[0]) runTrial(nominator, candidates[0], events);
         }
       }
 
-      function revivePlayer(target, events) {
+      function computeAiVote(voter, accused, nominator) {
+        if (voter.id === accused.id) return false;
+        if (voter.id === nominator.id) return true;
+        let guiltyProb = 0.55;
+        if (accused.revealedPublic) guiltyProb += 0.18;
+        if (accused.credits >= 8) guiltyProb += 0.15;
+        if (accused.bounty > 0) guiltyProb += 0.2;
+        if (voter.style === 'chaotic') guiltyProb = 0.5;
+        return Math.random() < guiltyProb;
+      }
+
+      function runTrial(nominator, accused, events) {
+        if (state.pot < 10 || !accused.alive) return;
+        state.pot -= 10;
+        state.trialUsed = true;
+        const voters = survivors();
+        let guilty = 0;
+        voters.forEach((v) => {
+          if (v.isHuman ? v.id !== accused.id : computeAiVote(v, accused, nominator)) guilty++;
+        });
+        if (guilty > voters.length / 2) {
+          eliminatePlayer(accused, nominator, `⚖️ Tribunal (${guilty}/${voters.length})`, events);
+        } else {
+          events.push(`⚖️ <strong>${accused.name}</strong> acquitted (${guilty}/${voters.length})`);
+        }
+      }
+
+      function revivePlayer(sponsor, target, events) {
         if (state.pot < 15 || target.alive) return;
         state.pot -= 15;
+        state.reviveUsed = true;
+        const occupied = new Set(survivors().map((p) => `${p.col},${p.row}`));
+        const spawn = shuffle(STARTS).find((pt) => !occupied.has(`${pt.col},${pt.row}`)) || { col: 0, row: 0 };
         target.alive = true;
         target.credits = 3;
-        events.push(`✚ <strong>${target.name}</strong> revived (3c)`);
+        target.col = spawn.col;
+        target.row = spawn.row;
+        events.push(`✚ <strong>${sponsor.name}</strong> revived <strong>${target.name}</strong> (3c)`);
+      }
+
+      function checkGameOver(events) {
+        const left = survivors();
+        if (left.length > 1) return false;
+        stopAuto();
+        state.phase = 'over';
+        const w = left[0] || state.players[0];
+        setTicker(`🏆 <strong>${w.name}</strong> (${COLOR_BY_ID[w.colorId].label}) wins with ${w.credits}c!`);
+        if (w.isHuman || gameMode === 'sim') globalThis.unlockTrophy?.('stupid_game');
+        return true;
       }
 
       // --- RENDER ---
       function render() {
-        const me = state.players[0];
+        const me = getHuman();
         roundTextEl.textContent = `R${state.round}`;
         potTextEl.textContent = `POT: ${state.pot}c`;
-        const moveCost = me.alive ? dist(me, { col: state.destCol, row: state.destRow }) : 0;
-        const killCost = state.killId !== null ? 3 : 0;
-        moveTextEl.textContent = me.alive ? `Cost: ${moveCost + killCost}/${me.credits}c` : 'SPECTATING';
+
+        if (!me) {
+          moveTextEl.textContent = `${survivors().length}/6 alive`;
+        } else {
+          const moveCost = me.alive ? dist(me, { col: state.destCol, row: state.destRow }) : 0;
+          const killCost = state.killId !== null ? 3 : 0;
+          moveTextEl.textContent = me.alive ? `${moveCost + killCost}/${me.credits}c` : 'OUT';
+        }
 
         // 1. 6 Player Chips
         playersGridEl.innerHTML = state.players.map((p) => {
           const c = COLOR_BY_ID[p.colorId];
-          const dot = p.revealed || !p.alive
+          const isKnown = p.isHuman || p.revealedPublic || !p.alive || (me && p.knownBy.has(me.id));
+          const dot = isKnown
             ? `<span class="dot" style="background:${c.hex};color:${c.text};">${c.short}</span>`
             : `<span class="dot" style="border-style:dashed;color:#888;">?</span>`;
           const sel = p.id === state.selectedId ? ' is-selected' : '';
           const kill = p.id === state.killId ? ' is-kill-target' : '';
           const dead = !p.alive ? ' is-dead' : '';
-          return `<button type="button" class="p-chip${sel}${kill}${dead}" data-id="${p.id}" ${!p.alive ? 'disabled' : ''}>
+          const bounty = p.bounty > 0 ? `<span class="p-bounty">🎯${p.bounty}</span>` : '';
+          return `<button type="button" class="p-chip${sel}${kill}${dead}" data-id="${p.id}" ${!p.alive ? 'disabled' : ''} title="${p.name} (${p.role})">
             <span class="p-left">${dot}<span>${p.name}</span></span>
-            <span class="p-cr">${p.credits}c</span>
+            <span class="p-right">${bounty}<span class="p-cr">${p.credits}c</span></span>
           </button>`;
         }).join('');
 
         playersGridEl.querySelectorAll('.p-chip').forEach((btn) => {
           btn.onclick = () => {
             const id = Number(btn.dataset.id);
-            if (id === 0) return;
+            if (me && id === me.id) return;
             state.selectedId = id;
             syncDefaultGuessColor();
             render();
@@ -726,17 +962,19 @@
 
         // 2. Context Bar for Selected Opponent
         const target = state.players[state.selectedId];
-        const canAct = me.alive && state.phase === 'orders';
-        if (!target || !target.alive || target.id === 0) {
+        const canAct = Boolean(me && me.alive && state.phase === 'orders');
+        if (!me) {
+          targetBarEl.innerHTML = `<span>6-AI Simulation Mode (Alice, Bob, Charlie, David, Eve, Frank)</span>`;
+        } else if (!target || !target.alive || target.isHuman) {
           targetBarEl.innerHTML = `<span>Select an opponent above</span>`;
-        } else if (!target.revealed) {
+        } else if (!target.revealedPublic && !target.knownBy.has(me.id)) {
           const known = knownColorSet();
           const swatches = COLORS.map((c) => {
-            const out = known.has(c.id) || target.ruledOut.has(c.id);
+            const out = known.has(c.id) || target.ruledOutColors.has(c.id);
             const act = c.id === state.guessColorId;
             return `<button type="button" class="swatch-btn${act ? ' is-active' : ''}${out ? ' is-out' : ''}" data-col="${c.id}" style="background:${c.hex};" title="${c.label}" ${!canAct ? 'disabled' : ''}></button>`;
           }).join('');
-          targetBarEl.innerHTML = `<span>Guess <strong>${target.name}</strong>:</span><div class="swatches">${swatches}</div>`;
+          targetBarEl.innerHTML = `<span>Guess <strong>${target.name}</strong> (${target.role}):</span><div class="swatches">${swatches}</div>`;
           targetBarEl.querySelectorAll('.swatch-btn').forEach((b) => {
             b.onclick = () => {
               state.guessColorId = b.dataset.col;
@@ -748,9 +986,9 @@
           const isKilling = state.killId === target.id;
           const d = dist({ col: state.destCol, row: state.destRow }, target);
           targetBarEl.innerHTML = `
-            <span><strong>${target.name}</strong> is <strong style="color:${c.hex};">${c.label}</strong> @ ${coordStr(target.col, target.row)} (${d === 1 ? '1-space ✓' : `${d}sp`})</span>
+            <span><strong>${target.name}</strong> (<strong style="color:${c.hex};">${c.label}</strong> @ ${coordStr(target.col, target.row)} · ${d === 1 ? '1-space ✓' : `${d}sp`})</span>
             <button type="button" id="btn-toggle-kill" class="btn btn--kill${isKilling ? ' is-on' : ''}" ${!canAct || me.credits < 3 ? 'disabled' : ''}>
-              ${isKilling ? '🗡️ KILL QUEUED (3c)' : '🗡️ KILL (3c)'}
+              ${isKilling ? '🗡️ QUEUED (3c)' : '🗡️ KILL (3c)'}
             </button>
           `;
           const kBtn = document.getElementById('btn-toggle-kill');
@@ -758,7 +996,7 @@
             kBtn.onclick = () => {
               state.killId = isKilling ? null : target.id;
               if (state.killId !== null && dist({ col: state.destCol, row: state.destRow }, target) !== 1) {
-                const adj = closestAdj(target, me);
+                const adj = adjacentCoordTo(target.col, target.row, me.col, me.row);
                 if (dist(me, adj) + 3 <= me.credits) {
                   state.destCol = adj.col;
                   state.destRow = adj.row;
@@ -774,13 +1012,14 @@
         for (let r = 7; r >= 0; r--) {
           for (let c = 0; c < 8; c++) {
             const here = state.players.filter((p) => p.alive && p.col === c && p.row === r);
-            const isYou = me.alive && me.col === c && me.row === r;
-            const isDest = me.alive && state.destCol === c && state.destRow === r;
-            const isAdj = me.alive && Math.abs(state.destCol - c) + Math.abs(state.destRow - r) === 1;
+            const isYou = Boolean(me && me.alive && me.col === c && me.row === r);
+            const isDest = Boolean(me && me.alive && state.destCol === c && state.destRow === r);
+            const isAdj = Boolean(me && me.alive && Math.abs(state.destCol - c) + Math.abs(state.destRow - r) === 1);
             const pieces = here.map((p) => {
               const col = COLOR_BY_ID[p.colorId];
-              const label = p.revealed ? p.name[0] : col.short;
-              return `<span class="piece${p.isHuman ? ' mine' : ''}" style="background:${col.hex};color:${col.text};">${label}</span>`;
+              const isKnown = p.isHuman || p.revealedPublic || (me && p.knownBy.has(me.id));
+              const label = isKnown ? p.name[0] : col.short;
+              return `<span class="piece${p.isHuman ? ' mine' : ''}" style="background:${col.hex};color:${col.text};" title="${isKnown ? p.name : col.label}">${label}</span>`;
             }).join('');
             cells.push(`<div class="cell${isYou ? ' is-you' : ''}${isDest ? ' is-dest' : ''}${isAdj ? ' is-adj' : ''}" data-c="${c}" data-r="${r}">
               <span class="coord">${coordStr(c, r)}</span>
@@ -806,10 +1045,11 @@
         });
 
         // 4. Bottom Action Buttons
+        btnBounty.disabled = !(canAct && me.credits >= 2 && target && target.alive && !target.isHuman);
         btnDonate.disabled = !(canAct && me.credits >= 1);
         btnInf.disabled = !canAct;
-        btnTrial.disabled = !(canAct && state.pot >= 10 && target && target.alive && target.id !== 0);
-        btnRevive.disabled = !(canAct && state.pot >= 15 && deadPlayers().length > 0);
+        btnTrial.disabled = !(canAct && state.pot >= 10 && !state.trialUsed && target && target.alive && !target.isHuman);
+        btnRevive.disabled = !(canAct && state.pot >= 15 && !state.reviveUsed && deadPlayers().length > 0);
 
         if (state.phase === 'over') btnMain.textContent = '↻ PLAY AGAIN';
         else if (state.phase === 'roll') btnMain.textContent = 'ROLL DIE';
@@ -822,9 +1062,19 @@
         else endTurn();
       };
 
+      btnBounty.onclick = () => {
+        const me = getHuman();
+        const target = state.players[state.selectedId];
+        if (!me || me.credits < 2 || !target || !target.alive || target.isHuman) return;
+        me.credits -= 2;
+        target.bounty += 2;
+        setTicker(`Placed <strong>+2c bounty</strong> on <strong>${target.name}</strong>.`);
+        render();
+      };
+
       btnDonate.onclick = () => {
-        const me = state.players[0];
-        if (me.credits < 1) return;
+        const me = getHuman();
+        if (!me || me.credits < 1) return;
         me.credits -= 1;
         state.pot += 1;
         setTicker(`Donated <strong>1c</strong> anonymously to the Pot.`);
@@ -836,22 +1086,47 @@
       };
 
       btnTrial.onclick = () => {
+        const me = getHuman();
         const target = state.players[state.selectedId];
-        if (!target || !target.alive || target.id === 0 || state.pot < 10) return;
+        if (!me || !target || !target.alive || target.isHuman || state.pot < 10 || state.trialUsed) return;
         const ev = [];
-        runTrial(target, ev);
+        runTrial(me, target, ev);
         setTicker(ev[0] || 'Trial complete.');
-        if (survivors().length <= 1) state.phase = 'over';
+        checkGameOver(ev);
         render();
       };
 
       btnRevive.onclick = () => {
+        const me = getHuman();
         const dead = deadPlayers()[0];
-        if (!dead || state.pot < 15) return;
+        if (!me || !dead || state.pot < 15 || state.reviveUsed) return;
         const ev = [];
-        revivePlayer(dead, ev);
+        revivePlayer(me, dead, ev);
         setTicker(ev[0]);
         render();
+      };
+
+      btnMode.onclick = () => {
+        gameMode = gameMode === 'human' ? 'sim' : 'human';
+        btnMode.textContent = gameMode === 'human' ? '1P' : 'SIM';
+        btnAuto.hidden = gameMode !== 'sim';
+        init();
+      };
+
+      btnAuto.onclick = () => {
+        if (autoTimer) {
+          stopAuto();
+          return;
+        }
+        btnAuto.textContent = 'STOP';
+        autoTimer = setInterval(() => {
+          if (!state || state.phase === 'over') {
+            stopAuto();
+            return;
+          }
+          if (state.phase === 'roll') rollDie();
+          else endTurn();
+        }, 1000);
       };
 
       btnReset.onclick = init;
