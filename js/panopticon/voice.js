@@ -267,6 +267,7 @@ const EYE_PRONUNCIATIONS = [
     [/\bngl\b/gi, 'not gonna lie'],
     [/\bminikits\b/gi, 'mih nee kihts'],
     [/\bminikit\b/gi, 'mih nee kiht'],
+    [/★★★★☆/g, 'four out of five stars'],
     // Long A / long O chant (not letter-names)
     [/\bay,\s*oh,\s*ay,\s*oh,\s*ay,\s*oh,\s*ay,\s*oh\b/gi, 'aye, owe, aye, owe, aye, owe, aye, owe'],
     [/\bpanopticon\b/gi, 'pan op tih con'],
